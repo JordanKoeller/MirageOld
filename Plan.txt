@@ -1,0 +1,26 @@
+Refactor so that each stellar entity wraps a C struct
+Add method that returns the struct for passing to OpenCL
+Include inside the struct a function pointer for calculating deflection
+
+
+******** Store chosen device, after asking on initialization? Or in GUI preferences? **********
+ENGINE METHODS:
+
+HELPER FUNCTIONS:
+__reconfigure(configs, galaxy, quasar)
+__build__tree()
+
+
+PUBLIC CALLABLE FUNCTIONS:
+__init__
+draw__frame(canvas)
+animateMoving()
+pause()
+reset()
+render_mag_map()
+SaveImage()
+
+
+
+
+Rewrite spatial tree (again) in AVL or Red/Black fashion
