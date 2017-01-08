@@ -215,7 +215,7 @@ class Quasar(Entity):
 		return self.__velocity.to('rad')
 
 	def setTime(self, t):
-		self.observedPosition = self.observedPosition + (self.velocity * t)
+		self.observedPosition = self.position + (self.velocity * t)
 
 	def setPos(self,position):
 		self.observedPosition = position
@@ -318,7 +318,7 @@ microGalaxy = Galaxy(0.0073,
 defaultQuasar = Quasar(0.073,
 	Vector2D(-0.0003,0,"rad"),
 	u.Quantity(2.272e-5,"rad"),
-	Vector2D(7.9508e-6,0,"rad"))
+	Vector2D(15e-5,0,"rad"))
 
 microQuasar = Quasar(0.073,
 	Vector2D(0,0,"rad"),

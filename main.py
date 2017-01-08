@@ -18,7 +18,7 @@ from Configs import defaultConfigs
 from stellar import microGalaxy
 from stellar import microQuasar
 from Configs import microConfigs
-from DynamicCanvas import DynamicCanvas
+# from DynamicCanvas import DynamicCanvas
 import threading as par
 from Vector2D import Vector2D
 
@@ -166,8 +166,12 @@ class Ui_MainWindow(object):
         self.gridLayout_4.addLayout(self.gridLayout, 0, 2, 1, 1)
         self.canvas2 = QtWidgets.QGraphicsView(self.splitter)
         self.canvas2.setObjectName("canvas2")
-        self.canvas1 = DynamicCanvas(self.splitter_2,10,10,100)
+        self.canvas1 = QtWidgets.QLabel(self.splitter_2)
         self.canvas1.setObjectName("canvas1")
+
+        # self.canvas1Scene = QtWidgets.QGraphicsScene(self.canvas1)
+        # self.canvas1Scene.addRect(50,50,50,50)
+        # self.canvas1.setScene(self.canvas1Scene)
 
         self.simThread = par.Thread(target=self.startSim)
 

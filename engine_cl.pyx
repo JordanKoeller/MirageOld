@@ -18,6 +18,8 @@ import os
 from SpatialTree cimport SpatialTree, Pixel
 from libcpp.vector cimport vector
 import random
+from PyQt5 import QtGui
+
 
 cdef class Engine_cl:
 
@@ -124,31 +126,32 @@ cdef class Engine_cl:
 
 
 	cpdef start(self, canvas):
-		timeSum = 0.0
-		# periodogram_opencl()
+		self.img = QtGui.QImage(self.__configs.canvasDim.x,self.__configs.canvasDim.y, QtGui.QImage.Format_Indexed8)
+		self.img.setColorTable([QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0)])
+		self.img.fill(0)
+		canvas.setPixmap(QtGui.QPixmap.fromImage(self.img))
+		# timeSum = 0.0
 		if self.__needsReconfiguring:
 			self.reConfigure()
 		self.__calculating = True
 		width = self.__configs.canvasDim.x
 		height = self.__configs.canvasDim.y
 		if not self.__preCalculating:
-			self.__galaxy.draw(canvas,self.__configs.dTheta)
-			self.__quasar.draw(canvas,self.__configs.dTheta)
-			begin = time.clock()
-			counter = 0
+			# begin = time.clock()
+			# counter = 0
 			while self.__calculating:
-				timeSum += self.drawFrame(canvas)
-				counter += 1
-				if counter % 25 is 0:
-					end = time.clock()
-					print('')
-					print("Next Printout")
-					print("Frame Rate = " + str(1/((end-begin)/25)) + " FPS")
-					print("Tree Rate = " + str(1/((end-begin-timeSum)/25)) + " FPS")
-					timeSum = 0.0
-					begin = time.clock()
-				# self.__quasar.draw(canvas,self.__configs.dTheta)
-				# print("New frame")
+				# timeSum += self.drawFrame(canvas)
+				self.drawFrame(canvas)
+				# counter += 1
+				# if counter % 25 is 0:
+				# 	end = time.clock()
+				# 	print('')
+				# 	print("Next Printout")
+				# 	print("Frame Rate = " + str(1/((end-begin)/25)) + " FPS")
+				# 	print("Tree Rate = " + str(1/((end-begin-timeSum)/25)) + " FPS")
+				# 	timeSum = 0.0
+				# 	begin = time.clock()
+
 
 
 	cpdef getMagnification(self):
@@ -186,14 +189,13 @@ cdef class Engine_cl:
 		self.__quasar.setTime(self.time)
 		ret = self.tree.query_point(self.__quasar.observedPosition.x,self.__quasar.observedPosition.y,self.__quasar.radius)
 		begin = time.clock()
-		self.__quasar.draw(canvas,self.configs.dTheta)
-		cdef np.ndarray coloredPixels = np.full(shape=(width,height,3),fill_value = 0, dtype = np.uint8)
-		# print(len(ret))
-		# cdef Pixel pixel
+		self.img.fill(0)
 		for pixel in ret:
-			coloredPixels[pixel[1],pixel[0]] = [255,255,0]
-		# coloredPixels = np.array([[random.random() for x in range(500)] for x in range(500)])
-		canvas.plotArray(coloredPixels)
+			self.img.setPixel(pixel[1],pixel[0],1)
+		canvas.pixmap().convertFromImage(self.img)
+		canvas.update()
+		# canvas.setPixmap(QtGui.QPixmap.fromImage(self.img))
+		# canvas.plotArray(coloredPixels)
 		self.time += dt
 		return time.clock() - begin
 		

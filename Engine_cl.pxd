@@ -27,6 +27,8 @@ cdef class Engine_cl:
 		public dLS
 		public dS 
 		public tree
+		public img
+		# public pixmap
 		np.ndarray data_array
 		# public byteArray
 		# vector[]
