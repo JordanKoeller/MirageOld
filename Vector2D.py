@@ -39,6 +39,10 @@ class Vector2D(object): #TODO: Make compatable with astropy units package
 			self.y = self.y.to(self.unit).value
 		return self
 
+	def setUnit(self,unit):
+		self.unit = unit
+		return self
+
 	def __add__(self, that):
 		"Returns a new vector that is the sum of self and the passed in vector."
 		return Vector2D(self.x+that.x,self.y+that.y)

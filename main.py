@@ -1,14 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'mainwindow.ui'
-#
-# Created by: PyQt5 UI code generator 5.6
-#
-# WARNING! All changes made in this file will be lost!
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Engine_cl import Engine_cl
-# from Engine import Engine
 from Configs import Configs
 from stellar import Galaxy
 from stellar import Quasar
@@ -18,268 +9,50 @@ from Configs import defaultConfigs
 from stellar import microGalaxy
 from stellar import microQuasar
 from Configs import microConfigs
-# from DynamicCanvas import DynamicCanvas
 import threading as par
 from Vector2D import Vector2D
+from enum import Enum
+from window import Ui_MainWindow
+import time
 
-class Ui_MainWindow(object):
+class CanvasType(Enum):
+    LABEL_CANVAS = 0
+    MPL_CANVAS = 1
+    NONE_TYPE = 2
 
-    def startSim(self):
-        self.engine.start(self.canvas1)
-
-    def pauseSim(self):
-        self.engine.pause()
-
-    def setupUi(self, MainWindow):
-        self.simThread = par.Thread(target=self.startSim)
-        self.engine = Engine_cl(defaultQuasar,defaultGalaxy,defaultConfigs, auto_configure = False)
-
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1192, 772)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(40)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
-        MainWindow.setSizePolicy(sizePolicy)
-        self.centralWidget = QtWidgets.QWidget(MainWindow)
-        self.centralWidget.setObjectName("centralWidget")
-        self.splitter_2 = QtWidgets.QSplitter(self.centralWidget)
-        self.splitter_2.setGeometry(QtCore.QRect(10, 0, 1171, 711))
-        self.splitter_2.setOrientation(QtCore.Qt.Horizontal)
-        self.splitter_2.setObjectName("splitter_2")
-        self.splitter = QtWidgets.QSplitter(self.splitter_2)
-        self.splitter.setOrientation(QtCore.Qt.Vertical)
-        self.splitter.setObjectName("splitter")
-        self.groupBox = QtWidgets.QGroupBox(self.splitter)
-        self.groupBox.setObjectName("groupBox")
-        self.gridLayout_4 = QtWidgets.QGridLayout(self.groupBox)
-        self.gridLayout_4.setContentsMargins(11, 11, 11, 11)
-        self.gridLayout_4.setSpacing(6)
-        self.gridLayout_4.setObjectName("gridLayout_4")
-        self.groupBox_3 = QtWidgets.QGroupBox(self.groupBox)
-        self.groupBox_3.setEnabled(True)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.groupBox_3.sizePolicy().hasHeightForWidth())
-        self.groupBox_3.setSizePolicy(sizePolicy)
-        self.groupBox_3.setMinimumSize(QtCore.QSize(30, 175))
-        self.groupBox_3.setMaximumSize(QtCore.QSize(240, 175))
-        self.groupBox_3.setObjectName("groupBox_3")
-        self.gridLayoutWidget_2 = QtWidgets.QWidget(self.groupBox_3)
-        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 20, 221, 148))
-        self.gridLayoutWidget_2.setObjectName("gridLayoutWidget_2")
-        self.gridLayout_2 = QtWidgets.QGridLayout(self.gridLayoutWidget_2)
-        self.gridLayout_2.setContentsMargins(11, 11, 11, 11)
-        self.gridLayout_2.setSpacing(6)
-        self.gridLayout_2.setObjectName("gridLayout_2")
-        self.label_10 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.label_10.setObjectName("label_10")
-        self.gridLayout_2.addWidget(self.label_10, 1, 2, 1, 1)
-        self.label_8 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.label_8.setObjectName("label_8")
-        self.gridLayout_2.addWidget(self.label_8, 3, 2, 1, 1)
-        self.qYIn = QtWidgets.QLineEdit(self.gridLayoutWidget_2)
-        self.qYIn.setObjectName("qYIn")
-        self.gridLayout_2.addWidget(self.qYIn, 2, 1, 1, 1)
-        self.label_5 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.label_5.setText("")
-        self.label_5.setObjectName("label_5")
-        self.gridLayout_2.addWidget(self.label_5, 0, 2, 1, 1)
-        self.label_4 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.label_4.setObjectName("label_4")
-        self.gridLayout_2.addWidget(self.label_4, 1, 0, 1, 1)
-        self.qXIn = QtWidgets.QLineEdit(self.gridLayoutWidget_2)
-        self.qXIn.setObjectName("qXIn")
-        self.gridLayout_2.addWidget(self.qXIn, 1, 1, 1, 1)
-        self.label_7 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.label_7.setObjectName("label_7")
-        self.gridLayout_2.addWidget(self.label_7, 2, 0, 1, 1)
-        self.qRedshiftIn = QtWidgets.QLineEdit(self.gridLayoutWidget_2)
-        self.qRedshiftIn.setObjectName("qRedshiftIn")
-        self.gridLayout_2.addWidget(self.qRedshiftIn, 0, 1, 1, 1)
-        self.label_6 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.label_6.setObjectName("label_6")
-        self.gridLayout_2.addWidget(self.label_6, 3, 0, 1, 1)
-        self.qRadiusIn = QtWidgets.QLineEdit(self.gridLayoutWidget_2)
-        self.qRadiusIn.setObjectName("qRadiusIn")
-        self.gridLayout_2.addWidget(self.qRadiusIn, 3, 1, 1, 1)
-        self.label_3 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.label_3.setObjectName("label_3")
-        self.gridLayout_2.addWidget(self.label_3, 0, 0, 1, 1)
-        self.label_9 = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.label_9.setObjectName("label_9")
-        self.gridLayout_2.addWidget(self.label_9, 2, 2, 1, 1)
-        self.gridLayout_4.addWidget(self.groupBox_3, 1, 2, 1, 1)
-        self.groupBox_4 = QtWidgets.QGroupBox(self.groupBox)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.groupBox_4.sizePolicy().hasHeightForWidth())
-        self.groupBox_4.setSizePolicy(sizePolicy)
-        self.groupBox_4.setMinimumSize(QtCore.QSize(30, 125))
-        self.groupBox_4.setMaximumSize(QtCore.QSize(16777215, 125))
-        self.groupBox_4.setObjectName("groupBox_4")
-        self.gridLayoutWidget_3 = QtWidgets.QWidget(self.groupBox_4)
-        self.gridLayoutWidget_3.setGeometry(QtCore.QRect(10, 20, 221, 101))
-        self.gridLayoutWidget_3.setObjectName("gridLayoutWidget_3")
-        self.gridLayout_3 = QtWidgets.QGridLayout(self.gridLayoutWidget_3)
-        self.gridLayout_3.setContentsMargins(11, 11, 11, 11)
-        self.gridLayout_3.setSpacing(6)
-        self.gridLayout_3.setObjectName("gridLayout_3")
-        self.label_12 = QtWidgets.QLabel(self.gridLayoutWidget_3)
-        self.label_12.setObjectName("label_12")
-        self.gridLayout_3.addWidget(self.label_12, 2, 0, 1, 1)
-        self.lRedshiftIn = QtWidgets.QLineEdit(self.gridLayoutWidget_3)
-        self.lRedshiftIn.setObjectName("lRedshiftIn")
-        self.gridLayout_3.addWidget(self.lRedshiftIn, 0, 1, 1, 1)
-        self.label_16 = QtWidgets.QLabel(self.gridLayoutWidget_3)
-        self.label_16.setObjectName("label_16")
-        self.gridLayout_3.addWidget(self.label_16, 1, 2, 1, 1)
-        self.label_17 = QtWidgets.QLabel(self.gridLayoutWidget_3)
-        self.label_17.setObjectName("label_17")
-        self.gridLayout_3.addWidget(self.label_17, 2, 2, 1, 1)
-        self.label_11 = QtWidgets.QLabel(self.gridLayoutWidget_3)
-        self.label_11.setObjectName("label_11")
-        self.gridLayout_3.addWidget(self.label_11, 1, 0, 1, 1)
-        self.label_14 = QtWidgets.QLabel(self.gridLayoutWidget_3)
-        self.label_14.setObjectName("label_14")
-        self.gridLayout_3.addWidget(self.label_14, 0, 0, 1, 1)
-        self.label_15 = QtWidgets.QLabel(self.gridLayoutWidget_3)
-        self.label_15.setText("")
-        self.label_15.setObjectName("label_15")
-        self.gridLayout_3.addWidget(self.label_15, 0, 2, 1, 1)
-        self.lMassIn = QtWidgets.QLineEdit(self.gridLayoutWidget_3)
-        self.lMassIn.setObjectName("lMassIn")
-        self.gridLayout_3.addWidget(self.lMassIn, 1, 1, 1, 1)
-        self.lStarCountIn = QtWidgets.QLineEdit(self.gridLayoutWidget_3)
-        self.lStarCountIn.setObjectName("lStarCountIn")
-        self.gridLayout_3.addWidget(self.lStarCountIn, 2, 1, 1, 1)
-        self.gridLayout_4.addWidget(self.groupBox_4, 2, 2, 1, 1)
-        self.gridLayout = QtWidgets.QGridLayout()
-        self.gridLayout.setContentsMargins(11, 11, 11, 11)
-        self.gridLayout.setSpacing(6)
-        self.gridLayout.setObjectName("gridLayout")
-        self.microLensingCheckBox = QtWidgets.QCheckBox(self.groupBox)
-        self.microLensingCheckBox.setObjectName("microLensingCheckBox")
-        self.gridLayout.addWidget(self.microLensingCheckBox, 1, 0, 1, 1)
-        self.gridLayout_4.addLayout(self.gridLayout, 0, 2, 1, 1)
-        self.canvas2 = QtWidgets.QGraphicsView(self.splitter)
-        self.canvas2.setObjectName("canvas2")
-        self.canvas1 = QtWidgets.QLabel(self.splitter_2)
-        self.canvas1.setObjectName("canvas1")
-
-        # self.canvas1Scene = QtWidgets.QGraphicsScene(self.canvas1)
-        # self.canvas1Scene.addRect(50,50,50,50)
-        # self.canvas1.setScene(self.canvas1Scene)
-
-        self.simThread = par.Thread(target=self.startSim)
-
-    #    self.canvas1.setGeometry(QtCore.QRect(0,0,1000,1000))
-        self.canvas1.setContentsMargins(11,11,11,11)
-        self.verticalLayoutWidget = QtWidgets.QWidget(self.centralWidget)
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(10, 720, 1181, 66))
-        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
-        self.verticalLayout.setContentsMargins(11, 11, 11, 11)
-        self.verticalLayout.setSpacing(6)
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.pushButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
-        self.pushButton.setObjectName("pushButton")
-        self.verticalLayout.addWidget(self.pushButton)
-        self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralWidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 680, 1181, 34))
-        self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
-        self.horizontalLayout_3.setContentsMargins(11, 11, 11, 11)
-        self.horizontalLayout_3.setSpacing(6)
-        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem)
-        self.sliderOptionsMenu = QtWidgets.QComboBox(self.horizontalLayoutWidget)
-        self.sliderOptionsMenu.setObjectName("sliderOptionsMenu")
-        self.sliderOptionsMenu.addItem("")
-        self.sliderOptionsMenu.addItem("")
-        self.sliderOptionsMenu.addItem("")
-        self.horizontalLayout_3.addWidget(self.sliderOptionsMenu)
-        self.horizontalSlider = QtWidgets.QSlider(self.horizontalLayoutWidget)
-        self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
-        self.horizontalSlider.setObjectName("horizontalSlider")
-        self.horizontalLayout_3.addWidget(self.horizontalSlider)
-        self.playButton = QtWidgets.QPushButton(self.horizontalLayoutWidget)
-        self.playButton.setObjectName("playButton")
-        self.playButton.clicked.connect(self.simThread.start)
-        self.horizontalLayout_3.addWidget(self.playButton)
-        self.resetButton = QtWidgets.QPushButton(self.horizontalLayoutWidget)
-        self.resetButton.setObjectName("resetButton")
-        self.resetButton.clicked.connect(self.pauseSim)
-        self.horizontalLayout_3.addWidget(self.resetButton)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem1)
-        self.infoBox = QtWidgets.QLabel(self.centralWidget)
-        self.infoBox.setGeometry(QtCore.QRect(978, 10, 201, 101))
-        self.infoBox.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.infoBox.setObjectName("infoBox")
-        self.splitter_2.raise_()
-        self.verticalLayoutWidget.raise_()
-        self.horizontalSlider.raise_()
-        self.canvas1.raise_()
-        self.horizontalLayoutWidget.raise_()
-        self.infoBox.raise_()
-        MainWindow.setCentralWidget(self.centralWidget)
-        self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setEnabled(False)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1192, 22))
-        self.menuBar.setDefaultUp(False)
-        self.menuBar.setNativeMenuBar(True)
-        self.menuBar.setObjectName("menuBar")
-        MainWindow.setMenuBar(self.menuBar)
-        self.mainToolBar = QtWidgets.QToolBar(MainWindow)
-        self.mainToolBar.setEnabled(False)
-        self.mainToolBar.setMovable(True)
-        self.mainToolBar.setObjectName("mainToolBar")
-        MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.mainToolBar)
-        self.toolBar = QtWidgets.QToolBar(MainWindow)
-        self.toolBar.setEnabled(False)
-        self.toolBar.setObjectName("toolBar")
-        MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-        self.statusBar = QtWidgets.QStatusBar(MainWindow)
-        self.statusBar.setEnabled(True)
-        self.statusBar.setObjectName("statusBar")
-        MainWindow.setStatusBar(self.statusBar)
+class SimThread(QtCore.QThread):
+    def __init__(self,engine,labelCanvas = None, mplCanvas = None):
+        QtCore.QThread.__init__(self)
+        self.engine = engine 
+        self.calculating = False
+        self.reconfiguring = False
 
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+    def setCanvas(self,canvas, canvasType = CanvasType.LABEL_CANVAS):
+        self.canvas = canvas
 
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.groupBox.setTitle(_translate("MainWindow", "Options"))
-        self.groupBox_3.setTitle(_translate("MainWindow", "Quasar Parameters"))
-        self.label_10.setText(_translate("MainWindow", "Arcsec"))
-        self.label_8.setText(_translate("MainWindow", "Parsecs"))
-        self.label_4.setText(_translate("MainWindow", "X"))
-        self.label_7.setText(_translate("MainWindow", "Y"))
-        self.label_6.setText(_translate("MainWindow", "Radius"))
-        self.label_3.setText(_translate("MainWindow", "Red Shift"))
-        self.label_9.setText(_translate("MainWindow", "Arcsec"))
-        self.groupBox_4.setTitle(_translate("MainWindow", "Lens Parameters"))
-        self.label_12.setText(_translate("MainWindow", "Star Count"))
-        self.label_16.setText(_translate("MainWindow", "Solar Mass"))
-        self.label_17.setText(_translate("MainWindow", "Stars"))
-        self.label_11.setText(_translate("MainWindow", "Mass"))
-        self.label_14.setText(_translate("MainWindow", "Red Shift"))
-        self.lStarCountIn.setText(_translate("MainWindow", "1"))
-        self.microLensingCheckBox.setText(_translate("MainWindow", "Calculate Microlensing"))
-        self.pushButton.setText(_translate("MainWindow", "PushButton"))
-        self.sliderOptionsMenu.setItemText(0, _translate("MainWindow", "Zoom"))
-        self.sliderOptionsMenu.setItemText(1, _translate("MainWindow", "Time"))
-        self.sliderOptionsMenu.setItemText(2, _translate("MainWindow", "Speed"))
-        self.playButton.setText(_translate("MainWindow", "Play"))
-        self.resetButton.setText(_translate("MainWindow", "Reset"))
-        self.infoBox.setText(_translate("MainWindow", "Filler"))
-        self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
+    def run(self):
+        self.canvas.setPixmap(QtGui.QPixmap.fromImage(self.engine.img))
+        if self.engine.needsReconfiguring:
+            self.reconfiguring = True
+            self.engine.reconfigure()
+            self.reconfiguring = False
+        if not self.reconfiguring:
+            self.calculating = True
+            interval = 1/self.engine.configs.frameRate
+            while self.calculating:
+                timer = time.clock()
+                frame = self.engine.drawFrame()
+                self.canvas.pixmap().convertFromImage(frame)
+                self.canvas.update()
+                deltaT = timer.clock() - timer
+                if deltaT < interval:
+                    time.sleep(interval-deltaT)
+                else:
+                    print("No sleep on frame " + str(counter))
+
+
+
 
 
 

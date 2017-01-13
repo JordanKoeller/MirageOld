@@ -6,7 +6,8 @@ from astropy import constants as const
 import random as rand
 from numba import jit
 from matplotlib.patches import Circle
-
+import math
+import time
 
 
 
@@ -21,6 +22,13 @@ class Entity(object):
 
 
 	def update(self,redshift = None,position = None):
+		"""
+		Allows access to update Entity's attributes.
+
+		Args:
+			redshift - Numeric value
+			position - Vector2D of entity's displacement from center of screen. Unit of a measurement of angle.
+		""" 
 		self.__redshift = redshift or self.__redshift
 		self.__position = position or self.__position
 
@@ -30,24 +38,40 @@ class Entity(object):
 
 	@property
 	def angDiamDist(self):
+		"""
+		Returns angular diameter distance to the entity, in units of light years.
+		"""
 		return cosmo.angular_diameter_distance(self.redshift).to('lyr').value
 
 	@property
 	def position(self):
+		"""
+		returns a Vector2D of displacement from the center of screen, in units of radians.
+		"""
 		return self.__position.to('rad')
 
 	def distanceTo(self,other):
-		"Returns the distance between two Entity objects in the form of an astropy unit object."
+		"""Returns the distance between two Entity instances."""
 		return self.__position.distanceTo(other.position)
 
-	def draw(self, canvas, dTheta):
-		"Draws the entity to the canvas. Abstract method instantiated by subtypes."
-		pixels = self.__position/dTheta
-		pixels = Vector2D(int(pixels.x),int(pixels.y))
-		canvas.drawCircle(pixels,1,"#ffffff")
 
-	def makeCircle(self,dTheta):
-		pixels = self.__position/dTheta
+
+	def draw(self, img, dTheta, colorKey = 2):
+		"""Draws the entity to the canvas.
+		Args:
+			img - QImage to be drawn to.
+			dTheta - Numeric of angle between two pixels on the canvas.
+			colorKey - Int specifying index of image's colourspace to color the circle.
+				default value = 2
+		"""
+		center = self.__position/dTheta
+		center = Vector2D(int(center.x+400),int(center.y+400))
+		img.setPixel(center.x,center.y,colorKey)
+		img.setPixel(center.x+1,center.y,colorKey)
+		img.setPixel(center.x+1,center.y+1,colorKey)
+		img.setPixel(center.x,center.y+1,colorKey)
+
+
 
 
 
@@ -137,9 +161,16 @@ class DistLenser(Lenser):
 		"Returns a complex number, representing the unscaled deflection angle at the point pt."
 		pass
 
-
-
-
+	def draw(self, img, dTheta):
+		"Draws the entity to the canvas. Abstract method instantiated by subtypes."
+		center = self.position/dTheta
+		center = Vector2D(int(center.x+400),int(center.y+400))
+		for i in range(-2,3):
+			for j in range(-2,3):
+				img.setPixel(center.x+i,center.y+j,3)
+		# img.setPixel(center.x+1,center.y,3)
+		# img.setPixel(center.x+1,center.y+1,3)
+		# img.setPixel(center.x,center.y+1,3)
 
 
 
@@ -191,15 +222,54 @@ class Quasar(Entity):
 		self.__velocity = velocity or self.__velocity
 		self.observedPosition = position or self.observedPosition
 
-	def draw(self, canvas, dTheta):
-		"Draws the entity to the canvas. Abstract method instantiated by subtypes."
-		if self.circle is None:
-			pixels = self.observedPosition/dTheta
-			pixels = Vector2D(int(pixels.x),int(pixels.y))
-			canvas.drawCircle(pixels,1,"#d6543c")
-		else:
-			pixels = self.observedPosition/dTheta
-			self.circle.center = (int(pixels.x),int(pixels.y))
+
+
+	def draw(self, img, dTheta):
+		begin = time.clock()
+		center = self.observedPosition/dTheta
+		center = Vector2D(int(center.x+400),int(center.y+400))
+		radius = int(self.radius/dTheta)
+		rSquared = radius * radius
+		# x = -radius
+		# y = -radius
+		for x in range(0,radius+1):
+			for y in range(0,radius+1):
+				if x*x + y*y <= rSquared:
+					img.setPixel(center.x + x, center.y + y,2)
+					img.setPixel(center.x - x, center.y + y,2)
+					img.setPixel(center.x - x, center.y - y,2)
+					img.setPixel(center.x + x, center.y - y,2)
+
+		# x = int(radius)
+		# y = 0
+		# err = 0
+		# while x >= y:
+		# 	img.setPixel(center.x + x, center.y + y,2)
+		# 	img.setPixel(center.x + y, center.y + x,2)
+		# 	img.setPixel(center.x - y, center.y + x,2)
+		# 	img.setPixel(center.x - x, center.y + y,2)
+		# 	img.setPixel(center.x - x, center.y - y,2)
+		# 	img.setPixel(center.x - y, center.y - x,2)
+		# 	img.setPixel(center.x + y, center.y - x,2)
+		# 	img.setPixel(center.x + x, center.y - y,2)
+		# 	if err <= 0:
+		# 		y += 1
+		# 		err += 2*y + 1
+		# 	if err > 0:
+		# 		x -= 1
+		# 		err -= 2*x + 1
+
+
+		# for r in range(int(radius),-1,-1):
+		# 	deltaH = radius - r
+		# 	chordLength = int(math.sqrt(2*r*deltaH + deltaH*deltaH))
+		# 	# for x in range(0,chordLength):
+		# 	img.setPixel(center.x+chordLength,center.y+r,2)
+		# 	img.setPixel(center.x-chordLength,center.y-r,2)
+		# 	img.setPixel(center.x-chordLength,center.y+r,2)
+		# 	img.setPixel(center.x+chordLength,center.y-r,2)
+		# print(str(time.clock() - begin))
+
 
 	@property
 	def radius(self):
@@ -230,20 +300,23 @@ class Quasar(Entity):
 
 
 class Galaxy(Entity):
-	def __init__(self,redshift,velocityDispersion,radius,numStars):
+	def __init__(self,redshift,velocityDispersion,shearMag, shearAngle,radius,numStars):
 		Entity.__init__(self,redshift,Vector2D(0,0,"rad"))
 		self.__velocityDispersion = velocityDispersion
 		self.__numStars = numStars+2
 		self.__stars = []
 		self.__radius = radius
+		self.shear = Shear(shearMag,shearAngle)
 
 
-	def update(self,redshift = None,velocityDispersion = None,radius = None,numStars = None):
-		Entity.update(self,redshift,Vector2D(0,0,'rad'),radius)
+	def update(self,redshift = None,velocityDispersion = None,radius = None,numStars = None,shearMag = None, shearAngle = None):
+		Entity.update(self,redshift,Vector2D(0,0,'rad'))
 		self.__numStars = numStars or self.__numStars
-		self.__velocityDispersion = velocityDispersion
+		self.__velocityDispersion = velocityDispersion or self.__velocityDispersion
 		self.__radius = radius or self.__radius
-
+		shearMag = shearMag or self.shear._Shear__strength
+		shearAngle = shearAngle or self.shear._Shear__angle
+		self.shear = Shear(shearMag,shearAngle)
 
 	@property
 	def numStars(self):
@@ -272,7 +345,6 @@ class Galaxy(Entity):
 		self.distribution = DistLenser(self.redshift,
 			Vector2D(0.0,0.0,'rad'),
 			self.__velocityDispersion)
-		self.shear = Shear(0.3206,u.Quantity(15,'degree'))
 		for i in range(0,self.numStars-2):
 			self.stars.append(PointLenser(self.redshift,
 				Vector2D(rand.random()-0.5,rand.random()-0.5,'rad')*self.radius,
@@ -307,11 +379,15 @@ class Galaxy(Entity):
 
 defaultGalaxy = Galaxy(0.0073,
 	u.Quantity(1500,"km/s"),
+	0.3206,
+	u.Quantity(30,'degree'),
 	u.Quantity(0.0006155,"rad"),
 	0)
 
 microGalaxy = Galaxy(0.0073,
 	u.Quantity(1500,"km/s"),
+	0.3206,
+	u.Quantity(30,'degree'),
 	u.Quantity(3.155e-5,"rad"),
 	100)
 

@@ -23,7 +23,7 @@ from scipy import interpolate
 
 def configureEngine():
 	__Engine = Engine_cl(defaultQuasar,defaultGalaxy,defaultConfigs,auto_configure = False)
-	__Engine.updateConfigs(canvasDim = Vector2D(500,500))
+	__Engine.updateConfigs(canvasDim = Vector2D(2000,2000))
 	__Einstein__Distance = __Engine.einsteinRadius
 	return (__Engine,__Einstein__Distance)
 
@@ -40,6 +40,7 @@ def plotMicroLensing(quasarRadii, xMin=-1.5, xMax=1.5,resolution = 200,smoothing
 		xMax = float representing the upper yvalue on the graph."""
 
 	begin = time.clock()
+	__Engine.updateConfigs(dTheta = __Einstein__Distance*4/__Engine.canvasDim.x)
 	step = (xMax - xMin)/resolution
 	xVals = np.arange(xMin,xMax,step)
 	yVals = xVals.copy()
@@ -63,7 +64,6 @@ def plotMicroLensing(quasarRadii, xMin=-1.5, xMax=1.5,resolution = 200,smoothing
 	plt.ylabel("Magnification Coefficient")
 	plt.show()	
 
-# plotMicroLensing([0.05,0.10,0.20,0.25])
 
 def mag_map(quasarRadius,xMin = -1.5,xMax = 1.5,yMin = -1.5,yMax = 1.5,resolution = 250, smoothing = True):
 

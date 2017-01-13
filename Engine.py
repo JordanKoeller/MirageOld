@@ -49,8 +49,7 @@ class EngineOld(object):
 		finalData = lensePlanePositions+((incidentAngle+deflectionAngles)*self.dLS)
 		return finalData
 
-	def start(self, canvas):
-		# periodogram_opencl()
+	def start(self, canvas, frameRate = 30):
 		self.reConfigure(self.configs)
 		self.calculating = True
 		width = self.configs.canvasDim.x
@@ -59,8 +58,16 @@ class EngineOld(object):
 			self.byteArray = np.full(shape=(width,height),fill_value = 0.0)
 			self.galaxy.draw(canvas,self.configs.dTheta)
 			self.quasar.draw(canvas,self.configs.dTheta)
+			interval = 1/frameRate
 			while self.calculating:
+				timer = time.clock()
 				self.drawFrame(canvas)
+				deltaT = time.clock() - timer
+				if deltaT < interval:
+					time.sleep(interval-deltaT)
+				else:
+					print("No sleep")
+
 
 	def getPixelCount(self,position):
 		self.quasar.setPos(position)
