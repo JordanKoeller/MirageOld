@@ -39,7 +39,7 @@ class SimThread(QtCore.QThread):
 
     def setCanvas(self,canvas, canvasType = CanvasType.LABEL_CANVAS):
         self.canvas = canvas
-        filler_img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
+        filler_img = QtGui.QImage(1200,1200, QtGui.QImage.Format_Indexed8)
         filler_img.setColorTable([QtGui.qRgb(0,0,0)])
         filler_img.fill(0)
         self.canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
@@ -74,7 +74,7 @@ class SimThread(QtCore.QThread):
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent = None):
         super(Ui_MainWindow, self).__init__(parent)
-        uic.loadUi('GUI.ui', self)
+        uic.loadUi('GUI/gui.ui', self)
         self.simThread = SimThread(Engine_cl(defaultQuasar,defaultGalaxy,defaultConfigs, auto_configure = False))
         self.setupUi()
 
@@ -120,7 +120,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         colorLenseImg = self.colorLenseImg.isChecked()
         displayQuasar = self.displayQuasar.isChecked()
         displayGalaxy = self.displayGalaxy.isChecked()
-        configs = Configs(1/25,.001/625, Vector2D(800,800), 25, displayGalaxy, displayQuasar)
+        configs = Configs(1/25,.001/625, Vector2D(1200,1200), 25, displayGalaxy, displayQuasar)
         return (quasar,galaxy,configs)
 
     def startSim(self):
