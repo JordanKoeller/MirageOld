@@ -1,0 +1,15 @@
+cdef extern from "engineHelper.h":
+	cdef void ray_trace(void *stars,
+		const int numStars, 
+		const double Point_Constant,
+		const double SIS_Constant,
+		const double dL,
+		const double dS,
+		const double dLS,
+		const int width, 
+		const int height,
+		const double dTheta,
+		const double shiftX,
+		const double shiftY,
+		double *result_buf_x,
+		double *result_buf_y)

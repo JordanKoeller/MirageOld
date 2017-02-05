@@ -93,3 +93,7 @@ class Vector2D(object): #TODO: Make compatable with astropy units package
 			return "<"+str(self.x)+","+str(self.y)+" " +self.unit + ">"
 		else:
 			return "<"+str(self.x)+","+str(self.y)+">"
+
+
+
+zeroVector = Vector2D(0.0,0.0)

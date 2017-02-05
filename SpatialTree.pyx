@@ -21,4 +21,5 @@ cdef extern from "SpatialTree_new.h":
 		int getNodeCount()
 		void trimTree()
 		vector[Pixel] query_point(double,double,double) except +
+		int query_point_count(double,double,double) except +
 		SpatialTree &operator=(SpatialTree) except +

@@ -2,21 +2,9 @@
 #include <cmath>
 #include <iostream>
 
-#define MAXOBJS 100
+#define MAXOBJS 256
 
-#define CONTAINS(OX,OY,LX,LY,HX,HY) ((OX)> (LX) && (OX) <= (HX) && (OY) > (LY) && (OY) <= (HY))
-	// const bool CONTAINS(const double &objx, const double &objy, const Node *node) const
-	// {
-	// 	return objx > node->lx && objx <= node->hx && objy > node->ly && objy <= node->hy;
-	// }
-
-#define PART_DISTANCE(AX,AY,BX,BY) (((AX)-(BX))*((AX)-(BX)) + ((AX)-(BX))*((AX)-(BX)))
-	// double distance(const double &ax, const double &ay, const double &bx, const double &by) const
-	// {
-	// 	double dx = ax-bx;
-	// 	double dy = ay-by;
-	// 	return dx*dx+dy*dy;
-	// }
+// #define CONTAINS(OX,OY,LX,LY,HX,HY) ((OX)> (LX) && (OX) <= (HX) && (OY) > (LY) && (OY) <= (HY))
 
 using std::vector;
 class Pixel
@@ -114,7 +102,18 @@ private:
 			objy - radius < node->hy && objy + radius > node->ly;
 	}
 
+	const bool CONTAINS(const double &objx, const double &objy, const Node *node)
+	{
+		return objx > node->lx && objx <= node->hx && objy > node->ly && objy <= node->hy;
+	}
 
+// #define PART_DISTANCE(AX,AY,BX,BY) (((AX)-(BX))*((AX)-(BX)) + ((AX)-(BX))*((AX)-(BX)))
+	double distance(const double &ax, const double &ay, const double &bx, const double &by)
+	{
+		double dx = ax-bx;
+		double dy = ay-by;
+		return dx*dx+dy*dy;
+	}
 
 	// void addRecur(Datum &obj, Node *n)
 	// {
@@ -221,7 +220,7 @@ private:
 		{
 			for (auto i:n->objects)
 			{
-				if (PART_DISTANCE(i.x,i.y,objx,objy) < radius*radius)
+				if (distance(i.x,i.y,objx,objy) < radius*radius)
 				{
 					ret.push_back(i.data);
 				}
@@ -344,7 +343,7 @@ public:
 	~SpatialTree() {
 		if (root != nullptr)
 		{
-			// std::cout << "Delete destructor" << "\n";
+			std::cout << "Delete destructor" << "\n";
 			delete root;
 		}
 	}
@@ -408,6 +407,20 @@ public:
 		else
 		{
 			return ret;
+		}
+	}
+
+	int query_point_count(double ptx, double pty, double radius)
+	{
+		std::vector<Pixel> ret;
+		if (ptx > xmin && ptx < xmax && pty > ymin && pty < ymax)
+		{
+			searchRecur(ptx,pty,radius,root,ret);
+			return ret.size();
+		}
+		else
+		{
+			return ret.size();
 		}
 	}
 

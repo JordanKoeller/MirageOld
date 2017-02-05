@@ -25,6 +25,7 @@ class WrappedTree(object):
 			for j in range(0,dataY.shape[1]):
 				k = (dataX[i,j],dataY[i,j])
 				v = (i,j)
+				# print(str(v[0]) + "," + str(v[1]) + " from " + str(k[0]) + "," + str(k[1]))
 				self.map[k] = v
 		self.keys = [*self.map.keys()]
 		lsz = 256

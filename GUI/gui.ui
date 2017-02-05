@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1287</width>
-    <height>883</height>
+    <width>1290</width>
+    <height>895</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>gui</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_5">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QScrollArea" name="scrollArea">
       <property name="frameShape">
@@ -28,7 +28,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1263</width>
+         <width>1266</width>
          <height>824</height>
         </rect>
        </property>
@@ -48,7 +48,7 @@
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
-           <item>
+           <item alignment="Qt::AlignLeft">
             <widget class="QScrollArea" name="scrollArea_2">
              <property name="maximumSize">
               <size>
@@ -65,7 +65,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>374</width>
-                <height>658</height>
+                <height>655</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -123,41 +123,6 @@
                   </item>
                   <item row="0" column="1">
                    <layout class="QGridLayout" name="gridLayout_5">
-                    <item row="0" column="1">
-                     <widget class="QLineEdit" name="qRedshift">
-                      <property name="text">
-                       <string>0.073</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="2">
-                     <widget class="QLabel" name="label_5">
-                      <property name="text">
-                       <string>z</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="2">
-                     <widget class="QLabel" name="label_19">
-                      <property name="text">
-                       <string>Arcseconds</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="label_4">
-                      <property name="text">
-                       <string>  Radius</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="0">
-                     <widget class="QLabel" name="label_9">
-                      <property name="text">
-                       <string> Redshift </string>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="2" column="1">
                      <widget class="QLineEdit" name="qPosition">
                       <property name="text">
@@ -196,14 +161,49 @@
                     <item row="3" column="1">
                      <widget class="QLineEdit" name="qVelocity">
                       <property name="text">
-                       <string>(30.0,0.0)</string>
+                       <string>(5.0,0.0)</string>
                       </property>
                      </widget>
                     </item>
                     <item row="3" column="2">
                      <widget class="QLabel" name="label_8">
                       <property name="text">
-                       <string>Arcs/sec</string>
+                       <string>Arcsecs/sec</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="2">
+                     <widget class="QLabel" name="label_19">
+                      <property name="text">
+                       <string>Arcseconds</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_9">
+                      <property name="text">
+                       <string> Redshift </string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_4">
+                      <property name="text">
+                       <string>  Radius</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLineEdit" name="qRedshift">
+                      <property name="text">
+                       <string>0.073</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="2">
+                     <widget class="QLabel" name="label_5">
+                      <property name="text">
+                       <string>z</string>
                       </property>
                      </widget>
                     </item>
@@ -216,6 +216,9 @@
                     </property>
                     <property name="text">
                      <string>Display Quasar</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
                     </property>
                    </widget>
                   </item>
@@ -255,6 +258,12 @@
                   </item>
                   <item row="5" column="2">
                    <widget class="QLabel" name="label_18">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>1</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="text">
                      <string/>
                     </property>
@@ -370,6 +379,9 @@
                     <property name="text">
                      <string>Display Galaxy</string>
                     </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
                    </widget>
                   </item>
                  </layout>
@@ -377,42 +389,87 @@
                </item>
                <item>
                 <widget class="QGroupBox" name="groupBox">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>150</height>
+                  </size>
+                 </property>
                  <property name="maximumSize">
                   <size>
                    <width>16777215</width>
-                   <height>131</height>
+                   <height>132</height>
                   </size>
                  </property>
                  <property name="title">
                   <string>Global Parameters</string>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_6">
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="label_21">
-                    <property name="text">
-                     <string>Dimension</string>
-                    </property>
-                   </widget>
+                  <item row="5" column="0">
+                   <layout class="QGridLayout" name="gridLayout_2">
+                    <item row="0" column="1">
+                     <widget class="QLineEdit" name="scaleInput">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
+                      <property name="text">
+                       <string>0.75</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="2">
+                     <widget class="QLabel" name="label_22">
+                      <property name="text">
+                       <string>Arcseconds</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_21">
+                      <property name="text">
+                       <string>Dimension</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_20">
+                      <property name="text">
+                       <string>Scale</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QLineEdit" name="dimensionInput">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
+                      <property name="text">
+                       <string>(800,800)</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </item>
-                  <item row="2" column="2">
-                   <widget class="QLineEdit" name="lineEdit"/>
-                  </item>
-                  <item row="0" column="2">
-                   <widget class="QLineEdit" name="lineEdit_2"/>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="label_20">
-                    <property name="text">
-                     <string>Scale</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QLabel" name="label_22">
-                    <property name="text">
-                     <string>Arcseconds</string>
-                    </property>
-                   </widget>
+                  <item row="1" column="0">
+                   <layout class="QHBoxLayout" name="horizontalLayout_3">
+                    <item>
+                     <widget class="QCheckBox" name="autoConfigCheckBox">
+                      <property name="text">
+                       <string>Auto-Configure</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="toggleMicrolensing">
+                      <property name="text">
+                       <string>Microlensing</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </item>
                  </layout>
                 </widget>
@@ -465,16 +522,16 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="resetButton">
+                 <widget class="QPushButton" name="pauseButton">
                   <property name="text">
-                   <string>Reset</string>
+                   <string>Pause</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pauseButton">
+                 <widget class="QPushButton" name="resetButton">
                   <property name="text">
-                   <string>Pause</string>
+                   <string>Reset</string>
                   </property>
                  </widget>
                 </item>
@@ -503,8 +560,17 @@
                 </item>
                 <item>
                  <widget class="QSlider" name="horizontalSlider">
+                  <property name="maximum">
+                   <number>1000</number>
+                  </property>
+                  <property name="value">
+                   <number>500</number>
+                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="tickPosition">
+                   <enum>QSlider::TicksBelow</enum>
                   </property>
                  </widget>
                 </item>
@@ -520,18 +586,9 @@
          <widget class="QScrollArea" name="scrollArea_3">
           <property name="minimumSize">
            <size>
-            <width>0</width>
-            <height>0</height>
+            <width>800</width>
+            <height>800</height>
            </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>1200</width>
-            <height>1200</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
           </property>
           <property name="widgetResizable">
            <bool>true</bool>
@@ -541,41 +598,19 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1200</width>
-             <height>1200</height>
+             <width>824</width>
+             <height>798</height>
             </rect>
            </property>
-           <property name="minimumSize">
-            <size>
-             <width>1200</width>
-             <height>1200</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>1200</width>
-             <height>1200</height>
-            </size>
-           </property>
-           <widget class="QLabel" name="main_canvas">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>1200</width>
-              <height>1200</height>
-             </rect>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>1200</width>
-              <height>1200</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QLabel" name="main_canvas">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
@@ -590,7 +625,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1287</width>
+     <width>1290</width>
      <height>22</height>
     </rect>
    </property>
@@ -603,6 +638,7 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
