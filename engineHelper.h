@@ -29,13 +29,18 @@ void ray_trace(
 		num *result_buf_x,
 		num *result_buf_y)
 	{
-	lenser_struct *stars = (lenser_struct*) numStars;
-	printf("%d %d %d\n",numStars, width, height );
+	printf("%lu\n\n\n",sizeof(dTheta));
+	lenser_struct *stars = (lenser_struct*) starData;
+	// printf("%d %d %d\n",numStars, width, height );
+	for (int i=0;i < numStars;i++)
+	{
+		printf("%f %f %f\n",stars[i].x,stars[i].y,stars[i].mass);
+	}
 	for (int gid1 = 0; gid1 < width-1; gid1++)
 	{
 		for (int gid2 = 0; gid2 < height-1; gid2++)
 		{
-			printf("%d\n",sizeof(stars[0]));
+			// printf("%d\n",sizeof(stars[0]));
 			// int gid1 = 0;
 			// int gid2 = 0;
 			int index = gid1*width + gid2;

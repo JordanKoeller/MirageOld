@@ -74,8 +74,8 @@ class SimThread(QtCore.QThread):
 
     def setCanvas(self,canvas, canvasType = CanvasType.LABEL_CANVAS):
         self.canvas = canvas
-        filler_img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
-        filler_img.setColorTable([QtGui.qRgb(255,255,255)])
+        filler_img = QtGui.QImage(1200,1200, QtGui.QImage.Format_Indexed8)
+        filler_img.setColorTable([QtGui.qRgb(0,0,0)])
         filler_img.fill(0)
         self.canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
 
@@ -130,7 +130,7 @@ class SimThread(QtCore.QThread):
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent = None):
         super(Ui_MainWindow, self).__init__(parent)
-        uic.loadUi('GUI/gui.ui', self)
+        uic.loadUi('GUI/Gravitational Lensing.ui', self)
         self.simThread = SimThread(Engine_cl(defaultQuasar,defaultGalaxy,defaultConfigs, auto_configure = False))
         self.setupUi()
 
@@ -171,12 +171,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def makeConfigs(self):
         displayQuasar = self.displayQuasar.isChecked()
         displayGalaxy = self.displayGalaxy.isChecked()
-        dimensionInput = self.__vector_from_qstring(self.dimensionInput.text(),reverse_y = False)
+        dimensionInput = int(self.dimensionInput.text())
         shiftCenter = self.toggleMicrolensing.isChecked()
         if self.autoConfigCheckBox.isChecked():
             er = self.simThread.engine.einsteinRadius
             er *= 1.5
-            dTheta = er/(dimensionInput.x/2) #400 because dTheta has to be *2, since specifying a diameter from a radius.
+            dTheta = er/(dimensionInput/2) #400 because dTheta has to be *2, since specifying a diameter from a radius.
+            self.simThread.engine.updateGalaxy(center = Vector2D(self.simThread.engine.einsteinRadius,0))
             configs = Configs(0.1,dTheta,dimensionInput,25,displayGalaxy,displayQuasar)
             return configs
         else:
@@ -201,8 +202,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         gShearMag = float(self.gShearMag.text())
         gShearAngle = u.Quantity(float(self.gShearAngle.text()),'degree')
         quasar = Quasar(redshift = qRedshift,position = qPosition,radius = qRadius,velocity = qVelocity)
-        galaxy = Galaxy(redshift = gRedshift,velocityDispersion = gVelDispersion,shearMag = gShearMag,shearAngle = gShearAngle)
-        colorLenseImg = self.colorLenseImg.isChecked()
+        galaxy = Galaxy(redshift = gRedshift,velocityDispersion = gVelDispersion,shearMag = gShearMag,shearAngle = gShearAngle, numStars = gNumStars)
+        # colorLenseImg = self.colorLenseImg.isChecked()
         return (quasar,galaxy)
 
     def startSim(self):
@@ -213,9 +214,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         Called by default when the "Play" button is presssed.
         """
         quasar,galaxy = self.pull_from_input()
-        configs = self.makeConfigs()
         self.simThread.engine.updateQuasar(quasar,auto_configure = False)
         self.simThread.engine.updateGalaxy(galaxy,auto_configure = False)
+        configs = self.makeConfigs()
         auto_generate_configs = True
         self.simThread.engine.updateConfigs(configs = configs,auto_configure = False,shiftGalacticCenter = self.toggleMicrolensing.isChecked())
         # if auto_generate_configs:

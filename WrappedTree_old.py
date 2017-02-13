@@ -13,11 +13,15 @@ class WrappedTree(object):
 	def setDataFromNumpy(self,data):
 		for i in range(0,data.shape[0]):
 			for j in range(0,data.shape[1]):
-				k = (data[i,j].x,data[i,j].y)
+				k = (data[i,j].real,data[i,j].imag)
 				v = complex(i,j)
+				# print(data[i,j])
 				self.map[k] = v
 		self.keys = [*self.map.keys()]
-		self.tree = sp.cKDTree(self.keys)
+		lsz = 256
+		self.tree = sp.cKDTree(self.keys,compact_nodes = False, balanced_tree = False, leafsize = lsz)
+
+
 	def setDataFromNumpies(self,data):
 		dataX = data[0]
 		dataY = data[1]
