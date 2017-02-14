@@ -177,7 +177,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             er = self.simThread.engine.einsteinRadius
             er *= 1.5
             dTheta = er/(dimensionInput/2) #400 because dTheta has to be *2, since specifying a diameter from a radius.
-            self.simThread.engine.updateGalaxy(center = Vector2D(self.simThread.engine.einsteinRadius,0))
+            # self.simThread.engine.updateGalaxy(center = Vector2D(self.simThread.engine.einsteinRadius,0))
             configs = Configs(0.1,dTheta,dimensionInput,25,displayGalaxy,displayQuasar)
             return configs
         else:

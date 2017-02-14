@@ -148,20 +148,19 @@ class Galaxy(Drawable,Cosmic):
 				img.setPixel(center.x+i,center.y+j,self.colorKey)
 
 
-	def getStarArray(self): #TODO
-		DTYPE_T = np.dtype([('lenserType',np.int32),
-			('mass', np.double),
-			('x',np.double),
-			('y',np.double),
-			('radius',np.double)])
-		arr = np.ndarray(self.__numStars+2,dtype = DTYPE_T)
-		for i in range(0,self.__numStars-2):
+	def getStarArray(self):
+		massArr = np.ndarray(self.__numStars+1,dtype = np.float64)
+		xArr = np.ndarray(self.__numStars+1,dtype = np.float64)
+		yArr = np.ndarray(self.__numStars+1,dtype = np.float64)
+		for i in range(0,self.__numStars):
 			star = self.__stars[i]
-			arr[i] = (0,star.mass.value,star.position.to('rad').x,star.position.y,0.0)
-		arr[self.__numStars-2] = (1,self.velocityDispersion.value,self.position.to('rad').x,self.position.y,00)
-		arr[self.__numStars-1] = (2,self.shear.magnitude,self.position.x,self.position.y,self.shear.angle.to('rad').value)
-		# print(arr)
-		return arr
+			massArr[i] = star.mass.value
+			xArr[i] = star.position.to('rad').x
+			yArr[i] = star.position.y
+		massArr[self.__numStars] = 0.0
+		xArr[self.__numStars] = 0.0
+		yArr[self.__numStars] = 0.0
+		return (massArr,xArr,yArr)
 
 	def update(self,redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, numStars = None, stars = None):
 		self.updateCosmic(redshift)

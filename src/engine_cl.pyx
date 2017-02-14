@@ -1,6 +1,6 @@
 # distutils: language=c++
 # cython: profile=True
-
+from __future__ import division
 import numpy as np
 cimport numpy as np
 from WrappedTree_old import WrappedTree
@@ -77,7 +77,7 @@ cdef class Engine_cl:
 		return self.__needsReconfiguring
 
 	def ray_trace(self, use_GPU = False):
-		return self.ray_trace_cython()
+		return self.ray_trace_gpu(False)
 
 	def setShift(self,newConfigs,enabled, theta = math.pi):
 		newConfigs.setShift(enabled,self.einsteinRadius, theta = math.pi)
@@ -97,10 +97,10 @@ cdef class Engine_cl:
 			os.environ['PYOPENCL_CTX'] = '0:0'
 		cdef int height = self.__configs.canvasDim
 		cdef int width = self.__configs.canvasDim
-		cdef double dTheta = self.__configs.dTheta
-		cdef np.ndarray result_nparray_x = np.ndarray((width,height), dtype = np.double)
-		cdef np.ndarray result_nparray_y = np.ndarray((width,height), dtype = np.double)
-		stars_nparray = self.__galaxy.getStarArray()
+		cdef np.float64_t dTheta = self.__configs.dTheta
+		cdef np.ndarray result_nparray_x = np.ndarray((width,height), dtype = np.float64)
+		cdef np.ndarray result_nparray_y = np.ndarray((width,height), dtype = np.float64)
+		stars_nparray_mass, stars_nparray_x, stars_nparray_y = self.__galaxy.getStarArray()
 
 		# create a context and a job queue
 		context = cl.create_some_context()
@@ -108,45 +108,51 @@ cdef class Engine_cl:
 
 		# create buffers to send to device
 		mf = cl.mem_flags
-		dtype = stars_nparray.dtype
+		# dtype = stars_nparray.dtype
 
-		dtype, c_decl = cl.tools.match_dtype_to_c_struct(context.devices[0],'lenser_struct',dtype)
-		cl.tools.get_or_register_dtype('lenser_struct',stars_nparray.dtype)
+		# dtype, c_decl = cl.tools.match_dtype_to_c_struct(context.devices[0],'lenser_struct',dtype)
+		# cl.tools.get_or_register_dtype('lenser_struct',stars_nparray.dtype)
 
 		#input buffers
-		stars_buffer = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf = stars_nparray)
+		stars_buffer_mass = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf = stars_nparray_mass)
+		stars_buffer_x = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf = stars_nparray_x)
+		stars_buffer_y = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf = stars_nparray_y)
 
 		#output buffers
 		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
 
 		# read and compile opencl kernel
-		prg = cl.Program(context,c_decl + open('engine_helper.cl').read()).build()
+		prg = cl.Program(context, open('engine_helper.cl').read()).build()
 		prg.ray_trace(queue,(width,height),None,
-			stars_buffer,
-			np.int32(len(stars_nparray)),
-			np.double((4*const.G/(const.c*const.c)).to("lyr/solMass").value), #np.double(0.12881055652653947), #
-			np.double(4*math.pi*(const.c**-2).to('s2/km2').value),#np.double(28.83988945290979), #
-			np.double(math.sin(2*self.galaxy.shear.angle.value+math.pi/2)),
-			np.double(-math.cos(2*self.galaxy.shear.angle.value+math.pi/2)),
-			np.double(self.galaxy.velocityDispersion),
-			np.double(self.galaxy.angDiamDist.value),
-			np.double(self.quasar.angDiamDist.value),
-			np.double(self.__dLS.value),
+			stars_buffer_mass,
+			stars_buffer_x,
+			stars_buffer_y,
+			np.int32(len(stars_nparray_x)),
+			np.float64((4*const.G/(const.c*const.c)).to("lyr/solMass").value), #np.float64 (0.12881055652653947), #
+			np.float64(4*math.pi*(const.c**-2).to('s2/km2').value),#np.float64 (28.83988945290979), #
+			# np.float64(math.sin(2*self.galaxy.shear.angle.value+math.pi/2)),
+			# np.float64(-math.cos(2*self.galaxy.shear.angle.value+math.pi/2)),
+			np.float64(self.galaxy.shear.magnitude),
+			np.float64(self.galaxy.shear.angle.value),
+			np.float64(self.galaxy.velocityDispersion),
+			np.float64(self.galaxy.angDiamDist.value),
+			np.float64(self.quasar.angDiamDist.value),
+			np.float64(self.__dLS.value),
 			np.int32(width),
 			np.int32(height),
-			np.double(self.configs.dTheta),
-			np.double(self.configs.frameShift.x),
-			np.double(self.configs.frameShift.y),
+			np.float64(self.configs.dTheta),
+			np.float64(self.galaxy.position.to('rad').x),
+			np.float64(self.galaxy.position.y),
 			result_buffer_x,
 			result_buffer_y)
 
 		# clean up GPU memory while copying data back into RAM
 		cl.enqueue_copy(queue,result_nparray_x,result_buffer_x)
 		cl.enqueue_copy(queue,result_nparray_y,result_buffer_y)
-		print(result_nparray_x)
-		print(result_nparray_y)
-		print(begin-time.clock())
+		# print(result_nparray_x)
+		# print(result_nparray_y)
+		print("Time Ray-Tracing = " + str(time.clock()-begin))
 		return (result_nparray_x,result_nparray_y)
 
 	@cython.boundscheck(False) # turn off bounds-checking for entire function
@@ -154,9 +160,9 @@ cdef class Engine_cl:
 	cdef ray_trace_cCode(self):
 		cdef int height = self.__configs.canvasDim
 		cdef int width = self.__configs.canvasDim
-		cdef double dTheta = self.__configs.dTheta
-		cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] result_nparray_x = np.ndarray((width,height), dtype = np.double)
-		cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] result_nparray_y = np.ndarray((width,height), dtype = np.double)
+		cdef np.float64_t dTheta = self.__configs.dTheta
+		cdef np.ndarray[dtype=np.float64_t, ndim=2, mode="c"] result_nparray_x = np.ndarray((width,height), dtype = np.float64)
+		cdef np.ndarray[dtype=np.float64_t, ndim=2, mode="c"] result_nparray_y = np.ndarray((width,height), dtype = np.float64)
 		result_nparray_x = np.ascontiguousarray(result_nparray_x)
 		result_nparray_y = np.ascontiguousarray(result_nparray_y)
 		cdef np.ndarray[dtype=lenser_struct, ndim=1, mode="c"] stars_nparray = self.__galaxy.getStarArray()
@@ -164,16 +170,16 @@ cdef class Engine_cl:
 		cdef lenser_struct [:] stars_buffer = stars_nparray
 		engineHelper.ray_trace(&stars_nparray[0],
 			np.int32(self.__galaxy.numStars),
-			np.double((4*const.G/(const.c*const.c)).to("lyr/solMass").value),
-			np.double(4*math.pi*(const.c**-2).to('s2/km2').value),
-			np.double(self.galaxy.angDiamDist.value),
-			np.double(self.quasar.angDiamDist.value),
-			np.double(self.__dLS.value),
+			np.float64((4*const.G/(const.c*const.c)).to("lyr/solMass").value),
+			np.float64(4*math.pi*(const.c**-2).to('s2/km2').value),
+			np.float64(self.galaxy.angDiamDist.value),
+			np.float64(self.quasar.angDiamDist.value),
+			np.float64(self.__dLS.value),
 			np.int32(width),
 			np.int32(height),
-			np.double(self.configs.dTheta),
-			np.double(self.configs.frameShift.x),
-			np.double(self.configs.frameShift.y),
+			np.float64(self.configs.dTheta),
+			np.float64(self.configs.frameShift.x),
+			np.float64(self.configs.frameShift.y),
 			&result_nparray_x[0,0],
 			&result_nparray_y[0,0])
 		return (result_nparray_x,result_nparray_y)
@@ -181,53 +187,53 @@ cdef class Engine_cl:
 	@cython.boundscheck(False) # turn off bounds-checking for entire function
 	@cython.wraparound(False)  # turn off negative index wrapping for entire function
 	cdef ray_trace_cython(self):
-		cdef double begin = time.clock()
+		cdef np.float64_t begin = time.clock()
 		cdef int height = self.__configs.canvasDim
 		cdef int width = self.__configs.canvasDim
-		cdef double dTheta = self.__configs.dTheta
-		cdef np.ndarray[dtype=np.complex128_t, ndim=2] result_buffer = np.ndarray((width,height), dtype = np.complex)
-		# cdef np.ndarray[dtype=np.float64_t, ndim=2] result_nparray_y = np.ndarray((width,height), dtype = np.double)
+		cdef np.float64_t dTheta = self.__configs.dTheta
+		cdef np.ndarray[dtype=np.float64_t, ndim=2] result_nparray_x = np.ndarray((width,height), dtype = np.float64)
+		cdef np.ndarray[dtype=np.float64_t, ndim=2] result_nparray_y = np.ndarray((width,height), dtype = np.float64)
 		cdef np.ndarray[dtype=lenser_struct, ndim=1] stars_nparray = self.__galaxy.getStarArray()
 		cdef int numStars = len(stars_nparray)
-		cdef double point_constant = (4*const.G/(const.c*const.c)).to("lyr/solMass").value
-		cdef double sis_constant = 4*math.pi*(const.c**-2).to('s2/km2').value
-		cdef double velocityDispersion = self.galaxy.velocityDispersion.value
-		cdef double dL = self.galaxy.angDiamDist.value
-		cdef double dLS = self.__dLS.value
-		cdef double dS = self.quasar.angDiamDist.value
-		cdef double galaxyCenterX = self.galaxy.position.x
-		cdef double galaxyCenterY = self.galaxy.position.y
-		cdef double shearMag = self.galaxy.shear.magnitude
-		cdef double shearAngle = self.galaxy.shear.angle.value
-		cdef double M_PI_2 = math.pi/2
-		cdef double dRX, dRY, incidentAngleX, incidentAngleY, r
-		cdef int i, j, star
+		cdef np.float64_t point_constant = (4*const.G/(const.c*const.c)).to("lyr/solMass").value
+		cdef np.float64_t sis_constant = 4*math.pi*(const.c**-2).to('s2/km2').value
+		cdef np.float64_t velocityDispersion = self.galaxy.velocityDispersion.value
+		cdef np.float64_t dL = self.galaxy.angDiamDist.value
+		cdef np.float64_t dLS = self.__dLS.value
+		cdef np.float64_t dS = self.quasar.angDiamDist.value
+		cdef np.float64_t galaxyCenterX = self.galaxy.position.x
+		cdef np.float64_t galaxyCenterY = self.galaxy.position.y
+		cdef np.float64_t shearMag = self.galaxy.shear.magnitude
+		cdef np.float64_t shearAngle = self.galaxy.shear.angle.value
+		cdef np.float64_t M_PI_2 = math.pi//2
+		cdef np.float64_t dRX, dRY, incidentAngleX, incidentAngleY, r
+		cdef unsigned int i, j, star
 		for i in range(0,width):
 			for j in range(0,height):
-				incidentAngleX = (((i - width/2)*dTheta) + galaxyCenterX) or 0.000000000000001
-				incidentAngleY = (((j - height/2)*dTheta) + galaxyCenterY) or 0.000000000000001
-				result_buffer[i][j] = 0.0 + 0.0j
-				# result_nparray_y[i][j] = 0.0
+				incidentAngleX = (((i - width//2)*dTheta) + galaxyCenterX) or 0.000000000000001
+				incidentAngleY = (((j - height//2)*dTheta) + galaxyCenterY) or 0.000000000000001
+				result_nparray_x[i][j] = 0.0
+				result_nparray_y[i][j] = 0.0
 				for star in range(0,numStars-2):
 					dRX = (stars_nparray[star].x - incidentAngleX)*dL
 					dRY = (stars_nparray[star].y - incidentAngleY)*dL
 					r = sqrt(dRX*dRX + dRY*dRY)		
-					result_buffer[i][j] += np.complex(dRX*stars_nparray[star].mass*point_constant/(r*r),dRY*stars_nparray[star].mass*point_constant/(r*r))
-					# result_nparray_y[i][j] += dRY*stars_nparray[star].mass*point_constant/(r*r)
+					result_nparray_x[i][j] += dRX*stars_nparray[star].mass*point_constant//(r*r)
+					result_nparray_y[i][j] += dRY*stars_nparray[star].mass*point_constant/(r*r)
 				dRX = galaxyCenterX - incidentAngleX
 				dRY = galaxyCenterY - incidentAngleY
 				r = sqrt(dRX*dRX + dRY*dRY)
-				result_buffer[i][j] += np.complex(velocityDispersion*velocityDispersion*dRX*sis_constant/r,velocityDispersion*velocityDispersion*dRY*sis_constant/r)
-				# result_nparray_y[i][j] += velocityDispersion*velocityDispersion*dRY*sis_constant/r
-				dRX = dRX / r 
-				dRY = dRY / r
-				result_buffer[i][j] += np.complex(shearMag*r*cos(2*(shearAngle+M_PI_2) - atan2(dRY,dRX)),shearMag*r*sin(2*(shearAngle+M_PI_2) - atan2(dRY,dRX)))
-				# result_nparray_y[i][j] += shearMag*r*cos(2*shearAngle+M_PI_2 - atan2(dRY,dRX))
-				result_buffer[i][j] = np.complex((incidentAngleX*dL + (incidentAngleX+result_buffer[i][j].real)*dLS)/dS,(incidentAngleY*dL + (incidentAngleY+result_buffer[i][j].imag)*dLS)/dS)
-				# result_nparray_y[i][j] = (incidentAngleY*dL + (incidentAngleY+result_nparray_y[i][j])*dLS)/dS
+				result_nparray_x[i][j] += velocityDispersion*velocityDispersion*dRX*sis_constant#//r
+				result_nparray_y[i][j] += velocityDispersion*velocityDispersion*dRY*sis_constant#//r
+				dRX = dRX // r 
+				dRY = dRY // r
+				result_nparray_x[i][j] = result_nparray_x[i][j]+ shearMag*r*cos(2*(shearAngle+M_PI_2) - atan2(dRY,dRX))
+				result_nparray_y[i][j] = result_nparray_y[i][j]+shearMag*r*sin(2*(shearAngle+M_PI_2) - atan2(dRY,dRX))
+				result_nparray_x[i][j] = (incidentAngleX*dL + (incidentAngleX+result_nparray_x[i][j])*dLS)//dS
+				result_nparray_y[i][j] = (incidentAngleY*dL + (incidentAngleY+result_nparray_y[i][j])*dLS)//dS
 		print(time.clock() - begin)
 		# print(result_buffer)
-		return result_buffer
+		return (result_nparray_x,result_nparray_y)
 
 	cpdef reconfigure(self):
 		if self.__needsReconfiguring:
@@ -236,15 +242,15 @@ cdef class Engine_cl:
 			self.__preCalculating = True
 			self.__tree = WrappedTree()
 			finalData = self.ray_trace(use_GPU = True)
-			self.__tree.setDataFromNumpy(finalData)
+			self.__tree.setDataFromNumpies(finalData)
 			print("Time calculating = " + str(time.clock() - begin) + " seconds.")
 			self.__preCalculating = False
 			self.__needsReconfiguring = False
 
 
 	cpdef getMagnification(self):
-		cdef a = np.double(self.__trueLuminosity)
-		cdef b = np.double(self.__tree.query_point_count(self.__quasar.observedPosition.x,self.__quasar.observedPosition.y,self.__quasar.radius.value))
+		cdef a = np.float64 (self.__trueLuminosity)
+		cdef b = np.float64 (self.__tree.query_point_count(self.__quasar.observedPosition.x,self.__quasar.observedPosition.y,self.__quasar.radius.value))
 		return b/a
 
 	cdef buildTree(self, data):
@@ -252,7 +258,7 @@ cdef class Engine_cl:
 		yvals = data[1]
 		cdef int width = self.__configs.canvasDim
 		cdef int height = self.__configs.canvasDim
-		cdef double __dS = self.quasar.angDiamDist.value
+		cdef np.float64_t __dS = self.quasar.angDiamDist.value
 		cdef int i = 0
 		cdef int j = 0
 		for i in range(width):
@@ -266,7 +272,7 @@ cdef class Engine_cl:
 			self.reconfigure()
 		cdef int width = self.__configs.canvasDim
 		cdef int height = self.__configs.canvasDim
-		cdef double dt = self.__configs.dt
+		cdef np.float64_t dt = self.__configs.dt
 		self.__quasar.setTime(self.time)
 		ret = self.__tree.query_point(self.__quasar.observedPosition.x,self.__quasar.observedPosition.y,self.__quasar.radius.value)
 		self.img.fill(0)
@@ -275,8 +281,8 @@ cdef class Engine_cl:
 		if self.configs.displayGalaxy:
 			self.galaxy.draw(self.img,self.configs)
 		for pixel in ret:
-			self.img.setPixel(pixel.real,pixel.imag,1)
-			# self.img.setPixel(pixel[0],pixel[1],1)
+			# self.img.setPixel(pixel.real,pixel.imag,1)
+			self.img.setPixel(pixel[0],pixel[1],1)
 		return self.img
 
 		
@@ -303,7 +309,7 @@ cdef class Engine_cl:
 
 	def updateGalaxy(self,galaxy = None ,redshift = None, velocityDispersion = None, radius = None, numStars = None, auto_configure = True, center = zeroVector):
 		if galaxy != None:
-			if galaxy.redshift != self.galaxy.redshift or galaxy.velocityDispersion != self.galaxy.velocityDispersion  or galaxy.shear.magnitude != self.galaxy.shear.magnitude or galaxy.shear.angle != self.galaxy.shear.angle or galaxy.center != self.galaxy.center:
+			if galaxy.redshift != self.galaxy.redshift or galaxy.velocityDispersion != self.galaxy.velocityDispersion  or galaxy.shear.magnitude != self.galaxy.shear.magnitude or galaxy.shear.angle != self.galaxy.shear.angle:# or galaxy.center != self.galaxy.center:
 				self.__needsReconfiguring = True
 		if galaxy is None:
 			self.__needsReconfiguring = True
