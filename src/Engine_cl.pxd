@@ -35,7 +35,7 @@ cdef class Engine_cl:
 
 		public double time
 		double __einsteinRadius
-		long int __trueLuminosity
+		long unsigned int __trueLuminosity
 		__dLS
 
 		__tree
@@ -43,12 +43,8 @@ cdef class Engine_cl:
 		__imgColors
 		np.ndarray __data_array
 
-	cdef calcDeflections(self)
-	cdef queryTree(self,position)
+	cpdef configureMicrolensing(self)
 	cdef ray_trace_gpu(self,use_GPU)
-	cdef ray_trace_cCode(self)
-	cdef buildTree(self, data)
-	cdef ray_trace_cython(self)
 	cpdef reconfigure(self)
 	cpdef getFrame(self)
 	cpdef getMagnification(self)

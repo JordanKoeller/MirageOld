@@ -18,7 +18,7 @@ from stellar import microGalaxy
 from stellar import microQuasar
 from Configs import microConfigs
 import threading as par
-from Vector2D import Vector2D
+from Vector2D import Vector2D, zeroVector
 from enum import Enum
 import time
 from astropy import units as u
@@ -103,34 +103,20 @@ class SimThread(QtCore.QThread):
         self.canvas.pixmap().convertFromImage(frame)
         self.canvas.update()
 
-
-    def updateStellar(self,quasar,galaxy):
-        self.engine.updateQuasar(quasar)
-        self.engine.updateGalaxy(galaxy)
-
-    def updateConfigs(self,configs):
-        self.engine.updateConfigs(configs,shiftGalacticCenter = self.toggleMicrolensing.isChecked())
-
-    def toggleDrawingQuasar(self):
-        if self.__drawingQuasar:
-            self.__drawingQuasar = False
+    def updateDrawingGalaxy(self, drawGalaxy, isMicrolensing):
+        if drawGalaxy and isMicrolensing:
+            self.engine.updateConfigs(displayGalaxy = False, displayStars = True)
+        elif not isMicrolensing:
+            self.engine.updateConfigs(displayGalaxy = True, displayStars = True)
         else:
-            self.__drawingQuasar = True 
-        self.engine.updateConfigs(displayQuasar = self.__drawingQuasar)
-
-    def toggleDrawingGalaxy(self):
-        if self.__drawingGalaxy:
-            self.__drawingGalaxy = False
-        else:
-            self.__drawingGalaxy = True
-        self.engine.updateConfigs(displayGalaxy = self.__drawingGalaxy)
+            self.engine.updateConfigs(displayGalaxy = False, displayStars = False)
 
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent = None):
         super(Ui_MainWindow, self).__init__(parent)
-        uic.loadUi('GUI/Gravitational Lensing.ui', self)
+        uic.loadUi('GUI/gui.ui', self)
         self.simThread = SimThread(Engine_cl(defaultQuasar,defaultGalaxy,defaultConfigs, auto_configure = False))
         self.setupUi()
 
@@ -150,8 +136,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.pauseButton.clicked.connect(self.simThread.pause)
         self.resetButton.clicked.connect(self.simThread.restart)
         self.playButton.clicked.connect(self.startSim)
-        self.displayQuasar.clicked.connect(self.simThread.toggleDrawingQuasar)
-        self.displayGalaxy.clicked.connect(self.simThread.toggleDrawingGalaxy)
+        self.displayQuasar.clicked.connect(self.drawQuasarHelper)
+        self.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
 
 
     def __vector_from_qstring(self,string,reverse_y = True):
@@ -171,18 +157,22 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def makeConfigs(self):
         displayQuasar = self.displayQuasar.isChecked()
         displayGalaxy = self.displayGalaxy.isChecked()
+        displayStars = self.displayGalaxy.isChecked()
+        isMicrolensing = self.enableMicrolensingBox.isChecked()
         dimensionInput = int(self.dimensionInput.text())
-        shiftCenter = self.toggleMicrolensing.isChecked()
+        if isMicrolensing:
+            displayGalaxy = False
+            displayQuasar = False
         if self.autoConfigCheckBox.isChecked():
             er = self.simThread.engine.einsteinRadius
             er *= 1.5
             dTheta = er/(dimensionInput/2) #400 because dTheta has to be *2, since specifying a diameter from a radius.
             # self.simThread.engine.updateGalaxy(center = Vector2D(self.simThread.engine.einsteinRadius,0))
-            configs = Configs(0.1,dTheta,dimensionInput,25,displayGalaxy,displayQuasar)
+            configs = Configs(0.1,dTheta,dimensionInput,25,displayGalaxy,displayQuasar,displayStars)
             return configs
         else:
             scaleInput = u.Quantity(float(self.scaleInput.text()),'arcsec').to('rad').value
-            configs = Configs(0.01,scaleInput, dimensionInput, 25, displayGalaxy, displayQuasar)
+            configs = Configs(0.1,scaleInput/dimensionInput, dimensionInput, 25, displayGalaxy, displayQuasar, displayStars)
             return configs
 
 
@@ -201,9 +191,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         gNumStars = int(self.gNumStars.text())
         gShearMag = float(self.gShearMag.text())
         gShearAngle = u.Quantity(float(self.gShearAngle.text()),'degree')
+        galaxyCenter = zeroVector
+        if self.enableMicrolensingBox.isChecked():
+            galaxyCenter = Vector2D(self.simThread.engine.einsteinRadius,0)
         quasar = Quasar(redshift = qRedshift,position = qPosition,radius = qRadius,velocity = qVelocity)
-        galaxy = Galaxy(redshift = gRedshift,velocityDispersion = gVelDispersion,shearMag = gShearMag,shearAngle = gShearAngle, numStars = gNumStars)
-        # colorLenseImg = self.colorLenseImg.isChecked()
+        galaxy = Galaxy(redshift = gRedshift,velocityDispersion = gVelDispersion,shearMag = gShearMag,shearAngle = gShearAngle, numStars = gNumStars, center = galaxyCenter)
         return (quasar,galaxy)
 
     def startSim(self):
@@ -213,17 +205,17 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         Called by default when the "Play" button is presssed.
         """
-        quasar,galaxy = self.pull_from_input()
-        self.simThread.engine.updateQuasar(quasar,auto_configure = False)
-        self.simThread.engine.updateGalaxy(galaxy,auto_configure = False)
         configs = self.makeConfigs()
-        auto_generate_configs = True
-        self.simThread.engine.updateConfigs(configs = configs,auto_configure = False,shiftGalacticCenter = self.toggleMicrolensing.isChecked())
-        # if auto_generate_configs:
-            # self.simThread.engine.updateConfigs(dTheta = 1.5*1.3*self.simThread.engine.einsteinRadius/400)
+        quasar,galaxy = self.pull_from_input()
+        self.simThread.engine.updateConfigs(dt = configs.dt,dTheta = configs.dTheta,canvasDim = configs.canvasDim,frameRate = configs.frameRate,displayGalaxy = configs.displayGalaxy,displayQuasar = configs.displayQuasar, displayStars = configs.displayStars, auto_configure = False)
+        self.simThread.engine.updateQuasar(redshift = quasar.redshift,radius = quasar.radius,position = quasar.position,velocity = quasar.velocity,auto_configure = False)
+        self.simThread.engine.updateGalaxy(redshift = galaxy.redshift,velocityDispersion = galaxy.velocityDispersion,shearMag = galaxy.shearMag,shearAngle = galaxy.shearAngle,center = galaxy.position,numStars = galaxy.numStars,auto_configure = False)
         self.simThread.start()
 
-
+    def drawGalaxyHelper(self):
+        self.simThread.updateDrawingGalaxy(self.displayGalaxy.isChecked(),self.enableMicrolensingBox.isChecked())
+    def drawQuasarHelper(self):
+        self.simThread.engine.updateConfigs(displayQuasar = self.displayQuasar.isChecked())
 
 if __name__ == "__main__":
     import sys

@@ -65,7 +65,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>374</width>
-                <height>655</height>
+                <height>646</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -224,98 +224,28 @@
                   <string>Galaxy Parameters</string>
                  </property>
                  <layout class="QGridLayout" name="gridLayout">
-                  <item row="0" column="3">
+                  <item row="5" column="1">
+                   <widget class="QCheckBox" name="displayGalaxy">
+                    <property name="layoutDirection">
+                     <enum>Qt::LeftToRight</enum>
+                    </property>
+                    <property name="text">
+                     <string>Display Galaxy</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
                    <widget class="QLabel" name="label_15">
                     <property name="text">
                      <string/>
                     </property>
                    </widget>
                   </item>
-                  <item row="5" column="2">
-                   <widget class="QLabel" name="label_18">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>1</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
+                  <item row="0" column="1" rowspan="2">
                    <layout class="QGridLayout" name="gridLayout_3">
-                    <item row="3" column="1">
-                     <widget class="QLineEdit" name="gShearMag">
-                      <property name="text">
-                       <string>0.3206</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="4" column="1">
-                     <widget class="QLineEdit" name="gNumStars">
-                      <property name="text">
-                       <string>0</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="2">
-                     <widget class="QLabel" name="label_16">
-                      <property name="text">
-                       <string>Km/sec</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="0">
-                     <widget class="QLabel" name="label_12">
-                      <property name="text">
-                       <string>Shear Magnitude</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="2">
-                     <widget class="QLabel" name="label_17">
-                      <property name="text">
-                       <string>Arcsecs</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="2">
-                     <widget class="QLabel" name="label_2">
-                      <property name="text">
-                       <string>Degrees </string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="label_11">
-                      <property name="text">
-                       <string>Velocity Dispersion</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="0">
-                     <widget class="QLabel" name="label_3">
-                      <property name="text">
-                       <string>Shear Angle</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="1">
-                     <widget class="QLineEdit" name="gVelDispersion">
-                      <property name="text">
-                       <string>1500.0</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="4" column="0">
-                     <widget class="QLabel" name="label_13">
-                      <property name="text">
-                       <string>Number of Stars</string>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="2" column="1">
                      <widget class="QLineEdit" name="gShearAngle">
                       <property name="text">
@@ -344,20 +274,77 @@
                       </property>
                      </widget>
                     </item>
+                    <item row="3" column="0">
+                     <widget class="QLabel" name="label_12">
+                      <property name="text">
+                       <string>Shear Magnitude</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QLabel" name="label_3">
+                      <property name="text">
+                       <string>Shear Angle</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="2">
+                     <widget class="QLabel" name="label_16">
+                      <property name="text">
+                       <string>Km/sec</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_11">
+                      <property name="text">
+                       <string>Velocity Dispersion</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="2">
+                     <widget class="QLabel" name="label_17">
+                      <property name="text">
+                       <string>Arcsecs</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="2">
+                     <widget class="QLabel" name="label_2">
+                      <property name="text">
+                       <string>Degrees </string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="1">
+                     <widget class="QLineEdit" name="gNumStars">
+                      <property name="text">
+                       <string>0</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QLineEdit" name="gVelDispersion">
+                      <property name="text">
+                       <string>1500.0</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="1">
+                     <widget class="QLineEdit" name="gShearMag">
+                      <property name="text">
+                       <string>0.3206</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="0">
+                     <widget class="QLabel" name="label_13">
+                      <property name="text">
+                       <string>Percent Stars</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
-                  </item>
-                  <item row="5" column="1">
-                   <widget class="QCheckBox" name="displayGalaxy">
-                    <property name="layoutDirection">
-                     <enum>Qt::LeftToRight</enum>
-                    </property>
-                    <property name="text">
-                     <string>Display Galaxy</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
                   </item>
                  </layout>
                 </widget>
@@ -388,7 +375,7 @@
                        <bool>true</bool>
                       </property>
                       <property name="text">
-                       <string>0.75</string>
+                       <string>600</string>
                       </property>
                      </widget>
                     </item>
@@ -402,14 +389,14 @@
                     <item row="0" column="0">
                      <widget class="QLabel" name="label_21">
                       <property name="text">
-                       <string>Dimension</string>
+                       <string>Scale</string>
                       </property>
                      </widget>
                     </item>
                     <item row="1" column="0">
                      <widget class="QLabel" name="label_20">
                       <property name="text">
-                       <string>Scale</string>
+                       <string>Resolution</string>
                       </property>
                      </widget>
                     </item>
@@ -428,19 +415,19 @@
                   <item row="1" column="0">
                    <layout class="QHBoxLayout" name="horizontalLayout_3">
                     <item>
+                     <widget class="QCheckBox" name="enableMicrolensingBox">
+                      <property name="text">
+                       <string>Enable Microlensing</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
                      <widget class="QCheckBox" name="autoConfigCheckBox">
                       <property name="text">
                        <string>Auto-Configure</string>
                       </property>
                       <property name="checked">
                        <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QCheckBox" name="toggleMicrolensing">
-                      <property name="text">
-                       <string>Microlensing</string>
                       </property>
                      </widget>
                     </item>
@@ -513,43 +500,21 @@
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_4">
-                <item>
-                 <widget class="QComboBox" name="zoomComboBox">
-                  <item>
-                   <property name="text">
-                    <string>Zoom</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Time</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Speed</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSlider" name="horizontalSlider">
-                  <property name="maximum">
-                   <number>1000</number>
-                  </property>
-                  <property name="value">
-                   <number>500</number>
-                  </property>
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="tickPosition">
-                   <enum>QSlider::TicksBelow</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="QLabel" name="outputLabel">
+                <property name="text">
+                 <string>(This will do something some day I promise)</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QProgressBar" name="progressBar">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="value">
+                 <number>24</number>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>

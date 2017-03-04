@@ -40,6 +40,9 @@ class Drawable(object):
 	def colorKey(self):
 		return self.__colorKey
 
+	def drawableString(self):
+		return "postion = " + str(self.position)
+
 class Cosmic(object):
 	__redshift = 0.0
 
@@ -55,6 +58,8 @@ class Cosmic(object):
 		if redshift is not None:
 			self.__redshift = redshift
 
+	def cosmicString(self):
+		return "redshift = " + str(self.redshift) + "\nAngDiamDist = " + str(self.angDiamDist)
 
 class PointLenser(Drawable):
 	__mass = 0
@@ -63,7 +68,7 @@ class PointLenser(Drawable):
 		self.__mass = mass 
 
 	def draw(self,img,configs):
-		center = (self.position - configs.frameShift)/configs.dTheta
+		center = (self.position)/configs.dTheta
 		center = Vector2D(int(center.x+configs.canvasDim/2),int(center.y+configs.canvasDim/2))
 		img.setPixel(center.x,center.y,self._Drawable__colorKey)
 		img.setPixel(center.x+1,center.y,self._Drawable__colorKey)
@@ -107,6 +112,8 @@ class ShearLenser(object):
 	def angle(self):
 		return self.__angle.to('rad')
 
+	def shearString(self):
+		return "shearMag = " + str(self.magnitude) + "\nshearAngle = " + str(self.angle)
 
 
 
@@ -119,12 +126,12 @@ class Galaxy(Drawable,Cosmic):
 	__stars = []
 	__numStars = 0
 
-	def __init__(self, redshift = 0.0, velocityDispersion = u.Quantity(0,'km/s'), percenterStars = 0, shearMag = 0, shearAngle = 0, center = zeroVector, shear = None,numStars = 0):
+	def __init__(self, redshift = 0.0, velocityDispersion = u.Quantity(0,'km/s'), percenterStars = 0, shearMag = 0, shearAngle = 0, center = zeroVector, numStars = 0):
 		self.updateDrawable(center, 4)
 		self.updateCosmic(redshift)
 		self.__velocityDispersion = velocityDispersion
 		self.__pcntStar = percenterStars
-		self.__shear = shear or ShearLenser(shearMag,shearAngle)
+		self.__shear = ShearLenser(shearMag,shearAngle)
 		self.__numStars = numStars
 
 	def setPos(self, einsteinRadius, theta = math.pi):
@@ -132,20 +139,21 @@ class Galaxy(Drawable,Cosmic):
 		y = -math.cos(theta)
 		self.updateDrawable(position = Vector2D(x*einsteinRadius, y*einsteinRadius, einsteinRadius.unit))
 
-	def generateStars(self,einsteinRadius, configs): #RTODO
+	def generateStars(self, configs): #RTODO
 		self.__stars = []
 		for i in range(0,self.__numStars):
 			self.__stars.append(PointLenser(Vector2D(rand.random()-0.5,
 					rand.random()-0.5,'rad')*(configs.canvasDim-2)*configs.dTheta,
-				const.M_sun*5e11))
+				const.M_sun))
 
-	def draw(self,img,configs):
+	def draw(self,img,configs, displayGalaxy):
 		for star in self.__stars:
 			star.draw(img,configs)
-		center = Vector2D(self.position.x + (configs.canvasDim/2),self.position.y + (configs.canvasDim/2))
-		for i in range(-2,3,1):
-			for j in range(-2,3,1):
-				img.setPixel(center.x+i,center.y+j,self.colorKey)
+		if displayGalaxy:
+			center = Vector2D(self.position.x/configs.dTheta + (configs.canvasDim/2),self.position.y/configs.dTheta + (configs.canvasDim/2))
+			for i in range(-2,3,1):
+				for j in range(-2,3,1):
+					img.setPixel(center.x+i,center.y+j,self.colorKey)
 
 
 	def getStarArray(self):
@@ -162,13 +170,14 @@ class Galaxy(Drawable,Cosmic):
 		yArr[self.__numStars] = 0.0
 		return (massArr,xArr,yArr)
 
-	def update(self,redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, numStars = None, stars = None):
+	def update(self,redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, numStars = None, center = None):
 		self.updateCosmic(redshift)
 		self.__velocityDispersion = velocityDispersion or self.__velocityDispersion
 		self.__shear.update(shearMag,shearAngle)
-		print(self.__numStars)
+		# print(self.__numStars)
 		self.__numStars = numStars or self.__numStars
-		print(numStars)
+		self.updateDrawable(center)
+		# print(numStars)
 
 	def unscaledAlphaAt(self, position):
 		"Returns a complex number, representing the unscaled deflection angle at the point pt."
@@ -182,6 +191,8 @@ class Galaxy(Drawable,Cosmic):
 		position += deltaR * (self.velocityDispersion.value*self.velocityDispersion.value*28.83988945290979/(r))
 		return position
 
+	def __str__(self):
+		return "GALAXY:\n" + self.drawableString() + "\n" + self.cosmicString() + "\n" + self.shear.shearString() + "\nvelocity Dispersion = " + str(self.velocityDispersion) + "\nnumStars = " + str(self.numStars) + "\n\n"
 
 	@property
 	def velocityDispersion(self):
@@ -194,11 +205,21 @@ class Galaxy(Drawable,Cosmic):
 	@property
 	def shear(self):
 		return self.__shear
+	@property
+	def shearMag(self):
+		return self.__shear.magnitude
+
+	@property
+	def shearAngle(self):
+		return self.__shear.angle
 
 	@property
 	def numStars(self):
-		return len(self.__stars)
+		return self.__numStars
 
+	@property
+	def center(self):
+		return self.position
 	@property
 	def stars(self):
 		return self.__stars
@@ -234,7 +255,7 @@ class Quasar(Drawable,Cosmic):
 
 	def draw(self, img, configs):
 		begin = time.clock()
-		center = (self.observedPosition - configs.frameShift)/configs.dTheta
+		center = (self.observedPosition)/configs.dTheta
 		center = Vector2D(int(center.x+configs.canvasDim/2),int(center.y+configs.canvasDim/2))
 		radius = int(self.radius.value/configs.dTheta)
 		rSquared = radius * radius
@@ -263,6 +284,8 @@ class Quasar(Drawable,Cosmic):
 	def setTime(self, t):
 		self.__observedPosition = self._Drawable__position + (self.velocity * t)
 
+	def __str__(self):
+		return "QUASAR:\n" + self.cosmicString() + "\n" + self.drawableString() + "\nvelocity = " + str(self.velocity) + "\nradius = " + str(self.radius) + "\n\n"
 
 
 	def setPos(self,position):
