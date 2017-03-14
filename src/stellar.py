@@ -22,11 +22,20 @@ class Drawable(object):
 			configs - Configs class instance, specifying how to draw the entity.
 		"""
 
-	def updateDrawable(self, position = None, colorKey = None):
-		if position is not None:
-			self.__position = position
-		if colorKey is not None:
-			self.__colorKey = colorKey
+	# def updateDrawable(self, position = None, colorKey = None):
+	# 	if position != None:
+	# 		self.__position = position
+	# 	if colorKey != None:
+	# 		self.__colorKey = colorKey
+
+	def updateDrawable(self,**kwargs):
+		for key,value in kwargs.items():
+			try:
+				getattr(self,"_Drawable__"+key)
+				if value != None:
+					setattr(self,"_Drawable__"+key,value)
+			except AttributeError as e:
+				print("failed to update "+key+ " in Drawable")
 
 
 	def setPos(self,position):
@@ -54,9 +63,17 @@ class Cosmic(object):
 	def redshift(self):
 		return self.__redshift
 
-	def updateCosmic(self,redshift = None):
-		if redshift is not None:
-			self.__redshift = redshift
+	# def updateCosmic(self,redshift = None):
+	# 	if redshift is not None:
+	# 		self.__redshift = redshift
+	def updateCosmic(self,**kwargs):
+		for key,value in kwargs.items():
+			try:
+				getattr(self,"_Cosmic__"+key)
+				if value != None:
+					setattr(self,"_Cosmic__"+key,value)
+			except AttributeError as e:
+				print("failed to update "+key+ " in Cosmic")
 
 	def cosmicString(self):
 		return "redshift = " + str(self.redshift) + "\nAngDiamDist = " + str(self.angDiamDist)
@@ -64,8 +81,22 @@ class Cosmic(object):
 class PointLenser(Drawable):
 	__mass = 0
 	def __init__(self, position = None, mass = u.Quantity(0)):
-		self.updateDrawable(position = position, colorKey = 2)
 		self.__mass = mass 
+		self.updateDrawable(position = position, colorKey = 2)
+
+	def __eq__(self,other):
+		if other == None:
+			return False
+		if self.position != other.position:
+			return False
+		if self.mass != other.mass:
+			return False
+		if self.colorKey != other.colorKey:
+			return False
+		return True
+
+	def __neq__(self,other):
+		return not self.__eq__(other)
 
 	def draw(self,img,configs):
 		center = (self.position)/configs.dTheta
@@ -99,8 +130,18 @@ class ShearLenser(object):
 		self.__angle = angle
 
 	def update(self,mag = None, angle = None):
-		self.__mag = mag or self.__mag
-		self.__angle = angle or self.__angle
+		if mag != None:
+			self.__mag = mag
+		if angle != None:
+			self.__angle = angle
+
+	def __eq__(self,other):
+		if other == None:
+			return False
+		return self.magnitude == other.magnitude and self.angle == other.angle
+
+	def __neq__(self,other):
+		return not self.__eq__(other)
 
 	def unscaledAlphaAt(self, position):
 		pass
@@ -126,25 +167,27 @@ class Galaxy(Drawable,Cosmic):
 	__stars = []
 	__numStars = 0
 
-	def __init__(self, redshift = 0.0, velocityDispersion = u.Quantity(0,'km/s'), percenterStars = 0, shearMag = 0, shearAngle = 0, center = zeroVector, numStars = 0):
-		self.updateDrawable(center, 4)
-		self.updateCosmic(redshift)
+	def __init__(self, redshift = 0.0, velocityDispersion = u.Quantity(0,'km/s'), percentStars = 0, shearMag = 0, shearAngle = 0, center = zeroVector, numStars = 0):
 		self.__velocityDispersion = velocityDispersion
-		self.__pcntStar = percenterStars
+		self.__pcntStar = percentStars
 		self.__shear = ShearLenser(shearMag,shearAngle)
 		self.__numStars = numStars
+		self.updateDrawable(position = center, colorKey = 4)
+		self.updateCosmic(redshift = redshift)
 
 	def setPos(self, einsteinRadius, theta = math.pi):
 		x = math.sin(theta)
 		y = -math.cos(theta)
 		self.updateDrawable(position = Vector2D(x*einsteinRadius, y*einsteinRadius, einsteinRadius.unit))
 
-	def generateStars(self, configs): #RTODO
+	def generateStars(self, configs,totalMass): #RTODO
 		self.__stars = []
+		massInStars = totalMass*self.__pcntStar
+		masses = configs.getStarMasses(massInStars) #Need to change this line to reflect, percentage and have a tolerance for mass in stars
 		for i in range(0,self.__numStars):
 			self.__stars.append(PointLenser(Vector2D(rand.random()-0.5,
 					rand.random()-0.5,'rad')*(configs.canvasDim-2)*configs.dTheta,
-				const.M_sun))
+				u.Quantity(masses[i],'solMass')))
 
 	def draw(self,img,configs, displayGalaxy):
 		for star in self.__stars:
@@ -170,14 +213,15 @@ class Galaxy(Drawable,Cosmic):
 		yArr[self.__numStars] = 0.0
 		return (massArr,xArr,yArr)
 
-	def update(self,redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, numStars = None, center = None):
-		self.updateCosmic(redshift)
+	def update(self,redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, numStars = None, center = None,percentStars = None):
 		self.__velocityDispersion = velocityDispersion or self.__velocityDispersion
 		self.__shear.update(shearMag,shearAngle)
-		# print(self.__numStars)
-		self.__numStars = numStars or self.__numStars
-		self.updateDrawable(center)
-		# print(numStars)
+		if numStars != None:
+			self.__numStars = numStars
+		if percentStars != None:
+			self.__pcntStar = percentStars
+		self.updateDrawable(position = center)
+		self.updateCosmic(redshift = redshift)
 
 	def unscaledAlphaAt(self, position):
 		"Returns a complex number, representing the unscaled deflection angle at the point pt."
@@ -193,6 +237,20 @@ class Galaxy(Drawable,Cosmic):
 
 	def __str__(self):
 		return "GALAXY:\n" + self.drawableString() + "\n" + self.cosmicString() + "\n" + self.shear.shearString() + "\nvelocity Dispersion = " + str(self.velocityDispersion) + "\nnumStars = " + str(self.numStars) + "\n\n"
+
+
+	def __eq__(self,other):
+		if other == None:
+			return False
+		if self.stars != other.stars:
+			return False
+		if self.shear != other.shear:
+			return False
+		if self.center != other.center:
+			return False
+		if self.velocityDispersion != other.velocityDispersion:
+			return False
+		return True
 
 	@property
 	def velocityDispersion(self):
@@ -236,21 +294,20 @@ class Quasar(Drawable,Cosmic):
 
 
 	def __init__(self,redshift = 0,radius = u.Quantity(0,'rad'),position = zeroVector,velocity = zeroVector):
-		self.updateDrawable(position,3)
-		self.updateCosmic(redshift)
 		self.__velocity = velocity
 		self.__observedPosition = position
 		self.__radius = radius
-		# print("radius = "+ str(self.__radius))
+		self.updateDrawable(position = position,colorKey = 3)
+		self.updateCosmic(redshift = redshift)
 
 	def update(self, redshift = None, position = None, radius = None, velocity = None):
 		self.updateCosmic(redshift = redshift)
 		self.updateDrawable(position = position)
-		self.__velocity = velocity or self.__velocity
+		if velocity != None:
+			self.__velocity = velocity
 		self.__observedPosition = self.position
-		self.__radius = radius or self.__radius
-		# print("radius = "+ str(self.__radius.to('rad')))
-		# print("position = "+ str(self.position.to('rad')))
+		if radius != None:
+			self.__radius = radius
 
 
 	def draw(self, img, configs):
@@ -292,7 +349,6 @@ class Quasar(Drawable,Cosmic):
 		self.__observedPosition = position
 
 
-
 defaultGalaxy = Galaxy(redshift = 0.0073,
 	velocityDispersion = u.Quantity(1500,"km/s"),
 	shearMag = 0.3206,
@@ -312,4 +368,5 @@ microQuasar = Quasar(redshift = 0.073,
 	position = Vector2D(0,0,"rad"),
 	radius = u.Quantity(1.7037e-6,"rad"),
 	velocity = Vector2D(1.59016e-8,0,"rad"))
+
 

@@ -195,7 +195,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         if self.enableMicrolensingBox.isChecked():
             galaxyCenter = Vector2D(self.simThread.engine.einsteinRadius,0)
         quasar = Quasar(redshift = qRedshift,position = qPosition,radius = qRadius,velocity = qVelocity)
-        galaxy = Galaxy(redshift = gRedshift,velocityDispersion = gVelDispersion,shearMag = gShearMag,shearAngle = gShearAngle, numStars = gNumStars, center = galaxyCenter)
+        galaxy = Galaxy(redshift = gRedshift,velocityDispersion = gVelDispersion,shearMag = gShearMag,shearAngle = gShearAngle, percentStars = gNumStars/100, center = galaxyCenter)
         return (quasar,galaxy)
 
     def startSim(self):
@@ -207,9 +207,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         """
         configs = self.makeConfigs()
         quasar,galaxy = self.pull_from_input()
-        self.simThread.engine.updateConfigs(dt = configs.dt,dTheta = configs.dTheta,canvasDim = configs.canvasDim,frameRate = configs.frameRate,displayGalaxy = configs.displayGalaxy,displayQuasar = configs.displayQuasar, displayStars = configs.displayStars, auto_configure = False)
+        self.simThread.engine.updateConfigs(dt = configs.dt,dTheta = configs.dTheta,canvasDim = configs.canvasDim,frameRate = configs.frameRate,displayGalaxy = configs.displayGalaxy,displayQuasar = configs.displayQuasar, isMicrolensing = self.enableMicrolensingBox.isChecked(), auto_configure = False)
+        self.simThread.engine.updateGalaxy(redshift = galaxy.redshift,velocityDispersion = galaxy.velocityDispersion,shearMag = galaxy.shearMag,shearAngle = galaxy.shearAngle,center = galaxy.position,percentStars = galaxy.percentStars,auto_configure = False)
         self.simThread.engine.updateQuasar(redshift = quasar.redshift,radius = quasar.radius,position = quasar.position,velocity = quasar.velocity,auto_configure = False)
-        self.simThread.engine.updateGalaxy(redshift = galaxy.redshift,velocityDispersion = galaxy.velocityDispersion,shearMag = galaxy.shearMag,shearAngle = galaxy.shearAngle,center = galaxy.position,numStars = galaxy.numStars,auto_configure = False)
         self.simThread.start()
 
     def drawGalaxyHelper(self):

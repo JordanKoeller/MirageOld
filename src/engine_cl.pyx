@@ -26,16 +26,6 @@ cimport engineHelper
 import ctypes
 from libc.math cimport sin, cos, atan2, sqrt
 
-
-
-cdef packed struct lenser_struct:
-	np.int32_t lenserType
-	np.float64_t mass
-	np.float64_t x
-	np.float64_t y
-	np.float64_t radius
-
-
 cdef class Engine_cl:
 
 	def __init__(self,quasar,galaxy,configs, auto_configure = True):
@@ -47,11 +37,11 @@ cdef class Engine_cl:
 		self.time = 0.0
 		self.__dLS = cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift).to('lyr')
 		self.__calcER()
-		self.__galaxy.generateStars(self.configs)
 		# self.__trueLuminosity = math.pi * (self.__quasar.radius.value/self.__configs.dTheta)**2
 		self.img = QtGui.QImage(self.__configs.canvasDim,self.__configs.canvasDim, QtGui.QImage.Format_Indexed8)
 		self.__imgColors = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)]
 		self.img.setColorTable(self.__imgColors)
+		self.__galaxy.generateStars(self.configs,self.calcMassOnScreen())
 		self.img.fill(0)
 		if auto_configure:
 			self.reconfigure()
@@ -83,7 +73,7 @@ cdef class Engine_cl:
 		cdef int x0, y0
 		x0 = centerx
 		y0 = centery
-		cdef int x = radius/self.configs.dTheta
+		cdef int x = abs(radius/self.configs.dTheta)
 		cdef int y = 0
 		cdef int err = 0
 		while x >= y:
@@ -103,7 +93,6 @@ cdef class Engine_cl:
 				err -= 2*x + 1
 
 	cdef ray_trace_gpu(self,use_GPU):
-		print(self.einsteinRadius)
 		self.__dLS = cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift).to('lyr')
 		begin = time.clock()
 		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
@@ -162,12 +151,9 @@ cdef class Engine_cl:
 
 	cpdef configureMicrolensing(self):
 		self.updateConfigs(displayGalaxy = False, displayQuasar = False)
-		# self.updateGalaxy(center = )
 
 	cpdef reconfigure(self):
 		if self.__needsReconfiguring:
-			# if self.__configs.isMicrolensing:
-			# 	self.configureMicrolensing()
 			begin = time.clock()
 			self.__preCalculating = True
 			self.__tree = WrappedTree()
@@ -180,21 +166,16 @@ cdef class Engine_cl:
 
 	def __calcER(self):
 		self.__einsteinRadius = 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.__dLS/self.quasar.angDiamDist /((const.c**2).to('km2/s2'))
+		return self.__einsteinRadius
+
+	def calcMassOnScreen(self):
+		return u.Quantity(2*(self.__galaxy.velocityDispersion.value**2)*(self.configs.dTheta**2)*(self.__galaxy.angDiamDist.value**2)/(const.G.to('lyr3/(solMass s2)').value*2*math.pi*self.__calcER()),'solMass')
 
 	def calTheta(self):
-		k = (4*math.pi*(const.c**-2).to('s2/km2').value * self.__dLS.value/self.quasar.angDiamDist.value* self.__galaxy.velocityDispersion.value * self.__galaxy.velocityDispersion.value)+self.quasar.position.magnitude()
+		k = (4*math.pi*(const.c**-2).to('s2/km2').value * self.__dLS.value/self.quasar.angDiamDist.value* self.__galaxy.velocityDispersion.value * self.__galaxy.velocityDispersion.value)+(self.quasar.position-self.galaxy.position).magnitude()
 		theta = (k/(1-(self.__dLS.value/self.quasar.angDiamDist.value)*self.galaxy.shearMag))
 		theta2 = (k/(1+(self.__dLS.value/self.quasar.angDiamDist.value)*self.galaxy.shearMag))
-		img1 = (self.quasar.position.magnitude() + math.sqrt(self.quasar.position.magnitude()**2 + 4 *theta**2))/2
-		img2 = (self.quasar.position.magnitude() - math.sqrt(self.quasar.position.magnitude()**2 + 4 *theta**2))/2
-		img3 = (self.quasar.position.magnitude() + math.sqrt(self.quasar.position.magnitude()**2 + 4 *theta2**2))/2
-		img4 = (self.quasar.position.magnitude() - math.sqrt(self.quasar.position.magnitude()**2 + 4 *theta2**2))/2
-		print(img1)
-		print(img2)
-		print(img3)
-		print(img4)
-		print("new")
-		return (img1,img2,img3,img4)
+		return (theta,theta2)
 
 	cpdef getMagnification(self):
 		cdef a = np.float64 (self.__trueLuminosity)
@@ -215,15 +196,8 @@ cdef class Engine_cl:
 		if self.configs.displayStars:
 			imgs = self.calTheta()
 			self.galaxy.draw(self.img,self.configs, self.configs.displayGalaxy)
-			# self.drawEinsteinRadius(self.img,self.einsteinRadius)
-			# self.drawEinsteinRadius(self.img,self.calTheta()[0],400 + self.quasar.position.x/self.configs.dTheta,400 + self.quasar.position.y/self.configs.dTheta)
-			# self.drawEinsteinRadius(self.img,self.calTheta()[1],400 + self.quasar.position.x/self.configs.dTheta,400 + self.quasar.position.y/self.configs.dTheta)
-			# self.drawEinsteinRadius(self.img,self.calTheta()[2],400 + self.quasar.position.x/self.configs.dTheta,400 + self.quasar.position.y/self.configs.dTheta)
-			self.drawEinsteinRadius(self.img,imgs[0],400,400)			# self.drawEinsteinRadius(self.img,self.calTheta()[0],400 + self.quasar.position.x/self.configs.dTheta,400 + self.quasar.position.y/self.configs.dTheta)
-			self.drawEinsteinRadius(self.img,imgs[1],400,400)			# self.drawEinsteinRadius(self.img,self.calTheta()[0],400 + self.quasar.position.x/self.configs.dTheta,400 + self.quasar.position.y/self.configs.dTheta)
-			self.drawEinsteinRadius(self.img,imgs[2],400,400)			# self.drawEinsteinRadius(self.img,self.calTheta()[0],400 + self.quasar.position.x/self.configs.dTheta,400 + self.quasar.position.y/self.configs.dTheta)
-			self.drawEinsteinRadius(self.img,imgs[3],400,400)			# self.drawEinsteinRadius(self.img,self.calTheta()[0],400 + self.quasar.position.x/self.configs.dTheta,400 + self.quasar.position.y/self.configs.dTheta)
-			# self.drawEinsteinRadius(self.img,self.einsteinRadius*(1-self.galaxy.shearMag/2))
+			self.drawEinsteinRadius(self.img,imgs[0],400+self.galaxy.position.x/self.configs.dTheta,400+self.galaxy.position.y/self.configs.dTheta)
+			self.drawEinsteinRadius(self.img,imgs[1],400+self.galaxy.position.x/self.configs.dTheta,400+self.galaxy.position.y/self.configs.dTheta)
 		for pixel in ret:
 			self.img.setPixel(pixel[0],pixel[1],1)
 		return self.img
@@ -240,13 +214,13 @@ cdef class Engine_cl:
 		if radius != None and self.__quasar.radius != radius:
 			self.__quasar.update(radius = radius)
 		if position != None and self.__quasar.position != position:
-			self.__quasar.update(position = position)
+			self.__quasar.update(position = position + self.galaxy.position)
 		if velocity != None and self.__quasar.velocity != velocity:
 			self.__quasar.update(velocity = velocity)
 		if auto_configure and self.__needsReconfiguring:
 			self.reconfigure()
 
-	def updateGalaxy(self, redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, center = None, numStars = None, auto_configure = False):
+	def updateGalaxy(self, redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, center = None, numStars = None, percentStars = None,auto_configure = False):
 		if redshift != None and self.__galaxy.redshift != redshift:
 			self.__galaxy.update(redshift = redshift)
 			self.__dLS = cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift)
@@ -266,13 +240,17 @@ cdef class Engine_cl:
 			self.__galaxy.update(numStars = numStars)
 			self.__galaxy.generateStars(self.configs)
 			self.__needsReconfiguring = True
+		if percentStars != None and self.__galaxy.percentStars != percentStars:
+			self.__galaxy.update(percentStars = percentStars)
+			self.__galaxy.generateStars(self.configs,self.calcMassOnScreen())
+			self.__needsReconfiguring = True
 		if center != None and self.__galaxy.position != center:
 			self.__galaxy.update(center = center)
 			self.__needsReconfiguring = True
 		if auto_configure and self.__needsReconfiguring:
 			self.reconfigure()
 
-	def updateConfigs(self, dt = None, dTheta = None, canvasDim = None, frameRate = None, displayGalaxy = None, displayQuasar = None, displayStars = None, auto_configure = False):
+	def updateConfigs(self, dt = None, dTheta = None, canvasDim = None, frameRate = None, displayGalaxy = None, displayQuasar = None, isMicrolensing = None, auto_configure = False):
 		if dt != None and self.__configs.dt != dt:
 			self.__configs.dt = dt
 		if dTheta != None and self.__configs.dTheta != dTheta:
@@ -286,11 +264,14 @@ cdef class Engine_cl:
 			self.img.fill(0)
 			self.__needsReconfiguring = True
 		if displayGalaxy != None:
-			self.__configs.displayGalaxy = displayGalaxy
+			self.__configs.updateDisplay(displayGalaxy = displayGalaxy)
 		if displayQuasar != None:
-			self.__configs.displayQuasar = displayQuasar
-		if displayStars != None:
-			self.__configs.displayStars = displayStars
+			self.__configs.updateDisplay(displayQuasar = displayQuasar)
+		if isMicrolensing != None:
+			if isMicrolensing:
+				self.__configs.enableMicrolensing()
+			else:
+				self.__configs.disableMicrolensing()
 		if frameRate != None and self.__configs.frameRate != frameRate:
 			self.__configs.frameRate = frameRate
 		if auto_configure and self.__needsReconfiguring:

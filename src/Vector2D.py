@@ -43,6 +43,8 @@ class Vector2D(object): #TODO: Make compatable with astropy units package
 		self.unit = unit
 		return self
 
+	def angle():
+		return math.atan2(self.y,self.x)
 	def __add__(self, that):
 		"Returns a new vector that is the sum of self and the passed in vector."
 		return Vector2D(self.x+that.x,self.y+that.y)
@@ -86,6 +88,14 @@ class Vector2D(object): #TODO: Make compatable with astropy units package
 	def __truediv__(self, scalar):
 		"Divides self by a scalar."
 		return self*(1/scalar)
+
+	def __eq__(self,other):
+		if other == None:
+			return False
+		return self.x == other.x and self.y == other.y and self.unit == other.unit
+
+	def __neq__(self,other):
+		return not self.__eq__(other)
 
 	def __str__(self):
 		"Pretty print"
