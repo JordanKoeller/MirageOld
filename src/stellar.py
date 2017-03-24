@@ -15,11 +15,11 @@ class Drawable(object):
 	__position = zeroVector
 	__colorKey = 0
 
-	def draw(self, img, configs):
+	def draw(self, img, parameters):
 		"""Draws the entity to the canvas.
 		Args:
 			img - QImage to be drawn to.
-			configs - Configs class instance, specifying how to draw the entity.
+			parameters - Configs class instance, specifying how to draw the entity.
 		"""
 
 	# def updateDrawable(self, position = None, colorKey = None):
@@ -98,9 +98,9 @@ class PointLenser(Drawable):
 	def __neq__(self,other):
 		return not self.__eq__(other)
 
-	def draw(self,img,configs):
-		center = (self.position)/configs.dTheta
-		center = Vector2D(int(center.x+configs.canvasDim/2),int(center.y+configs.canvasDim/2))
+	def draw(self,img,parameters):
+		center = (self.position)/parameters.dTheta
+		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
 		img.setPixel(center.x,center.y,self._Drawable__colorKey)
 		img.setPixel(center.x+1,center.y,self._Drawable__colorKey)
 		img.setPixel(center.x+1,center.y+1,self._Drawable__colorKey)
@@ -165,13 +165,11 @@ class Galaxy(Drawable,Cosmic):
 	__pcntStar = 0
 	__shear = None
 	__stars = []
-	__numStars = 0
 
-	def __init__(self, redshift = 0.0, velocityDispersion = u.Quantity(0,'km/s'), percentStars = 0, shearMag = 0, shearAngle = 0, center = zeroVector, numStars = 0):
+	def __init__(self, redshift = 0.0, velocityDispersion = u.Quantity(0,'km/s'), shearMag = 0, shearAngle = 0, percentStars = 0, center = zeroVector):
 		self.__velocityDispersion = velocityDispersion
 		self.__pcntStar = percentStars
 		self.__shear = ShearLenser(shearMag,shearAngle)
-		self.__numStars = numStars
 		self.updateDrawable(position = center, colorKey = 4)
 		self.updateCosmic(redshift = redshift)
 
@@ -180,46 +178,47 @@ class Galaxy(Drawable,Cosmic):
 		y = -math.cos(theta)
 		self.updateDrawable(position = Vector2D(x*einsteinRadius, y*einsteinRadius, einsteinRadius.unit))
 
-	def generateStars(self, configs,totalMass): #RTODO
+	def generateStars(self, parameters,numStars,totalMass=0): #RTODO
 		self.__stars = []
 		massInStars = totalMass*self.__pcntStar
-		masses = configs.getStarMasses(massInStars) #Need to change this line to reflect, percentage and have a tolerance for mass in stars
-		for i in range(0,self.__numStars):
-			self.__stars.append(PointLenser(Vector2D(rand.random()-0.5,
-					rand.random()-0.5,'rad')*(configs.canvasDim-2)*configs.dTheta,
-				u.Quantity(masses[i],'solMass')))
+		masses = parameters.getStarMasses(numStars) #Need to change this line to reflect, percentage and have a tolerance for mass in stars
+		if masses is not []:
+			for i in range(0,len(masses)):
+				self.__stars.append(PointLenser(Vector2D(rand.random()-0.5,
+						rand.random()-0.5,'rad')*(parameters.canvasDim-2)*parameters.dTheta,
+					u.Quantity(masses[i],'solMass')))
 
-	def draw(self,img,configs, displayGalaxy):
+	def draw(self,img,parameters, displayGalaxy):
 		for star in self.__stars:
-			star.draw(img,configs)
+			star.draw(img,parameters)
 		if displayGalaxy:
-			center = Vector2D(self.position.x/configs.dTheta + (configs.canvasDim/2),self.position.y/configs.dTheta + (configs.canvasDim/2))
+			center = Vector2D(self.position.x/parameters.dTheta + (parameters.canvasDim/2),self.position.y/parameters.dTheta + (parameters.canvasDim/2))
 			for i in range(-2,3,1):
 				for j in range(-2,3,1):
 					img.setPixel(center.x+i,center.y+j,self.colorKey)
 
 
 	def getStarArray(self):
-		massArr = np.ndarray(self.__numStars+1,dtype = np.float64)
-		xArr = np.ndarray(self.__numStars+1,dtype = np.float64)
-		yArr = np.ndarray(self.__numStars+1,dtype = np.float64)
-		for i in range(0,self.__numStars):
+		massArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
+		xArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
+		yArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
+		for i in range(0,len(self.__stars)):
 			star = self.__stars[i]
 			massArr[i] = star.mass.value
 			xArr[i] = star.position.to('rad').x
 			yArr[i] = star.position.y
-		massArr[self.__numStars] = 0.0
-		xArr[self.__numStars] = 0.0
-		yArr[self.__numStars] = 0.0
+		massArr[len(self.__stars)] = 0.0
+		xArr[len(self.__stars)] = 0.0
+		yArr[len(self.__stars)] = 0.0
 		return (massArr,xArr,yArr)
 
-	def update(self,redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, numStars = None, center = None,percentStars = None):
+	def update(self,redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, center = None,percentStars = None,stars = None):
 		self.__velocityDispersion = velocityDispersion or self.__velocityDispersion
 		self.__shear.update(shearMag,shearAngle)
-		if numStars != None:
-			self.__numStars = numStars
 		if percentStars != None:
 			self.__pcntStar = percentStars
+		if stars != None:
+			self.__stars = stars
 		self.updateDrawable(position = center)
 		self.updateCosmic(redshift = redshift)
 
@@ -242,7 +241,7 @@ class Galaxy(Drawable,Cosmic):
 	def __eq__(self,other):
 		if other == None:
 			return False
-		if self.stars != other.stars:
+		if self.percentStars != other.percentStars:
 			return False
 		if self.shear != other.shear:
 			return False
@@ -273,7 +272,7 @@ class Galaxy(Drawable,Cosmic):
 
 	@property
 	def numStars(self):
-		return self.__numStars
+		return len(self.__stars)
 
 	@property
 	def center(self):
@@ -310,11 +309,11 @@ class Quasar(Drawable,Cosmic):
 			self.__radius = radius
 
 
-	def draw(self, img, configs):
+	def draw(self, img, parameters):
 		begin = time.clock()
-		center = (self.observedPosition)/configs.dTheta
-		center = Vector2D(int(center.x+configs.canvasDim/2),int(center.y+configs.canvasDim/2))
-		radius = int(self.radius.value/configs.dTheta)
+		center = (self.observedPosition)/parameters.dTheta
+		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
+		radius = int(self.radius.value/parameters.dTheta)
 		rSquared = radius * radius
 		for x in range(0,radius+1):
 			for y in range(0,radius+1):
@@ -345,8 +344,8 @@ class Quasar(Drawable,Cosmic):
 		return "QUASAR:\n" + self.cosmicString() + "\n" + self.drawableString() + "\nvelocity = " + str(self.velocity) + "\nradius = " + str(self.radius) + "\n\n"
 
 
-	def setPos(self,position):
-		self.__observedPosition = position
+	def setPos(self,x,y):
+		self.__observedPosition = Vector2D(x,y)
 
 
 defaultGalaxy = Galaxy(redshift = 0.0073,

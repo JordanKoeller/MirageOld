@@ -7,7 +7,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from Engine_cl import Engine_cl
+from Engine_cl import Engine_cl as Engine
 from Configs import Configs
 from stellar import Galaxy
 from stellar import Quasar
@@ -22,6 +22,9 @@ from Vector2D import Vector2D, zeroVector
 from enum import Enum
 import time
 from astropy import units as u
+from Parameters import Parameters
+from DynamicCanvas import DynamicCanvas
+from matplotlib import pyplot as pl
 
 class CanvasType(Enum):
     LABEL_CANVAS = 0
@@ -62,15 +65,14 @@ class SimThread(QtCore.QThread):
     setCanvas
 
     """
-    def __init__(self,engine,canvas = None):
+    def __init__(self,canvas = None):
         QtCore.QThread.__init__(self)
-        self.engine = engine
         self.canvas = canvas
         self.__calculating = False
-        self.__reconfiguring = False
-        self.__drawingGalaxy = True
-        self.__drawingQuasar = True
-
+        self.__frameRate = 25
+        self.engine = Engine()
+        self.operation = ""
+        self.progressBar = None
 
     def setCanvas(self,canvas, canvasType = CanvasType.LABEL_CANVAS):
         self.canvas = canvas
@@ -79,19 +81,27 @@ class SimThread(QtCore.QThread):
         filler_img.fill(0)
         self.canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
 
+    def updateParameters(self,params):
+        self.engine.updateParameters(params)
+
     def run(self):
-        self.canvas.setPixmap(QtGui.QPixmap.fromImage(self.engine.img))
         self.__calculating = True
-        interval = 1/self.engine.configs.frameRate
-        while self.__calculating:
-            timer = time.clock()
-            frame = self.engine.getFrame()
-            self.engine.time += self.engine.configs.dt
-            self.canvas.pixmap().convertFromImage(frame)
-            self.canvas.update()
-            deltaT = time.clock() - timer
-            if deltaT < interval:
-                time.sleep(interval-deltaT)
+        if self.operation == "Image":
+            interval = 1/self.__frameRate
+            while self.__calculating:
+                timer = time.clock()
+                frame,dt = self.engine.getFrame()
+                self.engine.time += dt
+                self.canvas.pixmap().convertFromImage(frame)
+                self.canvas.update()
+                deltaT = time.clock() - timer
+                if deltaT < interval:
+                    time.sleep(interval-deltaT)
+        elif self.operation == "Light Curve":
+            x,y = self.engine.makeLightCurve(Vector2D(-0.05,-0.05),Vector2D(0.05,0.05),progressBar = self.progressBar,canvas = self.canvas)
+            print("returned the stuff")
+            pl.plot(x,y)
+            pl.show()
 
     def pause(self):
         self.__calculating = False
@@ -99,17 +109,9 @@ class SimThread(QtCore.QThread):
     def restart(self):
         self.pause()
         self.engine.time = 0.0
-        frame = self.engine.getFrame()
+        frame = self.engine.getFrame()[0]
         self.canvas.pixmap().convertFromImage(frame)
         self.canvas.update()
-
-    def updateDrawingGalaxy(self, drawGalaxy, isMicrolensing):
-        if drawGalaxy and isMicrolensing:
-            self.engine.updateConfigs(displayGalaxy = False, displayStars = True)
-        elif not isMicrolensing:
-            self.engine.updateConfigs(displayGalaxy = True, displayStars = True)
-        else:
-            self.engine.updateConfigs(displayGalaxy = False, displayStars = False)
 
 
 
@@ -117,13 +119,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent = None):
         super(Ui_MainWindow, self).__init__(parent)
         uic.loadUi('GUI/gui.ui', self)
-        self.simThread = SimThread(Engine_cl(defaultQuasar,defaultGalaxy,defaultConfigs, auto_configure = False))
+        self.simThread = SimThread()
         self.setupUi()
-
-
-    # @property
-    # def engine(self):
-    #     return self.simThread.engine
 
 
     def setupUi(self):
@@ -138,6 +135,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.playButton.clicked.connect(self.startSim)
         self.displayQuasar.clicked.connect(self.drawQuasarHelper)
         self.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
+        self.simThread.operation = self.modeComboBox.currentText()
+        self.simThread.progressBar = self.progressBar
 
 
     def __vector_from_qstring(self,string,reverse_y = True):
@@ -154,49 +153,41 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             ret = Vector2D(float(x),float(y))
             return ret
 
-    def makeConfigs(self):
-        displayQuasar = self.displayQuasar.isChecked()
-        displayGalaxy = self.displayGalaxy.isChecked()
-        displayStars = self.displayGalaxy.isChecked()
-        isMicrolensing = self.enableMicrolensingBox.isChecked()
-        dimensionInput = int(self.dimensionInput.text())
-        if isMicrolensing:
-            displayGalaxy = False
-            displayQuasar = False
-        if self.autoConfigCheckBox.isChecked():
-            er = self.simThread.engine.einsteinRadius
-            er *= 1.5
-            dTheta = er/(dimensionInput/2) #400 because dTheta has to be *2, since specifying a diameter from a radius.
-            # self.simThread.engine.updateGalaxy(center = Vector2D(self.simThread.engine.einsteinRadius,0))
-            configs = Configs(0.1,dTheta,dimensionInput,25,displayGalaxy,displayQuasar,displayStars)
-            return configs
-        else:
-            scaleInput = u.Quantity(float(self.scaleInput.text()),'arcsec').to('rad').value
-            configs = Configs(0.1,scaleInput/dimensionInput, dimensionInput, 25, displayGalaxy, displayQuasar, displayStars)
-            return configs
-
-
-    def pull_from_input(self):
+    def makeParameters(self):
         """
         Collects and parses all the information from the various user input fields/checkboxes.
         Stores them in instances of a Quasar class, Galaxy class, and Configs class.
         Returns the instances in that order as a tuple.
         """
-        qVelocity = self.__vector_from_qstring(self.qVelocity.text()).setUnit('arcsec')
-        qPosition = self.__vector_from_qstring(self.qPosition.text()).setUnit('arcsec')
+        qVelocity = self.__vector_from_qstring(self.qVelocity.text()).setUnit('arcsec').to('rad')
+        qPosition = self.__vector_from_qstring(self.qPosition.text()).setUnit('arcsec').to('rad')
         qRadius = u.Quantity(float(self.qRadius.text()),'arcsec')
         qRedshift = float(self.qRedshift.text())
+
         gRedshift = float(self.gRedshift.text())
         gVelDispersion = u.Quantity(float(self.gVelDispersion.text()),'km/s')
-        gNumStars = int(self.gNumStars.text())
+        gPercentStars = int(self.gNumStars.text())
         gShearMag = float(self.gShearMag.text())
         gShearAngle = u.Quantity(float(self.gShearAngle.text()),'degree')
-        galaxyCenter = zeroVector
-        if self.enableMicrolensingBox.isChecked():
-            galaxyCenter = Vector2D(self.simThread.engine.einsteinRadius,0)
-        quasar = Quasar(redshift = qRedshift,position = qPosition,radius = qRadius,velocity = qVelocity)
-        galaxy = Galaxy(redshift = gRedshift,velocityDispersion = gVelDispersion,shearMag = gShearMag,shearAngle = gShearAngle, percentStars = gNumStars/100, center = galaxyCenter)
-        return (quasar,galaxy)
+
+        dTheta = u.Quantity(float(self.scaleInput.text()),'arcsec').to('rad').value
+        canvasDim = int(self.dimensionInput.text())
+        displayQuasar = self.displayQuasar.isChecked()
+        displayGalaxy = self.displayGalaxy.isChecked()
+        isMicrolensing = self.enableMicrolensingBox.isChecked()
+        autoConfiguring = self.autoConfigCheckBox.isChecked()
+
+        quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity)
+        galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gPercentStars)
+        params = Parameters(isMicrolensing, autoConfiguring, galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
+        return params
+
+
+    def drawQuasarHelper(self):
+        self.simThread.engine.parameters.showQuasar = self.displayQuasar.isChecked()
+
+    def drawGalaxyHelper(self):
+        self.simThread.engine.parameters.showGalaxy = self.displayGalaxy.isChecked()
 
     def startSim(self):
         """
@@ -205,17 +196,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         Called by default when the "Play" button is presssed.
         """
-        configs = self.makeConfigs()
-        quasar,galaxy = self.pull_from_input()
-        self.simThread.engine.updateConfigs(dt = configs.dt,dTheta = configs.dTheta,canvasDim = configs.canvasDim,frameRate = configs.frameRate,displayGalaxy = configs.displayGalaxy,displayQuasar = configs.displayQuasar, isMicrolensing = self.enableMicrolensingBox.isChecked(), auto_configure = False)
-        self.simThread.engine.updateGalaxy(redshift = galaxy.redshift,velocityDispersion = galaxy.velocityDispersion,shearMag = galaxy.shearMag,shearAngle = galaxy.shearAngle,center = galaxy.position,percentStars = galaxy.percentStars,auto_configure = False)
-        self.simThread.engine.updateQuasar(redshift = quasar.redshift,radius = quasar.radius,position = quasar.position,velocity = quasar.velocity,auto_configure = False)
+        parameters = self.makeParameters()
+        self.simThread.updateParameters(parameters)
+        self.simThread.operation = self.modeComboBox.currentText()
+        # self.main_canvas = DynamicCanvas()
+        # self.simThread.setCanvas(self.main_canvas)
         self.simThread.start()
 
-    def drawGalaxyHelper(self):
-        self.simThread.updateDrawingGalaxy(self.displayGalaxy.isChecked(),self.enableMicrolensingBox.isChecked())
-    def drawQuasarHelper(self):
-        self.simThread.engine.updateConfigs(displayQuasar = self.displayQuasar.isChecked())
+
 
 if __name__ == "__main__":
     import sys

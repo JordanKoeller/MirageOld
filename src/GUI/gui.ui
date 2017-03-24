@@ -457,6 +457,11 @@
                   </item>
                   <item>
                    <property name="text">
+                    <string>Light Curve</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
                     <string>Magnification Map</string>
                    </property>
                   </item>

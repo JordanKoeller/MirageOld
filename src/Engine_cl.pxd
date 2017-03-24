@@ -27,24 +27,18 @@ from libc.math cimport sin, cos, atan2, sqrt
 
 cdef class Engine_cl:
 	cdef:
+		__parameters
 		__preCalculating
-		__needsReconfiguring
-		__quasar
-		__galaxy
-		__configs
 
 		public double time
-		double __einsteinRadius
-		long unsigned int __trueLuminosity
-		__dLS
-
+		__trueLuminosity
 		__tree
 		public img
 		__imgColors
 		np.ndarray __data_array
 
-	cpdef configureMicrolensing(self)
 	cdef ray_trace_gpu(self,use_GPU)
 	cpdef reconfigure(self)
 	cpdef getFrame(self)
 	cpdef getMagnification(self)
+	cdef cythonMakeLightCurve(self,mmin, mmax,resolution,canvas, progressBar, smoothing)

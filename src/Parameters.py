@@ -10,7 +10,7 @@ from astropy.cosmology import WMAP7 as cosmo
 from astropy import constants as const
 from astropy import units as u 
 import math
-
+from MassFunction import massGenerator
 
 class Parameters(object):
 	"""Stores and processes all the information regarding the setup for a 
@@ -48,7 +48,7 @@ class Parameters(object):
 	def __init__(self, isMicrolensing = False, autoConfiguring = False, galaxy = defaultGalaxy, quasar = defaultQuasar, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None):
 		self.__galaxy = galaxy
 		self.__quasar = quasar
-		self.__dTheta = dTheta
+		self.__dTheta = dTheta/canvasDim
 		self.__canvasDim = canvasDim
 		self.showGalaxy = showGalaxy
 		self.showQuasar = showQuasar
@@ -56,8 +56,12 @@ class Parameters(object):
 		self.__starMassVariation = starMassVariation
 		self.__dLS = self.__calcdLS()
 		self.__einsteinRadius = self.__calcEinsteinRadius()
+		self.dt = 0.1
 		self.setAutoConfigure(autoConfiguring)
 		self.setMicrolensing(isMicrolensing)
+
+	def generateStars(self):
+		self.galaxy.generateStars(self,100)
 
 	@property
 	def galaxy(self):
@@ -86,6 +90,24 @@ class Parameters(object):
 		return self.__einsteinRadius
 
 	@property
+	def displayQuasar(self):
+		return self.showQuasar and self.__galaxy.center == zeroVector
+
+	@property
+	def displayGalaxy(self):
+		return self.showGalaxy and self.__galaxy.center == zeroVector
+
+	@property
+	def displayStars(self):
+		return self.showGalaxy
+	@property
+	def stars(self):
+		return self.galaxy._Galaxy__stars
+
+	def setStars(self,stars):
+		self.__galaxy.update(stars = stars)
+
+	@property
 	def dLS(self):
 		return self.__dLS
 
@@ -101,6 +123,8 @@ class Parameters(object):
 		else:
 			self.__galaxy.update(center = zeroVector)
 
+	def setTime(self,time):
+		self.__quasar.setTime(time)
 
 
 	def setAutoConfigure(self,isAutoConfiguring):
@@ -108,6 +132,9 @@ class Parameters(object):
 			self.__dTheta = self.einsteinRadius/self.__canvasDim
 		else:
 			pass
+
+	def getStarMasses(self,mass,tolerance = 0.05):
+		return massGenerator.starField(mass,tolerance)
 
 	def isSimilar(self,other):
 		"""Things that warrant recalculation:
@@ -133,8 +160,8 @@ class Parameters(object):
 			return False
 		if self.canvasDim != other.canvasDim:
 			return False
-		if self.starMassTolerance < other.starMassTolerance:
-			return False
+		# if self.starMassTolerance < other.starMassTolerance:
+		# 	return False
 		if self.starMassVariation != other.starMassVariation:
 			return False
 		if self.galaxy != other.galaxy:
@@ -148,8 +175,8 @@ class Parameters(object):
 			return False
 		if self.quasar != other.quasar:
 			return False
-		if self.starMassTolerance != other.starMassTolerance:
-			return False
+		# if self.starMassTolerance != other.starMassTolerance:
+		# 	return False
 		if self.showQuasar != other.showQuasar:
 			return False
 		if self.showGalaxy != other.showGalaxy:
@@ -158,7 +185,8 @@ class Parameters(object):
 		# if self.isAutoConfiguring != other.isAutoConfiguring:
 		# 	return False
 
-
+	def __str__(self):
+		return ("dTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("Einstein Radius = " + str(self.einsteinRadius))
 
 
 

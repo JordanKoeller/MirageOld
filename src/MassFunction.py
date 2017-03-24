@@ -51,9 +51,8 @@ class MassFunction():
 		return ret
 
 	def starField(self,mTot, tolerance):
-		if mTot.value == 0:
-			return u.Quantity(0,'solMass')
-		mTot = mTot.to('solMass').value
+		if mTot == 0:
+			return []
 		masses = self.query(mTot/0.83).tolist()
 		massSum = sum(masses)
 		while (abs(massSum-mTot)/mTot > tolerance):
@@ -70,6 +69,7 @@ class MassFunction():
 			if self.stepFunction[i][0] <= x and self.stepFunction[i][1] > x:
 				return x**(-self.stepFunction[i][2])
 		return 0
+massGenerator = MassFunction()
 
 
 

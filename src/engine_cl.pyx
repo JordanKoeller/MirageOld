@@ -25,46 +25,26 @@ import cython
 cimport engineHelper
 import ctypes
 from libc.math cimport sin, cos, atan2, sqrt
+from Parameters import Parameters
+from matplotlib import pyplot as pl
+from scipy import interpolate
+
 
 cdef class Engine_cl:
 
-	def __init__(self,quasar,galaxy,configs, auto_configure = True):
-		self.__quasar = quasar
-		self.__galaxy = galaxy
-		self.__configs = configs
+	def __init__(self,parameters = Parameters()):
+		self.__parameters = parameters
 		self.__preCalculating = False
-		self.__needsReconfiguring = True
 		self.time = 0.0
-		self.__dLS = cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift).to('lyr')
-		self.__calcER()
-		# self.__trueLuminosity = math.pi * (self.__quasar.radius.value/self.__configs.dTheta)**2
-		self.img = QtGui.QImage(self.__configs.canvasDim,self.__configs.canvasDim, QtGui.QImage.Format_Indexed8)
+		self.__trueLuminosity = math.pi * (self.__parameters.quasar.radius.value/self.__parameters.dTheta)**2
+		self.img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
 		self.__imgColors = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)]
 		self.img.setColorTable(self.__imgColors)
-		self.__galaxy.generateStars(self.configs,self.calcMassOnScreen())
 		self.img.fill(0)
-		if auto_configure:
-			self.reconfigure()
 
 	@property
-	def configs(self):
-		return self.__configs
-
-	@property
-	def galaxy(self):
-		return self.__galaxy
-
-	@property
-	def quasar(self):
-		return self.__quasar
-
-	@property
-	def einsteinRadius(self):
-		return self.__einsteinRadius
-
-	@property
-	def needsReconfiguring(self):
-		return self.__needsReconfiguring
+	def parameters(self):
+		return self.__parameters
 
 	def ray_trace(self, use_GPU = False):
 		return self.ray_trace_gpu(False)
@@ -73,7 +53,7 @@ cdef class Engine_cl:
 		cdef int x0, y0
 		x0 = centerx
 		y0 = centery
-		cdef int x = abs(radius/self.configs.dTheta)
+		cdef int x = abs(radius/self.__parameters.dTheta)
 		cdef int y = 0
 		cdef int err = 0
 		while x >= y:
@@ -93,19 +73,19 @@ cdef class Engine_cl:
 				err -= 2*x + 1
 
 	cdef ray_trace_gpu(self,use_GPU):
-		self.__dLS = cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift).to('lyr')
+		# print(self.__parameters)
 		begin = time.clock()
 		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
 		if use_GPU:
 			os.environ['PYOPENCL_CTX'] = '0:1'
 		else:
 			os.environ['PYOPENCL_CTX'] = '0:0'
-		cdef int height = self.__configs.canvasDim
-		cdef int width = self.__configs.canvasDim
-		cdef np.float64_t dTheta = self.__configs.dTheta
+		cdef int height = self.__parameters.canvasDim
+		cdef int width = self.__parameters.canvasDim
+		cdef np.float64_t dTheta = self.__parameters.dTheta
 		cdef np.ndarray result_nparray_x = np.ndarray((width,height), dtype = np.float64)
 		cdef np.ndarray result_nparray_y = np.ndarray((width,height), dtype = np.float64)
-		stars_nparray_mass, stars_nparray_x, stars_nparray_y = self.__galaxy.getStarArray()
+		stars_nparray_mass, stars_nparray_x, stars_nparray_y = self.__parameters.galaxy.getStarArray()
 
 		# create a context and a job queue
 		context = cl.create_some_context()
@@ -130,17 +110,17 @@ cdef class Engine_cl:
 			np.int32(len(stars_nparray_x)),
 			np.float64((4*const.G/(const.c*const.c)).to("lyr/solMass").value),
 			np.float64(4*math.pi*(const.c**-2).to('s2/km2').value),
-			np.float64(self.galaxy.shear.magnitude),
-			np.float64(self.galaxy.shear.angle.value),
-			np.float64(self.galaxy.velocityDispersion.value),
-			np.float64(self.galaxy.angDiamDist.value),
-			np.float64(self.quasar.angDiamDist.value),
-			np.float64(self.__dLS.value),
+			np.float64(self.__parameters.galaxy.shear.magnitude),
+			np.float64(self.__parameters.galaxy.shear.angle.value),
+			np.float64(self.__parameters.galaxy.velocityDispersion.value),
+			np.float64(self.__parameters.galaxy.angDiamDist.value),
+			np.float64(self.__parameters.quasar.angDiamDist.value),
+			np.float64(self.__parameters.dLS.value),
 			np.int32(width),
 			np.int32(height),
-			np.float64(self.configs.dTheta),
-			np.float64(self.galaxy.position.to('rad').x),
-			np.float64(self.galaxy.position.y),
+			np.float64(self.__parameters.dTheta),
+			np.float64(self.__parameters.galaxy.position.to('rad').x),
+			np.float64(self.__parameters.galaxy.position.y),
 			result_buffer_x,
 			result_buffer_y)
 
@@ -149,133 +129,107 @@ cdef class Engine_cl:
 		print("Time Ray-Tracing = " + str(time.clock()-begin))
 		return (result_nparray_x,result_nparray_y)
 
-	cpdef configureMicrolensing(self):
-		self.updateConfigs(displayGalaxy = False, displayQuasar = False)
-
 	cpdef reconfigure(self):
-		if self.__needsReconfiguring:
-			begin = time.clock()
-			self.__preCalculating = True
-			self.__tree = WrappedTree()
-			finalData = self.ray_trace(use_GPU = True)
-			self.__tree.setDataFromNumpies(finalData)
-			print("Time calculating = " + str(time.clock() - begin) + " seconds.")
-			self.__preCalculating = False
-			self.__needsReconfiguring = False
+		begin = time.clock()
+		self.__preCalculating = True
+		self.img = QtGui.QImage(self.__parameters.canvasDim,self.__parameters.canvasDim, QtGui.QImage.Format_Indexed8)
+		self.__imgColors = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)]
+		self.img.setColorTable(self.__imgColors)
+		self.img.fill(0)
+		self.__tree = WrappedTree()
+		finalData = self.ray_trace(use_GPU = True)
+		self.__tree.setDataFromNumpies(finalData)
+		self.__preCalculating = False
+		print("Time calculating = " + str(time.clock() - begin) + " seconds.")
 
-
-	def __calcER(self):
-		self.__einsteinRadius = 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.__dLS/self.quasar.angDiamDist /((const.c**2).to('km2/s2'))
-		return self.__einsteinRadius
-
-	def calcMassOnScreen(self):
-		return u.Quantity(2*(self.__galaxy.velocityDispersion.value**2)*(self.configs.dTheta**2)*(self.__galaxy.angDiamDist.value**2)/(const.G.to('lyr3/(solMass s2)').value*2*math.pi*self.__calcER()),'solMass')
+	# def calcMassOnScreen(self):
+	# 	return u.Quantity(2*(self.__parameters.galaxy.velocityDispersion.value**2)*(self.__parameters.dTheta**2)*(self.__parameters.galaxy.angDiamDist.value**2)/(const.G.to('lyr3/(solMass s2)').value*2*math.pi*self.__calcER()),'solMass')
 
 	def calTheta(self):
-		k = (4*math.pi*(const.c**-2).to('s2/km2').value * self.__dLS.value/self.quasar.angDiamDist.value* self.__galaxy.velocityDispersion.value * self.__galaxy.velocityDispersion.value)+(self.quasar.position-self.galaxy.position).magnitude()
-		theta = (k/(1-(self.__dLS.value/self.quasar.angDiamDist.value)*self.galaxy.shearMag))
-		theta2 = (k/(1+(self.__dLS.value/self.quasar.angDiamDist.value)*self.galaxy.shearMag))
+		k = (4*math.pi*(const.c**-2).to('s2/km2').value * self.__parameters.dLS.value/self.__parameters.quasar.angDiamDist.value* self.__parameters.galaxy.velocityDispersion.value * self.__parameters.galaxy.velocityDispersion.value)+(self.__parameters.quasar.position-self.__parameters.galaxy.position).magnitude()
+		theta = (k/(1-(self.__parameters.dLS.value/self.__parameters.quasar.angDiamDist.value)*self.__parameters.galaxy.shearMag))
+		theta2 = (k/(1+(self.__parameters.dLS.value/self.__parameters.quasar.angDiamDist.value)*self.__parameters.galaxy.shearMag))
 		return (theta,theta2)
 
 	cpdef getMagnification(self):
 		cdef a = np.float64 (self.__trueLuminosity)
-		cdef b = np.float64 (self.__tree.query_point_count(self.__quasar.observedPosition.x,self.__quasar.observedPosition.y,self.__quasar.radius.value))
+		cdef b = np.float64 (self.__tree.query_point_count(self.__parameters.quasar.observedPosition.x,self.__parameters.quasar.observedPosition.y,self.__parameters.quasar.radius.value))
 		return b/a
 
 	cpdef getFrame(self):
-		if self.__needsReconfiguring:
-			self.reconfigure()
-		cdef int width = self.__configs.canvasDim
-		cdef int height = self.__configs.canvasDim
-		cdef np.float64_t dt = self.__configs.dt
-		self.__quasar.setTime(self.time)
-		ret = self.__tree.query_point(self.__quasar.observedPosition.x,self.__quasar.observedPosition.y,self.__quasar.radius.value)
+		cdef int width = self.__parameters.canvasDim
+		cdef int height = self.__parameters.canvasDim
+		cdef np.float64_t dt = self.__parameters.dt
+		self.__parameters.setTime(self.time)
+		ret = self.__tree.query_point(self.__parameters.quasar.observedPosition.x,self.__parameters.quasar.observedPosition.y,self.__parameters.quasar.radius.value)
 		self.img.fill(0)
-		if self.configs.displayQuasar:
-			self.quasar.draw(self.img,self.configs)
-		if self.configs.displayStars:
+		if self.__parameters.displayQuasar:
+			self.__parameters.quasar.draw(self.img,self.__parameters)
+		if self.__parameters.displayStars:
 			imgs = self.calTheta()
-			self.galaxy.draw(self.img,self.configs, self.configs.displayGalaxy)
-			self.drawEinsteinRadius(self.img,imgs[0],400+self.galaxy.position.x/self.configs.dTheta,400+self.galaxy.position.y/self.configs.dTheta)
-			self.drawEinsteinRadius(self.img,imgs[1],400+self.galaxy.position.x/self.configs.dTheta,400+self.galaxy.position.y/self.configs.dTheta)
+			self.__parameters.galaxy.draw(self.img,self.__parameters, self.__parameters.displayGalaxy)
+			# self.drawEinsteinRadius(self.img,imgs[0],400+self.__parameters.galaxy.position.x/self.__parameters.dTheta,400+self.__parameters.galaxy.position.y/self.__parameters.dTheta)
+			# self.drawEinsteinRadius(self.img,imgs[1],400+self.__parameters.galaxy.position.x/self.__parameters.dTheta,400+self.__parameters.galaxy.position.y/self.__parameters.dTheta)
 		for pixel in ret:
 			self.img.setPixel(pixel[0],pixel[1],1)
-		return self.img
+		return (self.img,self.__parameters.dt)
 
-	def updateQuasar(self, redshift = None, radius = None, position = None, velocity = None, auto_configure = False):
-		"""Resets parameters for the quasar inside the engine. Also recalculates any attributes dependent
-		on the qusar's parameters. By default, does not re-ray trace the system. In order to ray trace, 
-		set the kwarg auto_reconfigure = True."""
-		if redshift != None and self.__quasar.redshift != redshift:
-			self.__quasar.update(redshift = redshift)
-			self.__dLS = cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift)
-			self.__calcER()
-			self.__needsReconfiguring = True
-		if radius != None and self.__quasar.radius != radius:
-			self.__quasar.update(radius = radius)
-		if position != None and self.__quasar.position != position:
-			self.__quasar.update(position = position + self.galaxy.position)
-		if velocity != None and self.__quasar.velocity != velocity:
-			self.__quasar.update(velocity = velocity)
-		if auto_configure and self.__needsReconfiguring:
-			self.reconfigure()
+	cdef cythonMakeLightCurve(self,mmin, mmax,resolution,canvas, progressBar, smoothing):
+		begin = time.clock()
+		# progressBar.setMinimum(0)
+		# progressBar.setMaximum(int(resolution))
+		cdef int counter = 0
+		stepX = (mmax.x - mmin.x)/resolution
+		stepY = (mmax.y - mmin.y)/resolution
+		yAxis= np.arange(0,resolution)
+		xVals = np.arange(0,1,1/resolution)
+		cdef int i = 0
+		cdef double radius = self.__parameters.quasar.radius.value
+		print("radius = "+str(radius))
+		for i in range(0,resolution):
+			x = mmin.x + stepX*i
+			y = mmin.y + stepY*i
+			print(str(xVals[i])+" :: " + str(x)+","+str(y))
+			yAxis[i] = self.__tree.query_point_count(x,y,radius)
+			counter += 1
+			# progressBar.setValue(counter)
+		print("clocked at = " + str(time.clock() - begin) + " seconds")
+		# print(xVals)
+		if smoothing:
+			xNew = np.arange(0,1,1/(resolution*10))
+			yNew = np.empty_like(xNew)
+			tck = interpolate.splrep(xVals,yAxis, s = 0)
+			yNew = interpolate.splev(xNew, tck, der=0)
+			# pl.plot(xNew,yNew)
+			return (xNew,yNew)
+		else:
+			return (xVals,yAxis)
+			# pl.plot(xVals,yAxis)
+			# pl.show()
+		# canvas.plot.legend()
+		# canvas.plot.xlabel("Distance of quasar from galactic center (theta_E)")
+		# canvas.plot.ylabel("Magnification Coefficient")
+		# canvas.plot.show()
 
-	def updateGalaxy(self, redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, center = None, numStars = None, percentStars = None,auto_configure = False):
-		if redshift != None and self.__galaxy.redshift != redshift:
-			self.__galaxy.update(redshift = redshift)
-			self.__dLS = cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift)
-			self.__calcER()
-			self.__needsReconfiguring = True
-		if velocityDispersion != None and self.__galaxy.velocityDispersion != velocityDispersion:
-			self.__galaxy.update(velocityDispersion = velocityDispersion)
-			self.__calcER()
-			self.__needsReconfiguring = True
-		if shearMag != None and shearMag != self.__galaxy.shearMag:
-			self.__galaxy.update(shearMag = shearMag)
-			self.__needsReconfiguring = True
-		if shearAngle != None and self.__galaxy.shearAngle != shearAngle:
-			self.__galaxy.update(shearAngle = shearAngle)
-			self.__needsReconfiguring = True
-		if numStars != None and self.__galaxy.numStars != numStars:
-			self.__galaxy.update(numStars = numStars)
-			self.__galaxy.generateStars(self.configs)
-			self.__needsReconfiguring = True
-		if percentStars != None and self.__galaxy.percentStars != percentStars:
-			self.__galaxy.update(percentStars = percentStars)
-			self.__galaxy.generateStars(self.configs,self.calcMassOnScreen())
-			self.__needsReconfiguring = True
-		if center != None and self.__galaxy.position != center:
-			self.__galaxy.update(center = center)
-			self.__needsReconfiguring = True
-		if auto_configure and self.__needsReconfiguring:
-			self.reconfigure()
+	def makeLightCurve(self,mmin,mmax,resolution=200,canvas = None, progressBar = None, smoothing = False):
+		return self.cythonMakeLightCurve(mmin,mmax,resolution,canvas,progressBar,smoothing)
 
-	def updateConfigs(self, dt = None, dTheta = None, canvasDim = None, frameRate = None, displayGalaxy = None, displayQuasar = None, isMicrolensing = None, auto_configure = False):
-		if dt != None and self.__configs.dt != dt:
-			self.__configs.dt = dt
-		if dTheta != None and self.__configs.dTheta != dTheta:
-			self.__configs.dTheta = dTheta
-			self.__trueLuminosity = math.pi * (self.quasar.radius.value/self.__configs.dTheta)**2
-			self.__needsReconfiguring = True
-		if canvasDim != None and self.__configs.canvasDim != canvasDim:
-			self.__configs.canvasDim = canvasDim
-			self.img = QtGui.QImage(self.__configs.canvasDim,self.__configs.canvasDim, QtGui.QImage.Format_Indexed8)
-			self.img.setColorTable(self.__imgColors)
-			self.img.fill(0)
-			self.__needsReconfiguring = True
-		if displayGalaxy != None:
-			self.__configs.updateDisplay(displayGalaxy = displayGalaxy)
-		if displayQuasar != None:
-			self.__configs.updateDisplay(displayQuasar = displayQuasar)
-		if isMicrolensing != None:
-			if isMicrolensing:
-				self.__configs.enableMicrolensing()
-			else:
-				self.__configs.disableMicrolensing()
-		if frameRate != None and self.__configs.frameRate != frameRate:
-			self.__configs.frameRate = frameRate
-		if auto_configure and self.__needsReconfiguring:
+
+	def updateParameters(self,parameters):
+		# print(parameters)
+		if self.__parameters is None:
+			# print("is none")
+			self.__parameters = parameters
 			self.reconfigure()
+		elif not self.__parameters.isSimilar(parameters):
+			# print("is not similar")
+			self.__parameters = parameters
+			self.reconfigure()
+			self.__parameters.generateStars()
+		else:
+			# print("is Similar")
+			parameters.setStars(self.__parameters.stars)
+			self.__parameters = parameters
 
 
 
