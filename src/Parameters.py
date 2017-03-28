@@ -1,16 +1,16 @@
 from __future__ import division
-from Vector2D import Vector2D
-from Vector2D import zeroVector
-from stellar import Galaxy
-from stellar import Quasar
-from stellar import defaultQuasar
-from stellar import defaultGalaxy
+from Utility import Vector2D
+from Utility import zeroVector
+from Stellar import Galaxy
+from Stellar import Quasar
+from Stellar import defaultQuasar
+from Stellar import defaultGalaxy
 from MassFunction import MassFunction
+from MassFunction import defaultMassGenerator
 from astropy.cosmology import WMAP7 as cosmo
 from astropy import constants as const
 from astropy import units as u 
 import math
-from MassFunction import massGenerator
 
 class Parameters(object):
 	"""Stores and processes all the information regarding the setup for a 
@@ -57,11 +57,12 @@ class Parameters(object):
 		self.__dLS = self.__calcdLS()
 		self.__einsteinRadius = self.__calcEinsteinRadius()
 		self.dt = 0.1
+		# self.massGenerator =  
 		self.setAutoConfigure(autoConfiguring)
 		self.setMicrolensing(isMicrolensing)
 
 	def generateStars(self):
-		self.galaxy.generateStars(self,100)
+		self.__galaxy.generateStars(self,100)
 
 	@property
 	def galaxy(self):
@@ -119,7 +120,7 @@ class Parameters(object):
 
 	def setMicrolensing(self,isMicrolensing):
 		if isMicrolensing:
-			self.__galaxy.update(center = Vector2D(-self.einsteinRadius,0,'rad')) #Will refactor later, once how this works is figured out
+			self.__galaxy.update(center = Vector2D(-self.einsteinRadius.value,0,'rad')) #Will refactor later, once how this works is figured out
 		else:
 			self.__galaxy.update(center = zeroVector)
 
@@ -129,12 +130,13 @@ class Parameters(object):
 
 	def setAutoConfigure(self,isAutoConfiguring):
 		if isAutoConfiguring:
-			self.__dTheta = self.einsteinRadius/self.__canvasDim
+			self.__dTheta = 4*self.einsteinRadius/self.__canvasDim
 		else:
 			pass
 
 	def getStarMasses(self,mass,tolerance = 0.05):
-		return massGenerator.starField(mass,tolerance)
+		ret = defaultMassGenerator.starField(mass,tolerance)
+		return ret
 
 	def isSimilar(self,other):
 		"""Things that warrant recalculation:

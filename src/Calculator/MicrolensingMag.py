@@ -1,14 +1,14 @@
 from Engine_cl import Engine_cl
-from stellar import microGalaxy
-from stellar import microQuasar
+from Stellar import microGalaxy
+from Stellar import microQuasar
 from Configs import microConfigs
-from stellar import defaultGalaxy
-from stellar import defaultQuasar
+from Stellar import defaultGalaxy
+from Stellar import defaultQuasar
 from Configs import defaultConfigs
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
-from Vector2D import Vector2D
+from Utility import Vector2D
 import math
 import astropy.units as u
 import time

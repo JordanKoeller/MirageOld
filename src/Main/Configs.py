@@ -1,5 +1,5 @@
-from Vector2D import Vector2D
-from Vector2D import zeroVector
+from Utility import Vector2D
+from Utility.Vector2D import zeroVector
 import math
 from MassFunction import MassFunction
 

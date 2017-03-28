@@ -35,7 +35,7 @@ class MassFunction():
 		pk = np.array(pk)
 		pk /= sum(pk)
 		self.generator = stats.rv_discrete(name='generator',values=(xk,pk),a=0.01,b=120)
-		self.masses = np.arange(0.01,120,(120-0.01)/resolution)
+		self.masses = np.arange(0.01,120,(120-0)/resolution)
 		self.stepFunction = stepFunction
 
 
@@ -69,7 +69,10 @@ class MassFunction():
 			if self.stepFunction[i][0] <= x and self.stepFunction[i][1] > x:
 				return x**(-self.stepFunction[i][2])
 		return 0
-massGenerator = MassFunction()
+
+
+defaultMassGenerator = MassFunction()
+
 
 
 

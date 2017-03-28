@@ -15,19 +15,15 @@ progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
 
+
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi,frameon=False,tight_layout=True)
+    def __init__(self, parent=None, width=8, height=8, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
-        # We want the axes cleared every time plot() is called
-       # self.axes.hold(False)
+
         self.compute_initial_figure()
-       # self.image = self.axes.imshow(filler,interpolation='nearest')
-        self.filler=np.array([[random.random() for x in range(300)] for x in range(300)])
-        #
-        self.image = self.axes.imshow(self.filler,interpolation='nearest')
 
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
@@ -36,8 +32,9 @@ class MyMplCanvas(FigureCanvas):
                                    QtWidgets.QSizePolicy.Expanding,
                                    QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-        self.axes.axis('off')
-        self.newData = False
+
+    def compute_initial_figure(self):
+        pass
 
     def compute_initial_figure(self):
         pass
@@ -47,12 +44,16 @@ class DynamicCanvas(MyMplCanvas):
 
     def __init__(self, *args, **kwargs):
         MyMplCanvas.__init__(self, *args, **kwargs)
+        self.compute_initial_figure()
 
     def compute_initial_figure(self):
         self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+        # self.axes.draw()
 
     def plot(self,x,y):
-        self.axes.plot(x,y)
+        self.axes.cla()
+        self.axes.plot(x,y,'r')
+        # self.axes.savefig('test.png')
         self.draw()
 
     def plotArray(self,data):

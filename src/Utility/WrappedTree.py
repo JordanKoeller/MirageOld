@@ -1,5 +1,5 @@
 from scipy import spatial as sp
-from Vector2D import Vector2D
+from Utility import Vector2D
 import time
 
 class WrappedTree(object):

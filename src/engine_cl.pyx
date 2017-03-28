@@ -3,13 +3,12 @@
 from __future__ import division
 import numpy as np
 cimport numpy as np
-from WrappedTree_old import WrappedTree
-from stellar import Galaxy
-from stellar import Quasar
-from Configs import Configs 
+from Utility import WrappedTree
+from Stellar import Galaxy
+from Stellar import Quasar
 from astropy.cosmology import WMAP7 as cosmo
-from Vector2D import Vector2D
-from Vector2D import zeroVector
+from Utility import Vector2D
+from Utility import zeroVector
 import time
 from astropy import constants as const
 from astropy import units as u
@@ -17,23 +16,20 @@ import math
 import pyopencl as cl
 import pyopencl.tools
 import os
-from SpatialTree cimport SpatialTree, Pixel
 from libcpp.vector cimport vector
 import random
 from PyQt5 import QtGui, QtCore
 import cython
-cimport engineHelper
 import ctypes
 from libc.math cimport sin, cos, atan2, sqrt
 from Parameters import Parameters
-from matplotlib import pyplot as pl
 from scipy import interpolate
 
 
 cdef class Engine_cl:
 
-	def __init__(self,parameters = Parameters()):
-		self.__parameters = parameters
+	def __init__(self,parameter = Parameters()):
+		self.__parameters = parameter
 		self.__preCalculating = False
 		self.time = 0.0
 		self.__trueLuminosity = math.pi * (self.__parameters.quasar.radius.value/self.__parameters.dTheta)**2
@@ -57,14 +53,22 @@ cdef class Engine_cl:
 		cdef int y = 0
 		cdef int err = 0
 		while x >= y:
-			canvas.setPixel(x0 + x, y0 + y,1)
-			canvas.setPixel(x0 + y, y0 + x,1)
-			canvas.setPixel(x0 - y, y0 + x,1)
-			canvas.setPixel(x0 - x, y0 + y,1)
-			canvas.setPixel(x0 - x, y0 - y,1)
-			canvas.setPixel(x0 - y, y0 - x,1)
-			canvas.setPixel(x0 + y, y0 - x,1)
-			canvas.setPixel(x0 + x, y0 - y,1)
+			if x0 + x > 0 and y0 + y > 0 and x0 + x < self.__parameters.canvasDim and y0 + y < self.__parameters.canvasDim:
+					canvas.setPixel(x0 + x, y0 + y,3)
+			if x0 + y > 0 and y0 + x > 0 and x0 + y < self.__parameters.canvasDim and y0 + x < self.__parameters.canvasDim:
+					canvas.setPixel(x0 + y, y0 + x,3)
+			if x0 - y > 0 and y0 + x > 0 and x0 - y < self.__parameters.canvasDim and y0 + x < self.__parameters.canvasDim:
+					canvas.setPixel(x0 - y, y0 + x,3)
+			if x0 - x > 0 and y0 + y > 0 and x0 - x < self.__parameters.canvasDim and y0 + y < self.__parameters.canvasDim:
+					canvas.setPixel(x0 - x, y0 + y,3)
+			if x0 - x > 0 and y0 - y > 0 and x0 - x < self.__parameters.canvasDim and y0 - y < self.__parameters.canvasDim:
+					canvas.setPixel(x0 - x, y0 - y,3)
+			if x0 - y > 0 and y0 - x > 0 and x0 - y < self.__parameters.canvasDim and y0 - x < self.__parameters.canvasDim:
+					canvas.setPixel(x0 - y, y0 - x,3)
+			if x0 + y > 0 and y0 - x > 0 and x0 + y < self.__parameters.canvasDim and y0 - x < self.__parameters.canvasDim:
+					canvas.setPixel(x0 + y, y0 - x,3)
+			if x0 + x > 0 and y0 - y > 0 and x0 + x < self.__parameters.canvasDim and y0 - y < self.__parameters.canvasDim:
+					canvas.setPixel(x0 + x, y0 - y,3)
 			if err <= 0:
 				y += 1
 				err += 2*y + 1
@@ -102,7 +106,7 @@ cdef class Engine_cl:
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
 
 		# read and compile opencl kernel
-		prg = cl.Program(context, open('engine_helper.cl').read()).build()
+		prg = cl.Program(context, open('Calculator/engine_helper.cl').read()).build()
 		prg.ray_trace(queue,(width,height),None,
 			stars_buffer_mass,
 			stars_buffer_x,
@@ -142,15 +146,14 @@ cdef class Engine_cl:
 		self.__preCalculating = False
 		print("Time calculating = " + str(time.clock() - begin) + " seconds.")
 
-	# def calcMassOnScreen(self):
-	# 	return u.Quantity(2*(self.__parameters.galaxy.velocityDispersion.value**2)*(self.__parameters.dTheta**2)*(self.__parameters.galaxy.angDiamDist.value**2)/(const.G.to('lyr3/(solMass s2)').value*2*math.pi*self.__calcER()),'solMass')
-
 	def calTheta(self):
 		k = (4*math.pi*(const.c**-2).to('s2/km2').value * self.__parameters.dLS.value/self.__parameters.quasar.angDiamDist.value* self.__parameters.galaxy.velocityDispersion.value * self.__parameters.galaxy.velocityDispersion.value)+(self.__parameters.quasar.position-self.__parameters.galaxy.position).magnitude()
 		theta = (k/(1-(self.__parameters.dLS.value/self.__parameters.quasar.angDiamDist.value)*self.__parameters.galaxy.shearMag))
 		theta2 = (k/(1+(self.__parameters.dLS.value/self.__parameters.quasar.angDiamDist.value)*self.__parameters.galaxy.shearMag))
 		return (theta,theta2)
 
+	def tree(self):
+		return self.__tree
 	cpdef getMagnification(self):
 		cdef a = np.float64 (self.__trueLuminosity)
 		cdef b = np.float64 (self.__tree.query_point_count(self.__parameters.quasar.observedPosition.x,self.__parameters.quasar.observedPosition.y,self.__parameters.quasar.radius.value))
@@ -160,74 +163,79 @@ cdef class Engine_cl:
 		cdef int width = self.__parameters.canvasDim
 		cdef int height = self.__parameters.canvasDim
 		cdef np.float64_t dt = self.__parameters.dt
-		self.__parameters.setTime(self.time)
-		ret = self.__tree.query_point(self.__parameters.quasar.observedPosition.x,self.__parameters.quasar.observedPosition.y,self.__parameters.quasar.radius.value)
-		self.img.fill(0)
-		if self.__parameters.displayQuasar:
-			self.__parameters.quasar.draw(self.img,self.__parameters)
-		if self.__parameters.displayStars:
-			imgs = self.calTheta()
-			self.__parameters.galaxy.draw(self.img,self.__parameters, self.__parameters.displayGalaxy)
-			# self.drawEinsteinRadius(self.img,imgs[0],400+self.__parameters.galaxy.position.x/self.__parameters.dTheta,400+self.__parameters.galaxy.position.y/self.__parameters.dTheta)
-			# self.drawEinsteinRadius(self.img,imgs[1],400+self.__parameters.galaxy.position.x/self.__parameters.dTheta,400+self.__parameters.galaxy.position.y/self.__parameters.dTheta)
-		for pixel in ret:
-			self.img.setPixel(pixel[0],pixel[1],1)
-		return (self.img,self.__parameters.dt)
+		cdef double gX,gY
+		if not self.__preCalculating:
+			self.__parameters.setTime(self.time)
+			gX = self.__parameters.galaxy.position.x
+			gY = self.__parameters.galaxy.position.y
+			ret = self.__tree.query_point(self.__parameters.quasar.observedPosition.x+gX,self.__parameters.quasar.observedPosition.y+gY,self.__parameters.quasar.radius.value)
+			self.img.fill(0)
+			if self.__parameters.displayQuasar:
+				self.__parameters.quasar.draw(self.img,self.__parameters)
+			for pixel in ret:
+				self.img.setPixel(pixel[0],pixel[1],1)
+			if self.__parameters.displayStars:
+				imgs = self.calTheta()
+				self.__parameters.galaxy.draw(self.img,self.__parameters, self.__parameters.displayGalaxy)
+				if self.__parameters.displayGalaxy:
+					pass
+			# self.drawEinsteinRadius(self.img,self.__parameters.einsteinRadius,400+self.__parameters.galaxy.position.x/self.__parameters.dTheta,400+self.__parameters.galaxy.position.y/self.__parameters.dTheta)
+			# self.drawEinsteinRadius(self.img,imgs[1],self.__parameters.galaxy.position.x/self.__parameters.dTheta-400,self.__parameters.galaxy.position.y/self.__parameters.dTheta-400)
+			return (self.img,self.__parameters.dt)
+		return (self.img,0)
 
-	cdef cythonMakeLightCurve(self,mmin, mmax,resolution,canvas, progressBar, smoothing):
+	cdef cythonMakeLightCurve(self,mmin, mmax,resolution, progressBar, smoothing):
+		if not self.__tree:
+			self.reconfigure()
 		begin = time.clock()
-		# progressBar.setMinimum(0)
-		# progressBar.setMaximum(int(resolution))
+		if progressBar:
+			progressBar.setMinimum(0)
+			progressBar.setMaximum(int(resolution))
 		cdef int counter = 0
 		stepX = (mmax.x - mmin.x)/resolution
 		stepY = (mmax.y - mmin.y)/resolution
-		yAxis= np.arange(0,resolution)
+		yAxis= np.ones(resolution)
 		xVals = np.arange(0,1,1/resolution)
 		cdef int i = 0
 		cdef double radius = self.__parameters.quasar.radius.value
-		print("radius = "+str(radius))
+		cdef double x = mmin.x
+		cdef double y = mmin.y
+		cdef double gx = self.__parameters.galaxy.position.x
+		cdef double gy = self.__parameters.galaxy.position.y
 		for i in range(0,resolution):
-			x = mmin.x + stepX*i
-			y = mmin.y + stepY*i
-			print(str(xVals[i])+" :: " + str(x)+","+str(y))
-			yAxis[i] = self.__tree.query_point_count(x,y,radius)
+			x += stepX
+			y += stepY
+			yAxis[i] = self.__tree.query_point_count(x+gx,y+gy,radius)
 			counter += 1
-			# progressBar.setValue(counter)
+			if progressBar:
+				progressBar.setValue(counter)
 		print("clocked at = " + str(time.clock() - begin) + " seconds")
-		# print(xVals)
 		if smoothing:
 			xNew = np.arange(0,1,1/(resolution*10))
 			yNew = np.empty_like(xNew)
 			tck = interpolate.splrep(xVals,yAxis, s = 0)
 			yNew = interpolate.splev(xNew, tck, der=0)
-			# pl.plot(xNew,yNew)
 			return (xNew,yNew)
 		else:
 			return (xVals,yAxis)
-			# pl.plot(xVals,yAxis)
-			# pl.show()
-		# canvas.plot.legend()
-		# canvas.plot.xlabel("Distance of quasar from galactic center (theta_E)")
-		# canvas.plot.ylabel("Magnification Coefficient")
-		# canvas.plot.show()
 
-	def makeLightCurve(self,mmin,mmax,resolution=200,canvas = None, progressBar = None, smoothing = False):
-		return self.cythonMakeLightCurve(mmin,mmax,resolution,canvas,progressBar,smoothing)
+	def makeLightCurve(self,mmin,mmax,resolution=200,canvas = None, progressBar = None, smoothing = True):
+		return self.cythonMakeLightCurve(mmin,mmax,resolution,progressBar,smoothing)
 
 
 	def updateParameters(self,parameters):
-		# print(parameters)
 		if self.__parameters is None:
-			# print("is none")
+			print("is none")
 			self.__parameters = parameters
+			self.__parameters.generateStars()
 			self.reconfigure()
 		elif not self.__parameters.isSimilar(parameters):
-			# print("is not similar")
+			print("is not similar")
 			self.__parameters = parameters
-			self.reconfigure()
 			self.__parameters.generateStars()
+			self.reconfigure()
 		else:
-			# print("is Similar")
+			print("is Similar")
 			parameters.setStars(self.__parameters.stars)
 			self.__parameters = parameters
 

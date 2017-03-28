@@ -5,7 +5,7 @@
 #else
 	#pragma OPENCL EXTENSION cl_khr_fp64 : enable
 	#define PYOPENCL_DEFINE_CDOUBLE
-	#define M_PI_2 1.5707963267948966
+	// #define M_PI_2 1.5707963267948966
 #endif
 
 __kernel void ray_trace(
@@ -37,8 +37,8 @@ __kernel void ray_trace(
 		int index = gid1*width + gid2;
 		double incident_angle_x;
 		double incident_angle_y;
-		incident_angle_x = (((double) (gid1 - width / 2)) * dTheta);
-		incident_angle_y = (((double) (gid2 - height / 2)) * dTheta);
+		incident_angle_x = ((double) (gid1 - width / 2)) * dTheta;
+		incident_angle_y = ((double) (gid2 - height / 2)) * dTheta;
 		double deltaR_x;
 		double deltaR_y;
 		double r;
@@ -55,8 +55,8 @@ __kernel void ray_trace(
 			result_buf_y[index] += (deltaR_y*stars_mass[i]/(r*r))*POINT_CONSTANT;
 		}
 		// Lensing from SIS
-		deltaR_x = centerX - incident_angle_x;
-		deltaR_y = centerY - incident_angle_y;
+		deltaR_x =  centerX -incident_angle_x;
+		deltaR_y = centerY -incident_angle_y;
 		r = sqrt(deltaR_x*deltaR_x + deltaR_y*deltaR_y);
 		result_buf_x[index] += velocityDispersion * velocityDispersion * deltaR_x * SIS_CONSTANT / r;
 		result_buf_y[index] += velocityDispersion * velocityDispersion * deltaR_y * SIS_CONSTANT / r;

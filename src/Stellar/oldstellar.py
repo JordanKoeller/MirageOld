@@ -1,8 +1,8 @@
 from astropy.cosmology import WMAP7 as cosmo
 import numpy as np
 import astropy.units as u
-from Vector2D import Vector2D
-from Vector2D import zeroVector
+from Utility import Vector2D
+from Utility.Vector2D import zeroVector
 from astropy import constants as const
 import random as rand
 from numba import jit
@@ -179,14 +179,14 @@ class Galaxy(Drawable,Cosmic):
 		self.updateDrawable(position = Vector2D(x*einsteinRadius, y*einsteinRadius, einsteinRadius.unit))
 
 	def generateStars(self, parameters,numStars,totalMass=0): #RTODO
+		print("Calling")
 		self.__stars = []
 		massInStars = totalMass*self.__pcntStar
 		masses = parameters.getStarMasses(numStars) #Need to change this line to reflect, percentage and have a tolerance for mass in stars
-		if masses is not []:
-			for i in range(0,len(masses)):
-				self.__stars.append(PointLenser(Vector2D(rand.random()-0.5,
-						rand.random()-0.5,'rad')*(parameters.canvasDim-2)*parameters.dTheta,
-					u.Quantity(masses[i],'solMass')))
+		for i in range(0,len(masses)):
+			self.__stars.append(PointLenser(Vector2D(rand.random()-0.5,
+					rand.random()-0.5,'rad')*(parameters.canvasDim-2)*parameters.dTheta,
+				u.Quantity(masses[i],'solMass')))
 
 	def draw(self,img,parameters, displayGalaxy):
 		for star in self.__stars:
@@ -195,13 +195,15 @@ class Galaxy(Drawable,Cosmic):
 			center = Vector2D(self.position.x/parameters.dTheta + (parameters.canvasDim/2),self.position.y/parameters.dTheta + (parameters.canvasDim/2))
 			for i in range(-2,3,1):
 				for j in range(-2,3,1):
-					img.setPixel(center.x+i,center.y+j,self.colorKey)
+					if center.x + i > 0 and center.y + j > 0 and center.x + i < parameters.canvasDim and center.y + j < parameters.canvasDim:
+						img.setPixel(center.x+i,center.y+j,self.colorKey)
 
 
 	def getStarArray(self):
 		massArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
 		xArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
 		yArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
+		print("Length = " + str(len(self.__stars)))
 		for i in range(0,len(self.__stars)):
 			star = self.__stars[i]
 			massArr[i] = star.mass.value
@@ -210,6 +212,7 @@ class Galaxy(Drawable,Cosmic):
 		massArr[len(self.__stars)] = 0.0
 		xArr[len(self.__stars)] = 0.0
 		yArr[len(self.__stars)] = 0.0
+		print(massArr)
 		return (massArr,xArr,yArr)
 
 	def update(self,redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, center = None,percentStars = None,stars = None):
@@ -318,10 +321,14 @@ class Quasar(Drawable,Cosmic):
 		for x in range(0,radius+1):
 			for y in range(0,radius+1):
 				if x*x + y*y <= rSquared:
-					img.setPixel(center.x+x,center.y+y,self._Drawable__colorKey)
-					img.setPixel(center.x+x,center.y-y,self._Drawable__colorKey)
-					img.setPixel(center.x-x,center.y+y,self._Drawable__colorKey)
-					img.setPixel(center.x-x,center.y-y,self._Drawable__colorKey)
+					if center.x+x > 0 and center.y+y > 0 and center.x+x < parameters.canvasDim and center.y+y < parameters.canvasDim:
+						img.setPixel(center.x+x,center.y+y,self._Drawable__colorKey)
+					if center.x+x > 0 and center.y-y > 0 and center.x+x < parameters.canvasDim and center.y-y < parameters.canvasDim:
+						img.setPixel(center.x+x,center.y-y,self._Drawable__colorKey)
+					if center.x-x > 0 and center.y+y > 0 and center.x-x < parameters.canvasDim and center.y+y < parameters.canvasDim:
+						img.setPixel(center.x-x,center.y+y,self._Drawable__colorKey)
+					if center.x-x > 0 and center.y-y > 0 and center.x-x < parameters.canvasDim and center.y-y < parameters.canvasDim:
+						img.setPixel(center.x-x,center.y-y,self._Drawable__colorKey)
 	@property
 	def velocity(self):
 		return self.__velocity.to('rad')
@@ -360,8 +367,8 @@ microGalaxy = Galaxy(redshift = 0.0073,
 
 defaultQuasar = Quasar(redshift = 0.073,
 	position = Vector2D(-0.0003,0,"rad"),
-	radius = u.Quantity(2.272e-5,"rad"),
-	velocity = Vector2D(15e-5,0,"rad"))
+	radius = u.Quantity(5,"arcsecond"),
+	velocity = Vector2D(0,0,"rad"))
 
 microQuasar = Quasar(redshift = 0.073,
 	position = Vector2D(0,0,"rad"),

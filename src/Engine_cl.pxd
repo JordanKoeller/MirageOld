@@ -1,13 +1,12 @@
 from __future__ import division
 import numpy as np
 cimport numpy as np
-from WrappedTree_old import WrappedTree
-from stellar import Galaxy
-from stellar import Quasar
-from Configs import Configs 
+from Utility import WrappedTree
+from Stellar import Galaxy
+from Stellar import Quasar
 from astropy.cosmology import WMAP7 as cosmo
-from Vector2D import Vector2D
-from Vector2D import zeroVector
+from Utility import Vector2D
+from Utility import zeroVector
 import time
 from astropy import constants as const
 from astropy import units as u
@@ -15,14 +14,14 @@ import math
 import pyopencl as cl
 import pyopencl.tools
 import os
-from SpatialTree cimport SpatialTree, Pixel
 from libcpp.vector cimport vector
 import random
 from PyQt5 import QtGui, QtCore
 import cython
-cimport engineHelper
 import ctypes
 from libc.math cimport sin, cos, atan2, sqrt
+from Parameters import Parameters
+from scipy import interpolate
 
 
 cdef class Engine_cl:
@@ -41,4 +40,4 @@ cdef class Engine_cl:
 	cpdef reconfigure(self)
 	cpdef getFrame(self)
 	cpdef getMagnification(self)
-	cdef cythonMakeLightCurve(self,mmin, mmax,resolution,canvas, progressBar, smoothing)
+	cdef cythonMakeLightCurve(self,mmin, mmax,resolution, progressBar, smoothing)
