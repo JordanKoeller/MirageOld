@@ -52,7 +52,7 @@ class ImageSimThread(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.setCanvas(canvas)
         self.__calculating = False
-        self.__frameRate = 40
+        self.__frameRate = 25
         self.engine = engine
         self.progressBar = progressBar
         self.progressLabel = progressLabel
@@ -70,7 +70,7 @@ class ImageSimThread(QtCore.QThread):
 
     def setCanvas(self,canvas):
         self.canvas = canvas
-        filler_img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
+        filler_img = QtGui.QImage(1200,1200, QtGui.QImage.Format_Indexed8)
         filler_img.setColorTable([QtGui.qRgb(0,0,0)])
         filler_img.fill(0)
         self.canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
@@ -107,11 +107,11 @@ class ImageSimThread(QtCore.QThread):
             counter += 1
             timer = time.clock()
             frame,dt = self.engine.getFrame()
+            if self.__writer != None:
+                self.__movieRaw.append(frame.copy())                
             self.engine.time += dt
             img = QtGui.QImage(frame.tobytes(),frame.shape[0],frame.shape[1],QtGui.QImage.Format_Indexed8)
             img.setColorTable([QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)])
-            if self.__writer != None:
-                self.__movieRaw.append(img.copy())                
             self.canvas.pixmap().convertFromImage(img)
             self.canvas.update()
             deltaT = time.clock() - timer

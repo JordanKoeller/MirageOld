@@ -45,24 +45,26 @@ class Parameters(object):
 		center position
 		velocity
 		base position"""
-	def __init__(self, isMicrolensing = False, autoConfiguring = False, galaxy = defaultGalaxy, quasar = defaultQuasar, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None):
+	def __init__(self, isMicrolensing = False, autoConfiguring = False, galaxy = defaultGalaxy, quasar = defaultQuasar, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0, curveDim = Vector2D(800,200)):
 		self.__galaxy = galaxy
 		self.__quasar = quasar
 		self.__dTheta = dTheta/canvasDim
 		self.__canvasDim = canvasDim
+		self.__curveDim = curveDim
 		self.showGalaxy = showGalaxy
 		self.showQuasar = showQuasar
+		self.numStars = numStars
 		self.__starMassTolerance = starMassTolerance
 		self.__starMassVariation = starMassVariation
 		self.__dLS = self.__calcdLS()
 		self.__einsteinRadius = self.__calcEinsteinRadius()
 		self.dt = 0.1
-		# self.massGenerator =  
+		self.time = 0
 		self.setAutoConfigure(autoConfiguring)
 		self.setMicrolensing(isMicrolensing)
 
 	def generateStars(self):
-		self.__galaxy.generateStars(self,100)
+		self.__galaxy.generateStars(self,self.numStars)
 
 	@property
 	def galaxy(self):
@@ -125,6 +127,7 @@ class Parameters(object):
 			self.__galaxy.update(center = zeroVector)
 
 	def setTime(self,time):
+		self.time = time
 		self.__quasar.setTime(time)
 
 
@@ -139,25 +142,6 @@ class Parameters(object):
 		return ret
 
 	def isSimilar(self,other):
-		"""Things that warrant recalculation:
-			dTheta
-			canvasDim
-			isMicrolensing
-			starMassTolerance(if lower)
-			starMassVariation
-			starMassFunction
-
-			gRedshift,
-			gVD
-			gShearMag
-			gShearAngle
-			gCenter
-			g%Smooth
-			qRedshift
-
-
-			Checks to make sure the two instances have the above parameters as equal
-			"""
 		if self.dTheta != other.dTheta:
 			return False
 		if self.canvasDim != other.canvasDim:
@@ -177,15 +161,11 @@ class Parameters(object):
 			return False
 		if self.quasar != other.quasar:
 			return False
-		# if self.starMassTolerance != other.starMassTolerance:
-		# 	return False
 		if self.showQuasar != other.showQuasar:
 			return False
 		if self.showGalaxy != other.showGalaxy:
 			return False
 		return True
-		# if self.isAutoConfiguring != other.isAutoConfiguring:
-		# 	return False
 
 	def __str__(self):
 		return ("dTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("Einstein Radius = " + str(self.einsteinRadius))

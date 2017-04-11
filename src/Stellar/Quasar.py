@@ -43,13 +43,13 @@ class Quasar(Drawable,Cosmic):
 			for y in range(0,radius+1):
 				if x*x + y*y <= rSquared:
 					if center.x+x > 0 and center.y+y > 0 and center.x+x < parameters.canvasDim and center.y+y < parameters.canvasDim:
-						img.setPixel(center.x+x,center.y+y,self._Drawable__colorKey)
+						img[center.x+x,center.y+y] = self._Drawable__colorKey
 					if center.x+x > 0 and center.y-y > 0 and center.x+x < parameters.canvasDim and center.y-y < parameters.canvasDim:
-						img.setPixel(center.x+x,center.y-y,self._Drawable__colorKey)
+						img[center.x+x,center.y-y] = self._Drawable__colorKey
 					if center.x-x > 0 and center.y+y > 0 and center.x-x < parameters.canvasDim and center.y+y < parameters.canvasDim:
-						img.setPixel(center.x-x,center.y+y,self._Drawable__colorKey)
+						img[center.x-x,center.y+y] = self._Drawable__colorKey
 					if center.x-x > 0 and center.y-y > 0 and center.x-x < parameters.canvasDim and center.y-y < parameters.canvasDim:
-						img.setPixel(center.x-x,center.y-y,self._Drawable__colorKey)
+						img[center.x-x,center.y-y] = self._Drawable__colorKey
 	@property
 	def velocity(self):
 		return self.__velocity.to('rad')

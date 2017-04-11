@@ -18,16 +18,33 @@ from astropy import units as u
 from Parameters import Parameters
 from Main import ImageSimThread
 from Main import LightCurveSimThread
+from Main import SimThread
 from Graphics import DynamicCanvas
+from Drawer import CurveDrawer
+import pyqtgraph as pg
+import pyqtgraph.widgets.RemoteGraphicsView
+
 
 class GUIManager(QtWidgets.QMainWindow):
     def __init__(self, parent = None):
         super(GUIManager, self).__init__(parent)
         uic.loadUi('Resources/GUI/gui.ui', self)
-        self.imgDrawer = ImageSimThread(self.main_canvas,progressBar = self.progressBar, progressLabel = self.progressLabel,engine = Engine())
-        self.lightCurveDrawer = LightCurveSimThread(DynamicCanvas(self.canvasFrame), self.imgDrawer.engine, progressBar = self.progressBar, progressLabel = self.progressLabel)
         self.setupUi()
+        self.imgDrawer = SimThread(self.main_canvas,self.curve_canvas,progressBar = self.progressBar, progressLabel = self.progressLabel,engine = Engine())
+        # self.lightCurveDrawer = LightCurveSimThread(DynamicCanvas(self.canvasFrame), self.imgDrawer.engine, progressBar = self.progressBar, progressLabel = self.progressLabel)
+        self.imgDrawer.image_canvas_update.connect(self.main_canvas_slot)
+        self.imgDrawer.curve_canvas_update.connect(self.curve_canvas_slot)
+        self.pauseButton.clicked.connect(self.imgDrawer.pause)
+        self.resetButton.clicked.connect(self.imgDrawer.restart)
+        self.curveDrawer = CurveDrawer(self.curve_canvas)
 
+    def main_canvas_slot(self,img):
+        self.main_canvas.pixmap().convertFromImage(img)
+        self.main_canvas.update()
+
+    def curve_canvas_slot(self,y):
+        print("trying")
+        self.curveDrawer.append(y)
 
     def setupUi(self):
         """
@@ -35,8 +52,10 @@ class GUIManager(QtWidgets.QMainWindow):
         Override or add to method to alter user interraction outcomes.
         Called upon initialization.
         """
-        self.pauseButton.clicked.connect(self.imgDrawer.pause)
-        self.resetButton.clicked.connect(self.imgDrawer.restart)
+        # self.curve_canvas_frame = pg.widgets.RemoteGraphicsView.RemoteGraphicsView(self.splitter)
+        # plot = self.curve_canvas_frame.pg.PlotItem()
+        # self.curve_canvas_frame.setCentralItem(plot)
+        self.curve_canvas = self.curve_canvas_frame
         self.playButton.clicked.connect(self.simImage)
         self.displayQuasar.clicked.connect(self.drawQuasarHelper)
         self.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
@@ -73,7 +92,7 @@ class GUIManager(QtWidgets.QMainWindow):
 
         gRedshift = float(self.gRedshift.text())
         gVelDispersion = u.Quantity(float(self.gVelDispersion.text()),'km/s')
-        gPercentStars = int(self.gNumStars.text())
+        gNumStars = int(self.gNumStars.text())
         gShearMag = float(self.gShearMag.text())
         gShearAngle = u.Quantity(float(self.gShearAngle.text()),'degree')
 
@@ -85,8 +104,8 @@ class GUIManager(QtWidgets.QMainWindow):
         autoConfiguring = self.autoConfigCheckBox.isChecked()
 
         quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity)
-        galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gPercentStars)
-        params = Parameters(isMicrolensing, autoConfiguring, galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
+        galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars)
+        params = Parameters(isMicrolensing, autoConfiguring, galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar, numStars = gNumStars)
         return params
 
 
@@ -99,12 +118,12 @@ class GUIManager(QtWidgets.QMainWindow):
     def calcLightCurve(self):
         start = self.__vector_from_qstring(self.lightCurveMinField.text()).setUnit('arcsec').to('rad')
         end = self.__vector_from_qstring(self.lightCurveMaxField.text()).setUnit('arcsec').to('rad')
-        self.lightCurveDrawer.canvas.setParent(self.canvasFrame)
-        self.imgDrawer.canvas.hide()
-        self.lightCurveDrawer.canvas.show()
-        self.lightCurveDrawer.setLightCurveLimits(start,end)
-        self.lightCurveDrawer.updateParameters(self.makeParameters())
-        self.lightCurveDrawer.start()
+        # self.lightCurveDrawer.canvas.setParent(self.canvasFrame)
+        # self.imgDrawer.canvas.hide()
+        # self.lightCurveDrawer.canvas.show()
+        # self.lightCurveDrawer.setLightCurveLimits(start,end)
+        # self.lightCurveDrawer.updateParameters(self.makeParameters())
+        # self.lightCurveDrawer.start()
     def simImage(self):
         """
         Reads user input, updates the engine, and instructs the engine to begin
@@ -114,7 +133,7 @@ class GUIManager(QtWidgets.QMainWindow):
         """
         # self.main_canvas = self.imgDrawer.canvas
         # self.imgDrawer.canvas.setParent(self.canvasFrame)
-        self.lightCurveDrawer.canvas.hide()
+        # self.lightCurveDrawer.canvas.hide()
         self.imgDrawer.canvas.show()
         parameters = self.makeParameters()
         self.imgDrawer.updateParameters(parameters)

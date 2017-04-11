@@ -29,10 +29,10 @@ class PointLenser(Drawable):
 	def draw(self,img,parameters):
 		center = (self.position)/parameters.dTheta
 		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
-		img.setPixel(center.x,center.y,self._Drawable__colorKey)
-		img.setPixel(center.x+1,center.y,self._Drawable__colorKey)
-		img.setPixel(center.x+1,center.y+1,self._Drawable__colorKey)
-		img.setPixel(center.x,center.y+1,self._Drawable__colorKey)
+		img[center.x,center.y] = self._Drawable__colorKey
+		img[center.x+1,center.y] = self._Drawable__colorKey
+		img[center.x+1,center.y+1] = self._Drawable__colorKey
+		img[center.x,center.y+1] = self._Drawable__colorKey
 
 
 	def unscaledAlphaAt(self, position):

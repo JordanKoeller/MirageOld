@@ -39,22 +39,22 @@ class Galaxy(Drawable,Cosmic):
 					rand.random()-0.5,'rad')*(parameters.canvasDim-2)*parameters.dTheta,
 				u.Quantity(masses[i],'solMass')))
 
-	def draw(self,img,parameters, displayGalaxy):
+	def drawStars(self,img,parameters):
 		for star in self.__stars:
 			star.draw(img,parameters)
-		if displayGalaxy:
-			center = Vector2D(self.position.x/parameters.dTheta + (parameters.canvasDim/2),self.position.y/parameters.dTheta + (parameters.canvasDim/2))
-			for i in range(-2,3,1):
-				for j in range(-2,3,1):
-					if center.x + i > 0 and center.y + j > 0 and center.x + i < parameters.canvasDim and center.y + j < parameters.canvasDim:
-						img.setPixel(center.x+i,center.y+j,self.colorKey)
+
+	def drawGalaxy(self,img,parameters):
+		center = Vector2D(self.position.x/parameters.dTheta + (parameters.canvasDim/2),self.position.y/parameters.dTheta + (parameters.canvasDim/2))
+		for i in range(-2,3,1):
+			for j in range(-2,3,1):
+				if center.x + i > 0 and center.y + j > 0 and center.x + i < parameters.canvasDim and center.y + j < parameters.canvasDim:
+					img[int(center.x+i),int(center.y+j)] = self.colorKey
 
 
 	def getStarArray(self):
 		massArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
 		xArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
 		yArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
-		print("Length = " + str(len(self.__stars)))
 		for i in range(0,len(self.__stars)):
 			star = self.__stars[i]
 			massArr[i] = star.mass.value
@@ -63,7 +63,6 @@ class Galaxy(Drawable,Cosmic):
 		massArr[len(self.__stars)] = 0.0
 		xArr[len(self.__stars)] = 0.0
 		yArr[len(self.__stars)] = 0.0
-		print(massArr)
 		return (massArr,xArr,yArr)
 
 	def update(self,redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, center = None,percentStars = None,stars = None):

@@ -33,10 +33,11 @@ cdef class Engine_cl:
 		self.__preCalculating = False
 		self.time = 0.0
 		self.__trueLuminosity = math.pi * (self.__parameters.quasar.radius.value/self.__parameters.dTheta)**2
-		self.img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
+		self.img = QtGui.QImage(400,400, QtGui.QImage.Format_Indexed8)
 		self.__imgColors = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)]
 		self.img.setColorTable(self.__imgColors)
 		self.img.fill(0)
+		self.__needsReconfiguring = True
 
 	@property
 	def parameters(self):
@@ -45,36 +46,6 @@ cdef class Engine_cl:
 	def ray_trace(self, use_GPU = False):
 		return self.ray_trace_gpu(False)
 
-	def drawEinsteinRadius(self,canvas,radius,centerx,centery):
-		cdef int x0, y0
-		x0 = centerx
-		y0 = centery
-		cdef int x = abs(radius/self.__parameters.dTheta)
-		cdef int y = 0
-		cdef int err = 0
-		while x >= y:
-			if x0 + x > 0 and y0 + y > 0 and x0 + x < self.__parameters.canvasDim and y0 + y < self.__parameters.canvasDim:
-					canvas.setPixel(x0 + x, y0 + y,3)
-			if x0 + y > 0 and y0 + x > 0 and x0 + y < self.__parameters.canvasDim and y0 + x < self.__parameters.canvasDim:
-					canvas.setPixel(x0 + y, y0 + x,3)
-			if x0 - y > 0 and y0 + x > 0 and x0 - y < self.__parameters.canvasDim and y0 + x < self.__parameters.canvasDim:
-					canvas.setPixel(x0 - y, y0 + x,3)
-			if x0 - x > 0 and y0 + y > 0 and x0 - x < self.__parameters.canvasDim and y0 + y < self.__parameters.canvasDim:
-					canvas.setPixel(x0 - x, y0 + y,3)
-			if x0 - x > 0 and y0 - y > 0 and x0 - x < self.__parameters.canvasDim and y0 - y < self.__parameters.canvasDim:
-					canvas.setPixel(x0 - x, y0 - y,3)
-			if x0 - y > 0 and y0 - x > 0 and x0 - y < self.__parameters.canvasDim and y0 - x < self.__parameters.canvasDim:
-					canvas.setPixel(x0 - y, y0 - x,3)
-			if x0 + y > 0 and y0 - x > 0 and x0 + y < self.__parameters.canvasDim and y0 - x < self.__parameters.canvasDim:
-					canvas.setPixel(x0 + y, y0 - x,3)
-			if x0 + x > 0 and y0 - y > 0 and x0 + x < self.__parameters.canvasDim and y0 - y < self.__parameters.canvasDim:
-					canvas.setPixel(x0 + x, y0 - y,3)
-			if err <= 0:
-				y += 1
-				err += 2*y + 1
-			if err > 0:
-				x -= 1
-				err -= 2*x + 1
 
 	cdef ray_trace_gpu(self,use_GPU):
 		# print(self.__parameters)
@@ -144,6 +115,7 @@ cdef class Engine_cl:
 		finalData = self.ray_trace(use_GPU = True)
 		self.__tree.setDataFromNumpies(finalData)
 		self.__preCalculating = False
+		self.__needsReconfiguring = False
 		print("Time calculating = " + str(time.clock() - begin) + " seconds.")
 
 	def calTheta(self):
@@ -152,37 +124,44 @@ cdef class Engine_cl:
 		theta2 = (k/(1+(self.__parameters.dLS.value/self.__parameters.quasar.angDiamDist.value)*self.__parameters.galaxy.shearMag))
 		return (theta,theta2)
 
+	@property
 	def tree(self):
 		return self.__tree
+
 	cpdef getMagnification(self):
 		cdef a = np.float64 (self.__trueLuminosity)
 		cdef b = np.float64 (self.__tree.query_point_count(self.__parameters.quasar.observedPosition.x,self.__parameters.quasar.observedPosition.y,self.__parameters.quasar.radius.value))
 		return b/a
 
 	cpdef getFrame(self):
-		cdef int width = self.__parameters.canvasDim
-		cdef int height = self.__parameters.canvasDim
-		cdef np.float64_t dt = self.__parameters.dt
-		cdef double gX,gY
-		if not self.__preCalculating:
-			self.__parameters.setTime(self.time)
-			gX = self.__parameters.galaxy.position.x
-			gY = self.__parameters.galaxy.position.y
-			ret = self.__tree.query_point(self.__parameters.quasar.observedPosition.x+gX,self.__parameters.quasar.observedPosition.y+gY,self.__parameters.quasar.radius.value)
-			self.img.fill(0)
-			if self.__parameters.displayQuasar:
-				self.__parameters.quasar.draw(self.img,self.__parameters)
-			for pixel in ret:
-				self.img.setPixel(pixel[0],pixel[1],1)
-			if self.__parameters.displayStars:
-				imgs = self.calTheta()
-				self.__parameters.galaxy.draw(self.img,self.__parameters, self.__parameters.displayGalaxy)
-				if self.__parameters.displayGalaxy:
-					pass
-			# self.drawEinsteinRadius(self.img,self.__parameters.einsteinRadius,400+self.__parameters.galaxy.position.x/self.__parameters.dTheta,400+self.__parameters.galaxy.position.y/self.__parameters.dTheta)
-			# self.drawEinsteinRadius(self.img,imgs[1],self.__parameters.galaxy.position.x/self.__parameters.dTheta-400,self.__parameters.galaxy.position.y/self.__parameters.dTheta-400)
-			return (self.img,self.__parameters.dt)
-		return (self.img,0)
+		if self.__needsReconfiguring:
+			self.reconfigure()
+		# cdef int width = self.__parameters.canvasDim
+		# cdef int height = self.__parameters.canvasDim
+		# cdef np.float64_t dt = self.__parameters.dt
+		# cdef double gX,gY
+		# data = np.zeros(shape=(self.__parameters.canvasDim,self.__parameters.canvasDim),dtype=np.uint8) #scrap bits, use tostring and pass in shape as well
+		while self.__preCalculating:
+			print("waiting")
+		gX = self.__parameters.galaxy.position.x
+		gY = self.__parameters.galaxy.position.y
+		return self.__tree.query_point(self.__parameters.quasar.observedPosition.x+gX,self.__parameters.quasar.observedPosition.y+gY,self.__parameters.quasar.radius.value)
+
+		# 	self.img.fill(0)
+		# 	if self.__parameters.displayQuasar:
+		# 		pass
+		# 		# self.__parameters.quasar.draw(self.img,self.__parameters)
+		# 	for pixel in ret:
+		# 		data[pixel[0],pixel[1]] = 1
+		# 	if self.__parameters.displayStars:
+		# 		imgs = self.calTheta()
+		# 		# self.__parameters.galaxy.draw(self.img,self.__parameters, self.__parameters.displayGalaxy)
+		# 		if self.__parameters.displayGalaxy:
+		# 			pass
+		# 	# self.drawEinsteinRadius(self.img,self.__parameters.einsteinRadius,400+self.__parameters.galaxy.position.x/self.__parameters.dTheta,400+self.__parameters.galaxy.position.y/self.__parameters.dTheta)
+		# 	# self.drawEinsteinRadius(self.img,imgs[1],self.__parameters.galaxy.position.x/self.__parameters.dTheta-400,self.__parameters.galaxy.position.y/self.__parameters.dTheta-400)
+		# 	return (data,self.__parameters.dt)
+		# return (data,0)
 
 	cdef cythonMakeLightCurve(self,mmin, mmax,resolution, progressBar, smoothing):
 		if not self.__tree:
@@ -228,12 +207,12 @@ cdef class Engine_cl:
 			print("is none")
 			self.__parameters = parameters
 			self.__parameters.generateStars()
-			self.reconfigure()
+			self.__needsReconfiguring = True
 		elif not self.__parameters.isSimilar(parameters):
 			print("is not similar")
 			self.__parameters = parameters
 			self.__parameters.generateStars()
-			self.reconfigure()
+			self.__needsReconfiguring = True
 		else:
 			print("is Similar")
 			parameters.setStars(self.__parameters.stars)
