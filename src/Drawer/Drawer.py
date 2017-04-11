@@ -1,6 +1,8 @@
 import numpy as np
 from Graphics import Plot
 import pyqtgraph as pg 
+from pyqtgraph import QtCore, QtGui
+
 
 class Drawer(object):
 	def draw(self, parameters, pixels, canvas=None):
@@ -8,8 +10,8 @@ class Drawer(object):
 
 class ImageDrawer(Drawer):
 	"""docstring for ImageDrawer"""
-	def __init__(self):
-		pass
+	def __init__(self,signal):
+		self.signal = signal
 	def draw(self,parameters,pixels, canvas=None):
 		if canvas is None:
 			canvas = np.zeros((parameters.canvasDim,parameters.canvasDim), dtype=np.uint8)
@@ -21,7 +23,10 @@ class ImageDrawer(Drawer):
 			parameters.quasar.draw(canvas,parameters)
 		for pixel in pixels:
 			canvas[pixel[0],pixel[1]] = 1
-		return canvas
+		img = QtGui.QImage(canvas.tobytes(),canvas.shape[0],canvas.shape[1],QtGui.QImage.Format_Indexed8)
+		img.setColorTable([QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)])
+		self.signal.emit(img)
+		return img
 
 
 	def __drawEinsteinRadius(self,canvas,radius,centerx,centery):
@@ -57,11 +62,10 @@ class ImageDrawer(Drawer):
 
 class CurveDrawer(object):
 	"""docstring for CurveDrawer"""
-	def __init__(self, plotWidget):
+	def __init__(self, signal):
 		super(CurveDrawer, self).__init__()
-		self.plotWidget = plotWidget
-		self.plotItem = self.plotWidget.getPlotItem()
-		self.xAxis = np.arange(0,100)
+		self.signal = signal
+		self.xAxis = np.arange(0,1000)
 		self.yAxis = np.zeros_like(self.xAxis)
 		self.index = 0
 
@@ -76,7 +80,7 @@ class CurveDrawer(object):
 				replaceY[x] = self.yAxis[x]
 			self.yAxis = replaceY
 			self.xAxis = replaceX
-			self.plotItem.plot(self.xAxis,self.yAxis,clear = True)
+		self.signal.emit(self.xAxis,self.yAxis)
 
 
 		

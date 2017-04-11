@@ -22,29 +22,25 @@ from Main import SimThread
 from Graphics import DynamicCanvas
 from Drawer import CurveDrawer
 import pyqtgraph as pg
-import pyqtgraph.widgets.RemoteGraphicsView
 
 
 class GUIManager(QtWidgets.QMainWindow):
     def __init__(self, parent = None):
         super(GUIManager, self).__init__(parent)
         uic.loadUi('Resources/GUI/gui.ui', self)
+        self.imgDrawer = SimThread(engine = Engine())
         self.setupUi()
-        self.imgDrawer = SimThread(self.main_canvas,self.curve_canvas,progressBar = self.progressBar, progressLabel = self.progressLabel,engine = Engine())
-        # self.lightCurveDrawer = LightCurveSimThread(DynamicCanvas(self.canvasFrame), self.imgDrawer.engine, progressBar = self.progressBar, progressLabel = self.progressLabel)
+        self.setupSignals()
+
+
+
+    def setupSignals(self):
         self.imgDrawer.image_canvas_update.connect(self.main_canvas_slot)
         self.imgDrawer.curve_canvas_update.connect(self.curve_canvas_slot)
-        self.pauseButton.clicked.connect(self.imgDrawer.pause)
-        self.resetButton.clicked.connect(self.imgDrawer.restart)
-        self.curveDrawer = CurveDrawer(self.curve_canvas)
+        self.imgDrawer.progress_bar_update.connect(self.progress_bar_slot)
+        self.imgDrawer.progress_bar_max_update.connect(self.progress_bar_max_slot)
+        self.imgDrawer.progress_label_update.connect(self.progress_label_slot)
 
-    def main_canvas_slot(self,img):
-        self.main_canvas.pixmap().convertFromImage(img)
-        self.main_canvas.update()
-
-    def curve_canvas_slot(self,y):
-        print("trying")
-        self.curveDrawer.append(y)
 
     def setupUi(self):
         """
@@ -52,10 +48,6 @@ class GUIManager(QtWidgets.QMainWindow):
         Override or add to method to alter user interraction outcomes.
         Called upon initialization.
         """
-        # self.curve_canvas_frame = pg.widgets.RemoteGraphicsView.RemoteGraphicsView(self.splitter)
-        # plot = self.curve_canvas_frame.pg.PlotItem()
-        # self.curve_canvas_frame.setCentralItem(plot)
-        self.curve_canvas = self.curve_canvas_frame
         self.playButton.clicked.connect(self.simImage)
         self.displayQuasar.clicked.connect(self.drawQuasarHelper)
         self.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
@@ -63,6 +55,12 @@ class GUIManager(QtWidgets.QMainWindow):
         self.lightCurveStartButton.clicked.connect(self.calcLightCurve)
         self.saveStillButton.clicked.connect(self.saveStill)
         self.recordButton.clicked.connect(self.record)
+        self.pauseButton.clicked.connect(self.imgDrawer.pause)
+        self.resetButton.clicked.connect(self.imgDrawer.restart)
+        filler_img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
+        filler_img.setColorTable([QtGui.qRgb(0,0,0)])
+        filler_img.fill(0)
+        self.main_canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
 
 
     def __vector_from_qstring(self,string,reverse_y = True):
@@ -118,12 +116,7 @@ class GUIManager(QtWidgets.QMainWindow):
     def calcLightCurve(self):
         start = self.__vector_from_qstring(self.lightCurveMinField.text()).setUnit('arcsec').to('rad')
         end = self.__vector_from_qstring(self.lightCurveMaxField.text()).setUnit('arcsec').to('rad')
-        # self.lightCurveDrawer.canvas.setParent(self.canvasFrame)
-        # self.imgDrawer.canvas.hide()
-        # self.lightCurveDrawer.canvas.show()
-        # self.lightCurveDrawer.setLightCurveLimits(start,end)
-        # self.lightCurveDrawer.updateParameters(self.makeParameters())
-        # self.lightCurveDrawer.start()
+
     def simImage(self):
         """
         Reads user input, updates the engine, and instructs the engine to begin
@@ -131,10 +124,6 @@ class GUIManager(QtWidgets.QMainWindow):
 
         Called by default when the "Play" button is presssed.
         """
-        # self.main_canvas = self.imgDrawer.canvas
-        # self.imgDrawer.canvas.setParent(self.canvasFrame)
-        # self.lightCurveDrawer.canvas.hide()
-        self.imgDrawer.canvas.show()
         parameters = self.makeParameters()
         self.imgDrawer.updateParameters(parameters)
         self.imgDrawer.start()
@@ -146,6 +135,24 @@ class GUIManager(QtWidgets.QMainWindow):
         self.imgDrawer.toggleRecording("../SavedFiles/"+self.fileNameField.text()+".mp4")
         self.simImage()
 
+
+
+    #SIGNAL METHODS
+    def main_canvas_slot(self,img):
+        self.main_canvas.pixmap().convertFromImage(img)
+        self.main_canvas.update()
+
+    def curve_canvas_slot(self,x,y):
+        self.curve_canvas.plot(x,y,clear=True)
+
+    def progress_bar_slot(self,value):
+        self.progressBar.setValue(value)
+
+    def progress_bar_max_slot(self,n):
+        self.progressBar.setMaximum(n)
+
+    def progress_label_slot(self,text):
+        self.progressLabel.setText(text)
 
 
 if __name__ == "__main__":

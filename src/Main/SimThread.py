@@ -55,20 +55,17 @@ class SimThread(QtCore.QThread):
     progress_bar_update = QtCore.pyqtSignal(int)
     progress_label_update = QtCore.pyqtSignal(str)
     image_canvas_update = QtCore.pyqtSignal(object)
-    curve_canvas_update = QtCore.pyqtSignal(object)
-
-    def __init__(self,canvas,curveCanvas,progressLabel,progressBar,engine):
+    curve_canvas_update = QtCore.pyqtSignal(object,object)
+    progress_bar_max_update = QtCore.pyqtSignal(int)
+    def __init__(self,engine):
         QtCore.QThread.__init__(self)
-        self.setCanvas(canvas)
         self.__calculating = False
-        self.__frameRate = 40
+        self.__frameRate = 25
         self.engine = engine
-        self.progressBar = progressBar
-        self.progressLabel = progressLabel
         self.__writer = None
         self.__movieRaw = []
-        self.__drawer = ImageDrawer()
-        # self.__curveDrawer = CurveDrawer(curveCanvas)
+        self.__drawer = ImageDrawer(self.image_canvas_update)
+        self.__curveDrawer = CurveDrawer(self.curve_canvas_update)
 
     def __asNPArray(self,im):
         im = im.convertToFormat(4)
@@ -79,13 +76,12 @@ class SimThread(QtCore.QThread):
         arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
         return arr
 
-    def setCanvas(self,canvas):
-        self.canvas = canvas
-        filler_img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
-        filler_img.setColorTable([QtGui.qRgb(0,0,0)])
-        filler_img.fill(0)
-        self.canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
-        self.canvas.hide()
+    # def setCanvas(self,canvas):
+    #     self.canvas = canvas
+    #     filler_img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
+    #     filler_img.setColorTable([QtGui.qRgb(0,0,0)])
+    #     filler_img.fill(0)
+    #     self.canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
 
     def updateParameters(self,params):
         self.engine.updateParameters(params)
@@ -96,37 +92,36 @@ class SimThread(QtCore.QThread):
             self.__movieRaw = []
         elif self.__movieRaw != []:
             counter = 0
-            self.progressBar.setMinimum(0)
-            self.progressBar.setMaximum(len(self.__movieRaw))
-            self.progressLabel.setText("Rendering. Please Wait")
+            self.progress_bar_max_update.emit(len(self.__movieRaw))
+            self.progress_label_update.emit("Rendering. Please Wait")
             for i in self.__movieRaw:
                 arr = self.__asNPArray(i)
                 self.__writer.append_data(arr)
                 counter += 1
-                self.progressBar.setValue(counter)
+                self.progress_bar_update.emit(counter)
             self.__writer.close()
             self.__writer = None
-            self.progressLabel.setText("File Saved.")
-            self.progressBar.setValue(0)
+            self.progress_label_update.emit("File Saved.")
+            self.progress_bar_update.emit(0)
 
-    def __showFrame(self,frame):
-        img = QtGui.QImage(frame.tobytes(),frame.shape[0],frame.shape[1],QtGui.QImage.Format_Indexed8)
-        img.setColorTable([QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)])
-        self.image_canvas_update.emit(img)
-        # self.canvas.pixmap().convertFromImage(img)
-        # self.canvas.update()
+    # def __showFrame(self,frame):
+    #     img = QtGui.QImage(frame.tobytes(),frame.shape[0],frame.shape[1],QtGui.QImage.Format_Indexed8)
+    #     img.setColorTable([QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)])
+    #     self.image_canvas_update.emit(img)
+
 
     def run(self):
-        self.progressLabel.setText("Running")
+        self.progress_label_update.emit("Running")
         self.__calculating = True
+        counter = 0
         interval = 1/self.__frameRate
         while self.__calculating:
             timer = time.clock()
             pixels = self.engine.getFrame()
-            frame = self.__drawer.draw(self.engine.parameters,pixels)
-            self.curve_canvas_update.emit(len(pixels))
+            img = self.__drawer.draw(self.engine.parameters,pixels)
+            self.__curveDrawer.append(len(pixels))
+            # self.curve_canvas_update.emit(len(pixels))
             self.engine.parameters.setTime(self.engine.parameters.time + self.engine.parameters.dt)
-            self.__showFrame(frame)
             if self.__writer != None:
                 self.__movieRaw.append(img.copy())                
             deltaT = time.clock() - timer
@@ -144,4 +139,3 @@ class SimThread(QtCore.QThread):
         self.engine.parameters.setTime(0)
         pixels = self.engine.getFrame()
         frame = self.__drawer.draw(self.engine.parameters,pixels)
-        self.__showFrame(frame)
