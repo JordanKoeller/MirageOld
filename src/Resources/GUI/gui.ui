@@ -41,7 +41,7 @@
          <x>0</x>
          <y>0</y>
          <width>398</width>
-         <height>774</height>
+         <height>752</height>
         </rect>
        </property>
        <property name="maximumSize">
@@ -404,6 +404,12 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>300</height>
+              </size>
+             </property>
              <property name="tabPosition">
               <enum>QTabWidget::North</enum>
              </property>
@@ -484,53 +490,14 @@
                  <item>
                   <widget class="QPushButton" name="pauseButton">
                    <property name="text">
-                    <string>Stop</string>
+                    <string>Pause</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="resetButton">
                    <property name="text">
-                    <string>Reset</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QGridLayout" name="gridLayout_6">
-                 <item row="1" column="2">
-                  <widget class="QPushButton" name="recordButton">
-                   <property name="layoutDirection">
-                    <enum>Qt::RightToLeft</enum>
-                   </property>
-                   <property name="text">
-                    <string>Record</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QPushButton" name="saveStillButton">
-                   <property name="text">
-                    <string>Save Still</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_4">
-                 <item>
-                  <widget class="QLabel" name="label_28">
-                   <property name="text">
-                    <string>Save to: </string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="fileNameField">
-                   <property name="text">
-                    <string>File Name</string>
+                    <string>Stop</string>
                    </property>
                   </widget>
                  </item>
@@ -545,16 +512,6 @@
               </attribute>
               <layout class="QVBoxLayout" name="verticalLayout">
                <item>
-                <widget class="QLabel" name="label_18">
-                 <property name="text">
-                  <string>Quasar Path:</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item>
                 <layout class="QGridLayout" name="gridLayout_7">
                  <item row="1" column="1">
                   <widget class="QLineEdit" name="lightCurveMinField">
@@ -563,14 +520,7 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="2">
-                  <widget class="QLabel" name="label_27">
-                   <property name="text">
-                    <string>Arcseconds</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="2">
+                 <item row="1" column="3">
                   <widget class="QLabel" name="label_25">
                    <property name="text">
                     <string>Arcseconds</string>
@@ -578,28 +528,21 @@
                   </widget>
                  </item>
                  <item row="2" column="1">
+                  <layout class="QHBoxLayout" name="horizontalLayout_6"/>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_23">
+                   <property name="text">
+                    <string>Path</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
                   <widget class="QLineEdit" name="lightCurveMaxField">
                    <property name="text">
                     <string>(1,1)</string>
                    </property>
                   </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_23">
-                   <property name="text">
-                    <string>Start</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_24">
-                   <property name="text">
-                    <string>End</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="1">
-                  <layout class="QHBoxLayout" name="horizontalLayout_6"/>
                  </item>
                 </layout>
                </item>
@@ -660,6 +603,19 @@
               <number>24</number>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -727,7 +683,7 @@
              <x>0</x>
              <y>0</y>
              <width>756</width>
-             <height>224</height>
+             <height>218</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -766,6 +722,84 @@
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1200</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>false</bool>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuLoad">
+     <property name="title">
+      <string>Load</string>
+     </property>
+     <addaction name="load_setup"/>
+     <addaction name="load_run"/>
+    </widget>
+    <widget class="QMenu" name="menuSave">
+     <property name="title">
+      <string>Save</string>
+     </property>
+     <addaction name="save_setup"/>
+     <addaction name="save_run"/>
+    </widget>
+    <addaction name="menuLoad"/>
+    <addaction name="menuSave"/>
+    <addaction name="separator"/>
+    <addaction name="record_button"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="load_setup">
+   <property name="text">
+    <string>Setup</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="load_run">
+   <property name="text">
+    <string>Run</string>
+   </property>
+  </action>
+  <action name="save_setup">
+   <property name="text">
+    <string>Setup</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="save_run">
+   <property name="text">
+    <string>Run</string>
+   </property>
+  </action>
+  <action name="record_button">
+   <property name="text">
+    <string>Record</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

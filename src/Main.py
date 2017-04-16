@@ -22,25 +22,36 @@ from Main import SimThread
 from Graphics import DynamicCanvas
 from Drawer import CurveDrawer
 import pyqtgraph as pg
+from Main import FileManager
 
 
 class GUIManager(QtWidgets.QMainWindow):
+    progress_bar_update = QtCore.pyqtSignal(int)
+    progress_label_update = QtCore.pyqtSignal(str)
+    image_canvas_update = QtCore.pyqtSignal(object)
+    curve_canvas_update = QtCore.pyqtSignal(object,object)
+    progress_bar_max_update = QtCore.pyqtSignal(int)
+
     def __init__(self, parent = None):
         super(GUIManager, self).__init__(parent)
         uic.loadUi('Resources/GUI/gui.ui', self)
-        self.imgDrawer = SimThread(engine = Engine())
+        signals = self.makeSignals()
+        self.imgDrawer = SimThread(Engine(),signals)
+        self.fileManager = FileManager(signals)
         self.setupUi()
         self.setupSignals()
 
 
 
     def setupSignals(self):
-        self.imgDrawer.image_canvas_update.connect(self.main_canvas_slot)
-        self.imgDrawer.curve_canvas_update.connect(self.curve_canvas_slot)
-        self.imgDrawer.progress_bar_update.connect(self.progress_bar_slot)
-        self.imgDrawer.progress_bar_max_update.connect(self.progress_bar_max_slot)
-        self.imgDrawer.progress_label_update.connect(self.progress_label_slot)
+        self.image_canvas_update.connect(self.main_canvas_slot)
+        self.curve_canvas_update.connect(self.curve_canvas_slot)
+        self.progress_bar_update.connect(self.progress_bar_slot)
+        self.progress_bar_max_update.connect(self.progress_bar_max_slot)
+        self.progress_label_update.connect(self.progress_label_slot)
 
+    def makeSignals(self):
+        return [self.progress_bar_update,self.progress_label_update,self.image_canvas_update,self.curve_canvas_update,self.progress_bar_max_update]
 
     def setupUi(self):
         """
@@ -53,10 +64,11 @@ class GUIManager(QtWidgets.QMainWindow):
         self.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
         self.progressBar.setValue(0)
         self.lightCurveStartButton.clicked.connect(self.calcLightCurve)
-        self.saveStillButton.clicked.connect(self.saveStill)
-        self.recordButton.clicked.connect(self.record)
         self.pauseButton.clicked.connect(self.imgDrawer.pause)
-        self.resetButton.clicked.connect(self.imgDrawer.restart)
+        self.resetButton.clicked.connect(self.restart)
+        self.load_setup.triggered.connect(self.loadParams)
+        self.save_setup.triggered.connect(self.saveParams)
+        self.record_button.triggered.connect(self.record)
         filler_img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
         filler_img.setColorTable([QtGui.qRgb(0,0,0)])
         filler_img.fill(0)
@@ -94,7 +106,7 @@ class GUIManager(QtWidgets.QMainWindow):
         gShearMag = float(self.gShearMag.text())
         gShearAngle = u.Quantity(float(self.gShearAngle.text()),'degree')
 
-        dTheta = u.Quantity(float(self.scaleInput.text()),'arcsec').to('rad').value
+        dTheta = u.Quantity(float(self.scaleInput.text()),'arcsec').to('rad')
         canvasDim = int(self.dimensionInput.text())
         displayQuasar = self.displayQuasar.isChecked()
         displayGalaxy = self.displayGalaxy.isChecked()
@@ -128,12 +140,41 @@ class GUIManager(QtWidgets.QMainWindow):
         self.imgDrawer.updateParameters(parameters)
         self.imgDrawer.start()
 
-    def saveStill(self):
-        self.imgDrawer.canvas.pixmap().save("../SavedFiles/"+self.fileNameField.text()+".png")
-
     def record(self):
-        self.imgDrawer.toggleRecording("../SavedFiles/"+self.fileNameField.text()+".mp4")
+        self.fileManager.recording = True
         self.simImage()
+
+    def restart(self):
+        self.imgDrawer.restart()
+        self.fileManager.save()
+
+    def saveParams(self):
+        self.fileManager.writeParams(self.imgDrawer.engine.parameters)
+
+    def loadParams(self):
+        params = self.fileManager.readParams()
+        self.bindFields(params)
+        
+    def bindFields(self,parameters):
+        qV = parameters.quasar.velocity.to('arcsec').unitless()
+        qP = parameters.quasar.position.to('arcsec').unitless()
+        self.qVelocity.setText("("+str(qV.x)+","+str(qV.y)+")")
+        self.qPosition.setText("("+str(qP.x)+","+str(qP.y)+")")
+        self.qRadius.setText(str(parameters.quasar.radius.to('arcsec').value))
+        self.qRedshift.setText(str(parameters.quasar.redshift))
+
+        self.gRedshift.setText(str(parameters.galaxy.redshift))
+        self.gVelDispersion.setText(str(parameters.galaxy.velocityDispersion.value))
+        self.gNumStars.setText(str(parameters.galaxy.numStars))
+        self.gShearMag.setText(str(parameters.galaxy.shearMag))
+        self.gShearAngle.setText(str(parameters.galaxy.shearAngle.to('degree').value))
+
+        self.scaleInput.setText(str(parameters.dTheta.to('arcsec').value))
+        self.dimensionInput.setText(str(parameters.canvasDim))
+        self.displayQuasar.setChecked(parameters.showQuasar)
+        self.displayGalaxy.setChecked(parameters.showGalaxy)
+        self.enableMicrolensingBox.setChecked(parameters.microlensing)
+        self.autoConfigCheckBox.setChecked(parameters.autoConfigure)
 
 
 
@@ -141,6 +182,7 @@ class GUIManager(QtWidgets.QMainWindow):
     def main_canvas_slot(self,img):
         self.main_canvas.pixmap().convertFromImage(img)
         self.main_canvas.update()
+        self.fileManager.giveFrame(img)
 
     def curve_canvas_slot(self,x,y):
         self.curve_canvas.plot(x,y,clear=True)
@@ -153,6 +195,7 @@ class GUIManager(QtWidgets.QMainWindow):
 
     def progress_label_slot(self,text):
         self.progressLabel.setText(text)
+
 
 
 if __name__ == "__main__":

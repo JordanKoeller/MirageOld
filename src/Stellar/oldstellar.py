@@ -99,7 +99,7 @@ class PointLenser(Drawable):
 		return not self.__eq__(other)
 
 	def draw(self,img,parameters):
-		center = (self.position)/parameters.dTheta
+		center = (self.position)/parameters.dTheta.value
 		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
 		img.setPixel(center.x,center.y,self._Drawable__colorKey)
 		img.setPixel(center.x+1,center.y,self._Drawable__colorKey)
@@ -185,14 +185,14 @@ class Galaxy(Drawable,Cosmic):
 		masses = parameters.getStarMasses(numStars) #Need to change this line to reflect, percentage and have a tolerance for mass in stars
 		for i in range(0,len(masses)):
 			self.__stars.append(PointLenser(Vector2D(rand.random()-0.5,
-					rand.random()-0.5,'rad')*(parameters.canvasDim-2)*parameters.dTheta,
+					rand.random()-0.5,'rad')*(parameters.canvasDim-2)*parameters.dTheta.value,
 				u.Quantity(masses[i],'solMass')))
 
 	def draw(self,img,parameters, displayGalaxy):
 		for star in self.__stars:
 			star.draw(img,parameters)
 		if displayGalaxy:
-			center = Vector2D(self.position.x/parameters.dTheta + (parameters.canvasDim/2),self.position.y/parameters.dTheta + (parameters.canvasDim/2))
+			center = Vector2D(self.position.x/parameters.dTheta.value + (parameters.canvasDim/2),self.position.y/parameters.dTheta.value + (parameters.canvasDim/2))
 			for i in range(-2,3,1):
 				for j in range(-2,3,1):
 					if center.x + i > 0 and center.y + j > 0 and center.x + i < parameters.canvasDim and center.y + j < parameters.canvasDim:
@@ -314,9 +314,9 @@ class Quasar(Drawable,Cosmic):
 
 	def draw(self, img, parameters):
 		begin = time.clock()
-		center = (self.observedPosition)/parameters.dTheta
+		center = (self.observedPosition)/parameters.dTheta.value
 		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
-		radius = int(self.radius.value/parameters.dTheta)
+		radius = int(self.radius.value/parameters.dTheta.value)
 		rSquared = radius * radius
 		for x in range(0,radius+1):
 			for y in range(0,radius+1):

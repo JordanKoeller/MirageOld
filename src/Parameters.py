@@ -48,7 +48,7 @@ class Parameters(object):
 	def __init__(self, isMicrolensing = False, autoConfiguring = False, galaxy = defaultGalaxy, quasar = defaultQuasar, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0, curveDim = Vector2D(800,200)):
 		self.__galaxy = galaxy
 		self.__quasar = quasar
-		self.__dTheta = dTheta/canvasDim
+		self.__dTheta = u.Quantity(dTheta/canvasDim,'rad')
 		self.__canvasDim = canvasDim
 		self.__curveDim = curveDim
 		self.showGalaxy = showGalaxy
@@ -122,8 +122,10 @@ class Parameters(object):
 
 	def setMicrolensing(self,isMicrolensing):
 		if isMicrolensing:
+			self.microlensing = True
 			self.__galaxy.update(center = Vector2D(-self.einsteinRadius.value,0,'rad')) #Will refactor later, once how this works is figured out
 		else:
+			self.microlensing = False
 			self.__galaxy.update(center = zeroVector)
 
 	def setTime(self,time):
@@ -133,9 +135,10 @@ class Parameters(object):
 
 	def setAutoConfigure(self,isAutoConfiguring):
 		if isAutoConfiguring:
+			self.autoConfigure = True
 			self.__dTheta = 4*self.einsteinRadius/self.__canvasDim
 		else:
-			pass
+			self.autoConfigure = False
 
 	def getStarMasses(self,mass,tolerance = 0.05):
 		ret = defaultMassGenerator.starField(mass,tolerance)

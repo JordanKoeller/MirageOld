@@ -43,6 +43,9 @@ class Vector2D(object): #TODO: Make compatable with astropy units package
 		self.unit = unit
 		return self
 
+	def unitless(self):
+		return Vector2D(self.x,self.y)
+
 	def angle():
 		return math.atan2(self.y,self.x)
 	def __add__(self, that):

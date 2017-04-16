@@ -32,7 +32,7 @@ class ImageDrawer(Drawer):
 	def __drawEinsteinRadius(self,canvas,radius,centerx,centery):
 		x0 = centerx
 		y0 = centery
-		x = abs(radius/self.__parameters.dTheta)
+		x = abs(radius/self.__parameters.dTheta.value)
 		y = 0
 		err = 0
 		while x >= y:
@@ -88,14 +88,16 @@ class CurveDrawer(object):
 
 
 
-# class CompositeDrawer(Drawer):
-# 	"""For drawing more than one thing"""
-# 	def __init__(self, *args):
-# 		self.__drawers = args
+class CompositeDrawer(Drawer):
+	"""For drawing more than one thing"""
+	def __init__(self, imgSignal, curveSignal):
+		self.__curve = CurveDrawer(curveSignal)
+		self.__img = ImageDrawer(imgSignal)
 
-# 	def draw(self,parameters,pixels, canvas=None):
+	def draw(self,parameters,pixels, canvas=None):
+		self.__curve.append(len(pixels))
+		return self.__img.draw(parameters,pixels)
 
-		
 		
 
 	

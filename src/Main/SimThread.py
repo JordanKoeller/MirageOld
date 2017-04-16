@@ -13,8 +13,7 @@ import threading as par
 import time
 import imageio
 import numpy as np
-from Drawer import ImageDrawer
-from Drawer import CurveDrawer
+from Drawer import CompositeDrawer
 
 
 class SimThread(QtCore.QThread):
@@ -52,66 +51,24 @@ class SimThread(QtCore.QThread):
 
     """
 
-    progress_bar_update = QtCore.pyqtSignal(int)
-    progress_label_update = QtCore.pyqtSignal(str)
-    image_canvas_update = QtCore.pyqtSignal(object)
-    curve_canvas_update = QtCore.pyqtSignal(object,object)
-    progress_bar_max_update = QtCore.pyqtSignal(int)
-    def __init__(self,engine):
+    def __init__(self,engine,signals):
         QtCore.QThread.__init__(self)
+        self.progress_bar_update  = signals[0]
+        self.progress_label_update = signals[1]
+        self.image_canvas_update = signals[2]
+        self.curve_canvas_update = signals[3]
+        self.progress_bar_max_update = signals[4]
         self.__calculating = False
         self.__frameRate = 25
         self.engine = engine
-        self.__writer = None
-        self.__movieRaw = []
-        self.__drawer = ImageDrawer(self.image_canvas_update)
-        self.__curveDrawer = CurveDrawer(self.curve_canvas_update)
+        self.__drawer = CompositeDrawer(self.image_canvas_update,self.curve_canvas_update)
 
-    def __asNPArray(self,im):
-        im = im.convertToFormat(4)
-        width = im.width()
-        height = im.height()
-        ptr = im.bits()
-        ptr.setsize(im.byteCount())
-        arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
-        return arr
-
-    # def setCanvas(self,canvas):
-    #     self.canvas = canvas
-    #     filler_img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
-    #     filler_img.setColorTable([QtGui.qRgb(0,0,0)])
-    #     filler_img.fill(0)
-    #     self.canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
 
     def updateParameters(self,params):
         self.engine.updateParameters(params)
 
-    def toggleRecording(self,writer):
-        if self.__writer == None:
-            self.__writer = imageio.get_writer(writer,fps=60)
-            self.__movieRaw = []
-        elif self.__movieRaw != []:
-            counter = 0
-            self.progress_bar_max_update.emit(len(self.__movieRaw))
-            self.progress_label_update.emit("Rendering. Please Wait")
-            for i in self.__movieRaw:
-                arr = self.__asNPArray(i)
-                self.__writer.append_data(arr)
-                counter += 1
-                self.progress_bar_update.emit(counter)
-            self.__writer.close()
-            self.__writer = None
-            self.progress_label_update.emit("File Saved.")
-            self.progress_bar_update.emit(0)
-
-    # def __showFrame(self,frame):
-    #     img = QtGui.QImage(frame.tobytes(),frame.shape[0],frame.shape[1],QtGui.QImage.Format_Indexed8)
-    #     img.setColorTable([QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)])
-    #     self.image_canvas_update.emit(img)
-
-
     def run(self):
-        self.progress_label_update.emit("Running")
+        self.progress_label_update.emit("Calculating. Please Wait.")
         self.__calculating = True
         counter = 0
         interval = 1/self.__frameRate
@@ -119,22 +76,15 @@ class SimThread(QtCore.QThread):
             timer = time.clock()
             pixels = self.engine.getFrame()
             img = self.__drawer.draw(self.engine.parameters,pixels)
-            self.__curveDrawer.append(len(pixels))
-            # self.curve_canvas_update.emit(len(pixels))
-            self.engine.parameters.setTime(self.engine.parameters.time + self.engine.parameters.dt)
-            if self.__writer != None:
-                self.__movieRaw.append(img.copy())                
+            self.engine.parameters.setTime(self.engine.parameters.time + self.engine.parameters.dt)       
             deltaT = time.clock() - timer
             if deltaT < interval:
                 time.sleep(interval-deltaT)
-        if self.__writer:
-            self.toggleRecording(None)
 
     def pause(self):
         self.__calculating = False
 
     def restart(self):
-        self.__movieRaw = []
         self.__calculating = False
         self.engine.parameters.setTime(0)
         pixels = self.engine.getFrame()

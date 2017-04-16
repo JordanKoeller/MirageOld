@@ -27,7 +27,7 @@ class PointLenser(Drawable):
 		return not self.__eq__(other)
 
 	def draw(self,img,parameters):
-		center = (self.position)/parameters.dTheta
+		center = (self.position)/parameters.dTheta.value
 		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
 		img[center.x,center.y] = self._Drawable__colorKey
 		img[center.x+1,center.y] = self._Drawable__colorKey

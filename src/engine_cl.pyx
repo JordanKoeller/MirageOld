@@ -32,7 +32,7 @@ cdef class Engine_cl:
 		self.__parameters = parameter
 		self.__preCalculating = False
 		self.time = 0.0
-		self.__trueLuminosity = math.pi * (self.__parameters.quasar.radius.value/self.__parameters.dTheta)**2
+		self.__trueLuminosity = math.pi * (self.__parameters.quasar.radius.value/self.__parameters.dTheta.value)**2
 		self.img = QtGui.QImage(400,400, QtGui.QImage.Format_Indexed8)
 		self.__imgColors = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)]
 		self.img.setColorTable(self.__imgColors)
@@ -57,7 +57,7 @@ cdef class Engine_cl:
 			os.environ['PYOPENCL_CTX'] = '0:0'
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
-		cdef np.float64_t dTheta = self.__parameters.dTheta
+		cdef double dTheta = self.__parameters.dTheta.value
 		cdef np.ndarray result_nparray_x = np.ndarray((width,height), dtype = np.float64)
 		cdef np.ndarray result_nparray_y = np.ndarray((width,height), dtype = np.float64)
 		stars_nparray_mass, stars_nparray_x, stars_nparray_y = self.__parameters.galaxy.getStarArray()
@@ -93,7 +93,7 @@ cdef class Engine_cl:
 			np.float64(self.__parameters.dLS.value),
 			np.int32(width),
 			np.int32(height),
-			np.float64(self.__parameters.dTheta),
+			np.float64(self.__parameters.dTheta.value),
 			np.float64(self.__parameters.galaxy.position.to('rad').x),
 			np.float64(self.__parameters.galaxy.position.y),
 			result_buffer_x,
@@ -136,32 +136,11 @@ cdef class Engine_cl:
 	cpdef getFrame(self):
 		if self.__needsReconfiguring:
 			self.reconfigure()
-		# cdef int width = self.__parameters.canvasDim
-		# cdef int height = self.__parameters.canvasDim
-		# cdef np.float64_t dt = self.__parameters.dt
-		# cdef double gX,gY
-		# data = np.zeros(shape=(self.__parameters.canvasDim,self.__parameters.canvasDim),dtype=np.uint8) #scrap bits, use tostring and pass in shape as well
 		while self.__preCalculating:
 			print("waiting")
 		gX = self.__parameters.galaxy.position.x
 		gY = self.__parameters.galaxy.position.y
 		return self.__tree.query_point(self.__parameters.quasar.observedPosition.x+gX,self.__parameters.quasar.observedPosition.y+gY,self.__parameters.quasar.radius.value)
-
-		# 	self.img.fill(0)
-		# 	if self.__parameters.displayQuasar:
-		# 		pass
-		# 		# self.__parameters.quasar.draw(self.img,self.__parameters)
-		# 	for pixel in ret:
-		# 		data[pixel[0],pixel[1]] = 1
-		# 	if self.__parameters.displayStars:
-		# 		imgs = self.calTheta()
-		# 		# self.__parameters.galaxy.draw(self.img,self.__parameters, self.__parameters.displayGalaxy)
-		# 		if self.__parameters.displayGalaxy:
-		# 			pass
-		# 	# self.drawEinsteinRadius(self.img,self.__parameters.einsteinRadius,400+self.__parameters.galaxy.position.x/self.__parameters.dTheta,400+self.__parameters.galaxy.position.y/self.__parameters.dTheta)
-		# 	# self.drawEinsteinRadius(self.img,imgs[1],self.__parameters.galaxy.position.x/self.__parameters.dTheta-400,self.__parameters.galaxy.position.y/self.__parameters.dTheta-400)
-		# 	return (data,self.__parameters.dt)
-		# return (data,0)
 
 	cdef cythonMakeLightCurve(self,mmin, mmax,resolution, progressBar, smoothing):
 		if not self.__tree:
