@@ -172,7 +172,3 @@ class Parameters(object):
 
 	def __str__(self):
 		return ("dTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("Einstein Radius = " + str(self.einsteinRadius))
-
-
-
-		

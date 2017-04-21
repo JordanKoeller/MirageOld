@@ -41,7 +41,7 @@
          <x>0</x>
          <y>0</y>
          <width>398</width>
-         <height>752</height>
+         <height>754</height>
         </rect>
        </property>
        <property name="maximumSize">
@@ -657,7 +657,7 @@
           <bool>false</bool>
          </property>
          <property name="handleWidth">
-          <number>5</number>
+          <number>8</number>
          </property>
          <property name="childrenCollapsible">
           <bool>true</bool>
@@ -670,7 +670,7 @@
            </sizepolicy>
           </property>
           <property name="interactive">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
          <widget class="QScrollArea" name="scrollArea">
@@ -682,9 +682,15 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>756</width>
-             <height>218</height>
+             <width>772</width>
+             <height>76</height>
             </rect>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <property name="spacing">
@@ -704,8 +710,17 @@
             </property>
             <item>
              <widget class="QLabel" name="main_canvas">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string/>
+              </property>
+              <property name="scaledContents">
+               <bool>false</bool>
               </property>
               <property name="alignment">
                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -728,7 +743,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <property name="nativeMenuBar">

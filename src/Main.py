@@ -149,7 +149,8 @@ class GUIManager(QtWidgets.QMainWindow):
         self.fileManager.save()
 
     def saveParams(self):
-        self.fileManager.writeParams(self.imgDrawer.engine.parameters)
+        print("Firing")
+        self.fileManager.writeParams(self.makeParameters())
 
     def loadParams(self):
         params = self.fileManager.readParams()
@@ -169,7 +170,7 @@ class GUIManager(QtWidgets.QMainWindow):
         self.gShearMag.setText(str(parameters.galaxy.shearMag))
         self.gShearAngle.setText(str(parameters.galaxy.shearAngle.to('degree').value))
 
-        self.scaleInput.setText(str(parameters.dTheta.to('arcsec').value))
+        self.scaleInput.setText(str(parameters.dTheta.to('arcsec').value*parameters.canvasDim))
         self.dimensionInput.setText(str(parameters.canvasDim))
         self.displayQuasar.setChecked(parameters.showQuasar)
         self.displayGalaxy.setChecked(parameters.showGalaxy)

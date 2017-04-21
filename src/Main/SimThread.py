@@ -59,7 +59,7 @@ class SimThread(QtCore.QThread):
         self.curve_canvas_update = signals[3]
         self.progress_bar_max_update = signals[4]
         self.__calculating = False
-        self.__frameRate = 25
+        self.__frameRate = 60
         self.engine = engine
         self.__drawer = CompositeDrawer(self.image_canvas_update,self.curve_canvas_update)
 
@@ -72,12 +72,18 @@ class SimThread(QtCore.QThread):
         self.__calculating = True
         counter = 0
         interval = 1/self.__frameRate
+        timeE = 1.0
         while self.__calculating:
             timer = time.clock()
             pixels = self.engine.getFrame()
             img = self.__drawer.draw(self.engine.parameters,pixels)
-            self.engine.parameters.setTime(self.engine.parameters.time + self.engine.parameters.dt)       
+            self.engine.incrementTime(self.engine.parameters.dt)
             deltaT = time.clock() - timer
+            counter += 1
+            if counter%100 == 0:
+                # timeE = timeE.clock() - timer 
+                print("Theoretically, frame rate is " + str(60/deltaT))
+                # timeE = timeE.clock()
             if deltaT < interval:
                 time.sleep(interval-deltaT)
 
@@ -86,6 +92,7 @@ class SimThread(QtCore.QThread):
 
     def restart(self):
         self.__calculating = False
-        self.engine.parameters.setTime(0)
+        self.engine.setTime(0)
         pixels = self.engine.getFrame()
         frame = self.__drawer.draw(self.engine.parameters,pixels)
+        self.__drawer.resetCurve()

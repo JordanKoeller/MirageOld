@@ -32,11 +32,9 @@ class FileManager(object):
 		return QtWidgets.QFileDialog.getOpenFileName()[0]
 
 	def writeParams(self, parameters):
-		if self.filename == None:
-			self.filename = self.__makeFile()
-		if self.filename:
-			with open(self.filename,"wb+") as file:
-				pickle.dump(parameters,file)
+		self.filename = self.__makeFile()
+		with open(self.filename,"wb+") as file:
+			pickle.dump(parameters,file)
 	def readParams(self):
 		self.filename = self.__getFile()
 		if self.filename:
@@ -59,18 +57,18 @@ class FileManager(object):
 
 
 	def __runMethod(self):
-				writer = imageio.get_writer(self.filename,fps=60)
-				counter = 0
-				for frame in self.__frames:
-					img = self.__asNPArray(frame)
-					writer.append_data(img)
-					counter  += 1
-					self.progress_bar_update.emit(counter)
-				writer.close()
-				self.progress_label_update.emit("File Saved.")
-				self.__frames = []
-				self.__frameCounter = 0
-				self.progress_bar_update.emit(0)
+		writer = imageio.get_writer(self.filename,fps=60)
+		counter = 0
+		for frame in self.__frames:
+			img = self.__asNPArray(frame)
+			writer.append_data(img)
+			counter  += 1
+			self.progress_bar_update.emit(counter)
+		writer.close()
+		self.progress_label_update.emit("File Saved.")
+		self.__frames = []
+		self.__frameCounter = 0
+		self.progress_bar_update.emit(0)
 		
 
 	def save(self):

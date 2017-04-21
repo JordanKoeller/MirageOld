@@ -1,7 +1,10 @@
+import math
 import numpy as np
 from Graphics import Plot
 import pyqtgraph as pg 
 from pyqtgraph import QtCore, QtGui
+from Calculator import ImageFinder
+from Utility import Vector2D
 
 
 class Drawer(object):
@@ -12,6 +15,7 @@ class ImageDrawer(Drawer):
 	"""docstring for ImageDrawer"""
 	def __init__(self,signal):
 		self.signal = signal
+
 	def draw(self,parameters,pixels, canvas=None):
 		if canvas is None:
 			canvas = np.zeros((parameters.canvasDim,parameters.canvasDim), dtype=np.uint8)
@@ -23,10 +27,23 @@ class ImageDrawer(Drawer):
 			parameters.quasar.draw(canvas,parameters)
 		for pixel in pixels:
 			canvas[pixel[0],pixel[1]] = 1
-		img = QtGui.QImage(canvas.tobytes(),canvas.shape[0],canvas.shape[1],QtGui.QImage.Format_Indexed8)
+		# self.__drawTrackers(parameters,canvas)
+		img = QtGui.QImage(canvas.tobytes(),parameters.canvasDim,parameters.canvasDim,QtGui.QImage.Format_Indexed8)
 		img.setColorTable([QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)])
 		self.signal.emit(img)
 		return img
+
+	def __drawTrackers(self,parameters,canvas):
+		x = ImageFinder.getRoot(-1,-1,parameters)
+		# x = Vector2D(x[0],x[1])
+		xNorm = x
+		# print("Spat out at")
+		# print(xNorm)
+		xInt = Vector2D(int(xNorm.x),int(xNorm.y))
+		for i in range(-1,1):
+			for j in range(-1,1):
+				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3
+
 
 
 	def __drawEinsteinRadius(self,canvas,radius,centerx,centery):
@@ -65,22 +82,31 @@ class CurveDrawer(object):
 	def __init__(self, signal):
 		super(CurveDrawer, self).__init__()
 		self.signal = signal
-		self.xAxis = np.arange(0,1000)
-		self.yAxis = np.zeros_like(self.xAxis)
-		self.index = 0
+		self.reset()
+
+	def draw(self,parameters,pixels):
+		trueSize = math.pi*parameters.quasar.pixelRadius(parameters.dTheta)**2
+		mag = len(pixels)/trueSize
+		# print(mag)
+		self.append(mag)
 
 	def append(self,y):
 		if self.index < self.xAxis.shape[0]:
 			self.yAxis[self.index] = y
 			self.index += 1
 		else:
-			replaceX = np.arange(0,self.xAxis.shape[0]*2)
-			replaceY = np.zeros_like(replaceX)
+			replaceX = np.arange(0,self.xAxis.shape[0]*2,dtype=np.float64)
+			replaceY = np.zeros_like(replaceX,dtype=np.float64)
 			for x in range(0,self.index):
 				replaceY[x] = self.yAxis[x]
 			self.yAxis = replaceY
 			self.xAxis = replaceX
 		self.signal.emit(self.xAxis,self.yAxis)
+
+	def reset(self):
+		self.xAxis = np.arange(0,1000,dtype=np.float64)
+		self.yAxis = np.zeros_like(self.xAxis,dtype=np.float64)
+		self.index = 0
 
 
 		
@@ -95,8 +121,11 @@ class CompositeDrawer(Drawer):
 		self.__img = ImageDrawer(imgSignal)
 
 	def draw(self,parameters,pixels, canvas=None):
-		self.__curve.append(len(pixels))
+		self.__curve.draw(parameters,pixels)
 		return self.__img.draw(parameters,pixels)
+
+	def resetCurve(self):
+		self.__curve.reset()		
 
 		
 

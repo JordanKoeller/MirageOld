@@ -50,6 +50,9 @@ class Quasar(Drawable,Cosmic):
 						img[center.x-x,center.y+y] = self._Drawable__colorKey
 					if center.x-x > 0 and center.y-y > 0 and center.x-x < parameters.canvasDim and center.y-y < parameters.canvasDim:
 						img[center.x-x,center.y-y] = self._Drawable__colorKey
+
+	def pixelRadius(self,dTheta):
+		return (self.__radius.to('rad')/dTheta).value
 	@property
 	def velocity(self):
 		return self.__velocity.to('rad')
