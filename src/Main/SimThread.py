@@ -14,6 +14,7 @@ import time
 import imageio
 import numpy as np
 from Drawer import CompositeDrawer
+from Drawer import DiagnosticCompositeDrawer
 
 
 class SimThread(QtCore.QThread):
@@ -81,8 +82,8 @@ class SimThread(QtCore.QThread):
             deltaT = time.clock() - timer
             counter += 1
             if counter%100 == 0:
-                # timeE = timeE.clock() - timer 
                 print("Theoretically, frame rate is " + str(60/deltaT))
+                # timeE = timeE.clock() - timer 
                 # timeE = timeE.clock()
             if deltaT < interval:
                 time.sleep(interval-deltaT)

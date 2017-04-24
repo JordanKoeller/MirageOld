@@ -22,6 +22,9 @@ import ctypes
 from libc.math cimport sin, cos, atan2, sqrt
 from Parameters import Parameters
 from scipy import interpolate
+from libcpp.pair cimport pair
+from Utility.Grid cimport Grid
+from Utility.Grid cimport Pixel
 
 
 cdef class Engine_cl:
@@ -36,8 +39,11 @@ cdef class Engine_cl:
 		public img
 		__imgColors
 		np.ndarray __data_array
+		Grid __grid
 
 	cdef ray_trace_gpu(self,use_GPU)
+	cdef build_grid(self,xArray,yArray)
+	cdef vector[Pixel] query_grid(self,double x, double y, double radius)
 	cpdef reconfigure(self)
 	cpdef getFrame(self)
 	cpdef getMagnification(self)

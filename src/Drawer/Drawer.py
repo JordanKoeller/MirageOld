@@ -108,9 +108,46 @@ class CurveDrawer(object):
 		self.yAxis = np.zeros_like(self.xAxis,dtype=np.float64)
 		self.index = 0
 
+class DiagnosticsDrawer(object):
+	"""docstring for DiagnosticsDrawer"""
+	def __init__(self, signal):
+		super(DiagnosticsDrawer, self).__init__()
+		self.signal = signal
+		self.reset()
+
+	def draw(self,parameters,y):
+		if self.index < self.xAxis.shape[0]:
+			self.yAxis[self.index] = y
+			self.index += 1
+		else:
+			replaceX = np.arange(0,self.xAxis.shape[0]*2,dtype=np.float64)
+			replaceY = np.zeros_like(replaceX,dtype=np.float64)
+			for x in range(0,self.index):
+				replaceY[x] = self.yAxis[x]
+			self.yAxis = replaceY
+			self.xAxis = replaceX
+		self.signal.emit(self.xAxis,self.yAxis)
+
+	def reset(self):
+		self.xAxis = np.arange(0,1000,dtype=np.float64)
+		self.yAxis = np.zeros_like(self.xAxis,dtype=np.float64)
+		self.index = 0
+
 
 		
 
+class DiagnosticCompositeDrawer(Drawer):
+	"""docstring for DiagnosticCompositeDrawer"""
+	def __init__(self, imgSignal, curveSignal):
+		self.__curve = DiagnosticsDrawer(curveSignal)
+		self.__img = ImageDrawer(imgSignal)
+
+	def draw(self,parameters,pixels, time=0.0, canvas=None):
+		self.__curve.draw(parameters,time)
+		return self.__img.draw(parameters,pixels)
+
+	def resetCurve(self):
+		self.__curve.reset()
 
 
 

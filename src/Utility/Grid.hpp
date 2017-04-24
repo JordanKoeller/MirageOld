@@ -1,21 +1,35 @@
 #include <vector>
 #include <cmath>
+#include <iostream>
+#include <utility>
+
+using namespace std;
 
 
+class Pixel
+{
+public:
+	double x;
+	double y;
+	int pixelX;
+	int pixelY;
+	Pixel() {}
+	Pixel(const double dx, const double dy, const int px, const int py):x{dx},y{dy},pixelX{px},pixelY{py} {}
+};
 
-template<typename T> //Must have a T.x and T.y method
+
 class Grid
 {
 private:
 
-	double hypot(const double& x1, const double& y1, const double& x2, const double& y2)
+	inline static double hypot(const double& x1, const double& y1, const double& x2, const double& y2) 
 	{
 		double dx = x2 - x1;
 		double dy = y2-y1;
 		return sqrt(dx*dx+dy*dy);
 	}
 
-	bool within(const double &ptx, const double &pty, const double &radius, const T& data)
+	inline static bool within(const double &ptx, const double &pty, const double &radius, const Pixel& data)
 	{
 		if (hypot(ptx,pty,data.x,data.y) <= radius)
 		{
@@ -26,28 +40,38 @@ private:
 		}
 	}
 
-	bool overlap(const double &objx, const double& objy, const double &radius, const int &i, const int &j)
+	inline bool overlap(const double &objx, const double& objy, const double &radius, const int &i, const int &j) const
 	{
 		double tnx = tlx + i*NODE_WIDTH;
 		double tny = tly + j*NODE_HEIGHT;
 		double bnx = tlx + (i+1)*NODE_WIDTH;
 		double bny = tly + (j+1)*NODE_HEIGHT;
-		return objx - radius < bnx && objx + radius > tnx && objy - radius < bny && objy + radius > tny; //BIG possible bug spot.
+		return objx - radius <= bnx && objx + radius > tnx && objy - radius <= bny && objy + radius > tny; //BIG possible bug spot.
+	}
+
+	inline pair<double,double> getIndices(const double &x,const double &y)
+	{
+		double xx  = (x - tlx)/NODE_WIDTH;
+		double yy  = (y - tly)/NODE_HEIGHT;
+		//cout << "xx = " << lrint(xx+0.5) << " , yy = " << lrint(0.5+yy) << "\n";
+		// //cout << "for x = " << x << ", y = " << y << endl;
+		return make_pair(xx,yy);				
 	}
 
 	class Node
 	{
 	private:
-		std::vector<T> node_data;
 	public:
-		void addData(const T &d)
+		std::vector<Pixel> node_data;
+		void addData(const double& x, const double& y, const int& px, const int& py)
 		{
-			node_data.push_back(d);
+			auto putting = Pixel(x,y,px,py);
+			node_data.push_back(putting);
 		}
-		std::vector<T> queryNode(const double& ptx, const double& pty,const double &radius)
+		std::vector<Pixel> queryNode(const double& ptx, const double& pty,const double &radius) const
 		{
-			std::vector<T> ret;
-			for (int i = 0; i < node_data.size(); ++i)
+			std::vector<Pixel> ret;
+			for (size_t i = 0; i < node_data.size(); ++i)
 			{
 				if (within(ptx,pty,radius,node_data[i]))
 				{
@@ -56,19 +80,60 @@ private:
 			}
 			return ret;
 		}
-		Node();
-		~Node();
+
+		void printNode() const
+		{
+			//cout << " | ";
+			for (size_t i = 0; i < node_data.size(); ++i)
+			{
+				//cout << node_data[i].x << "," << node_data[i].y << " ; ";
+			}
+			//cout << "|";
+		}
+
+		Node()=default;
+		~Node()=default;
+
 		
 	};
 	double NODE_WIDTH;
 	double NODE_HEIGHT;
+	double LARGE_AXIS;
 	double tlx;
 	double tly;
+	unsigned int sz;
 	std::vector<std::vector<Node>> data;
 public:
+
+	/* ------------------------------------------
+	   ------ Debugging methods -----------------
+	   ------------------------------------------
+	*/
+	void debug() const
+	{
+		//cout << "Node width = " << NODE_WIDTH << endl;
+		//cout << "tlx = " << tlx << endl;
+		//cout << "tly = " << tly << endl;
+	}
+
+	void printGrid() const
+	{
+		for (auto i:data)
+		{
+			int counter = 0;
+			for (auto j:i) 
+			{
+				//cout << "<" << counter++ << ">";
+				j.printNode();
+			}
+			//cout <<"\n";
+		}
+	}
+
 	Grid(const double &top_left_x, const double& top_left_y, const double& bottom_right_x,const double& bottom_right_y, const int &node_count)
 	{
 		constructGrid(top_left_x, top_left_y, bottom_right_x,bottom_right_y,node_count);
+		sz = 0;
 	}
 
 	void constructGrid(const double& x1, const double& y1, const double& x2, const double& y2, const int &node_count)
@@ -76,63 +141,89 @@ public:
 		tlx = x1;
 		tly = y1;
 		int rootNodes = (int) sqrt(node_count);
-		data = std::vector<std::vector<Node>>(rootNodes,std::vector<Node>(rootNodes));
+		// cout << "Number of nodes = " << rootNodes << "\n";
+		data = std::vector<std::vector<Node>>(rootNodes+1,std::vector<Node>(rootNodes+1));
 		NODE_HEIGHT = (y2 - y1)/ (float) rootNodes;
 		NODE_WIDTH = (x2 - x1)/(float) rootNodes;
+		NODE_HEIGHT > NODE_WIDTH ? LARGE_AXIS = NODE_HEIGHT : LARGE_AXIS = NODE_WIDTH;
 
 	}
 
-	template<typename IteratorBegin, typename IteratorEnd>
-	Grid(IteratorBegin i1, IteratorEnd i2, const int &node_count)
+	Grid(const vector<pair<pair<double,double>,pair<int,int>>>::iterator i1, const vector<pair<pair<double,double>,pair<int,int>>>::iterator i2, const int &node_count)
 	{
 		double minX = 1e30;
 		double minY = 1e30;
 		double maxX = -1e30;
 		double maxY = -1e30;
-		for (auto i=i1; i1 != i2; i1++)
+		sz = 0;
+		for (auto i=i1; i != i2; i++)
 		{
-			T &t = *i1;
-			t.x > maxX ? maxX = t.x : maxX = maxX;
-			t.x < minX ? minX = t.x : minX = minX;
-			t.y > maxY ? maxY = t.y : maxY = maxY;
-			t.y < minY ? minY = t.y : minY = minY;
+			pair<pair<double,double>,pair<int,int>> &t = *i;
+			get<0>(get<0>(t)) > maxX ? maxX = get<0>(get<0>(t)) : maxX = maxX;
+			get<0>(get<0>(t)) < minX ? minX = get<0>(get<0>(t)) : minX = minX;
+			get<1>(get<0>(t)) > maxY ? maxY = get<1>(get<0>(t)) : maxY = maxY;
+			get<1>(get<0>(t)) < minY ? minY = get<1>(get<0>(t)) : minY = minY;
 		}
 		constructGrid(minX,minY,maxX,maxY,node_count);		
+		for (auto i=i1; i != i2; i++) {
+			pair<pair<double,double>,pair<int,int>> &t = *i;
+			insert(get<0>(get<0>(t)),get<1>(get<0>(t)),get<0>(get<1>(t)),get<1>(get<1>(t)));
+		}
 	}
 	Grid()=default;
 
-	std::vector<T> query_Point(const double& x, const double& y, const double& radius)
+	vector<Pixel> find_within(const double &x, const double &y, const double &r) const
 	{
-		std::vector<T> ret;
-		for (int i = 0; i < data.size(); ++i)
+		double cx = (x-tlx)/NODE_WIDTH;
+		double cy = (y-tly)/NODE_HEIGHT;
+		double rx = r/(NODE_WIDTH) + 1;
+		double ry = r/(NODE_HEIGHT) + 1;
+		// cout << "Center at " << cx << "," << cy << " with radius^2 " << rr << endl;
+		vector<Pixel> ret;
+		for (int i = cx - rx; i <= cx + rx; ++i) // Possible indexing issue here?
 		{
-			for (int j = 0; j < data[i].size(); ++j)
+			for (int j = cy - ry; j <= cy + ry;++j) //Improvement by using symmetry possible
 			{
-				if (overlap(x,y,radius,i,j))
+				if (i >= 0 && j >= 0 && i < data.size() && j < data[0].size())
 				{
-					auto tmp = data[i][j].queryNode(x,y,radius);
-					ret.push_back(tmp); //Wrong method. Need a push_back that jjoins two vectors together
+					vector<Pixel> tmp = data[i][j].queryNode(x,y,r);
+					for (auto elem:tmp)
+					{
+						ret.push_back(elem);
+					}
 				}
 			}
 		}
 		return ret;
 	}
 
-	bool addData(const T& d)
+	bool insert(const double& x, const double& y, const int& px, const int &py)
 	{
-		for (int i = 0; i < data.size(); ++i)
+		auto indices = getIndices(x,y);
+		// //cout << "Pixel = " << d.x << "," << d.y << endl;
+		if (get<0>(indices) >= 0 && get<1>(indices) >= 0 && get<0>(indices) < data.size() && get<1>(indices) < data[0].size())
 		{
-			for (int j = 0; j < data[i].size(); ++j)
-			{
-				if (overlap(d.x,d.y,0.0,i,j))
-				{
-					data[i][j].addData(d);
-					return true;
-				}
-			}
+			data[lrint(get<0>(indices))][lrint(get<1>(indices))].addData(x,y,px,py);
+			++sz;
+			return true;
 		}
 		return false;
 	}
 
-	~Grid();
+
+	~Grid()=default;
+
+	bool clear()
+	{
+		sz = 0;
+		for (size_t i = 0; i < data.size(); ++i)
+		{
+			for (size_t j = 0; j < data[0].size(); ++j)
+			{
+				data[i][j].node_data.clear();
+			}
+		}
+		return true;
+	}
+
 };

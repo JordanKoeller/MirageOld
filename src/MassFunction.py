@@ -53,7 +53,7 @@ class MassFunction():
 	def starField(self,mTot, tolerance):
 		if mTot == 0:
 			return []
-		masses = self.query(mTot/0.83).tolist()
+		masses = self.query(int(mTot/0.83)).tolist()
 		massSum = sum(masses)
 		while (abs(massSum-mTot)/mTot > tolerance):
 			if massSum > mTot:
