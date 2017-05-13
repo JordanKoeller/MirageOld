@@ -26,7 +26,7 @@ class ImageDrawer(Drawer):
 		if parameters.displayQuasar:
 			parameters.quasar.draw(canvas,parameters)
 		for pixel in pixels:
-			canvas[pixel[0],pixel[1]] = 1
+			canvas[int(pixel[0]),int(pixel[1])] = 1
 		# self.__drawTrackers(parameters,canvas)
 		img = QtGui.QImage(canvas.tobytes(),parameters.canvasDim,parameters.canvasDim,QtGui.QImage.Format_Indexed8)
 		img.setColorTable([QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)])
@@ -108,6 +108,16 @@ class CurveDrawer(object):
 		self.yAxis = np.zeros_like(self.xAxis,dtype=np.float64)
 		self.index = 0
 
+class PlotDrawer(object):
+	def __init__(self, signal):
+		super(PlotDrawer, self).__init__()
+		self.signal = signal
+
+
+	def draw(self,x,y):
+		self.signal.emit(x,y)
+
+
 class DiagnosticsDrawer(object):
 	"""docstring for DiagnosticsDrawer"""
 	def __init__(self, signal):
@@ -143,7 +153,7 @@ class DiagnosticCompositeDrawer(Drawer):
 		self.__img = ImageDrawer(imgSignal)
 
 	def draw(self,parameters,pixels, time=0.0, canvas=None):
-		self.__curve.draw(parameters,time)
+		self.__curve.draw(parameters,1/time)
 		return self.__img.draw(parameters,pixels)
 
 	def resetCurve(self):
@@ -165,5 +175,13 @@ class CompositeDrawer(Drawer):
 		self.__curve.reset()		
 
 		
+class DataDrawer(Drawer):
+	def __init__(self,imgSignal):
+		self.signal = imgSignal
 
-	
+	def draw(self,canvas):
+		img = QtGui.QImage(canvas.tobytes(),canvas.shape[0],canvas.shape[1],QtGui.QImage.Format_Indexed8)
+		img.setColorTable([QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)])
+		self.signal.emit(img)
+		return img
+

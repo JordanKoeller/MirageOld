@@ -7,7 +7,6 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from Engine_cl import Engine_cl as Engine
 from Stellar import Galaxy
 from Stellar import Quasar
 import threading as par
@@ -23,7 +22,9 @@ from Graphics import DynamicCanvas
 from Drawer import CurveDrawer
 import pyqtgraph as pg
 from Main import FileManager
-
+from Engine_Grid import Engine_Grid
+from Engine_Quadtree import Engine_Quadtree
+from Engine_KDTree import Engine_KDTree
 
 class GUIManager(QtWidgets.QMainWindow):
     progress_bar_update = QtCore.pyqtSignal(int)
@@ -36,7 +37,7 @@ class GUIManager(QtWidgets.QMainWindow):
         super(GUIManager, self).__init__(parent)
         uic.loadUi('Resources/GUI/gui.ui', self)
         signals = self.makeSignals()
-        self.imgDrawer = SimThread(Engine(),signals)
+        self.imgDrawer = SimThread(Engine_Grid(),signals)
         self.fileManager = FileManager(signals)
         self.setupUi()
         self.setupSignals()
@@ -69,6 +70,9 @@ class GUIManager(QtWidgets.QMainWindow):
         self.load_setup.triggered.connect(self.loadParams)
         self.save_setup.triggered.connect(self.saveParams)
         self.record_button.triggered.connect(self.record)
+        self.visualizeDataButton.clicked.connect(self.visualizeData)
+        self.developerExportButton.clicked.connect(self.saveVisualization)
+        self.binSizeTestButton.clicked.connect(self.imgDrawer.bin_test)
         filler_img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
         filler_img.setColorTable([QtGui.qRgb(0,0,0)])
         filler_img.fill(0)
@@ -115,7 +119,7 @@ class GUIManager(QtWidgets.QMainWindow):
 
         quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity)
         galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars)
-        params = Parameters(isMicrolensing, autoConfiguring, galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar, numStars = gNumStars)
+        params = Parameters(isMicrolensing, autoConfiguring, galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
         return params
 
 
@@ -155,6 +159,15 @@ class GUIManager(QtWidgets.QMainWindow):
     def loadParams(self):
         params = self.fileManager.readParams()
         self.bindFields(params)
+
+    def visualizeData(self):
+        params = self.makeParameters()
+        self.imgDrawer.visualize(params)
+
+    def saveVisualization(self):
+        self.fileManager.recording = True
+        self.visualizeData()
+        self.fileManager.save()
         
     def bindFields(self,parameters):
         qV = parameters.quasar.velocity.to('arcsec').unitless()
@@ -201,6 +214,8 @@ class GUIManager(QtWidgets.QMainWindow):
 
 if __name__ == "__main__":
     import sys
+    import os
+    print("Process ID = "+str(os.getpid()))
     app = QtWidgets.QApplication(sys.argv)
     ui = GUIManager()
     ui.show()

@@ -29,15 +29,11 @@ class Galaxy(Drawable,Cosmic):
 		y = -math.cos(theta)
 		self.updateDrawable(position = Vector2D(x*einsteinRadius, y*einsteinRadius, einsteinRadius.unit))
 
-	def generateStars(self, parameters,numStars,totalMass=0): #RTODO
-		print("Calling")
-		self.__stars = []
-		massInStars = totalMass*self.__pcntStar
-		masses = parameters.getStarMasses(numStars) #Need to change this line to reflect, percentage and have a tolerance for mass in stars
-		for i in range(0,len(masses)):
-			self.__stars.append(PointLenser(Vector2D(rand.random()-0.5,
-					rand.random()-0.5,'rad')*(parameters.canvasDim-2)*parameters.dTheta.value,
-				u.Quantity(masses[i],'solMass')))
+	# def generateStars(self, parameters,numStars,totalMass=0): #RTODO
+	# 	print("Calling")
+	# 	self.__stars = []
+	# 	massInStars = totalMass*self.__pcntStar
+	# 	masses = parameters.getStarMasses(numStars) #Need to change this line to reflect, percentage and have a tolerance for mass in stars
 
 	def drawStars(self,img,parameters):
 		for star in self.__stars:
@@ -51,7 +47,8 @@ class Galaxy(Drawable,Cosmic):
 					img[int(center.x+i),int(center.y+j)] = self.colorKey
 
 
-	def getStarArray(self):
+	@property
+	def starArray(self):
 		massArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
 		xArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
 		yArr = np.ndarray(len(self.__stars)+1,dtype = np.float64)
@@ -64,6 +61,13 @@ class Galaxy(Drawable,Cosmic):
 		xArr[len(self.__stars)] = 0.0
 		yArr[len(self.__stars)] = 0.0
 		return (massArr,xArr,yArr)
+
+	def setStarMasses(self,masses,parameters):
+		for i in range(0,len(masses)):
+			self.__stars.append(PointLenser(Vector2D(rand.random()-0.5,
+					rand.random()-0.5,'rad')*(parameters.canvasDim-2)*parameters.dTheta.value,
+				u.Quantity(masses[i],'solMass')))
+
 
 	def update(self,redshift = None, velocityDispersion = None, shearMag = None, shearAngle = None, center = None,percentStars = None,stars = None):
 		self.__velocityDispersion = velocityDispersion or self.__velocityDispersion

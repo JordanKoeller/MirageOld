@@ -1,1 +1,2 @@
 from Calculator.ImageFinder import ImageFinder
+from Calculator.InitialMassFunction import Kroupa_2001

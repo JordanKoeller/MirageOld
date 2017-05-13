@@ -15,6 +15,7 @@ import imageio
 import numpy as np
 from Drawer import CompositeDrawer
 from Drawer import DiagnosticCompositeDrawer
+from Drawer import DataDrawer
 
 
 class SimThread(QtCore.QThread):
@@ -71,22 +72,18 @@ class SimThread(QtCore.QThread):
     def run(self):
         self.progress_label_update.emit("Calculating. Please Wait.")
         self.__calculating = True
-        counter = 0
         interval = 1/self.__frameRate
-        timeE = 1.0
+        counter = 0
         while self.__calculating:
+            counter += 1
             timer = time.clock()
             pixels = self.engine.getFrame()
             img = self.__drawer.draw(self.engine.parameters,pixels)
             self.engine.incrementTime(self.engine.parameters.dt)
             deltaT = time.clock() - timer
-            counter += 1
-            if counter%100 == 0:
-                print("Theoretically, frame rate is " + str(60/deltaT))
-                # timeE = timeE.clock() - timer 
-                # timeE = timeE.clock()
             if deltaT < interval:
                 time.sleep(interval-deltaT)
+
 
     def pause(self):
         self.__calculating = False
@@ -97,3 +94,23 @@ class SimThread(QtCore.QThread):
         pixels = self.engine.getFrame()
         frame = self.__drawer.draw(self.engine.parameters,pixels)
         self.__drawer.resetCurve()
+
+    def visualize(self,params):
+        drawer = DataDrawer(self.image_canvas_update)
+        self.engine.updateParameters(params)
+        pixels = self.engine.visualize()
+        frame = drawer.draw(pixels)
+
+    def bin_test(self):
+        binszs = np.arange(7000,65000,100)
+        reps = 200
+        prevRunner = self.run
+        self.progress_label_update.emit("Calculating Various Bin Sizes")
+        self.progress_bar_max_update.emit(len(binszs))
+        # self.__calculating = True
+        def runner():
+            self.engine.gridTest(binszs, reps,self.curve_canvas_update,self.progress_bar_update)
+            # self.__calculating = False
+        self.run = runner
+        self.start()
+        print("Asynchronous")

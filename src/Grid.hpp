@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <utility>
+#include <algorithm>
 
 using namespace std;
 
@@ -180,6 +181,8 @@ public:
 		double ry = r/(NODE_HEIGHT) + 1;
 		// cout << "Center at " << cx << "," << cy << " with radius^2 " << rr << endl;
 		vector<Pixel> ret;
+
+		// #pragma omp parallel for
 		for (int i = cx - rx; i <= cx + rx; ++i) // Possible indexing issue here?
 		{
 			for (int j = cy - ry; j <= cy + ry;++j) //Improvement by using symmetry possible

@@ -2,21 +2,31 @@
 #include <cmath>
 #include <iostream>
 
-#define MAXOBJS 256
+#define MAXOBJS 100
 
-// #define CONTAINS(OX,OY,LX,LY,HX,HY) ((OX)> (LX) && (OX) <= (HX) && (OY) > (LY) && (OY) <= (HY))
+#define CONTAINS(OX,OY,LX,LY,HX,HY) ((OX)> (LX) && (OX) <= (HX) && (OY) > (LY) && (OY) <= (HY))
+	// const bool CONTAINS(const double &objx, const double &objy, const Node *node) const
+	// {
+	// 	return objx > node->lx && objx <= node->hx && objy > node->ly && objy <= node->hy;
+	// }
+
+#define PART_DISTANCE(AX,AY,BX,BY) (((AX)-(BX))*((AX)-(BX)) + ((AX)-(BX))*((AX)-(BX)))
+	// double distance(const double &ax, const double &ay, const double &bx, const double &by) const
+	// {
+	// 	double dx = ax-bx;
+	// 	double dy = ay-by;
+	// 	return dx*dx+dy*dy;
+	// }
 
 using std::vector;
-// class Pixel
-// {
-// public:
-// 	int x;
-// 	int y;
-// 	Pixel() {}
-// 	Pixel(int dx, int dy):x{dx},y{dy} {}
-// };
-
-template<typename T>
+class Pixel
+{
+public:
+	int x;
+	int y;
+	Pixel() {}
+	Pixel(int dx, int dy):x{dx},y{dy} {}
+};
 class SpatialTree {
 private:
 	// static const int MAXOBJS = 8;
@@ -26,14 +36,14 @@ private:
 	double xmax;
 	double ymin;
 	double ymax;
-	// struct Datum
-	// {
-	// 	double x;
-	// 	double y;
-	// 	T data;
-	// 	Datum() {}
-	// 	Datum(double a, double b, T c):x{a},y{b},data{c} {}
-	// };
+	struct Datum
+	{
+		double x;
+		double y;
+		Pixel data;
+		Datum() {}
+		Datum(double a, double b, Pixel c):x{a},y{b},data{c} {}
+	};
 	struct Node
 	{
 		bool isLeaf;
@@ -104,18 +114,41 @@ private:
 			objy - radius < node->hy && objy + radius > node->ly;
 	}
 
-	const bool CONTAINS(const double &objx, const double &objy, const Node *node)
-	{
-		return objx > node->lx && objx <= node->hx && objy > node->ly && objy <= node->hy;
-	}
 
-// #define PART_DISTANCE(AX,AY,BX,BY) (((AX)-(BX))*((AX)-(BX)) + ((AX)-(BX))*((AX)-(BX)))
-	double distance(const double &ax, const double &ay, const double &bx, const double &by)
-	{
-		double dx = ax-bx;
-		double dy = ay-by;
-		return dx*dx+dy*dy;
-	}
+
+	// void addRecur(Datum &obj, Node *n)
+	// {
+	// 	if (n->isLeaf)
+	// 	{
+	// 		if (n->size < MAXOBJS)
+	// 		{
+	// 			n->size++;
+	// 			n->objects.push_back(obj);
+	// 			return;
+	// 		}
+	// 		else
+	// 		{
+	// 			makeChildren(n);
+	// 			n->size = 0;
+	// 			for (auto o:n->objects)
+	// 			{
+	// 			}
+	// 			n->objects.clear();
+	// 			addRecur(obj,&n->children[whichChild(obj,n)]);
+	// 			return;
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		int index = whichChild(o,n);
+	// 		if (index == 5)
+	// 		{
+	// 			regenerateNode(n);
+	// 		}
+	// 		addRecur(o,n);
+	// 		return;
+	// 	}
+	// }
 
 	void trimTreeRecur(Node *node)
 	{
@@ -182,13 +215,13 @@ private:
 
 
 
-	void searchRecur(double &objx,double &objy,double &radius, Node *n,std::vector<T> &ret)
+	void searchRecur(double &objx,double &objy,double &radius, Node *n,std::vector<Pixel> &ret)
 	{
 		if (n->isLeaf)
 		{
 			for (auto i:n->objects)
 			{
-				if (distance(i.x,i.y,objx,objy) < radius*radius)
+				if (PART_DISTANCE(i.x,i.y,objx,objy) < radius*radius)
 				{
 					ret.push_back(i.data);
 				}
@@ -259,6 +292,35 @@ private:
 		}
 	}
 
+	// void regenerateNode_helper(Node * prnt,Node *node)
+	// {
+	// 	if (node.isLeaf)
+	// 	{
+	// 		for (auto obj:node->objects)
+	// 		{
+	// 			addRecur(obj,prnt);
+	// 		}
+	// 		return;
+	// 	}
+	// 	else
+	// 	{
+	// 		for (auto n:node->children)
+	// 		{
+	// 			regenerateNode_helper(prnt,n);
+	// 		}
+	// 		return;
+	// 	}
+	// }
+
+	// void regenerateNode(Node *node)
+	// {
+	// 	vector<Node> tmp = node->children;
+	// 	node->children.clear()
+	// 	makeChildren(node);
+	// 	regenerateNode_helper(node,node);
+	// 	return;
+	// }
+
 public:
 	SpatialTree(double xmn, double xmx, double ymn, double ymx) {
 		sz = 0;
@@ -282,7 +344,7 @@ public:
 	~SpatialTree() {
 		if (root != nullptr)
 		{
-			std::cout << "Delete destructor" << "\n";
+			// std::cout << "Delete destructor" << "\n";
 			delete root;
 		}
 	}
@@ -306,7 +368,7 @@ public:
 		}
 		else
 		{
-			T tmp = T(dx,dy);
+			Pixel tmp = Pixel(dx,dy);
 			Datum data = Datum(posx,posy,tmp);
 			// std::cout << "Calling insert \n";
 			addRecur(data, root);
@@ -335,9 +397,9 @@ public:
 		return;
 	}
 
-	vector<T> query_point(double ptx, double pty, double radius)
+	vector<Pixel> query_point(double ptx, double pty, double radius)
 	{
-		std::vector<T> ret;
+		std::vector<Pixel> ret;
 		if (ptx > xmin && ptx < xmax && pty > ymin && pty < ymax)
 		{
 			searchRecur(ptx,pty,radius,root,ret);
@@ -346,20 +408,6 @@ public:
 		else
 		{
 			return ret;
-		}
-	}
-
-	int query_point_count(double ptx, double pty, double radius)
-	{
-		std::vector<T> ret;
-		if (ptx > xmin && ptx < xmax && pty > ymin && pty < ymax)
-		{
-			searchRecur(ptx,pty,radius,root,ret);
-			return ret.size();
-		}
-		else
-		{
-			return ret.size();
 		}
 	}
 

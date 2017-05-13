@@ -5,8 +5,7 @@ from Stellar import Galaxy
 from Stellar import Quasar
 from Stellar import defaultQuasar
 from Stellar import defaultGalaxy
-from MassFunction import MassFunction
-from MassFunction import defaultMassGenerator
+from Calculator import Kroupa_2001
 from astropy.cosmology import WMAP7 as cosmo
 from astropy import constants as const
 from astropy import units as u 
@@ -64,7 +63,12 @@ class Parameters(object):
 		self.setMicrolensing(isMicrolensing)
 
 	def generateStars(self):
-		self.__galaxy.generateStars(self,self.numStars)
+		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen/100
+		generator = Kroupa_2001()
+		print("Starting generator with mass of "+str(m_stars))
+		starMasses = generator.generate_cluster(m_stars)[0]
+		print("Done.")
+		self.__galaxy.setStarMasses(starMasses,self)
 
 	@property
 	def galaxy(self):
@@ -107,12 +111,25 @@ class Parameters(object):
 	def stars(self):
 		return self.galaxy._Galaxy__stars
 
-	def setStars(self,stars):
-		self.__galaxy.update(stars = stars)
-
 	@property
 	def dLS(self):
 		return self.__dLS
+
+	@property
+	def smoothMassOnScreen(self):
+		l = (self.dTheta*self.canvasDim*self.__galaxy.angDiamDist.to('m')).value
+		r_in = self.__galaxy.center.magnitude()*self.__galaxy.angDiamDist.to('m').value
+		ret = (l * self.__galaxy.velocityDispersion**2 * math.log(r_in/l)/2/const.G.to('m3 / (solMass s2)')).value
+		print(ret)
+		return ret
+
+	@property
+	def correctedVelocityDispersion(self):
+		return math.sqrt(1-self.__galaxy.percentStars)*self.__galaxy.velocityDispersion
+
+	def setStars(self,stars):
+		self.__galaxy.update(stars = stars)
+
 
 	def __calcEinsteinRadius(self):
 		return 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.__dLS/self.quasar.angDiamDist /((const.c**2).to('km2/s2'))
@@ -143,6 +160,20 @@ class Parameters(object):
 	def getStarMasses(self,mass,tolerance = 0.05):
 		ret = defaultMassGenerator.starField(mass,tolerance)
 		return ret
+	
+	@property
+	def queryQuasarX(self):
+		return self.galaxy.position.x + self.quasar.observedPosition.x
+
+	@property
+	def queryQuasarY(self):
+		return self.galaxy.position.y + self.quasar.observedPosition.y
+				
+	@property
+	def queryQuasarRadius(self):
+		return self.quasar.radius.value
+
+
 
 	def isSimilar(self,other):
 		if self.dTheta != other.dTheta:
