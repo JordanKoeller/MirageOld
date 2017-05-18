@@ -13,9 +13,10 @@ import threading as par
 import time
 import imageio
 import numpy as np
-from Drawer import CompositeDrawer
-from Drawer import DiagnosticCompositeDrawer
-from Drawer import DataDrawer
+from Drawer.Drawer import CompositeDrawer
+# from Drawer import DiagnosticCompositeDrawer
+from Drawer.Drawer import ImageDrawer 
+from Drawer import LensedImageLightCurveComposite
 
 
 class SimThread(QtCore.QThread):
@@ -63,7 +64,7 @@ class SimThread(QtCore.QThread):
         self.__calculating = False
         self.__frameRate = 60
         self.engine = engine
-        self.__drawer = CompositeDrawer(self.image_canvas_update,self.curve_canvas_update)
+        self.__drawer = LensedImageLightCurveComposite(self.image_canvas_update,self.curve_canvas_update)
 
 
     def updateParameters(self,params):
@@ -78,7 +79,7 @@ class SimThread(QtCore.QThread):
             counter += 1
             timer = time.clock()
             pixels = self.engine.getFrame()
-            img = self.__drawer.draw(self.engine.parameters,pixels)
+            img = self.__drawer.draw([self.engine.parameters,pixels],[len(pixels)])
             self.engine.incrementTime(self.engine.parameters.dt)
             deltaT = time.clock() - timer
             if deltaT < interval:
@@ -92,14 +93,14 @@ class SimThread(QtCore.QThread):
         self.__calculating = False
         self.engine.setTime(0)
         pixels = self.engine.getFrame()
-        frame = self.__drawer.draw(self.engine.parameters,pixels)
-        self.__drawer.resetCurve()
+        frame = self.__drawer.draw([self.engine.parameters,pixels],[len(pixels)])
+        self.__drawer.reset()
 
     def visualize(self,params):
-        drawer = DataDrawer(self.image_canvas_update)
+        drawer = ImageDrawer(self.image_canvas_update)
         self.engine.updateParameters(params)
         pixels = self.engine.visualize()
-        frame = drawer.draw(pixels)
+        frame = drawer.draw([pixels])
 
     def bin_test(self):
         binszs = np.arange(7000,65000,100)

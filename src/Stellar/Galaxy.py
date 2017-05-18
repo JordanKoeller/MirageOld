@@ -19,7 +19,7 @@ class Galaxy(Drawable,Cosmic):
 
 	def __init__(self, redshift = 0.0, velocityDispersion = u.Quantity(0,'km/s'), shearMag = 0, shearAngle = 0, percentStars = 0, center = zeroVector):
 		self.__velocityDispersion = velocityDispersion
-		self.__pcntStar = percentStars
+		self.__pcntStar = percentStars/100
 		self.__shear = ShearLenser(shearMag,shearAngle)
 		self.updateDrawable(position = center, colorKey = 4)
 		self.updateCosmic(redshift = redshift)

@@ -63,7 +63,7 @@ class Parameters(object):
 		self.setMicrolensing(isMicrolensing)
 
 	def generateStars(self):
-		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen/100
+		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
 		generator = Kroupa_2001()
 		print("Starting generator with mass of "+str(m_stars))
 		starMasses = generator.generate_cluster(m_stars)[0]
@@ -120,7 +120,6 @@ class Parameters(object):
 		l = (self.dTheta*self.canvasDim*self.__galaxy.angDiamDist.to('m')).value
 		r_in = self.__galaxy.center.magnitude()*self.__galaxy.angDiamDist.to('m').value
 		ret = (l * self.__galaxy.velocityDispersion**2 * math.log(r_in/l)/2/const.G.to('m3 / (solMass s2)')).value
-		print(ret)
 		return ret
 
 	@property
@@ -132,8 +131,8 @@ class Parameters(object):
 
 
 	def __calcEinsteinRadius(self):
-		return 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.__dLS/self.quasar.angDiamDist /((const.c**2).to('km2/s2'))
-
+		ret =  4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.__dLS/self.quasar.angDiamDist /((const.c**2).to('km2/s2'))
+		return ret
 	def __calcdLS(self):
 		return cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift).to('lyr')
 

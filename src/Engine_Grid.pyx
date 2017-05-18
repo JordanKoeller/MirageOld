@@ -29,8 +29,7 @@ from Utility.Grid cimport Grid
 from Utility.Grid cimport Pixel
 from Engine cimport Engine
 from libcpp cimport bool
-from Drawer import CurveDrawer
-from Drawer import PlotDrawer
+from Drawer.Drawer import PlotDrawer
 
 cdef class Engine_Grid(Engine):
 
@@ -82,6 +81,7 @@ cdef class Engine_Grid(Engine):
 		cdef double qr = <double> self.__parameters.queryQuasarRadius
 		cdef vector[Pixel] ret = self.query_data(qx,qy,qr)
 		cdef int retf = ret.size()
+		cdef int i = 0
 		cdef np.ndarray[np.int32_t, ndim = 2] fret = np.ndarray((ret.size(), 2), dtype=np.int32)
 		for i in range(0, retf):
 			fret[i][0] = ret[i].pixelX

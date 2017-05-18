@@ -19,7 +19,6 @@ from Main import ImageSimThread
 from Main import LightCurveSimThread
 from Main import SimThread
 from Graphics import DynamicCanvas
-from Drawer import CurveDrawer
 import pyqtgraph as pg
 from Main import FileManager
 from Engine_Grid import Engine_Grid
@@ -150,7 +149,7 @@ class GUIManager(QtWidgets.QMainWindow):
 
     def restart(self):
         self.imgDrawer.restart()
-        self.fileManager.save()
+        self.fileManager.save_recording()
 
     def saveParams(self):
         print("Firing")
@@ -167,7 +166,7 @@ class GUIManager(QtWidgets.QMainWindow):
     def saveVisualization(self):
         self.fileManager.recording = True
         self.visualizeData()
-        self.fileManager.save()
+        self.fileManager.save_still(self.main_canvas)
         
     def bindFields(self,parameters):
         qV = parameters.quasar.velocity.to('arcsec').unitless()

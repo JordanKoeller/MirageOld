@@ -2,6 +2,8 @@
 #include <cmath>
 #include <iostream>
 #include <utility>
+#include <algorithm>
+#include <cfloat>
 
 using namespace std;
 
@@ -120,7 +122,6 @@ public:
 	{
 		for (auto i:data)
 		{
-			int counter = 0;
 			for (auto j:i) 
 			{
 				//cout << "<" << counter++ << ">";
@@ -151,10 +152,10 @@ public:
 
 	Grid(const vector<pair<pair<double,double>,pair<int,int>>>::iterator i1, const vector<pair<pair<double,double>,pair<int,int>>>::iterator i2, const int &node_count)
 	{
-		double minX = 1e30;
-		double minY = 1e30;
-		double maxX = -1e30;
-		double maxY = -1e30;
+		double minX = DBL_MAX;
+		double minY = DBL_MAX;
+		double maxX = DBL_MIN;
+		double maxY = DBL_MIN;
 		sz = 0;
 		for (auto i=i1; i != i2; i++)
 		{
@@ -178,18 +179,34 @@ public:
 		double cy = (y-tly)/NODE_HEIGHT;
 		double rx = r/(NODE_WIDTH) + 1;
 		double ry = r/(NODE_HEIGHT) + 1;
+		// cout << "Querying " << 4*rx*ry << " Nodes.";
+		double hypot = rx*rx+ry*ry;
 		// cout << "Center at " << cx << "," << cy << " with radius^2 " << rr << endl;
 		vector<Pixel> ret;
-		for (int i = cx - rx; i <= cx + rx; ++i) // Possible indexing issue here?
+
+		// #pragma omp parallel for
+		for (int i = 0; i <= rx; ++i) // Possible indexing issue here?
 		{
-			for (int j = cy - ry; j <= cy + ry;++j) //Improvement by using symmetry possible
+			for (int j = 0; j <= ry;++j) //Improvement by using symmetry possible
 			{
-				if (i >= 0 && j >= 0 && i < data.size() && j < data[0].size())
+				if ((i)*(i)+(j)*(j) <= hypot)
 				{
-					vector<Pixel> tmp = data[i][j].queryNode(x,y,r);
-					for (auto elem:tmp)
-					{
-						ret.push_back(elem);
+
+					if (i+cx >= 0 && i+cx < data.size() && j+cy >= 0 && j+cy < data[0].size()) {	
+						vector<Pixel> tmp = data[i+cx][j+cy].queryNode(x,y,r);
+						ret.insert(ret.end(),tmp.begin(),tmp.end());
+					}
+					if (cx-i >= 0 && cx-i < data.size() && j+cy >= 0 && j+cy < data[0].size()) {	
+						vector<Pixel> tmp = data[cx-i][cy+j].queryNode(x,y,r);
+						ret.insert(ret.end(),tmp.begin(),tmp.end());
+					}
+						if (cx+i >= 0 && cx+i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
+						vector<Pixel> tmp = data[i+cx][cy-j].queryNode(x,y,r);
+						ret.insert(ret.end(),tmp.begin(),tmp.end());
+					}
+						if (cx-i >= 0 && cx-i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
+						vector<Pixel> tmp = data[cx-i][cy-j].queryNode(x,y,r);
+						ret.insert(ret.end(),tmp.begin(),tmp.end());
 					}
 				}
 			}

@@ -24,12 +24,15 @@ class FileManager(object):
 		self.progress_label_update = singals[1]
 		self.progress_bar_max_update = singals[4]
 		self.IOThread = IOThread(self.__runMethod)
+		self.imgtype = "Images (*.png *.tiff *.jpg *.jpeg)"
+		self.movtype = "Movies (*.mp4)"
+		self.paramType = "Parameters (*.param)"
 
-	def __makeFile(self):
-		return QtWidgets.QFileDialog.getSaveFileName()[0]
+	def __makeFile(self,filetype=""):
+		return QtWidgets.QFileDialog.getSaveFileName(filter=filetype)[0]
 
-	def __getFile(self):
-		return QtWidgets.QFileDialog.getOpenFileName()[0]
+	def __getFile(self,filetype=""):
+		return QtWidgets.QFileDialog.getOpenFileName(filter=filetype)[0]
 
 	def writeParams(self, parameters):
 		self.filename = self.__makeFile()
@@ -71,15 +74,16 @@ class FileManager(object):
 		self.progress_bar_update.emit(0)
 		
 
-	def save(self):
+	def save_recording(self):
 		if self.recording:
-			self.filename = self.__makeFile()
+			self.filename = self.__makeFile(self.movtype)
 			if self.filename:
 				self.progress_bar_max_update.emit(self.__frameCounter)
 				self.progress_label_update.emit("Rendering. Please Wait.")
 				self.IOThread.start()
 			self.recording = False
 
-
-
-		
+	def save_still(self,img):
+		self.filename = self.__makeFile(self.imgtype)
+		if self.filename:
+			img.pixmap().save(self.filename)
