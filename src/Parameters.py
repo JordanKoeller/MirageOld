@@ -44,7 +44,9 @@ class Parameters(object):
 		center position
 		velocity
 		base position"""
-	def __init__(self, isMicrolensing = False, autoConfiguring = False, galaxy = defaultGalaxy, quasar = defaultQuasar, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0, curveDim = Vector2D(800,200)):
+		
+	def __init__(self, galaxy = defaultGalaxy, quasar = defaultQuasar, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0, curveDim = Vector2D(800,200), center = zeroVector):
+		self.__center = center
 		self.__galaxy = galaxy
 		self.__quasar = quasar
 		self.__dTheta = u.Quantity(dTheta/canvasDim,'rad')
@@ -55,12 +57,9 @@ class Parameters(object):
 		self.numStars = numStars
 		self.__starMassTolerance = starMassTolerance
 		self.__starMassVariation = starMassVariation
-		self.__dLS = self.__calcdLS()
-		self.__einsteinRadius = self.__calcEinsteinRadius()
 		self.dt = 0.1
 		self.time = 0
-		self.setAutoConfigure(autoConfiguring)
-		self.setMicrolensing(isMicrolensing)
+
 
 	def generateStars(self):
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
@@ -94,15 +93,15 @@ class Parameters(object):
 
 	@property
 	def einsteinRadius(self):
-		return self.__einsteinRadius
+		return 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.__dLS/self.quasar.angDiamDist /const.c**2
 
 	@property
 	def displayQuasar(self):
-		return self.showQuasar and self.__galaxy.center == zeroVector
+		return self.showQuasar
 
 	@property
 	def displayGalaxy(self):
-		return self.showGalaxy and self.__galaxy.center == zeroVector
+		return self.showGalaxy
 
 	@property
 	def displayStars(self):
@@ -113,12 +112,13 @@ class Parameters(object):
 
 	@property
 	def dLS(self):
-		return self.__dLS
+		return cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift).to('lyr')
 
 	@property
 	def smoothMassOnScreen(self):
 		l = (self.dTheta*self.canvasDim*self.__galaxy.angDiamDist.to('m')).value
-		r_in = self.__galaxy.center.magnitude()*self.__galaxy.angDiamDist.to('m').value
+		r_in = self.center.magnitude()*self.__galaxy.angDiamDist.to('m').value
+		print(l)
 		ret = (l * self.__galaxy.velocityDispersion**2 * math.log(r_in/l)/2/const.G.to('m3 / (solMass s2)')).value
 		return ret
 
@@ -129,32 +129,9 @@ class Parameters(object):
 	def setStars(self,stars):
 		self.__galaxy.update(stars = stars)
 
-
-	def __calcEinsteinRadius(self):
-		ret =  4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.__dLS/self.quasar.angDiamDist /((const.c**2).to('km2/s2'))
-		return ret
-	def __calcdLS(self):
-		return cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift).to('lyr')
-
-	def setMicrolensing(self,isMicrolensing):
-		if isMicrolensing:
-			self.microlensing = True
-			self.__galaxy.update(center = Vector2D(-self.einsteinRadius.value,0,'rad')) #Will refactor later, once how this works is figured out
-		else:
-			self.microlensing = False
-			self.__galaxy.update(center = zeroVector)
-
 	def setTime(self,time):
 		self.time = time
 		self.__quasar.setTime(time)
-
-
-	def setAutoConfigure(self,isAutoConfiguring):
-		if isAutoConfiguring:
-			self.autoConfigure = True
-			self.__dTheta = 4*self.einsteinRadius/self.__canvasDim
-		else:
-			self.autoConfigure = False
 
 	def getStarMasses(self,mass,tolerance = 0.05):
 		ret = defaultMassGenerator.starField(mass,tolerance)
@@ -162,11 +139,23 @@ class Parameters(object):
 	
 	@property
 	def queryQuasarX(self):
-		return self.galaxy.position.x + self.quasar.observedPosition.x
+		return self.quasar.position.to('rad').x + self.__center.to('rad').x
 
 	@property
 	def queryQuasarY(self):
-		return self.galaxy.position.y + self.quasar.observedPosition.y
+		return self.quasar.position.to('rad').y + self.__center.to('rad').y
+
+	@property
+	def centerX(self):
+		return self.__center.to('rad').x
+
+	@property
+	def centerY(self):
+		return self.__center.to('rad').y
+
+	@property
+	def center(self):
+		return self.__center.to('rad')
 				
 	@property
 	def queryQuasarRadius(self):
@@ -179,8 +168,8 @@ class Parameters(object):
 			return False
 		if self.canvasDim != other.canvasDim:
 			return False
-		# if self.starMassTolerance < other.starMassTolerance:
-		# 	return False
+		if self.center != other.center:
+			return False
 		if self.starMassVariation != other.starMassVariation:
 			return False
 		if self.galaxy != other.galaxy:

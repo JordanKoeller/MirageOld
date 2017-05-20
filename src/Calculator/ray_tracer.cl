@@ -42,6 +42,7 @@ __kernel void ray_trace(
 		double deltaR_x;
 		double deltaR_y;
 		double r;
+		double phi;
 		result_buf_x[index] = 0.0;
 		result_buf_y[index] = 0.0;
 		r = 0.0;
@@ -50,22 +51,21 @@ __kernel void ray_trace(
 		{
 			deltaR_x = (stars_x[i] - incident_angle_x)*dL;
 			deltaR_y = (stars_y[i] - incident_angle_y)*dL;
-			r = (double) sqrt((float) deltaR_x*deltaR_x + deltaR_y*deltaR_y);
+			r = sqrt(deltaR_x*deltaR_x + deltaR_y*deltaR_y);
 			result_buf_x[index] += (deltaR_x*stars_mass[i]/(r*r))*POINT_CONSTANT;
 			result_buf_y[index] += (deltaR_y*stars_mass[i]/(r*r))*POINT_CONSTANT;
 		}
 		// Lensing from SIS
-		deltaR_x =  centerX -incident_angle_x;
-		deltaR_y = centerY -incident_angle_y;
-		r = (double) sqrt((float) deltaR_x*deltaR_x + deltaR_y*deltaR_y);
-		result_buf_x[index] += velocityDispersion * velocityDispersion * deltaR_x * SIS_CONSTANT / r;
-		result_buf_y[index] += velocityDispersion * velocityDispersion * deltaR_y * SIS_CONSTANT / r;
+		deltaR_x =  incident_angle_x - centerX;
+		deltaR_y =  incident_angle_y - centerY;
+		r = sqrt(deltaR_x*deltaR_x + deltaR_y*deltaR_y);
+		result_buf_x[index] += velocityDispersion * velocityDispersion * (-deltaR_x) * SIS_CONSTANT / r;
+		result_buf_y[index] += velocityDispersion * velocityDispersion * (-deltaR_y) * SIS_CONSTANT / r;
 
 		// Lensing from shear
-		// deltaR_x /= r;
-		// deltaR_y /= r;
-		result_buf_x[index] += shear_mag*r*(double) cos((float) 2*(shear_angle+M_PI_2) - (float) atan2((float) deltaR_y,(float) deltaR_x));
-		result_buf_y[index] += shear_mag*r*(double) sin((float) 2*(shear_angle+M_PI_2) - (float) atan2((float) deltaR_y,(float) deltaR_x));
+		phi = 2*(shear_angle+M_PI_2) - atan2(deltaR_y,deltaR_x);
+		result_buf_x[index] += shear_mag*r*cos(phi);
+		result_buf_y[index] += shear_mag*r*sin(phi);
 		result_buf_x[index] = (incident_angle_x*dL + ((incident_angle_x+(result_buf_x[index]))*dLS))/dS;
 		result_buf_y[index] = (incident_angle_y*dL + ((incident_angle_y+(result_buf_y[index]))*dLS))/dS;
 

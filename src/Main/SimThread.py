@@ -17,6 +17,7 @@ from Drawer.Drawer import CompositeDrawer
 # from Drawer import DiagnosticCompositeDrawer
 from Drawer.Drawer import ImageDrawer 
 from Drawer import LensedImageLightCurveComposite
+from Utility import zeroVector
 
 
 class SimThread(QtCore.QThread):

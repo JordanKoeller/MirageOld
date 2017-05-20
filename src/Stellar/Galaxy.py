@@ -24,23 +24,13 @@ class Galaxy(Drawable,Cosmic):
 		self.updateDrawable(position = center, colorKey = 4)
 		self.updateCosmic(redshift = redshift)
 
-	def setPos(self, einsteinRadius, theta = math.pi):
-		x = math.sin(theta)
-		y = -math.cos(theta)
-		self.updateDrawable(position = Vector2D(x*einsteinRadius, y*einsteinRadius, einsteinRadius.unit))
-
-	# def generateStars(self, parameters,numStars,totalMass=0): #RTODO
-	# 	print("Calling")
-	# 	self.__stars = []
-	# 	massInStars = totalMass*self.__pcntStar
-	# 	masses = parameters.getStarMasses(numStars) #Need to change this line to reflect, percentage and have a tolerance for mass in stars
-
 	def drawStars(self,img,parameters):
 		for star in self.__stars:
 			star.draw(img,parameters)
 
 	def drawGalaxy(self,img,parameters):
-		center = Vector2D(self.position.x/parameters.dTheta.value + (parameters.canvasDim/2),self.position.y/parameters.dTheta.value + (parameters.canvasDim/2))
+		center = (self.position + parameters.center)/parameters.dTheta.to('rad').value + Vector2D(parameters.canvasDim/2,parameters.canvasDim/2)
+		# center = Vector2D(self.position.x/parameters.dTheta.value + (parameters.canvasDim/2),self.position.y/parameters.dTheta.value + (parameters.canvasDim/2))
 		for i in range(-2,3,1):
 			for j in range(-2,3,1):
 				if center.x + i > 0 and center.y + j > 0 and center.x + i < parameters.canvasDim and center.y + j < parameters.canvasDim:
@@ -78,18 +68,6 @@ class Galaxy(Drawable,Cosmic):
 			self.__stars = stars
 		self.updateDrawable(position = center)
 		self.updateCosmic(redshift = redshift)
-
-	def unscaledAlphaAt(self, position):
-		"Returns a complex number, representing the unscaled deflection angle at the point pt."
-		for star in self.__stars:
-			position += star.unscaledAlphaAt(position)
-		position += self.shear.unscaledAlphaAt(position)
-		pos = self.position.toComplex()
-		mass = self.mass.to('solMass')
-		deltaR = pos-position
-		r = np.absolute(deltaR)
-		position += deltaR * (self.velocityDispersion.value*self.velocityDispersion.value*28.83988945290979/(r))
-		return position
 
 	def __str__(self):
 		return "GALAXY:\n" + self.drawableString() + "\n" + self.cosmicString() + "\n" + self.shear.shearString() + "\nvelocity Dispersion = " + str(self.velocityDispersion) + "\nnumStars = " + str(self.numStars) + "\n\n"
@@ -133,7 +111,11 @@ class Galaxy(Drawable,Cosmic):
 
 	@property
 	def center(self):
-		return self.position
+		return zeroVector
+
+	@property
+	def position(self):
+		return zeroVector
 	@property
 	def stars(self):
 		return self.__stars

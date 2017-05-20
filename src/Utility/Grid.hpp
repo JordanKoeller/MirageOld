@@ -42,14 +42,15 @@ private:
 		}
 	}
 
-	inline bool overlap(const double &objx, const double& objy, const double &radius, const int &i, const int &j) const
-	{
-		double tnx = tlx + i*NODE_WIDTH;
-		double tny = tly + j*NODE_HEIGHT;
-		double bnx = tlx + (i+1)*NODE_WIDTH;
-		double bny = tly + (j+1)*NODE_HEIGHT;
-		return objx - radius <= bnx && objx + radius > tnx && objy - radius <= bny && objy + radius > tny; //BIG possible bug spot.
-	}
+	// inline bool overlap(const double &objx, const double& objy, const double &radius, const int &i, const int &j) const
+	// {
+	// 	double tnx = tlx + i*NODE_WIDTH;
+	// 	double tny = tly + j*NODE_HEIGHT;
+	// 	double bnx = tlx + (i+1)*NODE_WIDTH;
+	// 	double bny = tly + (j+1)*NODE_HEIGHT;
+	// 	// bool flag1 = 
+	// 	return objx - radius <= bnx && objx + radius > tnx && objy - radius <= bny && objy + radius > tny; //BIG possible bug spot.
+	// }
 
 	inline pair<double,double> getIndices(const double &x,const double &y)
 	{
@@ -173,40 +174,70 @@ public:
 	}
 	Grid()=default;
 
+	vector<Pixel> find_within_brute(const double &x, const double &y, const double &r) const {
+		vector<Pixel> ret;
+		for (auto i:data) {
+			for (auto j:i) {
+				vector<Pixel> tmp = j.queryNode(x,y,r);
+				ret.insert(ret.end(),tmp.begin(),tmp.end());
+			}
+		}
+		return ret;
+	}
+
 	vector<Pixel> find_within(const double &x, const double &y, const double &r) const
 	{
-		double cx = (x-tlx)/NODE_WIDTH;
-		double cy = (y-tly)/NODE_HEIGHT;
-		double rx = r/(NODE_WIDTH) + 1;
-		double ry = r/(NODE_HEIGHT) + 1;
-		// cout << "Querying " << 4*rx*ry << " Nodes.";
-		double hypot = rx*rx+ry*ry;
-		// cout << "Center at " << cx << "," << cy << " with radius^2 " << rr << endl;
+		int cx = ceil((x-tlx)/NODE_WIDTH);
+		int cy = ceil((y-tly)/NODE_HEIGHT);
+		int rx = ceil(r/(NODE_WIDTH));
+		int ry = ceil(r/(NODE_HEIGHT));
+		// cout << "X,Y = " << rx << "," << ry << "\n";
+		int hypot2 = rx*rx+ry*ry;
 		vector<Pixel> ret;
-
-		// #pragma omp parallel for
-		for (int i = 0; i <= rx; ++i) // Possible indexing issue here?
+		vector<Pixel> tmp = data[cx][cy].queryNode(x,y,r);
+		// ret.insert(ret.end\\(),tmp.begn(),tmp.end());
+		for (size_t i = 0; i <= rx; ++i) // Possible indexing issue here?
 		{
-			for (int j = 0; j <= ry;++j) //Improvement by using symmetry possible
+			int ryLow = ceil(sqrt(hypot2 - i*i))+1;
+			for (size_t j = 0; j <= ryLow;++j) //Improvement by using symmetry possible
 			{
-				if ((i)*(i)+(j)*(j) <= hypot)
+				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r)
 				{
-
-					if (i+cx >= 0 && i+cx < data.size() && j+cy >= 0 && j+cy < data[0].size()) {	
-						vector<Pixel> tmp = data[i+cx][j+cy].queryNode(x,y,r);
-						ret.insert(ret.end(),tmp.begin(),tmp.end());
+					if ((i+2)*NODE_WIDTH*(i+2)*NODE_WIDTH + (j+2)*NODE_HEIGHT*(j+2)*NODE_HEIGHT < r*r) {
+						if (i+cx >= 0 && i+cx < data.size() && j+cy >= 0 && j+cy < data[0].size()) {
+							auto &node = data[i+cx][j+cy];
+							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
+						}
+						if (cx-i >= 0 && cx-i < data.size() && j+cy >= 0 && j+cy < data[0].size()) {	
+							auto &node = data[cx-i][cy+j];
+							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
+						}
+							if (cx+i >= 0 && cx+i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
+							auto &node = data[i+cx][cy-j];
+							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
+						}
+							if (cx-i >= 0 && cx-i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
+							auto &node = data[cx-i][cy-j];
+							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
+						}						
 					}
-					if (cx-i >= 0 && cx-i < data.size() && j+cy >= 0 && j+cy < data[0].size()) {	
-						vector<Pixel> tmp = data[cx-i][cy+j].queryNode(x,y,r);
-						ret.insert(ret.end(),tmp.begin(),tmp.end());
-					}
-						if (cx+i >= 0 && cx+i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
-						vector<Pixel> tmp = data[i+cx][cy-j].queryNode(x,y,r);
-						ret.insert(ret.end(),tmp.begin(),tmp.end());
-					}
-						if (cx-i >= 0 && cx-i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
-						vector<Pixel> tmp = data[cx-i][cy-j].queryNode(x,y,r);
-						ret.insert(ret.end(),tmp.begin(),tmp.end());
+					else {
+						if (i+cx >= 0 && i+cx < data.size() && j+cy >= 0 && j+cy < data[0].size()) {
+							tmp = data[i+cx][j+cy].queryNode(x,y,r);
+							ret.insert(ret.end(),tmp.begin(),tmp.end());
+						}
+						if (cx-i >= 0 && cx-i < data.size() && j+cy >= 0 && j+cy < data[0].size()) {	
+							tmp = data[cx-i][cy+j].queryNode(x,y,r);
+							ret.insert(ret.end(),tmp.begin(),tmp.end());
+						}
+							if (cx+i >= 0 && cx+i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
+							tmp = data[i+cx][cy-j].queryNode(x,y,r);
+							ret.insert(ret.end(),tmp.begin(),tmp.end());
+						}
+							if (cx-i >= 0 && cx-i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
+							tmp = data[cx-i][cy-j].queryNode(x,y,r);
+							ret.insert(ret.end(),tmp.begin(),tmp.end());
+						}
 					}
 				}
 			}

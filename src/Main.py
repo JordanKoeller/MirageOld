@@ -22,8 +22,8 @@ from Graphics import DynamicCanvas
 import pyqtgraph as pg
 from Main import FileManager
 from Engine_Grid import Engine_Grid
-from Engine_Quadtree import Engine_Quadtree
-from Engine_KDTree import Engine_KDTree
+# from Engine_Quadtree import Engine_Quadtree
+# from Engine_KDTree import Engine_KDTree
 
 class GUIManager(QtWidgets.QMainWindow):
     progress_bar_update = QtCore.pyqtSignal(int)
@@ -36,7 +36,7 @@ class GUIManager(QtWidgets.QMainWindow):
         super(GUIManager, self).__init__(parent)
         uic.loadUi('Resources/GUI/gui.ui', self)
         signals = self.makeSignals()
-        self.imgDrawer = SimThread(Engine_Grid(),signals)
+        self.simThread = SimThread(Engine_Grid(),signals)
         self.fileManager = FileManager(signals)
         self.setupUi()
         self.setupSignals()
@@ -64,33 +64,38 @@ class GUIManager(QtWidgets.QMainWindow):
         self.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
         self.progressBar.setValue(0)
         self.lightCurveStartButton.clicked.connect(self.calcLightCurve)
-        self.pauseButton.clicked.connect(self.imgDrawer.pause)
+        self.pauseButton.clicked.connect(self.simThread.pause)
         self.resetButton.clicked.connect(self.restart)
         self.load_setup.triggered.connect(self.loadParams)
         self.save_setup.triggered.connect(self.saveParams)
         self.record_button.triggered.connect(self.record)
         self.visualizeDataButton.clicked.connect(self.visualizeData)
         self.developerExportButton.clicked.connect(self.saveVisualization)
-        self.binSizeTestButton.clicked.connect(self.imgDrawer.bin_test)
-        filler_img = QtGui.QImage(800,800, QtGui.QImage.Format_Indexed8)
+        self.binSizeTestButton.clicked.connect(self.simThread.bin_test)
+        filler_img = QtGui.QImage(2000,2000, QtGui.QImage.Format_Indexed8)
         filler_img.setColorTable([QtGui.qRgb(0,0,0)])
         filler_img.fill(0)
         self.main_canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
 
 
-    def __vector_from_qstring(self,string,reverse_y = True):
+    def __vector_from_qstring(self,string,reverse_y = False, transpose = True):
         """
         Converts an ordered pair string of the form (x,y) into a Vector2D of x and y.
         Flips the sign of the y coordinate to translate computer coordinate systems of
         y increasing down to the conventional coordinate system of y increasing up.
         """
         x,y = (string.strip('()')).split(',')
-        if (reverse_y):
-            ret = Vector2D(float(x),-float(y))
-            return ret
+
+        if transpose:
+            if reverse_y:
+                return Vector2D(-float(y),float(x))
+            else:
+                return Vector2D(float(y),float(x))
         else:
-            ret = Vector2D(float(x),float(y))
-            return ret
+            if reverse_y:
+                return Vector2D(float(x),-float(y))
+            else:
+                return Vector2D(float(x),float(y))
 
     def makeParameters(self):
         """
@@ -109,24 +114,23 @@ class GUIManager(QtWidgets.QMainWindow):
         gShearMag = float(self.gShearMag.text())
         gShearAngle = u.Quantity(float(self.gShearAngle.text()),'degree')
 
+        displayCenter = self.__vector_from_qstring(self.gCenter.text()).setUnit('arcsec').to('rad')
         dTheta = u.Quantity(float(self.scaleInput.text()),'arcsec').to('rad')
         canvasDim = int(self.dimensionInput.text())
         displayQuasar = self.displayQuasar.isChecked()
         displayGalaxy = self.displayGalaxy.isChecked()
-        isMicrolensing = self.enableMicrolensingBox.isChecked()
-        autoConfiguring = self.autoConfigCheckBox.isChecked()
 
         quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity)
         galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars)
-        params = Parameters(isMicrolensing, autoConfiguring, galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
+        params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar, center = displayCenter)
         return params
 
 
     def drawQuasarHelper(self):
-        self.imgDrawer.engine.parameters.showQuasar = self.displayQuasar.isChecked()
+        self.simThread.engine.parameters.showQuasar = self.displayQuasar.isChecked()
 
     def drawGalaxyHelper(self):
-        self.imgDrawer.engine.parameters.showGalaxy = self.displayGalaxy.isChecked()
+        self.simThread.engine.parameters.showGalaxy = self.displayGalaxy.isChecked()
 
     def calcLightCurve(self):
         start = self.__vector_from_qstring(self.lightCurveMinField.text()).setUnit('arcsec').to('rad')
@@ -140,15 +144,15 @@ class GUIManager(QtWidgets.QMainWindow):
         Called by default when the "Play" button is presssed.
         """
         parameters = self.makeParameters()
-        self.imgDrawer.updateParameters(parameters)
-        self.imgDrawer.start()
+        self.simThread.updateParameters(parameters)
+        self.simThread.start()
 
     def record(self):
         self.fileManager.recording = True
         self.simImage()
 
     def restart(self):
-        self.imgDrawer.restart()
+        self.simThread.restart()
         self.fileManager.save_recording()
 
     def saveParams(self):
@@ -161,7 +165,7 @@ class GUIManager(QtWidgets.QMainWindow):
 
     def visualizeData(self):
         params = self.makeParameters()
-        self.imgDrawer.visualize(params)
+        self.simThread.visualize(params)
 
     def saveVisualization(self):
         self.fileManager.recording = True

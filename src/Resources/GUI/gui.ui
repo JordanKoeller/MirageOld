@@ -95,7 +95,7 @@
              <item row="2" column="1">
               <widget class="QLineEdit" name="qPosition">
                <property name="text">
-                <string>(-61.88,0.0)</string>
+                <string>(0.0,0.0)</string>
                </property>
               </widget>
              </item>
@@ -116,7 +116,7 @@
              <item row="1" column="1">
               <widget class="QLineEdit" name="qRadius">
                <property name="text">
-                <string>4.686</string>
+                <string>4</string>
                </property>
               </widget>
              </item>
@@ -308,7 +308,7 @@
              <item row="4" column="0">
               <widget class="QLabel" name="label_13">
                <property name="text">
-                <string>Number of Stars</string>
+                <string>Percent Stars</string>
                </property>
               </widget>
              </item>
@@ -373,28 +373,31 @@
                </property>
               </widget>
              </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_18">
+               <property name="text">
+                <string>Image Center</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QLabel" name="label_24">
+               <property name="text">
+                <string>Arcseconds</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="gCenter">
+               <property name="text">
+                <string>(0,0)</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QCheckBox" name="enableMicrolensingBox">
-               <property name="text">
-                <string>Enable Microlensing</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="autoConfigCheckBox">
-               <property name="text">
-                <string>Auto-Configure</string>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <layout class="QHBoxLayout" name="horizontalLayout_3"/>
            </item>
            <item>
             <widget class="QTabWidget" name="tabWidget">

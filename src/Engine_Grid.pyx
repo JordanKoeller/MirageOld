@@ -45,17 +45,18 @@ cdef class Engine_Grid(Engine):
 		cdef int nodeSz = hw * hw
 		cdef pair[double, double] sp 
 		cdef pair[int, int] pp
-		x = 0
-		y = 0
 		cdef vector[pair[pair[double, double], pair[int, int]]] tmpVect
-		for x in range(0, hw):
-			for y in range(0, hw):
-				sp = pair[double, double](xArray[x, y], yArray[x, y])
-				pp = pair[int, int](< int > x, < int > y)
-				tmpVect.push_back(pair[pair[double, double], pair[int, int]](sp, pp))
-		self.__grid = Grid(tmpVect.begin(), tmpVect.end(), binsize)
+		with nogil:
+			x = 0
+			y = 0
+			for x in range(0, hw):
+				for y in range(0, hw):
+					sp = pair[double, double](xArray[x, y], yArray[x, y])
+					pp = pair[int, int](< int > x, < int > y)
+					tmpVect.push_back(pair[pair[double, double], pair[int, int]](sp, pp))
+			self.__grid = Grid(tmpVect.begin(), tmpVect.end(), binsize)
 
-	cdef vector[Pixel] query_data(self, double x, double y, double radius):
+	cdef vector[Pixel] query_data(self, double x, double y, double radius) nogil:
 		cdef vector[Pixel] ret = self.__grid.find_within(x, y, radius)
 		return ret
 
@@ -76,16 +77,21 @@ cdef class Engine_Grid(Engine):
 			self.reconfigure()
 		while self.__preCalculating:
 			print("waiting")
-		cdef double qx = <double> self.__parameters.queryQuasarX
-		cdef double qy = <double> self.__parameters.queryQuasarY
-		cdef double qr = <double> self.__parameters.queryQuasarRadius
+		cdef double qx = self.__parameters.queryQuasarX
+		cdef double qy = self.__parameters.queryQuasarY
+		cdef double qr = self.__parameters.queryQuasarRadius
+		delta = time.clock()
 		cdef vector[Pixel] ret = self.query_data(qx,qy,qr)
+		print(str(1/(time.clock() - delta)) + " FPS")
 		cdef int retf = ret.size()
 		cdef int i = 0
 		cdef np.ndarray[np.int32_t, ndim = 2] fret = np.ndarray((ret.size(), 2), dtype=np.int32)
-		for i in range(0, retf):
-			fret[i][0] = ret[i].pixelX
-			fret[i][1] = ret[i].pixelY
+		with nogil:
+			for i in range(0, retf):
+				fret[i,0] = <int> ret[i].pixelX
+				fret[i,1] = <int> ret[i].pixelY
+		# for i in range(0,retf):
+		# 	print(fret[i])
 		return fret  # self.__tree.query_point(self.__parameters.quasar.observedPosition.x+gX,self.__parameters.quasar.observedPosition.y+gY,self.__parameters.quasar.radius.value)
 
 	def visualize(self):

@@ -71,9 +71,9 @@ cdef class Engine:
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
 
 		# read and compile opencl kernel
-		prg = cl.Program(context, open('Calculator/engine_helper.cl').read()).build()
+		prg = cl.Program(context, open('Calculator/ray_tracer.cl').read()).build()
 		prg.ray_trace(queue, (width, height), None,
-			stars_buffer_mass,
+			stars_buffer_mass,																		
 			stars_buffer_x,
 			stars_buffer_y,
 			np.int32(len(stars_nparray_x)),
@@ -88,10 +88,11 @@ cdef class Engine:
 			np.int32(width),
 			np.int32(height),
 			np.float64(self.__parameters.dTheta.value),
-			np.float64(self.__parameters.galaxy.position.to('rad').x),
-			np.float64(self.__parameters.galaxy.position.y),
+			np.float64(self.__parameters.centerX),
+			np.float64(self.__parameters.centerY),
 			result_buffer_x,
 			result_buffer_y)
+
 
 		cl.enqueue_copy(queue, result_nparray_x, result_buffer_x)
 		cl.enqueue_copy(queue, result_nparray_y, result_buffer_y)
@@ -122,7 +123,7 @@ cdef class Engine:
 		self.time = t 
 		self.parameters.setTime(t)
 		
-	cdef cythonMakeLightCurve(self, mmin, mmax, resolution, progressBar, smoothing):
+	cdef cythonMakeLightCurve(self, mmin, mmax, resolution, progressBar, smoothing): #Needs updateing
 		if not self.__tree:
 			self.reconfigure()
 		begin = time.clock()
@@ -138,12 +139,12 @@ cdef class Engine:
 		cdef double radius = self.__parameters.quasar.radius.value
 		cdef double x = mmin.x
 		cdef double y = mmin.y
-		cdef double gx = self.__parameters.galaxy.position.x
-		cdef double gy = self.__parameters.galaxy.position.y
+		cdef double gx = self.__parameters.galaxy.position.x # Incorrect interfaced
+		cdef double gy = self.__parameters.galaxy.position.y # Incorrect interfaced
 		for i in range(0, resolution):
 			x += stepX
 			y += stepY
-			yAxis[i] = self.__tree.query_point_count(x + gx, y + gy, radius)
+			yAxis[i] = self.__tree.query_point_count(x + gx, y + gy, radius) #Incorrect interfrace
 			counter += 1
 			if progressBar:
 				progressBar.setValue(counter)
@@ -164,19 +165,14 @@ cdef class Engine:
 	def updateParameters(self, parameters):
 		if self.__parameters is None:
 			self.__parameters = parameters
-			if self.__parameters.galaxy.center != zeroVector and self.__parameters.galaxy.percentStars > 0:
+			if self.__parameters.galaxy.percentStars > 0:
 				self.__parameters.generateStars()
 			self.__needsReconfiguring = True
 		elif not self.__parameters.isSimilar(parameters):
 			self.__parameters = parameters
-			if self.__parameters.galaxy.center != zeroVector and self.__parameters.galaxy.percentStars > 0:
+			if self.__parameters.galaxy.percentStars > 0:
 				self.__parameters.generateStars()
 			self.__needsReconfiguring = True
 		else:
 			parameters.setStars(self.__parameters.stars)
 			self.__parameters = parameters
-
-
-
-
-

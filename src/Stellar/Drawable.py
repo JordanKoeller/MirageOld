@@ -12,12 +12,6 @@ class Drawable(object):
 			parameters - Configs class instance, specifying how to draw the entity.
 		"""
 
-	# def updateDrawable(self, position = None, colorKey = None):
-	# 	if position != None:
-	# 		self.__position = position
-	# 	if colorKey != None:
-	# 		self.__colorKey = colorKey
-
 	def updateDrawable(self,**kwargs):
 		for key,value in kwargs.items():
 			try:

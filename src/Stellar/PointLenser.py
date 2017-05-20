@@ -35,15 +35,6 @@ class PointLenser(Drawable):
 		img[center.x,center.y+1] = self._Drawable__colorKey
 
 
-	def unscaledAlphaAt(self, position):
-		"Returns a complex number, representing the unscaled deflection angle at the point pt."
-		pos = self.position.toComplex()
-		mass = self.mass.to('solMass')
-		deltaR = pos-position
-		r = np.absolute(deltaR)
-		return deltaR * 0.12881055652653947 * (mass/(r*r))
-
-
 	@property
 	def mass(self):
 		return self.__mass.to('solMass')

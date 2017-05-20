@@ -11,12 +11,13 @@ cdef extern from "Grid.hpp":
 		int pixelX
 		int pixelY
 		Pixel() except +
-		Pixel(double,double,int, int) except +
+		Pixel(double,double,int, int) nogil
 	cdef cppclass Grid:
 		Grid(double, double,double,double,int) except +
 		Grid() except +
-		Grid(vector[pair[pair[double,double],pair[int,int]]].iterator,vector[pair[pair[double,double],pair[int,int]]].iterator,int)		
-		vector[Pixel] find_within(double,double,double) except +
-		bool insert(double,double, int, int) except +
+		Grid(vector[pair[pair[double,double],pair[int,int]]].iterator,vector[pair[pair[double,double],pair[int,int]]].iterator,int) nogil
+		vector[Pixel] find_within(double,double,double) nogil
+		vector[Pixel] find_within_brute(const double, double, double) nogil
+		bool insert(double,double, int, int) nogil
 		bool clear() except +
 
