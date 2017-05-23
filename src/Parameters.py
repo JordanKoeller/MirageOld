@@ -46,9 +46,9 @@ class Parameters(object):
 		base position"""
 		
 	def __init__(self, galaxy = defaultGalaxy, quasar = defaultQuasar, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0, curveDim = Vector2D(800,200), center = zeroVector):
-		self.__center = center
 		self.__galaxy = galaxy
 		self.__quasar = quasar
+		self.__galaxy.update(center = center)
 		self.__dTheta = u.Quantity(dTheta/canvasDim,'rad')
 		self.__canvasDim = canvasDim
 		self.__curveDim = curveDim
@@ -93,7 +93,7 @@ class Parameters(object):
 
 	@property
 	def einsteinRadius(self):
-		return 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.__dLS/self.quasar.angDiamDist /const.c**2
+		return 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.dLS/self.quasar.angDiamDist /(const.c**2).to('km2/s2')
 
 	@property
 	def displayQuasar(self):
@@ -118,7 +118,7 @@ class Parameters(object):
 	def smoothMassOnScreen(self):
 		l = (self.dTheta*self.canvasDim*self.__galaxy.angDiamDist.to('m')).value
 		r_in = self.center.magnitude()*self.__galaxy.angDiamDist.to('m').value
-		print(l)
+		# print(l)
 		ret = (l * self.__galaxy.velocityDispersion**2 * math.log(r_in/l)/2/const.G.to('m3 / (solMass s2)')).value
 		return ret
 
@@ -139,23 +139,23 @@ class Parameters(object):
 	
 	@property
 	def queryQuasarX(self):
-		return self.quasar.position.to('rad').x + self.__center.to('rad').x
+		return self.galaxy.position.x + self.quasar.observedPosition.x
 
 	@property
 	def queryQuasarY(self):
-		return self.quasar.position.to('rad').y + self.__center.to('rad').y
+		return self.galaxy.position.y + self.quasar.observedPosition.y
 
 	@property
 	def centerX(self):
-		return self.__center.to('rad').x
+		return self.__galaxy.position.to('rad').x
 
 	@property
 	def centerY(self):
-		return self.__center.to('rad').y
+		return self.__galaxy.position.to('rad').y
 
 	@property
 	def center(self):
-		return self.__center.to('rad')
+		return self.__galaxy.position.to('rad')
 				
 	@property
 	def queryQuasarRadius(self):
@@ -190,4 +190,4 @@ class Parameters(object):
 		return True
 
 	def __str__(self):
-		return ("dTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("Einstein Radius = " + str(self.einsteinRadius))
+		return ("\ndTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("\nEinstein Radius = " + str(self.einsteinRadius)) +"\n"

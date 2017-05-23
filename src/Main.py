@@ -23,7 +23,7 @@ import pyqtgraph as pg
 from Main import FileManager
 from Engine_Grid import Engine_Grid
 # from Engine_Quadtree import Engine_Quadtree
-# from Engine_KDTree import Engine_KDTree
+from Engine_KDTree import Engine_KDTree
 
 class GUIManager(QtWidgets.QMainWindow):
     progress_bar_update = QtCore.pyqtSignal(int)

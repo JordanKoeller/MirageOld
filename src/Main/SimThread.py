@@ -115,4 +115,4 @@ class SimThread(QtCore.QThread):
             # self.__calculating = False
         self.run = runner
         self.start()
-        print("Asynchronous")
+        # print("Asynchronous")

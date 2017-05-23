@@ -14,6 +14,6 @@ lensedimgdrawer = Extension("Drawer/LensedImageDrawer", sources = ["Drawer/Lense
 # diagnosticdrawer = Extension("Drawer/DiagnosticDrawer", sources = ["Drawer/DiagnosticDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 
 setup(
-	ext_modules=cythonize([tree,engine,grid,engine_grid,drawer_supers,lensedimgdrawer], nthreads = 8),
+	ext_modules=cythonize([tree,engine,grid,engine_kdtree,drawer_supers,lensedimgdrawer], nthreads = 8),
 	include_dirs = [numpy.get_include()],
 )

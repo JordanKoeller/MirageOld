@@ -35,7 +35,7 @@ class Quasar(Drawable,Cosmic):
 
 	def draw(self, img, parameters):
 		begin = time.clock()
-		center = (self.observedPosition + parameters.center)/parameters.dTheta.to('rad').value
+		center = (self.observedPosition)/parameters.dTheta.value
 		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
 		radius = int(self.radius.value/parameters.dTheta.value)
 		rSquared = radius * radius

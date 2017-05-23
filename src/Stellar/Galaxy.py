@@ -4,7 +4,6 @@ from Utility import Vector2D
 from Utility.Vector2D import zeroVector
 from astropy import constants as const
 import random as rand
-from matplotlib.patches import Circle
 import math
 import time
 from Stellar.ShearLenser import ShearLenser
@@ -29,7 +28,7 @@ class Galaxy(Drawable,Cosmic):
 			star.draw(img,parameters)
 
 	def drawGalaxy(self,img,parameters):
-		center = (self.position + parameters.center)/parameters.dTheta.to('rad').value + Vector2D(parameters.canvasDim/2,parameters.canvasDim/2)
+		center = Vector2D(self.position.x/parameters.dTheta.value + (parameters.canvasDim/2),self.position.y/parameters.dTheta.value + (parameters.canvasDim/2))
 		# center = Vector2D(self.position.x/parameters.dTheta.value + (parameters.canvasDim/2),self.position.y/parameters.dTheta.value + (parameters.canvasDim/2))
 		for i in range(-2,3,1):
 			for j in range(-2,3,1):

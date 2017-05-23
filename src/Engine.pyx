@@ -70,6 +70,9 @@ cdef class Engine:
 		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
 
+		# print(self.__parameters.centerX)
+		# print(self.__parameters.centerY)
+		# print("Off gpu")
 		# read and compile opencl kernel
 		prg = cl.Program(context, open('Calculator/ray_tracer.cl').read()).build()
 		prg.ray_trace(queue, (width, height), None,
@@ -88,8 +91,8 @@ cdef class Engine:
 			np.int32(width),
 			np.int32(height),
 			np.float64(self.__parameters.dTheta.value),
-			np.float64(self.__parameters.centerX),
-			np.float64(self.__parameters.centerY),
+			np.float64(self.__parameters.galaxy.position.to('rad').x),
+			np.float64(self.__parameters.galaxy.position.y),
 			result_buffer_x,
 			result_buffer_y)
 
@@ -97,6 +100,7 @@ cdef class Engine:
 		cl.enqueue_copy(queue, result_nparray_x, result_buffer_x)
 		cl.enqueue_copy(queue, result_nparray_y, result_buffer_y)
 		print("Time Ray-Tracing = " + str(time.clock() - begin))
+		print(self.__parameters.einsteinRadius)
 		return (result_nparray_x, result_nparray_y)
 
 

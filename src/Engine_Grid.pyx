@@ -68,6 +68,7 @@ cdef class Engine_Grid(Engine):
 		self.__preCalculating = False
 		self.__needsReconfiguring = False
 		print("Time calculating = " + str(time.clock() - begin) + " seconds.")
+		print(self.__parameters)
 
 
 	@cython.boundscheck(False)  # turn off bounds-checking for entire function
@@ -82,7 +83,6 @@ cdef class Engine_Grid(Engine):
 		cdef double qr = self.__parameters.queryQuasarRadius
 		delta = time.clock()
 		cdef vector[Pixel] ret = self.query_data(qx,qy,qr)
-		print(str(1/(time.clock() - delta)) + " FPS")
 		cdef int retf = ret.size()
 		cdef int i = 0
 		cdef np.ndarray[np.int32_t, ndim = 2] fret = np.ndarray((ret.size(), 2), dtype=np.int32)
@@ -90,21 +90,19 @@ cdef class Engine_Grid(Engine):
 			for i in range(0, retf):
 				fret[i,0] = <int> ret[i].pixelX
 				fret[i,1] = <int> ret[i].pixelY
-		# for i in range(0,retf):
-		# 	print(fret[i])
-		return fret  # self.__tree.query_point(self.__parameters.quasar.observedPosition.x+gX,self.__parameters.quasar.observedPosition.y+gY,self.__parameters.quasar.radius.value)
+		return fret
 
-	def visualize(self):
+	def visualize(self): #REFACTOR to plot to a colormap, rather than binary hit/no hit
 		x,y = self.ray_trace(use_GPU=True)
-		extrema  = [abs(x.min()),abs(y.min()),abs(x.max()),abs(y.max())]
 		print(x.shape)
-		# for i in extrema:
-		# 	print(i)
-		extreme = max(extrema)
 		xm = x.min()
 		ym = y.min()
-		x = x*(1999/extreme) - xm
-		y = y*(1999/extreme) - ym 
+		x = (x - xm)
+		y = (y - ym)
+		extrema  = [abs(x.min()),abs(y.min()),abs(x.max()),abs(y.max())]
+		extreme = max(extrema)
+		x = x*1999/extreme
+		y = y*1999/extreme
 		img = np.zeros((2000,2000),dtype=np.uint8)
 		for i in range(0,x.shape[0]):
 			for j in range(0,y.shape[1]):
