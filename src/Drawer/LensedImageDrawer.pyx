@@ -25,13 +25,11 @@ cdef class LensedImageDrawer(ImageDrawer):
 			parameters.quasar.draw(canvas,parameters)
 		cdef int pixel = 0
 		cdef int end = pixels.shape[0]
-		with nogil:
-			for pixel in range(0,end):
-				canvas[pixels[pixel,0],pixels[pixel,1]] = 1
-# 		self.__drawEinsteinRadius(canvas,parameters)
-# 		self.__drawEinsteinRadius(canvas,parameters)
-# 		self.__drawEinsteinRadius(canvas,parameters)
-		# self.__drawTrackers(parameters,canvas)
+		print("End = "+str(end))
+		if end > 1:
+			with nogil:
+				for pixel in range(0,end):
+					canvas[pixels[pixel,0],pixels[pixel,1]] = 1
 		return self.drawImage(canvas,None)
 		
 		
@@ -44,12 +42,10 @@ cdef class LensedImageDrawer(ImageDrawer):
 				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3
 
 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): #***************NOT OPTIMIZED****************
-		x0 = parameters.galaxy.center.x + 400
-		y0 = parameters.galaxy.center.y + 400
-		# radius = parameters.einsteinRadius/math.sqrt(math.pi)
-		radius = parameters.galaxy.shearMag
-		# radius = (4*math.pi*parameters.galaxy.velocityDispersion**2/(const.c.to('km/s')**2)).value - parameters.galaxy.shearMag*4.84814e-6
-		x = abs(radius/parameters.dTheta.value)
+		x0 = parameters.galaxy.center.x + parameters.canvasDim/2
+		y0 = parameters.galaxy.center.y + parameters.canvasDim/2
+		radius = parameters.einsteinRadius/parameters.dTheta.value
+		x = abs(radius)
 		y = 0
 		err = 0
 		while x >= y:

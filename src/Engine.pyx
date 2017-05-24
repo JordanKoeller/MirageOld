@@ -45,15 +45,17 @@ cdef class Engine:
 
 
 	cdef ray_trace_gpu(self, use_GPU):
-		# print(self.__parameters)
 		begin = time.clock()
 		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
 		os.environ['PYOPENCL_CTX'] = '2'
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
 		cdef double dTheta = self.__parameters.dTheta.value
-		cdef np.ndarray result_nparray_x = np.ndarray((width, height), dtype=np.float64)
-		cdef np.ndarray result_nparray_y = np.ndarray((width, height), dtype=np.float64)
+		cdef np.ndarray result_nparray_x = np.zeros((width, height), dtype=np.float64)
+		cdef np.ndarray result_nparray_y = np.zeros((width, height), dtype=np.float64)
+		cdef double dS = self.__parameters.quasar.angDiamDist.value
+		cdef double dL = self.__parameters.galaxy.angDiamDist.value
+		cdef double dLS = self.__parameters.dLS.value
 		stars_nparray_mass, stars_nparray_x, stars_nparray_y = self.__parameters.galaxy.starArray
 
 		# create a context and a job queue
@@ -70,29 +72,21 @@ cdef class Engine:
 		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
 
-		# print(self.__parameters.centerX)
-		# print(self.__parameters.centerY)
-		# print("Off gpu")
-		# read and compile opencl kernel
 		prg = cl.Program(context, open('Calculator/ray_tracer.cl').read()).build()
 		prg.ray_trace(queue, (width, height), None,
-			stars_buffer_mass,																		
+			stars_buffer_mass,
 			stars_buffer_x,
 			stars_buffer_y,
 			np.int32(len(stars_nparray_x)),
-			np.float64((4 * const.G / (const.c * const.c)).to("lyr/solMass").value),
-			np.float64(4 * math.pi * (const.c ** -2).to('s2/km2').value),
+			np.float64((4 * const.G / (const.c * const.c)).to("lyr/solMass").value * dLS/dS/dL),
+			np.float64(4 * math.pi * self.__parameters.galaxy.velocityDispersion**2 *(const.c ** -2).to('s2/km2').value*dLS/dS),
 			np.float64(self.__parameters.galaxy.shear.magnitude),
 			np.float64(self.__parameters.galaxy.shear.angle.value),
-			np.float64(self.__parameters.galaxy.velocityDispersion.value),
-			np.float64(self.__parameters.galaxy.angDiamDist.value),
-			np.float64(self.__parameters.quasar.angDiamDist.value),
-			np.float64(self.__parameters.dLS.value),
 			np.int32(width),
 			np.int32(height),
-			np.float64(self.__parameters.dTheta.value),
+			np.float64(self.__parameters.dTheta.to('rad').value),
 			np.float64(self.__parameters.galaxy.position.to('rad').x),
-			np.float64(self.__parameters.galaxy.position.y),
+			np.float64(self.__parameters.galaxy.position.to('rad').y),
 			result_buffer_x,
 			result_buffer_y)
 
@@ -100,7 +94,6 @@ cdef class Engine:
 		cl.enqueue_copy(queue, result_nparray_x, result_buffer_x)
 		cl.enqueue_copy(queue, result_nparray_y, result_buffer_y)
 		print("Time Ray-Tracing = " + str(time.clock() - begin))
-		print(self.__parameters.einsteinRadius)
 		return (result_nparray_x, result_nparray_y)
 
 
@@ -161,6 +154,22 @@ cdef class Engine:
 			return (xNew, yNew)
 		else:
 			return (xVals, yAxis)
+
+	def visualize(self): #REFACTOR to plot to a colormap, rather than binary hit/no hit
+		x,y = self.ray_trace(use_GPU=True)
+		xm = x.min()
+		ym = y.min()
+		x = (x - xm)
+		y = (y - ym)
+		extrema  = [abs(x.min()),abs(y.min()),abs(x.max()),abs(y.max())]
+		extreme = max(extrema)
+		x = x*(x.shape[0]-1)/extreme
+		y = y*(y.shape[0]-1)/extreme
+		img = np.zeros_like(x, dtype=np.int32)
+		for i in range(0,x.shape[0]):
+			for j in range(0,y.shape[1]):
+				img[int(x[i,j]),int(y[i,j])] += 1
+		return img
 
 	def makeLightCurve(self, mmin, mmax, resolution=200, canvas=None, progressBar=None, smoothing=True):
 		return self.cythonMakeLightCurve(mmin, mmax, resolution, progressBar, smoothing)

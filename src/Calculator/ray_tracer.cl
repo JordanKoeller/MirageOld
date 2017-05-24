@@ -17,10 +17,6 @@ __kernel void ray_trace(
 		const double SIS_CONSTANT,
 		const double shear_mag,
 		const double shear_angle,
-		const double velocityDispersion,
-		const double dL,
-		const double dS,
-		const double dLS,
 		const int width, 
 		const int height,
 		const double dTheta,
@@ -42,32 +38,45 @@ __kernel void ray_trace(
 		double deltaR_x;
 		double deltaR_y;
 		double r;
-		double phi;
 		result_buf_x[index] = 0.0;
 		result_buf_y[index] = 0.0;
 		r = 0.0;
+
+
+
 		//For Loop for  all the stars
 		for (int i=0; i < numStars; i++)
 		{
-			deltaR_x = (stars_x[i] - incident_angle_x)*dL;
-			deltaR_y = (stars_y[i] - incident_angle_y)*dL;
-			r = sqrt(deltaR_x*deltaR_x + deltaR_y*deltaR_y);
-			result_buf_x[index] += (deltaR_x*stars_mass[i]/(r*r))*POINT_CONSTANT;
-			result_buf_y[index] += (deltaR_y*stars_mass[i]/(r*r))*POINT_CONSTANT;
+			deltaR_x = (stars_x[i] - incident_angle_x);
+			deltaR_y = (stars_y[i] - incident_angle_y);
+			r = deltaR_x*deltaR_x + deltaR_y*deltaR_y;
+			result_buf_x[index] += deltaR_x*stars_mass[i]*POINT_CONSTANT/r;
+			result_buf_y[index] += deltaR_y*stars_mass[i]*POINT_CONSTANT/r;
 		}
+
+
+
 		// Lensing from SIS
-		deltaR_x =  incident_angle_x - centerX;
-		deltaR_y =  incident_angle_y - centerY;
-		r = sqrt(deltaR_x*deltaR_x + deltaR_y*deltaR_y);
-		result_buf_x[index] += velocityDispersion * velocityDispersion * (-deltaR_x) * SIS_CONSTANT / r;
-		result_buf_y[index] += velocityDispersion * velocityDispersion * (-deltaR_y) * SIS_CONSTANT / r;
+		deltaR_x = incident_angle_x - centerX;
+		deltaR_y = incident_angle_y - centerY;
+		r =  sqrt(deltaR_x*deltaR_x + deltaR_y*deltaR_y);
+		result_buf_x[index] += deltaR_x * SIS_CONSTANT / r;
+		result_buf_y[index] += deltaR_y * SIS_CONSTANT / r;
+
+
+
 
 		// Lensing from shear
-		phi = 2*(shear_angle+M_PI_2) - atan2(deltaR_y,deltaR_x);
+		double phi = 2*(shear_angle+M_PI_2) - atan2(deltaR_y,deltaR_x);
 		result_buf_x[index] += shear_mag*r*cos(phi);
 		result_buf_y[index] += shear_mag*r*sin(phi);
-		result_buf_x[index] = (incident_angle_x*dL + ((incident_angle_x+(result_buf_x[index]))*dLS))/dS;
-		result_buf_y[index] = (incident_angle_y*dL + ((incident_angle_y+(result_buf_y[index]))*dLS))/dS;
+
+		result_buf_x[index] = deltaR_x - result_buf_x[index];
+		result_buf_y[index] = deltaR_y - result_buf_y[index];
+
+
+//		result_buf_x[index] = (incident_angle_x*dL + ((incident_angle_x+(result_buf_x[index]))*dLS))/dS;
+//		result_buf_y[index] = (incident_angle_y*dL + ((incident_angle_y+(result_buf_y[index]))*dLS))/dS;
 
 }
 

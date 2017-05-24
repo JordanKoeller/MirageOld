@@ -63,13 +63,6 @@ cdef class Engine_KDTree(Engine):
 		cdef double qx = <double> self.__parameters.queryQuasarX
 		cdef double qy = <double> self.__parameters.queryQuasarY
 		cdef double qr = <double> self.__parameters.queryQuasarRadius
-		print(qx)
-		print(qy)
-		print(str(self.__parameters))
 		ret = self.query_data(qx,qy,qr)
-		# cdef int retf = len(ret)
-		# cdef np.ndarray[np.int32_t, ndim = 2] fret = np.ndarray((ret.size(), 2), dtype=np.int32)
-		# for i in range(0, retf):
-		# 	fret[i][0] = ret[i].x
-		# 	fret[i][1] = ret[i].y
-		return np.array(ret, dtype=np.int32)  # self.__tree.query_point(self.__parameters.quasar.observedPosition.x+gX,self.__parameters.quasar.observedPosition.y+gY,self.__parameters.quasar.radius.value)
+		ret = np.array(ret,ndmin=2, dtype=np.int32)
+		return ret  # self.__tree.query_point(self.__parameters.quasar.observedPosition.x+gX,self.__parameters.quasar.observedPosition.y+gY,self.__parameters.quasar.radius.value)

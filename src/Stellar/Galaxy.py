@@ -29,7 +29,6 @@ class Galaxy(Drawable,Cosmic):
 
 	def drawGalaxy(self,img,parameters):
 		center = Vector2D(self.position.x/parameters.dTheta.value + (parameters.canvasDim/2),self.position.y/parameters.dTheta.value + (parameters.canvasDim/2))
-		# center = Vector2D(self.position.x/parameters.dTheta.value + (parameters.canvasDim/2),self.position.y/parameters.dTheta.value + (parameters.canvasDim/2))
 		for i in range(-2,3,1):
 			for j in range(-2,3,1):
 				if center.x + i > 0 and center.y + j > 0 and center.x + i < parameters.canvasDim and center.y + j < parameters.canvasDim:
@@ -110,11 +109,8 @@ class Galaxy(Drawable,Cosmic):
 
 	@property
 	def center(self):
-		return zeroVector
+		return self.position
 
-	@property
-	def position(self):
-		return zeroVector
 	@property
 	def stars(self):
 		return self.__stars

@@ -36,7 +36,7 @@ class GUIManager(QtWidgets.QMainWindow):
         super(GUIManager, self).__init__(parent)
         uic.loadUi('Resources/GUI/gui.ui', self)
         signals = self.makeSignals()
-        self.simThread = SimThread(Engine_Grid(),signals)
+        self.simThread = SimThread(Engine_KDTree(),signals)
         self.fileManager = FileManager(signals)
         self.setupUi()
         self.setupSignals()
@@ -121,8 +121,8 @@ class GUIManager(QtWidgets.QMainWindow):
         displayGalaxy = self.displayGalaxy.isChecked()
 
         quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity)
-        galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars)
-        params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar, center = displayCenter)
+        galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center = displayCenter)
+        params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
         return params
 
 
@@ -175,8 +175,10 @@ class GUIManager(QtWidgets.QMainWindow):
     def bindFields(self,parameters):
         qV = parameters.quasar.velocity.to('arcsec').unitless()
         qP = parameters.quasar.position.to('arcsec').unitless()
-        self.qVelocity.setText("("+str(qV.x)+","+str(qV.y)+")")
-        self.qPosition.setText("("+str(qP.x)+","+str(qP.y)+")")
+        gP = parameters.galaxy.position.to('arcsec').unitless()
+        self.qVelocity.setText("("+str(qV.y)+","+str(qV.x)+")")
+        self.qPosition.setText("("+str(qP.y)+","+str(qP.x)+")")
+        self.gCenter.setText("("+str(gP.y)+","+str(gP.x)+")")
         self.qRadius.setText(str(parameters.quasar.radius.to('arcsec').value))
         self.qRedshift.setText(str(parameters.quasar.redshift))
 
@@ -190,8 +192,8 @@ class GUIManager(QtWidgets.QMainWindow):
         self.dimensionInput.setText(str(parameters.canvasDim))
         self.displayQuasar.setChecked(parameters.showQuasar)
         self.displayGalaxy.setChecked(parameters.showGalaxy)
-        self.enableMicrolensingBox.setChecked(parameters.microlensing)
-        self.autoConfigCheckBox.setChecked(parameters.autoConfigure)
+        # self.enableMicrolensingBox.setChecked(parameters.microlensing)
+        # self.autoConfigCheckBox.setChecked(parameters.autoConfigure)
 
 
 

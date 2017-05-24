@@ -16,6 +16,7 @@ import numpy as np
 from Drawer.Drawer import CompositeDrawer
 # from Drawer import DiagnosticCompositeDrawer
 from Drawer.Drawer import ImageDrawer 
+from Drawer.DataVisualizerDrawer import DataVisualizerDrawer 
 from Drawer import LensedImageLightCurveComposite
 from Utility import zeroVector
 
@@ -69,19 +70,21 @@ class SimThread(QtCore.QThread):
 
 
     def updateParameters(self,params):
-        self.engine.updateParameters(params)
+        self.parameters = params
 
     def run(self):
         self.progress_label_update.emit("Calculating. Please Wait.")
+        self.engine.updateParameters(self.parameters)
         self.__calculating = True
         interval = 1/self.__frameRate
         counter = 0
+        self.progress_label_update.emit("Animating.")
         while self.__calculating:
             counter += 1
             timer = time.clock()
             pixels = self.engine.getFrame()
-            img = self.__drawer.draw([self.engine.parameters,pixels],[len(pixels)])
-            self.engine.incrementTime(self.engine.parameters.dt)
+            img = self.__drawer.draw([self.parameters,pixels],[len(pixels)])
+            self.engine.incrementTime(self.parameters.dt)
             deltaT = time.clock() - timer
             if deltaT < interval:
                 time.sleep(interval-deltaT)
@@ -94,11 +97,11 @@ class SimThread(QtCore.QThread):
         self.__calculating = False
         self.engine.setTime(0)
         pixels = self.engine.getFrame()
-        frame = self.__drawer.draw([self.engine.parameters,pixels],[len(pixels)])
+        frame = self.__drawer.draw([self.parameters,pixels],[len(pixels)])
         self.__drawer.reset()
 
     def visualize(self,params):
-        drawer = ImageDrawer(self.image_canvas_update)
+        drawer = DataVisualizerDrawer(self.image_canvas_update)
         self.engine.updateParameters(params)
         pixels = self.engine.visualize()
         frame = drawer.draw([pixels])
@@ -107,7 +110,7 @@ class SimThread(QtCore.QThread):
         binszs = np.arange(7000,65000,100)
         reps = 200
         prevRunner = self.run
-        self.progress_label_update.emit("Calculating Various Bin Sizes")
+        self.progress_label_update.emit("Calculating Various Bin Sizes.")
         self.progress_bar_max_update.emit(len(binszs))
         # self.__calculating = True
         def runner():

@@ -36,8 +36,8 @@ cdef class Engine_Grid(Engine):
 	def __init__(self, parameter=Parameters()):
 		Engine.__init__(self,parameter)
 
-	@cython.boundscheck(False)  # turn off bounds-checking for entire function
-	@cython.wraparound(False)
+	# @cython.boundscheck(False)  # turn off bounds-checking for entire function
+	# @cython.wraparound(False)
 	cdef build_data(self, np.ndarray[np.float64_t, ndim=2] xArray, np.ndarray[np.float64_t, ndim=2] yArray,int binsize):
 		cdef int hw
 		hw = xArray.shape[0]
@@ -71,8 +71,8 @@ cdef class Engine_Grid(Engine):
 		print(self.__parameters)
 
 
-	@cython.boundscheck(False)  # turn off bounds-checking for entire function
-	@cython.wraparound(False)
+	# @cython.boundscheck(False)  # turn off bounds-checking for entire function
+	# @cython.wraparound(False)
 	cpdef getFrame(self):
 		if self.__needsReconfiguring:
 			self.reconfigure()
@@ -81,7 +81,6 @@ cdef class Engine_Grid(Engine):
 		cdef double qx = self.__parameters.queryQuasarX
 		cdef double qy = self.__parameters.queryQuasarY
 		cdef double qr = self.__parameters.queryQuasarRadius
-		delta = time.clock()
 		cdef vector[Pixel] ret = self.query_data(qx,qy,qr)
 		cdef int retf = ret.size()
 		cdef int i = 0
@@ -91,23 +90,6 @@ cdef class Engine_Grid(Engine):
 				fret[i,0] = <int> ret[i].pixelX
 				fret[i,1] = <int> ret[i].pixelY
 		return fret
-
-	def visualize(self): #REFACTOR to plot to a colormap, rather than binary hit/no hit
-		x,y = self.ray_trace(use_GPU=True)
-		print(x.shape)
-		xm = x.min()
-		ym = y.min()
-		x = (x - xm)
-		y = (y - ym)
-		extrema  = [abs(x.min()),abs(y.min()),abs(x.max()),abs(y.max())]
-		extreme = max(extrema)
-		x = x*1999/extreme
-		y = y*1999/extreme
-		img = np.zeros((2000,2000),dtype=np.uint8)
-		for i in range(0,x.shape[0]):
-			for j in range(0,y.shape[1]):
-				img[int(x[i,j]),int(y[i,j])] = 1
-		return img
 
 	def gridTest(self,binsizes,queryPerTest,curveSignal,barSignal):
 		x,y = self.ray_trace(use_GPU=False)

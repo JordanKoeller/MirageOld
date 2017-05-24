@@ -44,11 +44,9 @@ class Parameters(object):
 		center position
 		velocity
 		base position"""
-		
-	def __init__(self, galaxy = defaultGalaxy, quasar = defaultQuasar, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0, curveDim = Vector2D(800,200), center = zeroVector):
+	def __init__(self, galaxy = defaultGalaxy, quasar = defaultQuasar, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0, curveDim = Vector2D(800,200)):
 		self.__galaxy = galaxy
 		self.__quasar = quasar
-		self.__galaxy.update(center = center)
 		self.__dTheta = u.Quantity(dTheta/canvasDim,'rad')
 		self.__canvasDim = canvasDim
 		self.__curveDim = curveDim
@@ -59,11 +57,14 @@ class Parameters(object):
 		self.__starMassVariation = starMassVariation
 		self.dt = 0.1
 		self.time = 0
-
+		# self.setMicrolensing(False)
 
 	def generateStars(self):
-		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
+		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen/100
 		generator = Kroupa_2001()
+		if m_stars < 1:
+			print("Not enough mass in stars")
+			m_stars = 10.0
 		print("Starting generator with mass of "+str(m_stars))
 		starMasses = generator.generate_cluster(m_stars)[0]
 		print("Done.")
@@ -93,7 +94,7 @@ class Parameters(object):
 
 	@property
 	def einsteinRadius(self):
-		return 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.dLS/self.quasar.angDiamDist /(const.c**2).to('km2/s2')
+		return 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.dLS/self.quasar.angDiamDist /((const.c**2).to('km2/s2'))
 
 	@property
 	def displayQuasar(self):
@@ -115,12 +116,12 @@ class Parameters(object):
 		return cosmo.angular_diameter_distance_z1z2(self.__galaxy.redshift,self.__quasar.redshift).to('lyr')
 
 	@property
-	def smoothMassOnScreen(self):
-		l = (self.dTheta*self.canvasDim*self.__galaxy.angDiamDist.to('m')).value
-		r_in = self.center.magnitude()*self.__galaxy.angDiamDist.to('m').value
-		# print(l)
-		ret = (l * self.__galaxy.velocityDispersion**2 * math.log(r_in/l)/2/const.G.to('m3 / (solMass s2)')).value
-		return ret
+	def smoothMassOnScreen(self): # WILL NEED TO COME BACK TO THIS
+		l = (self.dTheta*self.canvasDim).to('rad').value*self.__galaxy.angDiamDist.to('m')
+		r_in = self.__galaxy.position.to('rad').magnitude()*self.__galaxy.angDiamDist.to('m')
+		ret = (l * self.__galaxy.velocityDispersion**2 * math.log(1+l/r_in)/2/const.G).to('solMass')
+		print(ret)
+		return ret.value
 
 	@property
 	def correctedVelocityDispersion(self):
@@ -129,33 +130,27 @@ class Parameters(object):
 	def setStars(self,stars):
 		self.__galaxy.update(stars = stars)
 
+
+
+	def setMicrolensing(self,isMicrolensing):
+		if isMicrolensing:
+			self.microlensing = True
+			self.__galaxy.update(center = Vector2D(0,self.einsteinRadius.value,'rad')) #Will refactor later, once how this works is figured out
+		else:
+			self.microlensing = False
+			self.__galaxy.update(center = zeroVector)
+
 	def setTime(self,time):
 		self.time = time
 		self.__quasar.setTime(time)
-
-	def getStarMasses(self,mass,tolerance = 0.05):
-		ret = defaultMassGenerator.starField(mass,tolerance)
-		return ret
 	
 	@property
 	def queryQuasarX(self):
-		return self.galaxy.position.x + self.quasar.observedPosition.x
+		return self.quasar.observedPosition.x
 
 	@property
 	def queryQuasarY(self):
-		return self.galaxy.position.y + self.quasar.observedPosition.y
-
-	@property
-	def centerX(self):
-		return self.__galaxy.position.to('rad').x
-
-	@property
-	def centerY(self):
-		return self.__galaxy.position.to('rad').y
-
-	@property
-	def center(self):
-		return self.__galaxy.position.to('rad')
+		return self.quasar.observedPosition.y
 				
 	@property
 	def queryQuasarRadius(self):
@@ -167,8 +162,6 @@ class Parameters(object):
 		if self.dTheta != other.dTheta:
 			return False
 		if self.canvasDim != other.canvasDim:
-			return False
-		if self.center != other.center:
 			return False
 		if self.starMassVariation != other.starMassVariation:
 			return False
@@ -190,4 +183,4 @@ class Parameters(object):
 		return True
 
 	def __str__(self):
-		return ("\ndTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("\nEinstein Radius = " + str(self.einsteinRadius)) +"\n"
+		return ("dTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("\nEinstein Radius = " + str(self.einsteinRadius))
