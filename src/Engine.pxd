@@ -35,3 +35,4 @@ cdef class Engine:
 	cdef ray_trace_gpu(self,use_GPU)
 	cpdef getMagnification(self)
 	cdef cythonMakeLightCurve(self,mmin, mmax,resolution, progressBar, smoothing)
+	cpdef visualize(self)

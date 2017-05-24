@@ -74,10 +74,6 @@ __kernel void ray_trace(
 		result_buf_x[index] = deltaR_x - result_buf_x[index];
 		result_buf_y[index] = deltaR_y - result_buf_y[index];
 
-
-//		result_buf_x[index] = (incident_angle_x*dL + ((incident_angle_x+(result_buf_x[index]))*dLS))/dS;
-//		result_buf_y[index] = (incident_angle_y*dL + ((incident_angle_y+(result_buf_y[index]))*dLS))/dS;
-
 }
 
 

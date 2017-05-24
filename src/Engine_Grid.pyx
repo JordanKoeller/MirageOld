@@ -36,8 +36,8 @@ cdef class Engine_Grid(Engine):
 	def __init__(self, parameter=Parameters()):
 		Engine.__init__(self,parameter)
 
-	# @cython.boundscheck(False)  # turn off bounds-checking for entire function
-	# @cython.wraparound(False)
+	@cython.boundscheck(False)  # turn off bounds-checking for entire function
+	@cython.wraparound(False)
 	cdef build_data(self, np.ndarray[np.float64_t, ndim=2] xArray, np.ndarray[np.float64_t, ndim=2] yArray,int binsize):
 		cdef int hw
 		hw = xArray.shape[0]
@@ -71,8 +71,8 @@ cdef class Engine_Grid(Engine):
 		print(self.__parameters)
 
 
-	# @cython.boundscheck(False)  # turn off bounds-checking for entire function
-	# @cython.wraparound(False)
+	@cython.boundscheck(False)  # turn off bounds-checking for entire function
+	@cython.wraparound(False)
 	cpdef getFrame(self):
 		if self.__needsReconfiguring:
 			self.reconfigure()

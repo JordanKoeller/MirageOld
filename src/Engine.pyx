@@ -155,20 +155,25 @@ cdef class Engine:
 		else:
 			return (xVals, yAxis)
 
-	def visualize(self): #REFACTOR to plot to a colormap, rather than binary hit/no hit
+	cpdef visualize(self):
+		cdef np.ndarray[np.float64_t, ndim=2] x
+		cdef np.ndarray[np.float64_t, ndim=2] y
 		x,y = self.ray_trace(use_GPU=True)
-		xm = x.min()
-		ym = y.min()
+		cdef int xm = x.min()
+		cdef int ym = y.min()
 		x = (x - xm)
 		y = (y - ym)
 		extrema  = [abs(x.min()),abs(y.min()),abs(x.max()),abs(y.max())]
-		extreme = max(extrema)
+		cdef double extreme = max(extrema)
 		x = x*(x.shape[0]-1)/extreme
 		y = y*(y.shape[0]-1)/extreme
-		img = np.zeros_like(x, dtype=np.int32)
-		for i in range(0,x.shape[0]):
-			for j in range(0,y.shape[1]):
-				img[int(x[i,j]),int(y[i,j])] += 1
+		cdef np.ndarray[np.int32_t, ndim=2] img = np.zeros_like(x, dtype=np.int32)
+		cdef int endX = x.shape[0]
+		cdef int endY = x.shape[1]
+		cdef int i,j
+		for i in range(0,endX):
+			for j in range(0,endY):
+				img[<int> x[i,j],<int> y[i,j]] += 1
 		return img
 
 	def makeLightCurve(self, mmin, mmax, resolution=200, canvas=None, progressBar=None, smoothing=True):

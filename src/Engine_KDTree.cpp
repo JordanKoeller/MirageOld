@@ -1029,6 +1029,7 @@ struct __pyx_vtabstruct_6Engine_Engine {
   PyObject *(*ray_trace_gpu)(struct __pyx_obj_6Engine_Engine *, PyObject *);
   PyObject *(*getMagnification)(struct __pyx_obj_6Engine_Engine *, int __pyx_skip_dispatch);
   PyObject *(*cythonMakeLightCurve)(struct __pyx_obj_6Engine_Engine *, PyObject *, PyObject *, PyObject *, PyObject *, PyObject *);
+  PyObject *(*visualize)(struct __pyx_obj_6Engine_Engine *, int __pyx_skip_dispatch);
 };
 static struct __pyx_vtabstruct_6Engine_Engine *__pyx_vtabptr_6Engine_Engine;
 

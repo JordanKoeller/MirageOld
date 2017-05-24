@@ -1033,6 +1033,7 @@ struct __pyx_vtabstruct_6Engine_Engine {
   PyObject *(*ray_trace_gpu)(struct __pyx_obj_6Engine_Engine *, PyObject *);
   PyObject *(*getMagnification)(struct __pyx_obj_6Engine_Engine *, int __pyx_skip_dispatch);
   PyObject *(*cythonMakeLightCurve)(struct __pyx_obj_6Engine_Engine *, PyObject *, PyObject *, PyObject *, PyObject *, PyObject *);
+  PyObject *(*visualize)(struct __pyx_obj_6Engine_Engine *, int __pyx_skip_dispatch);
 };
 static struct __pyx_vtabstruct_6Engine_Engine *__pyx_vtabptr_6Engine_Engine;
 
@@ -1384,12 +1385,6 @@ static const char* __Pyx_BufFmt_CheckString(__Pyx_BufFmt_Context* ctx, const cha
 static void __Pyx_BufFmt_Init(__Pyx_BufFmt_Context* ctx,
                               __Pyx_BufFmt_StackElem* stack,
                               __Pyx_TypeInfo* type); // PROTO
-
-/* BufferIndexError.proto */
-static void __Pyx_RaiseBufferIndexError(int axis);
-
-/* BufferIndexErrorNogil.proto */
-static void __Pyx_RaiseBufferIndexErrorNogil(int axis);
 
 #define __Pyx_BufPtrStrided2d(type, buf, i0, s0, i1, s1) (type)((char*)buf + i0 * s0 + i1 * s1)
 /* ForceInitThreads.proto */
@@ -2135,7 +2130,7 @@ static int __pyx_pf_11Engine_Grid_11Engine_Grid___init__(struct __pyx_obj_11Engi
  * 	def __init__(self, parameter=Parameters()):
  * 		Engine.__init__(self,parameter)             # <<<<<<<<<<<<<<
  * 
- * 	# @cython.boundscheck(False)  # turn off bounds-checking for entire function
+ * 	@cython.boundscheck(False)  # turn off bounds-checking for entire function
  */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_6Engine_Engine), __pyx_n_s_init); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -2211,8 +2206,8 @@ static int __pyx_pf_11Engine_Grid_11Engine_Grid___init__(struct __pyx_obj_11Engi
 }
 
 /* "Engine_Grid.pyx":41
- * 	# @cython.boundscheck(False)  # turn off bounds-checking for entire function
- * 	# @cython.wraparound(False)
+ * 	@cython.boundscheck(False)  # turn off bounds-checking for entire function
+ * 	@cython.wraparound(False)
  * 	cdef build_data(self, np.ndarray[np.float64_t, ndim=2] xArray, np.ndarray[np.float64_t, ndim=2] yArray,int binsize):             # <<<<<<<<<<<<<<
  * 		cdef int hw
  * 		hw = xArray.shape[0]
@@ -2239,12 +2234,11 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_build_data(struct __pyx_obj
   int __pyx_t_4;
   Py_ssize_t __pyx_t_5;
   Py_ssize_t __pyx_t_6;
-  int __pyx_t_7;
+  Py_ssize_t __pyx_t_7;
   Py_ssize_t __pyx_t_8;
-  Py_ssize_t __pyx_t_9;
-  std::pair<double,double>  __pyx_t_10;
-  std::pair<int,int>  __pyx_t_11;
-  std::pair<std::pair<double,double> ,std::pair<int,int> >  __pyx_t_12;
+  std::pair<double,double>  __pyx_t_9;
+  std::pair<int,int>  __pyx_t_10;
+  std::pair<std::pair<double,double> ,std::pair<int,int> >  __pyx_t_11;
   __Pyx_RefNannySetupContext("build_data", 0);
   __Pyx_TraceCall("build_data", __pyx_f[0], 41, 0, __PYX_ERR(0, 41, __pyx_L1_error));
   __pyx_pybuffer_xArray.pybuffer.buf = NULL;
@@ -2347,36 +2341,10 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_build_data(struct __pyx_obj
  */
             __pyx_t_5 = __pyx_v_x;
             __pyx_t_6 = __pyx_v_y;
-            __pyx_t_7 = -1;
-            if (__pyx_t_5 < 0) {
-              __pyx_t_5 += __pyx_pybuffernd_xArray.diminfo[0].shape;
-              if (unlikely(__pyx_t_5 < 0)) __pyx_t_7 = 0;
-            } else if (unlikely(__pyx_t_5 >= __pyx_pybuffernd_xArray.diminfo[0].shape)) __pyx_t_7 = 0;
-            if (__pyx_t_6 < 0) {
-              __pyx_t_6 += __pyx_pybuffernd_xArray.diminfo[1].shape;
-              if (unlikely(__pyx_t_6 < 0)) __pyx_t_7 = 1;
-            } else if (unlikely(__pyx_t_6 >= __pyx_pybuffernd_xArray.diminfo[1].shape)) __pyx_t_7 = 1;
-            if (unlikely(__pyx_t_7 != -1)) {
-              __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_7);
-              __PYX_ERR(0, 54, __pyx_L4_error)
-            }
-            __pyx_t_8 = __pyx_v_x;
-            __pyx_t_9 = __pyx_v_y;
-            __pyx_t_7 = -1;
-            if (__pyx_t_8 < 0) {
-              __pyx_t_8 += __pyx_pybuffernd_yArray.diminfo[0].shape;
-              if (unlikely(__pyx_t_8 < 0)) __pyx_t_7 = 0;
-            } else if (unlikely(__pyx_t_8 >= __pyx_pybuffernd_yArray.diminfo[0].shape)) __pyx_t_7 = 0;
-            if (__pyx_t_9 < 0) {
-              __pyx_t_9 += __pyx_pybuffernd_yArray.diminfo[1].shape;
-              if (unlikely(__pyx_t_9 < 0)) __pyx_t_7 = 1;
-            } else if (unlikely(__pyx_t_9 >= __pyx_pybuffernd_yArray.diminfo[1].shape)) __pyx_t_7 = 1;
-            if (unlikely(__pyx_t_7 != -1)) {
-              __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_7);
-              __PYX_ERR(0, 54, __pyx_L4_error)
-            }
+            __pyx_t_7 = __pyx_v_x;
+            __pyx_t_8 = __pyx_v_y;
             try {
-              __pyx_t_10 = std::pair<double,double> ((*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_xArray.rcbuffer->pybuffer.buf, __pyx_t_5, __pyx_pybuffernd_xArray.diminfo[0].strides, __pyx_t_6, __pyx_pybuffernd_xArray.diminfo[1].strides)), (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_yArray.rcbuffer->pybuffer.buf, __pyx_t_8, __pyx_pybuffernd_yArray.diminfo[0].strides, __pyx_t_9, __pyx_pybuffernd_yArray.diminfo[1].strides)));
+              __pyx_t_9 = std::pair<double,double> ((*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_xArray.rcbuffer->pybuffer.buf, __pyx_t_5, __pyx_pybuffernd_xArray.diminfo[0].strides, __pyx_t_6, __pyx_pybuffernd_xArray.diminfo[1].strides)), (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_yArray.rcbuffer->pybuffer.buf, __pyx_t_7, __pyx_pybuffernd_yArray.diminfo[0].strides, __pyx_t_8, __pyx_pybuffernd_yArray.diminfo[1].strides)));
             } catch(...) {
               #ifdef WITH_THREAD
               PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -2387,7 +2355,7 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_build_data(struct __pyx_obj
               #endif
               __PYX_ERR(0, 54, __pyx_L4_error)
             }
-            __pyx_v_sp = __pyx_t_10;
+            __pyx_v_sp = __pyx_t_9;
 
             /* "Engine_Grid.pyx":55
  * 				for y in range(0, hw):
@@ -2397,7 +2365,7 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_build_data(struct __pyx_obj
  * 			self.__grid = Grid(tmpVect.begin(), tmpVect.end(), binsize)
  */
             try {
-              __pyx_t_11 = std::pair<int,int> (((int)__pyx_v_x), ((int)__pyx_v_y));
+              __pyx_t_10 = std::pair<int,int> (((int)__pyx_v_x), ((int)__pyx_v_y));
             } catch(...) {
               #ifdef WITH_THREAD
               PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -2408,7 +2376,7 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_build_data(struct __pyx_obj
               #endif
               __PYX_ERR(0, 55, __pyx_L4_error)
             }
-            __pyx_v_pp = __pyx_t_11;
+            __pyx_v_pp = __pyx_t_10;
 
             /* "Engine_Grid.pyx":56
  * 					sp = pair[double, double](xArray[x, y], yArray[x, y])
@@ -2418,7 +2386,7 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_build_data(struct __pyx_obj
  * 
  */
             try {
-              __pyx_t_12 = std::pair<std::pair<double,double> ,std::pair<int,int> > (__pyx_v_sp, __pyx_v_pp);
+              __pyx_t_11 = std::pair<std::pair<double,double> ,std::pair<int,int> > (__pyx_v_sp, __pyx_v_pp);
             } catch(...) {
               #ifdef WITH_THREAD
               PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -2430,7 +2398,7 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_build_data(struct __pyx_obj
               __PYX_ERR(0, 56, __pyx_L4_error)
             }
             try {
-              __pyx_v_tmpVect.push_back(__pyx_t_12);
+              __pyx_v_tmpVect.push_back(__pyx_t_11);
             } catch(...) {
               #ifdef WITH_THREAD
               PyGILState_STATE __pyx_gilstate_save = PyGILState_Ensure();
@@ -2479,8 +2447,8 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_build_data(struct __pyx_obj
   }
 
   /* "Engine_Grid.pyx":41
- * 	# @cython.boundscheck(False)  # turn off bounds-checking for entire function
- * 	# @cython.wraparound(False)
+ * 	@cython.boundscheck(False)  # turn off bounds-checking for entire function
+ * 	@cython.wraparound(False)
  * 	cdef build_data(self, np.ndarray[np.float64_t, ndim=2] xArray, np.ndarray[np.float64_t, ndim=2] yArray,int binsize):             # <<<<<<<<<<<<<<
  * 		cdef int hw
  * 		hw = xArray.shape[0]
@@ -2859,8 +2827,8 @@ static PyObject *__pyx_pf_11Engine_Grid_11Engine_Grid_2reconfigure(struct __pyx_
 }
 
 /* "Engine_Grid.pyx":76
- * 	# @cython.boundscheck(False)  # turn off bounds-checking for entire function
- * 	# @cython.wraparound(False)
+ * 	@cython.boundscheck(False)  # turn off bounds-checking for entire function
+ * 	@cython.wraparound(False)
  * 	cpdef getFrame(self):             # <<<<<<<<<<<<<<
  * 		if self.__needsReconfiguring:
  * 			self.reconfigure()
@@ -2890,9 +2858,8 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_getFrame(struct __pyx_obj_1
   int __pyx_t_8;
   Py_ssize_t __pyx_t_9;
   Py_ssize_t __pyx_t_10;
-  int __pyx_t_11;
+  Py_ssize_t __pyx_t_11;
   Py_ssize_t __pyx_t_12;
-  Py_ssize_t __pyx_t_13;
   __Pyx_RefNannySetupContext("getFrame", 0);
   __Pyx_TraceCall("getFrame", __pyx_f[0], 76, 0, __PYX_ERR(0, 76, __pyx_L1_error));
   __pyx_pybuffer_fret.pybuffer.buf = NULL;
@@ -2935,7 +2902,7 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_getFrame(struct __pyx_obj_1
   }
 
   /* "Engine_Grid.pyx":77
- * 	# @cython.wraparound(False)
+ * 	@cython.wraparound(False)
  * 	cpdef getFrame(self):
  * 		if self.__needsReconfiguring:             # <<<<<<<<<<<<<<
  * 			self.reconfigure()
@@ -2956,7 +2923,7 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_getFrame(struct __pyx_obj_1
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "Engine_Grid.pyx":77
- * 	# @cython.wraparound(False)
+ * 	@cython.wraparound(False)
  * 	cpdef getFrame(self):
  * 		if self.__needsReconfiguring:             # <<<<<<<<<<<<<<
  * 			self.reconfigure()
@@ -3131,19 +3098,6 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_getFrame(struct __pyx_obj_1
  */
           __pyx_t_9 = __pyx_v_i;
           __pyx_t_10 = 0;
-          __pyx_t_11 = -1;
-          if (__pyx_t_9 < 0) {
-            __pyx_t_9 += __pyx_pybuffernd_fret.diminfo[0].shape;
-            if (unlikely(__pyx_t_9 < 0)) __pyx_t_11 = 0;
-          } else if (unlikely(__pyx_t_9 >= __pyx_pybuffernd_fret.diminfo[0].shape)) __pyx_t_11 = 0;
-          if (__pyx_t_10 < 0) {
-            __pyx_t_10 += __pyx_pybuffernd_fret.diminfo[1].shape;
-            if (unlikely(__pyx_t_10 < 0)) __pyx_t_11 = 1;
-          } else if (unlikely(__pyx_t_10 >= __pyx_pybuffernd_fret.diminfo[1].shape)) __pyx_t_11 = 1;
-          if (unlikely(__pyx_t_11 != -1)) {
-            __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_11);
-            __PYX_ERR(0, 90, __pyx_L7_error)
-          }
           *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_fret.rcbuffer->pybuffer.buf, __pyx_t_9, __pyx_pybuffernd_fret.diminfo[0].strides, __pyx_t_10, __pyx_pybuffernd_fret.diminfo[1].strides) = ((int)(__pyx_v_ret[__pyx_v_i]).pixelX);
 
           /* "Engine_Grid.pyx":91
@@ -3153,22 +3107,9 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_getFrame(struct __pyx_obj_1
  * 		return fret
  * 
  */
-          __pyx_t_12 = __pyx_v_i;
-          __pyx_t_13 = 1;
-          __pyx_t_11 = -1;
-          if (__pyx_t_12 < 0) {
-            __pyx_t_12 += __pyx_pybuffernd_fret.diminfo[0].shape;
-            if (unlikely(__pyx_t_12 < 0)) __pyx_t_11 = 0;
-          } else if (unlikely(__pyx_t_12 >= __pyx_pybuffernd_fret.diminfo[0].shape)) __pyx_t_11 = 0;
-          if (__pyx_t_13 < 0) {
-            __pyx_t_13 += __pyx_pybuffernd_fret.diminfo[1].shape;
-            if (unlikely(__pyx_t_13 < 0)) __pyx_t_11 = 1;
-          } else if (unlikely(__pyx_t_13 >= __pyx_pybuffernd_fret.diminfo[1].shape)) __pyx_t_11 = 1;
-          if (unlikely(__pyx_t_11 != -1)) {
-            __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_11);
-            __PYX_ERR(0, 91, __pyx_L7_error)
-          }
-          *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_fret.rcbuffer->pybuffer.buf, __pyx_t_12, __pyx_pybuffernd_fret.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_fret.diminfo[1].strides) = ((int)(__pyx_v_ret[__pyx_v_i]).pixelY);
+          __pyx_t_11 = __pyx_v_i;
+          __pyx_t_12 = 1;
+          *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_fret.rcbuffer->pybuffer.buf, __pyx_t_11, __pyx_pybuffernd_fret.diminfo[0].strides, __pyx_t_12, __pyx_pybuffernd_fret.diminfo[1].strides) = ((int)(__pyx_v_ret[__pyx_v_i]).pixelY);
         }
       }
 
@@ -3185,12 +3126,6 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_getFrame(struct __pyx_obj_1
           Py_BLOCK_THREADS
           #endif
           goto __pyx_L8;
-        }
-        __pyx_L7_error: {
-          #ifdef WITH_THREAD
-          Py_BLOCK_THREADS
-          #endif
-          goto __pyx_L1_error;
         }
         __pyx_L8:;
       }
@@ -3209,8 +3144,8 @@ static PyObject *__pyx_f_11Engine_Grid_11Engine_Grid_getFrame(struct __pyx_obj_1
   goto __pyx_L0;
 
   /* "Engine_Grid.pyx":76
- * 	# @cython.boundscheck(False)  # turn off bounds-checking for entire function
- * 	# @cython.wraparound(False)
+ * 	@cython.boundscheck(False)  # turn off bounds-checking for entire function
+ * 	@cython.wraparound(False)
  * 	cpdef getFrame(self):             # <<<<<<<<<<<<<<
  * 		if self.__needsReconfiguring:
  * 			self.reconfigure()
@@ -8348,23 +8283,6 @@ static CYTHON_INLINE void __Pyx_SafeReleaseBuffer(Py_buffer* info) {
   if (info->buf == NULL) return;
   if (info->suboffsets == __Pyx_minusones) info->suboffsets = NULL;
   __Pyx_ReleaseBuffer(info);
-}
-
-/* BufferIndexError */
-  static void __Pyx_RaiseBufferIndexError(int axis) {
-  PyErr_Format(PyExc_IndexError,
-     "Out of bounds on buffer access (axis %d)", axis);
-}
-
-/* BufferIndexErrorNogil */
-  static void __Pyx_RaiseBufferIndexErrorNogil(int axis) {
-    #ifdef WITH_THREAD
-    PyGILState_STATE gilstate = PyGILState_Ensure();
-    #endif
-    __Pyx_RaiseBufferIndexError(axis);
-    #ifdef WITH_THREAD
-    PyGILState_Release(gilstate);
-    #endif
 }
 
 /* PyErrFetchRestore */

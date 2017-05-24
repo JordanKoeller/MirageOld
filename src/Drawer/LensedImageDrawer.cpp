@@ -1545,21 +1545,12 @@ static void __Pyx_WriteUnraisable(const char *name, int clineno,
                                   int lineno, const char *filename,
                                   int full_traceback, int nogil);
 
-/* PyIntBinop.proto */
-#if !CYTHON_COMPILING_IN_PYPY
-static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, long intval, int inplace);
-#else
-#define __Pyx_PyInt_AddObjC(op1, op2, intval, inplace)\
-    (inplace ? PyNumber_InPlaceAdd(op1, op2) : PyNumber_Add(op1, op2))
-#endif
-
-/* PyIntBinop.proto */
-#if !CYTHON_COMPILING_IN_PYPY
-static PyObject* __Pyx_PyInt_SubtractObjC(PyObject *op1, PyObject *op2, long intval, int inplace);
-#else
-#define __Pyx_PyInt_SubtractObjC(op1, op2, intval, inplace)\
-    (inplace ? PyNumber_InPlaceSubtract(op1, op2) : PyNumber_Subtract(op1, op2))
-#endif
+/* abs_int.proto */
+static CYTHON_INLINE unsigned int __Pyx_abs_int(int x) {
+    if (unlikely(x == -INT_MAX-1))
+        return ((unsigned int)INT_MAX) + 1U;
+    return (unsigned int) abs(x);
+}
 
 /* RaiseException.proto */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
@@ -1688,6 +1679,14 @@ static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
 #define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
 #endif
 
+/* PyIntBinop.proto */
+#if !CYTHON_COMPILING_IN_PYPY
+static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, long intval, int inplace);
+#else
+#define __Pyx_PyInt_AddObjC(op1, op2, intval, inplace)\
+    (inplace ? PyNumber_InPlaceAdd(op1, op2) : PyNumber_Add(op1, op2))
+#endif
+
 /* ListExtend.proto */
 static CYTHON_INLINE int __Pyx_PyList_Extend(PyObject* L, PyObject* v) {
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -1799,12 +1798,17 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
-/* Print.proto */
-static int __Pyx_Print(PyObject*, PyObject *, int);
-#if CYTHON_COMPILING_IN_PYPY || PY_MAJOR_VERSION >= 3
-static PyObject* __pyx_print = 0;
-static PyObject* __pyx_print_kwargs = 0;
-#endif
+/* MemviewSliceIsContig.proto */
+static int __pyx_memviewslice_is_contig(const __Pyx_memviewslice mvs,
+                                        char order, int ndim);
+
+/* OverlappingSlices.proto */
+static int __pyx_slices_overlap(__Pyx_memviewslice *slice1,
+                                __Pyx_memviewslice *slice2,
+                                int ndim, size_t itemsize);
+
+/* Capsule.proto */
+static CYTHON_INLINE PyObject *__pyx_capsule_create(void *p, const char *sig);
 
 /* RealImag.proto */
 #if CYTHON_CCOMPLEX
@@ -1906,21 +1910,6 @@ static PyObject* __pyx_print_kwargs = 0;
 
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_enum__NPY_TYPES(enum NPY_TYPES value);
-
-/* MemviewSliceIsContig.proto */
-static int __pyx_memviewslice_is_contig(const __Pyx_memviewslice mvs,
-                                        char order, int ndim);
-
-/* OverlappingSlices.proto */
-static int __pyx_slices_overlap(__Pyx_memviewslice *slice1,
-                                __Pyx_memviewslice *slice2,
-                                int ndim, size_t itemsize);
-
-/* Capsule.proto */
-static CYTHON_INLINE PyObject *__pyx_capsule_create(void *p, const char *sig);
-
-/* PrintOne.proto */
-static int __Pyx_PrintOne(PyObject* stream, PyObject *o);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
@@ -2102,13 +2091,10 @@ static const char __pyx_k_y[] = "y";
 static const char __pyx_k_id[] = "id";
 static const char __pyx_k_np[] = "np";
 static const char __pyx_k_pg[] = "pg";
-static const char __pyx_k_End[] = "End = ";
-static const char __pyx_k_end[] = "end";
 static const char __pyx_k_obj[] = "obj";
 static const char __pyx_k_Plot[] = "Plot";
 static const char __pyx_k_base[] = "base";
 static const char __pyx_k_draw[] = "draw";
-static const char __pyx_k_file[] = "file";
 static const char __pyx_k_init[] = "__init__";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_math[] = "math";
@@ -2128,7 +2114,6 @@ static const char __pyx_k_dtype[] = "dtype";
 static const char __pyx_k_error[] = "error";
 static const char __pyx_k_flags[] = "flags";
 static const char __pyx_k_numpy[] = "numpy";
-static const char __pyx_k_print[] = "print";
 static const char __pyx_k_range[] = "range";
 static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_start[] = "start";
@@ -2213,7 +2198,6 @@ static PyObject *__pyx_kp_s_Can_only_create_a_buffer_that_is;
 static PyObject *__pyx_kp_s_Cannot_index_with_type_s;
 static PyObject *__pyx_n_s_Ellipsis;
 static PyObject *__pyx_kp_s_Empty_shape_tuple_for_cython_arr;
-static PyObject *__pyx_kp_s_End;
 static PyObject *__pyx_kp_u_Format_string_allocated_too_shor;
 static PyObject *__pyx_kp_u_Format_string_allocated_too_shor_2;
 static PyObject *__pyx_n_s_Graphics;
@@ -2261,10 +2245,8 @@ static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_dtype_is_object;
 static PyObject *__pyx_n_s_einsteinRadius;
 static PyObject *__pyx_n_s_encode;
-static PyObject *__pyx_n_s_end;
 static PyObject *__pyx_n_s_enumerate;
 static PyObject *__pyx_n_s_error;
-static PyObject *__pyx_n_s_file;
 static PyObject *__pyx_n_s_flags;
 static PyObject *__pyx_n_s_format;
 static PyObject *__pyx_n_s_fortran;
@@ -2293,7 +2275,6 @@ static PyObject *__pyx_kp_s_numpy_core_umath_failed_to_impor;
 static PyObject *__pyx_n_s_obj;
 static PyObject *__pyx_n_s_pack;
 static PyObject *__pyx_n_s_pg;
-static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_pyqtgraph;
 static PyObject *__pyx_n_s_pyx_getbuffer;
 static PyObject *__pyx_n_s_pyx_vtable;
@@ -2400,7 +2381,7 @@ static PyObject *__pyx_tuple__29;
  * 
  * 	def __init__(self,signal):             # <<<<<<<<<<<<<<
  * 		ImageDrawer.__init__(self,signal)
- * 	cpdef draw(self,object args):
+ * 
  */
 
 /* Python wrapper */
@@ -2466,8 +2447,8 @@ static int __pyx_pf_6Drawer_17LensedImageDrawer_17LensedImageDrawer___init__(str
  * 
  * 	def __init__(self,signal):
  * 		ImageDrawer.__init__(self,signal)             # <<<<<<<<<<<<<<
- * 	cpdef draw(self,object args):
- * 		cdef object parameters = args[0]
+ * 
+ * 
  */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_6Drawer_6Drawer_ImageDrawer), __pyx_n_s_init); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -2523,7 +2504,7 @@ static int __pyx_pf_6Drawer_17LensedImageDrawer_17LensedImageDrawer___init__(str
  * 
  * 	def __init__(self,signal):             # <<<<<<<<<<<<<<
  * 		ImageDrawer.__init__(self,signal)
- * 	cpdef draw(self,object args):
+ * 
  */
 
   /* function exit code */
@@ -2541,9 +2522,9 @@ static int __pyx_pf_6Drawer_17LensedImageDrawer_17LensedImageDrawer___init__(str
   return __pyx_r;
 }
 
-/* "Drawer/LensedImageDrawer.pyx":16
- * 	def __init__(self,signal):
- * 		ImageDrawer.__init__(self,signal)
+/* "Drawer/LensedImageDrawer.pyx":18
+ * 
+ * 
  * 	cpdef draw(self,object args):             # <<<<<<<<<<<<<<
  * 		cdef object parameters = args[0]
  * 		cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]
@@ -2593,7 +2574,7 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_draw); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_draw); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_6Drawer_17LensedImageDrawer_17LensedImageDrawer_3draw)) {
       __Pyx_XDECREF(__pyx_r);
@@ -2609,13 +2590,13 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
         }
       }
       if (!__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_args); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 16, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_args); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 18, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_3)) {
           PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_v_args};
-          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 16, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 18, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_GOTREF(__pyx_t_2);
         } else
@@ -2623,19 +2604,19 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
           PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_v_args};
-          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 16, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 18, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_GOTREF(__pyx_t_2);
         } else
         #endif
         {
-          __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 16, __pyx_L1_error)
+          __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 18, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
           __Pyx_INCREF(__pyx_v_args);
           __Pyx_GIVEREF(__pyx_v_args);
           PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_v_args);
-          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 16, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 18, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         }
@@ -2649,34 +2630,34 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "Drawer/LensedImageDrawer.pyx":17
- * 		ImageDrawer.__init__(self,signal)
+  /* "Drawer/LensedImageDrawer.pyx":19
+ * 
  * 	cpdef draw(self,object args):
  * 		cdef object parameters = args[0]             # <<<<<<<<<<<<<<
  * 		cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]
  * 		cdef np.ndarray[np.uint8_t, ndim=2] canvas = np.zeros((parameters.canvasDim,parameters.canvasDim), dtype=np.uint8)
  */
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_args, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_args, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_parameters = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "Drawer/LensedImageDrawer.pyx":18
+  /* "Drawer/LensedImageDrawer.pyx":20
  * 	cpdef draw(self,object args):
  * 		cdef object parameters = args[0]
  * 		cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]             # <<<<<<<<<<<<<<
  * 		cdef np.ndarray[np.uint8_t, ndim=2] canvas = np.zeros((parameters.canvasDim,parameters.canvasDim), dtype=np.uint8)
  * 		if parameters.displayGalaxy:
  */
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_args, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_args, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 18, __pyx_L1_error)
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 20, __pyx_L1_error)
   __pyx_t_6 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_pixels.rcbuffer->pybuffer, (PyObject*)__pyx_t_6, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int32_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_pixels = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_pixels.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 18, __pyx_L1_error)
+      __PYX_ERR(0, 20, __pyx_L1_error)
     } else {__pyx_pybuffernd_pixels.diminfo[0].strides = __pyx_pybuffernd_pixels.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_pixels.diminfo[0].shape = __pyx_pybuffernd_pixels.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_pixels.diminfo[1].strides = __pyx_pybuffernd_pixels.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_pixels.diminfo[1].shape = __pyx_pybuffernd_pixels.rcbuffer->pybuffer.shape[1];
     }
   }
@@ -2684,23 +2665,23 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
   __pyx_v_pixels = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "Drawer/LensedImageDrawer.pyx":19
+  /* "Drawer/LensedImageDrawer.pyx":21
  * 		cdef object parameters = args[0]
  * 		cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]
  * 		cdef np.ndarray[np.uint8_t, ndim=2] canvas = np.zeros((parameters.canvasDim,parameters.canvasDim), dtype=np.uint8)             # <<<<<<<<<<<<<<
  * 		if parameters.displayGalaxy:
  * 			parameters.galaxy.drawGalaxy(canvas,parameters)
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
@@ -2708,32 +2689,32 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
   PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_3);
   __pyx_t_1 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5);
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_uint8); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_uint8); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 19, __pyx_L1_error)
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 21, __pyx_L1_error)
   __pyx_t_7 = ((PyArrayObject *)__pyx_t_4);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_canvas.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_5numpy_uint8_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_canvas = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_canvas.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 19, __pyx_L1_error)
+      __PYX_ERR(0, 21, __pyx_L1_error)
     } else {__pyx_pybuffernd_canvas.diminfo[0].strides = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_canvas.diminfo[0].shape = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_canvas.diminfo[1].strides = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_canvas.diminfo[1].shape = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.shape[1];
     }
   }
@@ -2741,29 +2722,29 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
   __pyx_v_canvas = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "Drawer/LensedImageDrawer.pyx":20
+  /* "Drawer/LensedImageDrawer.pyx":22
  * 		cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]
  * 		cdef np.ndarray[np.uint8_t, ndim=2] canvas = np.zeros((parameters.canvasDim,parameters.canvasDim), dtype=np.uint8)
  * 		if parameters.displayGalaxy:             # <<<<<<<<<<<<<<
  * 			parameters.galaxy.drawGalaxy(canvas,parameters)
  * 		if parameters.displayStars:
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_displayGalaxy); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_displayGalaxy); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (__pyx_t_8) {
 
-    /* "Drawer/LensedImageDrawer.pyx":21
+    /* "Drawer/LensedImageDrawer.pyx":23
  * 		cdef np.ndarray[np.uint8_t, ndim=2] canvas = np.zeros((parameters.canvasDim,parameters.canvasDim), dtype=np.uint8)
  * 		if parameters.displayGalaxy:
  * 			parameters.galaxy.drawGalaxy(canvas,parameters)             # <<<<<<<<<<<<<<
  * 		if parameters.displayStars:
  * 			parameters.galaxy.drawStars(canvas,parameters)
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_galaxy); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 21, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_galaxy); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 23, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_drawGalaxy); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_drawGalaxy); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 23, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = NULL;
@@ -2781,7 +2762,7 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[3] = {__pyx_t_5, ((PyObject *)__pyx_v_canvas), __pyx_v_parameters};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 23, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_4);
     } else
@@ -2789,13 +2770,13 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[3] = {__pyx_t_5, ((PyObject *)__pyx_v_canvas), __pyx_v_parameters};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 23, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_4);
     } else
     #endif
     {
-      __pyx_t_2 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 21, __pyx_L1_error)
+      __pyx_t_2 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 23, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       if (__pyx_t_5) {
         __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5); __pyx_t_5 = NULL;
@@ -2806,14 +2787,14 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
       __Pyx_INCREF(__pyx_v_parameters);
       __Pyx_GIVEREF(__pyx_v_parameters);
       PyTuple_SET_ITEM(__pyx_t_2, 1+__pyx_t_9, __pyx_v_parameters);
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 23, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "Drawer/LensedImageDrawer.pyx":20
+    /* "Drawer/LensedImageDrawer.pyx":22
  * 		cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]
  * 		cdef np.ndarray[np.uint8_t, ndim=2] canvas = np.zeros((parameters.canvasDim,parameters.canvasDim), dtype=np.uint8)
  * 		if parameters.displayGalaxy:             # <<<<<<<<<<<<<<
@@ -2822,29 +2803,29 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
  */
   }
 
-  /* "Drawer/LensedImageDrawer.pyx":22
+  /* "Drawer/LensedImageDrawer.pyx":24
  * 		if parameters.displayGalaxy:
  * 			parameters.galaxy.drawGalaxy(canvas,parameters)
  * 		if parameters.displayStars:             # <<<<<<<<<<<<<<
  * 			parameters.galaxy.drawStars(canvas,parameters)
  * 		if parameters.displayQuasar:
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_displayStars); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_displayStars); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 24, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 24, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (__pyx_t_8) {
 
-    /* "Drawer/LensedImageDrawer.pyx":23
+    /* "Drawer/LensedImageDrawer.pyx":25
  * 			parameters.galaxy.drawGalaxy(canvas,parameters)
  * 		if parameters.displayStars:
  * 			parameters.galaxy.drawStars(canvas,parameters)             # <<<<<<<<<<<<<<
  * 		if parameters.displayQuasar:
  * 			parameters.quasar.draw(canvas,parameters)
  */
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_galaxy); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 23, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_galaxy); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_drawStars); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 23, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_drawStars); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_3 = NULL;
@@ -2862,7 +2843,7 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[3] = {__pyx_t_3, ((PyObject *)__pyx_v_canvas), __pyx_v_parameters};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 23, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 25, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_4);
     } else
@@ -2870,13 +2851,13 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[3] = {__pyx_t_3, ((PyObject *)__pyx_v_canvas), __pyx_v_parameters};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 23, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 25, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_4);
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 23, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 25, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       if (__pyx_t_3) {
         __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -2887,14 +2868,14 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
       __Pyx_INCREF(__pyx_v_parameters);
       __Pyx_GIVEREF(__pyx_v_parameters);
       PyTuple_SET_ITEM(__pyx_t_5, 1+__pyx_t_9, __pyx_v_parameters);
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 23, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 25, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "Drawer/LensedImageDrawer.pyx":22
+    /* "Drawer/LensedImageDrawer.pyx":24
  * 		if parameters.displayGalaxy:
  * 			parameters.galaxy.drawGalaxy(canvas,parameters)
  * 		if parameters.displayStars:             # <<<<<<<<<<<<<<
@@ -2903,29 +2884,29 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
  */
   }
 
-  /* "Drawer/LensedImageDrawer.pyx":24
+  /* "Drawer/LensedImageDrawer.pyx":26
  * 		if parameters.displayStars:
  * 			parameters.galaxy.drawStars(canvas,parameters)
  * 		if parameters.displayQuasar:             # <<<<<<<<<<<<<<
  * 			parameters.quasar.draw(canvas,parameters)
  * 		cdef int pixel = 0
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_displayQuasar); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_displayQuasar); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (__pyx_t_8) {
 
-    /* "Drawer/LensedImageDrawer.pyx":25
+    /* "Drawer/LensedImageDrawer.pyx":27
  * 			parameters.galaxy.drawStars(canvas,parameters)
  * 		if parameters.displayQuasar:
  * 			parameters.quasar.draw(canvas,parameters)             # <<<<<<<<<<<<<<
  * 		cdef int pixel = 0
  * 		cdef int end = pixels.shape[0]
  */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_quasar); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 25, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_quasar); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 27, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_draw); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 25, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_draw); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 27, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_2 = NULL;
@@ -2943,7 +2924,7 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[3] = {__pyx_t_2, ((PyObject *)__pyx_v_canvas), __pyx_v_parameters};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 25, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 27, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GOTREF(__pyx_t_4);
     } else
@@ -2951,13 +2932,13 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[3] = {__pyx_t_2, ((PyObject *)__pyx_v_canvas), __pyx_v_parameters};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 25, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 27, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GOTREF(__pyx_t_4);
     } else
     #endif
     {
-      __pyx_t_3 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 25, __pyx_L1_error)
+      __pyx_t_3 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 27, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       if (__pyx_t_2) {
         __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2); __pyx_t_2 = NULL;
@@ -2968,14 +2949,14 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
       __Pyx_INCREF(__pyx_v_parameters);
       __Pyx_GIVEREF(__pyx_v_parameters);
       PyTuple_SET_ITEM(__pyx_t_3, 1+__pyx_t_9, __pyx_v_parameters);
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 25, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 27, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     }
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "Drawer/LensedImageDrawer.pyx":24
+    /* "Drawer/LensedImageDrawer.pyx":26
  * 		if parameters.displayStars:
  * 			parameters.galaxy.drawStars(canvas,parameters)
  * 		if parameters.displayQuasar:             # <<<<<<<<<<<<<<
@@ -2984,50 +2965,27 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
  */
   }
 
-  /* "Drawer/LensedImageDrawer.pyx":26
+  /* "Drawer/LensedImageDrawer.pyx":28
  * 		if parameters.displayQuasar:
  * 			parameters.quasar.draw(canvas,parameters)
  * 		cdef int pixel = 0             # <<<<<<<<<<<<<<
  * 		cdef int end = pixels.shape[0]
- * 		print("End = "+str(end))
+ * 		if end > 1:
  */
   __pyx_v_pixel = 0;
 
-  /* "Drawer/LensedImageDrawer.pyx":27
+  /* "Drawer/LensedImageDrawer.pyx":29
  * 			parameters.quasar.draw(canvas,parameters)
  * 		cdef int pixel = 0
  * 		cdef int end = pixels.shape[0]             # <<<<<<<<<<<<<<
- * 		print("End = "+str(end))
- * 		if end > 1:
- */
-  __pyx_v_end = (__pyx_v_pixels->dimensions[0]);
-
-  /* "Drawer/LensedImageDrawer.pyx":28
- * 		cdef int pixel = 0
- * 		cdef int end = pixels.shape[0]
- * 		print("End = "+str(end))             # <<<<<<<<<<<<<<
  * 		if end > 1:
  * 			with nogil:
  */
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_end); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 28, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 28, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4);
-  __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 28, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = PyNumber_Add(__pyx_kp_s_End, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 28, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (__Pyx_PrintOne(0, __pyx_t_5) < 0) __PYX_ERR(0, 28, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_v_end = (__pyx_v_pixels->dimensions[0]);
 
-  /* "Drawer/LensedImageDrawer.pyx":29
+  /* "Drawer/LensedImageDrawer.pyx":30
+ * 		cdef int pixel = 0
  * 		cdef int end = pixels.shape[0]
- * 		print("End = "+str(end))
  * 		if end > 1:             # <<<<<<<<<<<<<<
  * 			with nogil:
  * 				for pixel in range(0,end):
@@ -3035,8 +2993,8 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
   __pyx_t_8 = ((__pyx_v_end > 1) != 0);
   if (__pyx_t_8) {
 
-    /* "Drawer/LensedImageDrawer.pyx":30
- * 		print("End = "+str(end))
+    /* "Drawer/LensedImageDrawer.pyx":31
+ * 		cdef int end = pixels.shape[0]
  * 		if end > 1:
  * 			with nogil:             # <<<<<<<<<<<<<<
  * 				for pixel in range(0,end):
@@ -3049,7 +3007,7 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
         #endif
         /*try:*/ {
 
-          /* "Drawer/LensedImageDrawer.pyx":31
+          /* "Drawer/LensedImageDrawer.pyx":32
  * 		if end > 1:
  * 			with nogil:
  * 				for pixel in range(0,end):             # <<<<<<<<<<<<<<
@@ -3060,7 +3018,7 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
           for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
             __pyx_v_pixel = __pyx_t_10;
 
-            /* "Drawer/LensedImageDrawer.pyx":32
+            /* "Drawer/LensedImageDrawer.pyx":33
  * 			with nogil:
  * 				for pixel in range(0,end):
  * 					canvas[pixels[pixel,0],pixels[pixel,1]] = 1             # <<<<<<<<<<<<<<
@@ -3080,7 +3038,7 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
             } else if (unlikely(__pyx_t_12 >= __pyx_pybuffernd_pixels.diminfo[1].shape)) __pyx_t_13 = 1;
             if (unlikely(__pyx_t_13 != -1)) {
               __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_13);
-              __PYX_ERR(0, 32, __pyx_L8_error)
+              __PYX_ERR(0, 33, __pyx_L8_error)
             }
             __pyx_t_14 = __pyx_v_pixel;
             __pyx_t_15 = 1;
@@ -3095,7 +3053,7 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
             } else if (unlikely(__pyx_t_15 >= __pyx_pybuffernd_pixels.diminfo[1].shape)) __pyx_t_13 = 1;
             if (unlikely(__pyx_t_13 != -1)) {
               __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_13);
-              __PYX_ERR(0, 32, __pyx_L8_error)
+              __PYX_ERR(0, 33, __pyx_L8_error)
             }
             __pyx_t_16 = (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_pixels.rcbuffer->pybuffer.buf, __pyx_t_11, __pyx_pybuffernd_pixels.diminfo[0].strides, __pyx_t_12, __pyx_pybuffernd_pixels.diminfo[1].strides));
             __pyx_t_17 = (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_pixels.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_pixels.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_pixels.diminfo[1].strides));
@@ -3110,14 +3068,14 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
             } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_canvas.diminfo[1].shape)) __pyx_t_13 = 1;
             if (unlikely(__pyx_t_13 != -1)) {
               __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_13);
-              __PYX_ERR(0, 32, __pyx_L8_error)
+              __PYX_ERR(0, 33, __pyx_L8_error)
             }
             *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_uint8_t *, __pyx_pybuffernd_canvas.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_canvas.diminfo[0].strides, __pyx_t_17, __pyx_pybuffernd_canvas.diminfo[1].strides) = 1;
           }
         }
 
-        /* "Drawer/LensedImageDrawer.pyx":30
- * 		print("End = "+str(end))
+        /* "Drawer/LensedImageDrawer.pyx":31
+ * 		cdef int end = pixels.shape[0]
  * 		if end > 1:
  * 			with nogil:             # <<<<<<<<<<<<<<
  * 				for pixel in range(0,end):
@@ -3140,16 +3098,16 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
         }
     }
 
-    /* "Drawer/LensedImageDrawer.pyx":29
+    /* "Drawer/LensedImageDrawer.pyx":30
+ * 		cdef int pixel = 0
  * 		cdef int end = pixels.shape[0]
- * 		print("End = "+str(end))
  * 		if end > 1:             # <<<<<<<<<<<<<<
  * 			with nogil:
  * 				for pixel in range(0,end):
  */
   }
 
-  /* "Drawer/LensedImageDrawer.pyx":33
+  /* "Drawer/LensedImageDrawer.pyx":34
  * 				for pixel in range(0,end):
  * 					canvas[pixels[pixel,0],pixels[pixel,1]] = 1
  * 		return self.drawImage(canvas,None)             # <<<<<<<<<<<<<<
@@ -3159,15 +3117,15 @@ static PyObject *__pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(st
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_18.__pyx_n = 1;
   __pyx_t_18.pixmap = Py_None;
-  __pyx_t_5 = ((struct __pyx_vtabstruct_6Drawer_17LensedImageDrawer_LensedImageDrawer *)__pyx_v_self->__pyx_base.__pyx_base.__pyx_vtab)->__pyx_base.drawImage(((struct __pyx_obj_6Drawer_6Drawer_ImageDrawer *)__pyx_v_self), ((PyArrayObject *)__pyx_v_canvas), &__pyx_t_18); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 33, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_r = __pyx_t_5;
-  __pyx_t_5 = 0;
+  __pyx_t_4 = ((struct __pyx_vtabstruct_6Drawer_17LensedImageDrawer_LensedImageDrawer *)__pyx_v_self->__pyx_base.__pyx_base.__pyx_vtab)->__pyx_base.drawImage(((struct __pyx_obj_6Drawer_6Drawer_ImageDrawer *)__pyx_v_self), ((PyArrayObject *)__pyx_v_canvas), &__pyx_t_18); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "Drawer/LensedImageDrawer.pyx":16
- * 	def __init__(self,signal):
- * 		ImageDrawer.__init__(self,signal)
+  /* "Drawer/LensedImageDrawer.pyx":18
+ * 
+ * 
  * 	cpdef draw(self,object args):             # <<<<<<<<<<<<<<
  * 		cdef object parameters = args[0]
  * 		cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]
@@ -3221,7 +3179,7 @@ static PyObject *__pyx_pf_6Drawer_17LensedImageDrawer_17LensedImageDrawer_2draw(
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("draw", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(__pyx_v_self, __pyx_v_args, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer_draw(__pyx_v_self, __pyx_v_args, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3238,7 +3196,7 @@ static PyObject *__pyx_pf_6Drawer_17LensedImageDrawer_17LensedImageDrawer_2draw(
   return __pyx_r;
 }
 
-/* "Drawer/LensedImageDrawer.pyx":36
+/* "Drawer/LensedImageDrawer.pyx":37
  * 
  * 
  * 	cdef void __drawTrackers(self,np.ndarray[np.uint8_t,ndim=2] canvas, object parameters): #*************NOT OPTIMIZED **************             # <<<<<<<<<<<<<<
@@ -3273,20 +3231,20 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   __pyx_pybuffernd_canvas.rcbuffer = &__pyx_pybuffer_canvas;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_canvas.rcbuffer->pybuffer, (PyObject*)__pyx_v_canvas, &__Pyx_TypeInfo_nn___pyx_t_5numpy_uint8_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 36, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_canvas.rcbuffer->pybuffer, (PyObject*)__pyx_v_canvas, &__Pyx_TypeInfo_nn___pyx_t_5numpy_uint8_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 37, __pyx_L1_error)
   }
   __pyx_pybuffernd_canvas.diminfo[0].strides = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_canvas.diminfo[0].shape = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_canvas.diminfo[1].strides = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_canvas.diminfo[1].shape = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.shape[1];
 
-  /* "Drawer/LensedImageDrawer.pyx":37
+  /* "Drawer/LensedImageDrawer.pyx":38
  * 
  * 	cdef void __drawTrackers(self,np.ndarray[np.uint8_t,ndim=2] canvas, object parameters): #*************NOT OPTIMIZED **************
  * 		x = ImageFinder.getRoot(-1,-1,parameters)             # <<<<<<<<<<<<<<
  * 		xNorm = x
  * 		xInt = Vector2D(int(xNorm.x),int(xNorm.y))
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_ImageFinder); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 37, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_ImageFinder); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 38, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_getRoot); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_getRoot); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -3304,7 +3262,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[4] = {__pyx_t_2, __pyx_int_neg_1, __pyx_int_neg_1, __pyx_v_parameters};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_4, 3+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 37, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_4, 3+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
@@ -3312,13 +3270,13 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[4] = {__pyx_t_2, __pyx_int_neg_1, __pyx_int_neg_1, __pyx_v_parameters};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_4, 3+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 37, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_4, 3+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
   #endif
   {
-    __pyx_t_5 = PyTuple_New(3+__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 37, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(3+__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 38, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     if (__pyx_t_2) {
       __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2); __pyx_t_2 = NULL;
@@ -3332,7 +3290,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
     __Pyx_INCREF(__pyx_v_parameters);
     __Pyx_GIVEREF(__pyx_v_parameters);
     PyTuple_SET_ITEM(__pyx_t_5, 2+__pyx_t_4, __pyx_v_parameters);
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 37, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
@@ -3340,7 +3298,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   __pyx_v_x = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "Drawer/LensedImageDrawer.pyx":38
+  /* "Drawer/LensedImageDrawer.pyx":39
  * 	cdef void __drawTrackers(self,np.ndarray[np.uint8_t,ndim=2] canvas, object parameters): #*************NOT OPTIMIZED **************
  * 		x = ImageFinder.getRoot(-1,-1,parameters)
  * 		xNorm = x             # <<<<<<<<<<<<<<
@@ -3350,23 +3308,23 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   __Pyx_INCREF(__pyx_v_x);
   __pyx_v_xNorm = __pyx_v_x;
 
-  /* "Drawer/LensedImageDrawer.pyx":39
+  /* "Drawer/LensedImageDrawer.pyx":40
  * 		x = ImageFinder.getRoot(-1,-1,parameters)
  * 		xNorm = x
  * 		xInt = Vector2D(int(xNorm.x),int(xNorm.y))             # <<<<<<<<<<<<<<
  * 		for i in range(-1,1):
  * 			for j in range(-1,1):
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_Vector2D); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_Vector2D); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_xNorm, __pyx_n_s_x); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_xNorm, __pyx_n_s_x); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_xNorm, __pyx_n_s_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_xNorm, __pyx_n_s_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyNumber_Int(__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyNumber_Int(__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_5 = NULL;
@@ -3384,7 +3342,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_t_2, __pyx_t_6};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_4, 2+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 39, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_4, 2+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -3394,7 +3352,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_t_2, __pyx_t_6};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_4, 2+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 39, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_4, 2+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -3402,7 +3360,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   } else
   #endif
   {
-    __pyx_t_7 = PyTuple_New(2+__pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 39, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(2+__pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     if (__pyx_t_5) {
       __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
@@ -3413,7 +3371,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
     PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_4, __pyx_t_6);
     __pyx_t_2 = 0;
     __pyx_t_6 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 39, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   }
@@ -3421,22 +3379,22 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   __pyx_v_xInt = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "Drawer/LensedImageDrawer.pyx":40
+  /* "Drawer/LensedImageDrawer.pyx":41
  * 		xNorm = x
  * 		xInt = Vector2D(int(xNorm.x),int(xNorm.y))
  * 		for i in range(-1,1):             # <<<<<<<<<<<<<<
  * 			for j in range(-1,1):
  * 				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
     __pyx_t_3 = __pyx_t_1; __Pyx_INCREF(__pyx_t_3); __pyx_t_8 = 0;
     __pyx_t_9 = NULL;
   } else {
-    __pyx_t_8 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
+    __pyx_t_8 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 41, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_9 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 40, __pyx_L1_error)
+    __pyx_t_9 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 41, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   for (;;) {
@@ -3444,17 +3402,17 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
       if (likely(PyList_CheckExact(__pyx_t_3))) {
         if (__pyx_t_8 >= PyList_GET_SIZE(__pyx_t_3)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_8); __Pyx_INCREF(__pyx_t_1); __pyx_t_8++; if (unlikely(0 < 0)) __PYX_ERR(0, 40, __pyx_L1_error)
+        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_8); __Pyx_INCREF(__pyx_t_1); __pyx_t_8++; if (unlikely(0 < 0)) __PYX_ERR(0, 41, __pyx_L1_error)
         #else
-        __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_8); __pyx_t_8++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_8); __pyx_t_8++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         #endif
       } else {
         if (__pyx_t_8 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_8); __Pyx_INCREF(__pyx_t_1); __pyx_t_8++; if (unlikely(0 < 0)) __PYX_ERR(0, 40, __pyx_L1_error)
+        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_8); __Pyx_INCREF(__pyx_t_1); __pyx_t_8++; if (unlikely(0 < 0)) __PYX_ERR(0, 41, __pyx_L1_error)
         #else
-        __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_8); __pyx_t_8++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_8); __pyx_t_8++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         #endif
       }
@@ -3464,7 +3422,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 40, __pyx_L1_error)
+          else __PYX_ERR(0, 41, __pyx_L1_error)
         }
         break;
       }
@@ -3473,22 +3431,22 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "Drawer/LensedImageDrawer.pyx":41
+    /* "Drawer/LensedImageDrawer.pyx":42
  * 		xInt = Vector2D(int(xNorm.x),int(xNorm.y))
  * 		for i in range(-1,1):
  * 			for j in range(-1,1):             # <<<<<<<<<<<<<<
  * 				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3
  * 
  */
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
       __pyx_t_7 = __pyx_t_1; __Pyx_INCREF(__pyx_t_7); __pyx_t_10 = 0;
       __pyx_t_11 = NULL;
     } else {
-      __pyx_t_10 = -1; __pyx_t_7 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 41, __pyx_L1_error)
+      __pyx_t_10 = -1; __pyx_t_7 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 42, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_11 = Py_TYPE(__pyx_t_7)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 41, __pyx_L1_error)
+      __pyx_t_11 = Py_TYPE(__pyx_t_7)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 42, __pyx_L1_error)
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     for (;;) {
@@ -3496,17 +3454,17 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
         if (likely(PyList_CheckExact(__pyx_t_7))) {
           if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_7)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_1 = PyList_GET_ITEM(__pyx_t_7, __pyx_t_10); __Pyx_INCREF(__pyx_t_1); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 41, __pyx_L1_error)
+          __pyx_t_1 = PyList_GET_ITEM(__pyx_t_7, __pyx_t_10); __Pyx_INCREF(__pyx_t_1); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 42, __pyx_L1_error)
           #else
-          __pyx_t_1 = PySequence_ITEM(__pyx_t_7, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_7, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_1);
           #endif
         } else {
           if (__pyx_t_10 >= PyTuple_GET_SIZE(__pyx_t_7)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_7, __pyx_t_10); __Pyx_INCREF(__pyx_t_1); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 41, __pyx_L1_error)
+          __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_7, __pyx_t_10); __Pyx_INCREF(__pyx_t_1); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 42, __pyx_L1_error)
           #else
-          __pyx_t_1 = PySequence_ITEM(__pyx_t_7, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_7, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_1);
           #endif
         }
@@ -3516,7 +3474,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 41, __pyx_L1_error)
+            else __PYX_ERR(0, 42, __pyx_L1_error)
           }
           break;
         }
@@ -3525,55 +3483,55 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
       __Pyx_XDECREF_SET(__pyx_v_j, __pyx_t_1);
       __pyx_t_1 = 0;
 
-      /* "Drawer/LensedImageDrawer.pyx":42
+      /* "Drawer/LensedImageDrawer.pyx":43
  * 		for i in range(-1,1):
  * 			for j in range(-1,1):
  * 				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3             # <<<<<<<<<<<<<<
  * 
  * 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): #***************NOT OPTIMIZED****************
  */
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_xInt, __pyx_n_s_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_xInt, __pyx_n_s_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_6 = PyNumber_Add(__pyx_v_i, __pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_6 = PyNumber_Add(__pyx_v_i, __pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_t_1, __pyx_int_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_t_1, __pyx_int_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = PyNumber_Add(__pyx_t_6, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_2 = PyNumber_Add(__pyx_t_6, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyObject_GetItem(((PyObject *)__pyx_v_canvas), __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_1 = PyObject_GetItem(((PyObject *)__pyx_v_canvas), __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_6 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_int_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_int_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_xInt, __pyx_n_s_y); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_xInt, __pyx_n_s_y); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_5 = PyNumber_Add(__pyx_v_j, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_5 = PyNumber_Add(__pyx_v_j, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_6 = PyNumber_Subtract(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_6 = PyNumber_Subtract(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(PyObject_SetItem(__pyx_t_1, __pyx_t_6, __pyx_int_3) < 0)) __PYX_ERR(0, 42, __pyx_L1_error)
+      if (unlikely(PyObject_SetItem(__pyx_t_1, __pyx_t_6, __pyx_int_3) < 0)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-      /* "Drawer/LensedImageDrawer.pyx":41
+      /* "Drawer/LensedImageDrawer.pyx":42
  * 		xInt = Vector2D(int(xNorm.x),int(xNorm.y))
  * 		for i in range(-1,1):
  * 			for j in range(-1,1):             # <<<<<<<<<<<<<<
@@ -3583,7 +3541,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
     }
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-    /* "Drawer/LensedImageDrawer.pyx":40
+    /* "Drawer/LensedImageDrawer.pyx":41
  * 		xNorm = x
  * 		xInt = Vector2D(int(xNorm.x),int(xNorm.y))
  * 		for i in range(-1,1):             # <<<<<<<<<<<<<<
@@ -3593,7 +3551,7 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "Drawer/LensedImageDrawer.pyx":36
+  /* "Drawer/LensedImageDrawer.pyx":37
  * 
  * 
  * 	cdef void __drawTrackers(self,np.ndarray[np.uint8_t,ndim=2] canvas, object parameters): #*************NOT OPTIMIZED **************             # <<<<<<<<<<<<<<
@@ -3629,21 +3587,22 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawTracke
   __Pyx_RefNannyFinishContext();
 }
 
-/* "Drawer/LensedImageDrawer.pyx":44
+/* "Drawer/LensedImageDrawer.pyx":45
  * 				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3
  * 
  * 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): #***************NOT OPTIMIZED****************             # <<<<<<<<<<<<<<
- * 		x0 = parameters.galaxy.center.x + parameters.canvasDim/2
- * 		y0 = parameters.galaxy.center.y + parameters.canvasDim/2
+ * 		cdef int x0 = parameters.galaxy.center.x + parameters.canvasDim/2
+ * 		cdef int y0 = parameters.galaxy.center.y + parameters.canvasDim/2
  */
 
 static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawEinsteinRadius(CYTHON_UNUSED struct __pyx_obj_6Drawer_17LensedImageDrawer_LensedImageDrawer *__pyx_v_self, PyArrayObject *__pyx_v_canvas, PyObject *__pyx_v_parameters) {
-  PyObject *__pyx_v_x0 = NULL;
-  PyObject *__pyx_v_y0 = NULL;
-  PyObject *__pyx_v_radius = NULL;
-  PyObject *__pyx_v_x = NULL;
-  PyObject *__pyx_v_y = NULL;
-  PyObject *__pyx_v_err = NULL;
+  int __pyx_v_x0;
+  int __pyx_v_y0;
+  int __pyx_v_radius;
+  int __pyx_v_x;
+  int __pyx_v_y;
+  int __pyx_v_err;
+  int __pyx_v_canvasDim;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_canvas;
   __Pyx_Buffer __pyx_pybuffer_canvas;
   __Pyx_RefNannyDeclarations
@@ -3651,7 +3610,25 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawEinste
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   int __pyx_t_4;
-  int __pyx_t_5;
+  unsigned int __pyx_t_5;
+  int __pyx_t_6;
+  int __pyx_t_7;
+  Py_ssize_t __pyx_t_8;
+  Py_ssize_t __pyx_t_9;
+  Py_ssize_t __pyx_t_10;
+  Py_ssize_t __pyx_t_11;
+  Py_ssize_t __pyx_t_12;
+  Py_ssize_t __pyx_t_13;
+  Py_ssize_t __pyx_t_14;
+  Py_ssize_t __pyx_t_15;
+  Py_ssize_t __pyx_t_16;
+  Py_ssize_t __pyx_t_17;
+  Py_ssize_t __pyx_t_18;
+  Py_ssize_t __pyx_t_19;
+  Py_ssize_t __pyx_t_20;
+  Py_ssize_t __pyx_t_21;
+  Py_ssize_t __pyx_t_22;
+  Py_ssize_t __pyx_t_23;
   __Pyx_RefNannySetupContext("__drawEinsteinRadius", 0);
   __pyx_pybuffer_canvas.pybuffer.buf = NULL;
   __pyx_pybuffer_canvas.refcount = 0;
@@ -3659,980 +3636,761 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawEinste
   __pyx_pybuffernd_canvas.rcbuffer = &__pyx_pybuffer_canvas;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_canvas.rcbuffer->pybuffer, (PyObject*)__pyx_v_canvas, &__Pyx_TypeInfo_nn___pyx_t_5numpy_uint8_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 44, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_canvas.rcbuffer->pybuffer, (PyObject*)__pyx_v_canvas, &__Pyx_TypeInfo_nn___pyx_t_5numpy_uint8_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 45, __pyx_L1_error)
   }
   __pyx_pybuffernd_canvas.diminfo[0].strides = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_canvas.diminfo[0].shape = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_canvas.diminfo[1].strides = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_canvas.diminfo[1].shape = __pyx_pybuffernd_canvas.rcbuffer->pybuffer.shape[1];
 
-  /* "Drawer/LensedImageDrawer.pyx":45
+  /* "Drawer/LensedImageDrawer.pyx":46
  * 
  * 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): #***************NOT OPTIMIZED****************
- * 		x0 = parameters.galaxy.center.x + parameters.canvasDim/2             # <<<<<<<<<<<<<<
- * 		y0 = parameters.galaxy.center.y + parameters.canvasDim/2
- * 		radius = parameters.einsteinRadius/parameters.dTheta.value
+ * 		cdef int x0 = parameters.galaxy.center.x + parameters.canvasDim/2             # <<<<<<<<<<<<<<
+ * 		cdef int y0 = parameters.galaxy.center.y + parameters.canvasDim/2
+ * 		cdef int radius = parameters.einsteinRadius/parameters.dTheta.value
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_galaxy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_galaxy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_center); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_center); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_int_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_int_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyNumber_Add(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Add(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_x0 = __pyx_t_2;
-  __pyx_t_2 = 0;
-
-  /* "Drawer/LensedImageDrawer.pyx":46
- * 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): #***************NOT OPTIMIZED****************
- * 		x0 = parameters.galaxy.center.x + parameters.canvasDim/2
- * 		y0 = parameters.galaxy.center.y + parameters.canvasDim/2             # <<<<<<<<<<<<<<
- * 		radius = parameters.einsteinRadius/parameters.dTheta.value
- * 		x = abs(radius)
- */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_galaxy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_center); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyNumber_Divide(__pyx_t_3, __pyx_int_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyNumber_Add(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_y0 = __pyx_t_3;
-  __pyx_t_3 = 0;
+  __pyx_v_x0 = __pyx_t_4;
 
   /* "Drawer/LensedImageDrawer.pyx":47
- * 		x0 = parameters.galaxy.center.x + parameters.canvasDim/2
- * 		y0 = parameters.galaxy.center.y + parameters.canvasDim/2
- * 		radius = parameters.einsteinRadius/parameters.dTheta.value             # <<<<<<<<<<<<<<
- * 		x = abs(radius)
- * 		y = 0
+ * 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): #***************NOT OPTIMIZED****************
+ * 		cdef int x0 = parameters.galaxy.center.x + parameters.canvasDim/2
+ * 		cdef int y0 = parameters.galaxy.center.y + parameters.canvasDim/2             # <<<<<<<<<<<<<<
+ * 		cdef int radius = parameters.einsteinRadius/parameters.dTheta.value
+ * 		cdef int x = abs(radius)
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_einsteinRadius); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_galaxy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_center); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_dTheta); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_1 = __Pyx_PyNumber_Divide(__pyx_t_3, __pyx_int_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = PyNumber_Add(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_v_y0 = __pyx_t_4;
+
+  /* "Drawer/LensedImageDrawer.pyx":48
+ * 		cdef int x0 = parameters.galaxy.center.x + parameters.canvasDim/2
+ * 		cdef int y0 = parameters.galaxy.center.y + parameters.canvasDim/2
+ * 		cdef int radius = parameters.einsteinRadius/parameters.dTheta.value             # <<<<<<<<<<<<<<
+ * 		cdef int x = abs(radius)
+ * 		cdef int y = 0
+ */
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_einsteinRadius); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_dTheta); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyNumber_Divide(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyNumber_Divide(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_v_radius = __pyx_t_1;
-  __pyx_t_1 = 0;
-
-  /* "Drawer/LensedImageDrawer.pyx":48
- * 		y0 = parameters.galaxy.center.y + parameters.canvasDim/2
- * 		radius = parameters.einsteinRadius/parameters.dTheta.value
- * 		x = abs(radius)             # <<<<<<<<<<<<<<
- * 		y = 0
- * 		err = 0
- */
-  __pyx_t_1 = PyNumber_Absolute(__pyx_v_radius); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_x = __pyx_t_1;
-  __pyx_t_1 = 0;
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_radius = __pyx_t_4;
 
   /* "Drawer/LensedImageDrawer.pyx":49
- * 		radius = parameters.einsteinRadius/parameters.dTheta.value
- * 		x = abs(radius)
- * 		y = 0             # <<<<<<<<<<<<<<
- * 		err = 0
- * 		while x >= y:
+ * 		cdef int y0 = parameters.galaxy.center.y + parameters.canvasDim/2
+ * 		cdef int radius = parameters.einsteinRadius/parameters.dTheta.value
+ * 		cdef int x = abs(radius)             # <<<<<<<<<<<<<<
+ * 		cdef int y = 0
+ * 		cdef int err = 0
  */
-  __Pyx_INCREF(__pyx_int_0);
-  __pyx_v_y = __pyx_int_0;
+  __pyx_t_5 = __Pyx_abs_int(__pyx_v_radius); 
+  __pyx_v_x = __pyx_t_5;
 
   /* "Drawer/LensedImageDrawer.pyx":50
- * 		x = abs(radius)
- * 		y = 0
- * 		err = 0             # <<<<<<<<<<<<<<
- * 		while x >= y:
- * 			if x0 + x > 0 and y0 + y > 0 and x0 + x < parameters.canvasDim and y0 + y < parameters.canvasDim:
+ * 		cdef int radius = parameters.einsteinRadius/parameters.dTheta.value
+ * 		cdef int x = abs(radius)
+ * 		cdef int y = 0             # <<<<<<<<<<<<<<
+ * 		cdef int err = 0
+ * 		cdef int canvasDim = parameters.canvasDim
  */
-  __Pyx_INCREF(__pyx_int_0);
-  __pyx_v_err = __pyx_int_0;
+  __pyx_v_y = 0;
 
   /* "Drawer/LensedImageDrawer.pyx":51
- * 		y = 0
- * 		err = 0
- * 		while x >= y:             # <<<<<<<<<<<<<<
- * 			if x0 + x > 0 and y0 + y > 0 and x0 + x < parameters.canvasDim and y0 + y < parameters.canvasDim:
- * 					canvas[int(x0 + x), int(y0 + y)] = 3
+ * 		cdef int x = abs(radius)
+ * 		cdef int y = 0
+ * 		cdef int err = 0             # <<<<<<<<<<<<<<
+ * 		cdef int canvasDim = parameters.canvasDim
+ * 		with nogil:
  */
-  while (1) {
-    __pyx_t_1 = PyObject_RichCompare(__pyx_v_x, __pyx_v_y, Py_GE); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
-    __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 51, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (!__pyx_t_4) break;
+  __pyx_v_err = 0;
 
-    /* "Drawer/LensedImageDrawer.pyx":52
- * 		err = 0
- * 		while x >= y:
- * 			if x0 + x > 0 and y0 + y > 0 and x0 + x < parameters.canvasDim and y0 + y < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 + x), int(y0 + y)] = 3
- * 			if x0 + y > 0 and y0 + x > 0 and x0 + y < parameters.canvasDim and y0 + x < parameters.canvasDim:
+  /* "Drawer/LensedImageDrawer.pyx":52
+ * 		cdef int y = 0
+ * 		cdef int err = 0
+ * 		cdef int canvasDim = parameters.canvasDim             # <<<<<<<<<<<<<<
+ * 		with nogil:
+ * 			while x >= y:
  */
-    __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L6_bool_binop_done;
-    }
-    __pyx_t_2 = PyNumber_Add(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L6_bool_binop_done;
-    }
-    __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L6_bool_binop_done;
-    }
-    __pyx_t_3 = PyNumber_Add(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_3, __pyx_t_2, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_4 = __pyx_t_5;
-    __pyx_L6_bool_binop_done:;
-    if (__pyx_t_4) {
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 52, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_canvasDim = __pyx_t_4;
+
+  /* "Drawer/LensedImageDrawer.pyx":53
+ * 		cdef int err = 0
+ * 		cdef int canvasDim = parameters.canvasDim
+ * 		with nogil:             # <<<<<<<<<<<<<<
+ * 			while x >= y:
+ * 				if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:
+ */
+  {
+      #ifdef WITH_THREAD
+      PyThreadState *_save;
+      Py_UNBLOCK_THREADS
+      #endif
+      /*try:*/ {
+
+        /* "Drawer/LensedImageDrawer.pyx":54
+ * 		cdef int canvasDim = parameters.canvasDim
+ * 		with nogil:
+ * 			while x >= y:             # <<<<<<<<<<<<<<
+ * 				if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:
+ * 						canvas[x0 + x, y0 + y] = 3
+ */
+        while (1) {
+          __pyx_t_6 = ((__pyx_v_x >= __pyx_v_y) != 0);
+          if (!__pyx_t_6) break;
+
+          /* "Drawer/LensedImageDrawer.pyx":55
+ * 		with nogil:
+ * 			while x >= y:
+ * 				if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 + x, y0 + y] = 3
+ * 				if x0 + y > 0 and y0 + x > 0 and x0 + y < canvasDim and y0 + x < canvasDim:
+ */
+          __pyx_t_7 = (((__pyx_v_x0 + __pyx_v_x) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L9_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 + __pyx_v_y) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L9_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_x0 + __pyx_v_x) < __pyx_v_canvasDim) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L9_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 + __pyx_v_y) < __pyx_v_canvasDim) != 0);
+          __pyx_t_6 = __pyx_t_7;
+          __pyx_L9_bool_binop_done:;
+          if (__pyx_t_6) {
+
+            /* "Drawer/LensedImageDrawer.pyx":56
+ * 			while x >= y:
+ * 				if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:
+ * 						canvas[x0 + x, y0 + y] = 3             # <<<<<<<<<<<<<<
+ * 				if x0 + y > 0 and y0 + x > 0 and x0 + y < canvasDim and y0 + x < canvasDim:
+ * 						canvas[x0 + y, y0 + x] = 3
+ */
+            __pyx_t_8 = (__pyx_v_x0 + __pyx_v_x);
+            __pyx_t_9 = (__pyx_v_y0 + __pyx_v_y);
+            __pyx_t_4 = -1;
+            if (__pyx_t_8 < 0) {
+              __pyx_t_8 += __pyx_pybuffernd_canvas.diminfo[0].shape;
+              if (unlikely(__pyx_t_8 < 0)) __pyx_t_4 = 0;
+            } else if (unlikely(__pyx_t_8 >= __pyx_pybuffernd_canvas.diminfo[0].shape)) __pyx_t_4 = 0;
+            if (__pyx_t_9 < 0) {
+              __pyx_t_9 += __pyx_pybuffernd_canvas.diminfo[1].shape;
+              if (unlikely(__pyx_t_9 < 0)) __pyx_t_4 = 1;
+            } else if (unlikely(__pyx_t_9 >= __pyx_pybuffernd_canvas.diminfo[1].shape)) __pyx_t_4 = 1;
+            if (unlikely(__pyx_t_4 != -1)) {
+              __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_4);
+              __PYX_ERR(0, 56, __pyx_L4_error)
+            }
+            *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_uint8_t *, __pyx_pybuffernd_canvas.rcbuffer->pybuffer.buf, __pyx_t_8, __pyx_pybuffernd_canvas.diminfo[0].strides, __pyx_t_9, __pyx_pybuffernd_canvas.diminfo[1].strides) = 3;
+
+            /* "Drawer/LensedImageDrawer.pyx":55
+ * 		with nogil:
+ * 			while x >= y:
+ * 				if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 + x, y0 + y] = 3
+ * 				if x0 + y > 0 and y0 + x > 0 and x0 + y < canvasDim and y0 + x < canvasDim:
+ */
+          }
+
+          /* "Drawer/LensedImageDrawer.pyx":57
+ * 				if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:
+ * 						canvas[x0 + x, y0 + y] = 3
+ * 				if x0 + y > 0 and y0 + x > 0 and x0 + y < canvasDim and y0 + x < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 + y, y0 + x] = 3
+ * 				if x0 - y > 0 and y0 + x > 0 and x0 - y < canvasDim and y0 + x < canvasDim:
+ */
+          __pyx_t_7 = (((__pyx_v_x0 + __pyx_v_y) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L14_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 + __pyx_v_x) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L14_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_x0 + __pyx_v_y) < __pyx_v_canvasDim) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L14_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 + __pyx_v_x) < __pyx_v_canvasDim) != 0);
+          __pyx_t_6 = __pyx_t_7;
+          __pyx_L14_bool_binop_done:;
+          if (__pyx_t_6) {
+
+            /* "Drawer/LensedImageDrawer.pyx":58
+ * 						canvas[x0 + x, y0 + y] = 3
+ * 				if x0 + y > 0 and y0 + x > 0 and x0 + y < canvasDim and y0 + x < canvasDim:
+ * 						canvas[x0 + y, y0 + x] = 3             # <<<<<<<<<<<<<<
+ * 				if x0 - y > 0 and y0 + x > 0 and x0 - y < canvasDim and y0 + x < canvasDim:
+ * 						canvas[x0 - y, y0 + x] = 3
+ */
+            __pyx_t_10 = (__pyx_v_x0 + __pyx_v_y);
+            __pyx_t_11 = (__pyx_v_y0 + __pyx_v_x);
+            __pyx_t_4 = -1;
+            if (__pyx_t_10 < 0) {
+              __pyx_t_10 += __pyx_pybuffernd_canvas.diminfo[0].shape;
+              if (unlikely(__pyx_t_10 < 0)) __pyx_t_4 = 0;
+            } else if (unlikely(__pyx_t_10 >= __pyx_pybuffernd_canvas.diminfo[0].shape)) __pyx_t_4 = 0;
+            if (__pyx_t_11 < 0) {
+              __pyx_t_11 += __pyx_pybuffernd_canvas.diminfo[1].shape;
+              if (unlikely(__pyx_t_11 < 0)) __pyx_t_4 = 1;
+            } else if (unlikely(__pyx_t_11 >= __pyx_pybuffernd_canvas.diminfo[1].shape)) __pyx_t_4 = 1;
+            if (unlikely(__pyx_t_4 != -1)) {
+              __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_4);
+              __PYX_ERR(0, 58, __pyx_L4_error)
+            }
+            *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_uint8_t *, __pyx_pybuffernd_canvas.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_canvas.diminfo[0].strides, __pyx_t_11, __pyx_pybuffernd_canvas.diminfo[1].strides) = 3;
+
+            /* "Drawer/LensedImageDrawer.pyx":57
+ * 				if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:
+ * 						canvas[x0 + x, y0 + y] = 3
+ * 				if x0 + y > 0 and y0 + x > 0 and x0 + y < canvasDim and y0 + x < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 + y, y0 + x] = 3
+ * 				if x0 - y > 0 and y0 + x > 0 and x0 - y < canvasDim and y0 + x < canvasDim:
+ */
+          }
+
+          /* "Drawer/LensedImageDrawer.pyx":59
+ * 				if x0 + y > 0 and y0 + x > 0 and x0 + y < canvasDim and y0 + x < canvasDim:
+ * 						canvas[x0 + y, y0 + x] = 3
+ * 				if x0 - y > 0 and y0 + x > 0 and x0 - y < canvasDim and y0 + x < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 - y, y0 + x] = 3
+ * 				if x0 - x > 0 and y0 + y > 0 and x0 - x < canvasDim and y0 + y < canvasDim:
+ */
+          __pyx_t_7 = (((__pyx_v_x0 - __pyx_v_y) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L19_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 + __pyx_v_x) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L19_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_x0 - __pyx_v_y) < __pyx_v_canvasDim) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L19_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 + __pyx_v_x) < __pyx_v_canvasDim) != 0);
+          __pyx_t_6 = __pyx_t_7;
+          __pyx_L19_bool_binop_done:;
+          if (__pyx_t_6) {
+
+            /* "Drawer/LensedImageDrawer.pyx":60
+ * 						canvas[x0 + y, y0 + x] = 3
+ * 				if x0 - y > 0 and y0 + x > 0 and x0 - y < canvasDim and y0 + x < canvasDim:
+ * 						canvas[x0 - y, y0 + x] = 3             # <<<<<<<<<<<<<<
+ * 				if x0 - x > 0 and y0 + y > 0 and x0 - x < canvasDim and y0 + y < canvasDim:
+ * 						canvas[x0 - x, y0 + y] = 3
+ */
+            __pyx_t_12 = (__pyx_v_x0 - __pyx_v_y);
+            __pyx_t_13 = (__pyx_v_y0 + __pyx_v_x);
+            __pyx_t_4 = -1;
+            if (__pyx_t_12 < 0) {
+              __pyx_t_12 += __pyx_pybuffernd_canvas.diminfo[0].shape;
+              if (unlikely(__pyx_t_12 < 0)) __pyx_t_4 = 0;
+            } else if (unlikely(__pyx_t_12 >= __pyx_pybuffernd_canvas.diminfo[0].shape)) __pyx_t_4 = 0;
+            if (__pyx_t_13 < 0) {
+              __pyx_t_13 += __pyx_pybuffernd_canvas.diminfo[1].shape;
+              if (unlikely(__pyx_t_13 < 0)) __pyx_t_4 = 1;
+            } else if (unlikely(__pyx_t_13 >= __pyx_pybuffernd_canvas.diminfo[1].shape)) __pyx_t_4 = 1;
+            if (unlikely(__pyx_t_4 != -1)) {
+              __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_4);
+              __PYX_ERR(0, 60, __pyx_L4_error)
+            }
+            *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_uint8_t *, __pyx_pybuffernd_canvas.rcbuffer->pybuffer.buf, __pyx_t_12, __pyx_pybuffernd_canvas.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_canvas.diminfo[1].strides) = 3;
+
+            /* "Drawer/LensedImageDrawer.pyx":59
+ * 				if x0 + y > 0 and y0 + x > 0 and x0 + y < canvasDim and y0 + x < canvasDim:
+ * 						canvas[x0 + y, y0 + x] = 3
+ * 				if x0 - y > 0 and y0 + x > 0 and x0 - y < canvasDim and y0 + x < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 - y, y0 + x] = 3
+ * 				if x0 - x > 0 and y0 + y > 0 and x0 - x < canvasDim and y0 + y < canvasDim:
+ */
+          }
+
+          /* "Drawer/LensedImageDrawer.pyx":61
+ * 				if x0 - y > 0 and y0 + x > 0 and x0 - y < canvasDim and y0 + x < canvasDim:
+ * 						canvas[x0 - y, y0 + x] = 3
+ * 				if x0 - x > 0 and y0 + y > 0 and x0 - x < canvasDim and y0 + y < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 - x, y0 + y] = 3
+ * 				if x0 - x > 0 and y0 - y > 0 and x0 - x < canvasDim and y0 - y < canvasDim:
+ */
+          __pyx_t_7 = (((__pyx_v_x0 - __pyx_v_x) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L24_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 + __pyx_v_y) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L24_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_x0 - __pyx_v_x) < __pyx_v_canvasDim) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L24_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 + __pyx_v_y) < __pyx_v_canvasDim) != 0);
+          __pyx_t_6 = __pyx_t_7;
+          __pyx_L24_bool_binop_done:;
+          if (__pyx_t_6) {
+
+            /* "Drawer/LensedImageDrawer.pyx":62
+ * 						canvas[x0 - y, y0 + x] = 3
+ * 				if x0 - x > 0 and y0 + y > 0 and x0 - x < canvasDim and y0 + y < canvasDim:
+ * 						canvas[x0 - x, y0 + y] = 3             # <<<<<<<<<<<<<<
+ * 				if x0 - x > 0 and y0 - y > 0 and x0 - x < canvasDim and y0 - y < canvasDim:
+ * 						canvas[x0 - x, y0 - y] = 3
+ */
+            __pyx_t_14 = (__pyx_v_x0 - __pyx_v_x);
+            __pyx_t_15 = (__pyx_v_y0 + __pyx_v_y);
+            __pyx_t_4 = -1;
+            if (__pyx_t_14 < 0) {
+              __pyx_t_14 += __pyx_pybuffernd_canvas.diminfo[0].shape;
+              if (unlikely(__pyx_t_14 < 0)) __pyx_t_4 = 0;
+            } else if (unlikely(__pyx_t_14 >= __pyx_pybuffernd_canvas.diminfo[0].shape)) __pyx_t_4 = 0;
+            if (__pyx_t_15 < 0) {
+              __pyx_t_15 += __pyx_pybuffernd_canvas.diminfo[1].shape;
+              if (unlikely(__pyx_t_15 < 0)) __pyx_t_4 = 1;
+            } else if (unlikely(__pyx_t_15 >= __pyx_pybuffernd_canvas.diminfo[1].shape)) __pyx_t_4 = 1;
+            if (unlikely(__pyx_t_4 != -1)) {
+              __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_4);
+              __PYX_ERR(0, 62, __pyx_L4_error)
+            }
+            *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_uint8_t *, __pyx_pybuffernd_canvas.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_canvas.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_canvas.diminfo[1].strides) = 3;
+
+            /* "Drawer/LensedImageDrawer.pyx":61
+ * 				if x0 - y > 0 and y0 + x > 0 and x0 - y < canvasDim and y0 + x < canvasDim:
+ * 						canvas[x0 - y, y0 + x] = 3
+ * 				if x0 - x > 0 and y0 + y > 0 and x0 - x < canvasDim and y0 + y < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 - x, y0 + y] = 3
+ * 				if x0 - x > 0 and y0 - y > 0 and x0 - x < canvasDim and y0 - y < canvasDim:
+ */
+          }
+
+          /* "Drawer/LensedImageDrawer.pyx":63
+ * 				if x0 - x > 0 and y0 + y > 0 and x0 - x < canvasDim and y0 + y < canvasDim:
+ * 						canvas[x0 - x, y0 + y] = 3
+ * 				if x0 - x > 0 and y0 - y > 0 and x0 - x < canvasDim and y0 - y < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 - x, y0 - y] = 3
+ * 				if x0 - y > 0 and y0 - x > 0 and x0 - y < canvasDim and y0 - x < canvasDim:
+ */
+          __pyx_t_7 = (((__pyx_v_x0 - __pyx_v_x) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L29_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 - __pyx_v_y) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L29_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_x0 - __pyx_v_x) < __pyx_v_canvasDim) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L29_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 - __pyx_v_y) < __pyx_v_canvasDim) != 0);
+          __pyx_t_6 = __pyx_t_7;
+          __pyx_L29_bool_binop_done:;
+          if (__pyx_t_6) {
+
+            /* "Drawer/LensedImageDrawer.pyx":64
+ * 						canvas[x0 - x, y0 + y] = 3
+ * 				if x0 - x > 0 and y0 - y > 0 and x0 - x < canvasDim and y0 - y < canvasDim:
+ * 						canvas[x0 - x, y0 - y] = 3             # <<<<<<<<<<<<<<
+ * 				if x0 - y > 0 and y0 - x > 0 and x0 - y < canvasDim and y0 - x < canvasDim:
+ * 						canvas[x0 - y, y0 - x] = 3
+ */
+            __pyx_t_16 = (__pyx_v_x0 - __pyx_v_x);
+            __pyx_t_17 = (__pyx_v_y0 - __pyx_v_y);
+            __pyx_t_4 = -1;
+            if (__pyx_t_16 < 0) {
+              __pyx_t_16 += __pyx_pybuffernd_canvas.diminfo[0].shape;
+              if (unlikely(__pyx_t_16 < 0)) __pyx_t_4 = 0;
+            } else if (unlikely(__pyx_t_16 >= __pyx_pybuffernd_canvas.diminfo[0].shape)) __pyx_t_4 = 0;
+            if (__pyx_t_17 < 0) {
+              __pyx_t_17 += __pyx_pybuffernd_canvas.diminfo[1].shape;
+              if (unlikely(__pyx_t_17 < 0)) __pyx_t_4 = 1;
+            } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_canvas.diminfo[1].shape)) __pyx_t_4 = 1;
+            if (unlikely(__pyx_t_4 != -1)) {
+              __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_4);
+              __PYX_ERR(0, 64, __pyx_L4_error)
+            }
+            *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_uint8_t *, __pyx_pybuffernd_canvas.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_canvas.diminfo[0].strides, __pyx_t_17, __pyx_pybuffernd_canvas.diminfo[1].strides) = 3;
+
+            /* "Drawer/LensedImageDrawer.pyx":63
+ * 				if x0 - x > 0 and y0 + y > 0 and x0 - x < canvasDim and y0 + y < canvasDim:
+ * 						canvas[x0 - x, y0 + y] = 3
+ * 				if x0 - x > 0 and y0 - y > 0 and x0 - x < canvasDim and y0 - y < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 - x, y0 - y] = 3
+ * 				if x0 - y > 0 and y0 - x > 0 and x0 - y < canvasDim and y0 - x < canvasDim:
+ */
+          }
+
+          /* "Drawer/LensedImageDrawer.pyx":65
+ * 				if x0 - x > 0 and y0 - y > 0 and x0 - x < canvasDim and y0 - y < canvasDim:
+ * 						canvas[x0 - x, y0 - y] = 3
+ * 				if x0 - y > 0 and y0 - x > 0 and x0 - y < canvasDim and y0 - x < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 - y, y0 - x] = 3
+ * 				if x0 + y > 0 and y0 - x > 0 and x0 + y < canvasDim and y0 - x < canvasDim:
+ */
+          __pyx_t_7 = (((__pyx_v_x0 - __pyx_v_y) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L34_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 - __pyx_v_x) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L34_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_x0 - __pyx_v_y) < __pyx_v_canvasDim) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L34_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 - __pyx_v_x) < __pyx_v_canvasDim) != 0);
+          __pyx_t_6 = __pyx_t_7;
+          __pyx_L34_bool_binop_done:;
+          if (__pyx_t_6) {
+
+            /* "Drawer/LensedImageDrawer.pyx":66
+ * 						canvas[x0 - x, y0 - y] = 3
+ * 				if x0 - y > 0 and y0 - x > 0 and x0 - y < canvasDim and y0 - x < canvasDim:
+ * 						canvas[x0 - y, y0 - x] = 3             # <<<<<<<<<<<<<<
+ * 				if x0 + y > 0 and y0 - x > 0 and x0 + y < canvasDim and y0 - x < canvasDim:
+ * 						canvas[x0 + y, y0 - x] = 3
+ */
+            __pyx_t_18 = (__pyx_v_x0 - __pyx_v_y);
+            __pyx_t_19 = (__pyx_v_y0 - __pyx_v_x);
+            __pyx_t_4 = -1;
+            if (__pyx_t_18 < 0) {
+              __pyx_t_18 += __pyx_pybuffernd_canvas.diminfo[0].shape;
+              if (unlikely(__pyx_t_18 < 0)) __pyx_t_4 = 0;
+            } else if (unlikely(__pyx_t_18 >= __pyx_pybuffernd_canvas.diminfo[0].shape)) __pyx_t_4 = 0;
+            if (__pyx_t_19 < 0) {
+              __pyx_t_19 += __pyx_pybuffernd_canvas.diminfo[1].shape;
+              if (unlikely(__pyx_t_19 < 0)) __pyx_t_4 = 1;
+            } else if (unlikely(__pyx_t_19 >= __pyx_pybuffernd_canvas.diminfo[1].shape)) __pyx_t_4 = 1;
+            if (unlikely(__pyx_t_4 != -1)) {
+              __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_4);
+              __PYX_ERR(0, 66, __pyx_L4_error)
+            }
+            *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_uint8_t *, __pyx_pybuffernd_canvas.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_canvas.diminfo[0].strides, __pyx_t_19, __pyx_pybuffernd_canvas.diminfo[1].strides) = 3;
+
+            /* "Drawer/LensedImageDrawer.pyx":65
+ * 				if x0 - x > 0 and y0 - y > 0 and x0 - x < canvasDim and y0 - y < canvasDim:
+ * 						canvas[x0 - x, y0 - y] = 3
+ * 				if x0 - y > 0 and y0 - x > 0 and x0 - y < canvasDim and y0 - x < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 - y, y0 - x] = 3
+ * 				if x0 + y > 0 and y0 - x > 0 and x0 + y < canvasDim and y0 - x < canvasDim:
+ */
+          }
+
+          /* "Drawer/LensedImageDrawer.pyx":67
+ * 				if x0 - y > 0 and y0 - x > 0 and x0 - y < canvasDim and y0 - x < canvasDim:
+ * 						canvas[x0 - y, y0 - x] = 3
+ * 				if x0 + y > 0 and y0 - x > 0 and x0 + y < canvasDim and y0 - x < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 + y, y0 - x] = 3
+ * 				if x0 + x > 0 and y0 - y > 0 and x0 + x < canvasDim and y0 - y < canvasDim:
+ */
+          __pyx_t_7 = (((__pyx_v_x0 + __pyx_v_y) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L39_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 - __pyx_v_x) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L39_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_x0 + __pyx_v_y) < __pyx_v_canvasDim) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L39_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 - __pyx_v_x) < __pyx_v_canvasDim) != 0);
+          __pyx_t_6 = __pyx_t_7;
+          __pyx_L39_bool_binop_done:;
+          if (__pyx_t_6) {
+
+            /* "Drawer/LensedImageDrawer.pyx":68
+ * 						canvas[x0 - y, y0 - x] = 3
+ * 				if x0 + y > 0 and y0 - x > 0 and x0 + y < canvasDim and y0 - x < canvasDim:
+ * 						canvas[x0 + y, y0 - x] = 3             # <<<<<<<<<<<<<<
+ * 				if x0 + x > 0 and y0 - y > 0 and x0 + x < canvasDim and y0 - y < canvasDim:
+ * 						canvas[x0 + x, y0 - y] = 3
+ */
+            __pyx_t_20 = (__pyx_v_x0 + __pyx_v_y);
+            __pyx_t_21 = (__pyx_v_y0 - __pyx_v_x);
+            __pyx_t_4 = -1;
+            if (__pyx_t_20 < 0) {
+              __pyx_t_20 += __pyx_pybuffernd_canvas.diminfo[0].shape;
+              if (unlikely(__pyx_t_20 < 0)) __pyx_t_4 = 0;
+            } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_canvas.diminfo[0].shape)) __pyx_t_4 = 0;
+            if (__pyx_t_21 < 0) {
+              __pyx_t_21 += __pyx_pybuffernd_canvas.diminfo[1].shape;
+              if (unlikely(__pyx_t_21 < 0)) __pyx_t_4 = 1;
+            } else if (unlikely(__pyx_t_21 >= __pyx_pybuffernd_canvas.diminfo[1].shape)) __pyx_t_4 = 1;
+            if (unlikely(__pyx_t_4 != -1)) {
+              __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_4);
+              __PYX_ERR(0, 68, __pyx_L4_error)
+            }
+            *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_uint8_t *, __pyx_pybuffernd_canvas.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_canvas.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_canvas.diminfo[1].strides) = 3;
+
+            /* "Drawer/LensedImageDrawer.pyx":67
+ * 				if x0 - y > 0 and y0 - x > 0 and x0 - y < canvasDim and y0 - x < canvasDim:
+ * 						canvas[x0 - y, y0 - x] = 3
+ * 				if x0 + y > 0 and y0 - x > 0 and x0 + y < canvasDim and y0 - x < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 + y, y0 - x] = 3
+ * 				if x0 + x > 0 and y0 - y > 0 and x0 + x < canvasDim and y0 - y < canvasDim:
+ */
+          }
+
+          /* "Drawer/LensedImageDrawer.pyx":69
+ * 				if x0 + y > 0 and y0 - x > 0 and x0 + y < canvasDim and y0 - x < canvasDim:
+ * 						canvas[x0 + y, y0 - x] = 3
+ * 				if x0 + x > 0 and y0 - y > 0 and x0 + x < canvasDim and y0 - y < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 + x, y0 - y] = 3
+ * 				if err <= 0:
+ */
+          __pyx_t_7 = (((__pyx_v_x0 + __pyx_v_x) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L44_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 - __pyx_v_y) > 0) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L44_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_x0 + __pyx_v_x) < __pyx_v_canvasDim) != 0);
+          if (__pyx_t_7) {
+          } else {
+            __pyx_t_6 = __pyx_t_7;
+            goto __pyx_L44_bool_binop_done;
+          }
+          __pyx_t_7 = (((__pyx_v_y0 - __pyx_v_y) < __pyx_v_canvasDim) != 0);
+          __pyx_t_6 = __pyx_t_7;
+          __pyx_L44_bool_binop_done:;
+          if (__pyx_t_6) {
+
+            /* "Drawer/LensedImageDrawer.pyx":70
+ * 						canvas[x0 + y, y0 - x] = 3
+ * 				if x0 + x > 0 and y0 - y > 0 and x0 + x < canvasDim and y0 - y < canvasDim:
+ * 						canvas[x0 + x, y0 - y] = 3             # <<<<<<<<<<<<<<
+ * 				if err <= 0:
+ * 					y += 1
+ */
+            __pyx_t_22 = (__pyx_v_x0 + __pyx_v_x);
+            __pyx_t_23 = (__pyx_v_y0 - __pyx_v_y);
+            __pyx_t_4 = -1;
+            if (__pyx_t_22 < 0) {
+              __pyx_t_22 += __pyx_pybuffernd_canvas.diminfo[0].shape;
+              if (unlikely(__pyx_t_22 < 0)) __pyx_t_4 = 0;
+            } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_canvas.diminfo[0].shape)) __pyx_t_4 = 0;
+            if (__pyx_t_23 < 0) {
+              __pyx_t_23 += __pyx_pybuffernd_canvas.diminfo[1].shape;
+              if (unlikely(__pyx_t_23 < 0)) __pyx_t_4 = 1;
+            } else if (unlikely(__pyx_t_23 >= __pyx_pybuffernd_canvas.diminfo[1].shape)) __pyx_t_4 = 1;
+            if (unlikely(__pyx_t_4 != -1)) {
+              __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_4);
+              __PYX_ERR(0, 70, __pyx_L4_error)
+            }
+            *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_uint8_t *, __pyx_pybuffernd_canvas.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_canvas.diminfo[0].strides, __pyx_t_23, __pyx_pybuffernd_canvas.diminfo[1].strides) = 3;
+
+            /* "Drawer/LensedImageDrawer.pyx":69
+ * 				if x0 + y > 0 and y0 - x > 0 and x0 + y < canvasDim and y0 - x < canvasDim:
+ * 						canvas[x0 + y, y0 - x] = 3
+ * 				if x0 + x > 0 and y0 - y > 0 and x0 + x < canvasDim and y0 - y < canvasDim:             # <<<<<<<<<<<<<<
+ * 						canvas[x0 + x, y0 - y] = 3
+ * 				if err <= 0:
+ */
+          }
+
+          /* "Drawer/LensedImageDrawer.pyx":71
+ * 				if x0 + x > 0 and y0 - y > 0 and x0 + x < canvasDim and y0 - y < canvasDim:
+ * 						canvas[x0 + x, y0 - y] = 3
+ * 				if err <= 0:             # <<<<<<<<<<<<<<
+ * 					y += 1
+ * 					err += 2*y + 1
+ */
+          __pyx_t_6 = ((__pyx_v_err <= 0) != 0);
+          if (__pyx_t_6) {
+
+            /* "Drawer/LensedImageDrawer.pyx":72
+ * 						canvas[x0 + x, y0 - y] = 3
+ * 				if err <= 0:
+ * 					y += 1             # <<<<<<<<<<<<<<
+ * 					err += 2*y + 1
+ * 				if err > 0:
+ */
+            __pyx_v_y = (__pyx_v_y + 1);
+
+            /* "Drawer/LensedImageDrawer.pyx":73
+ * 				if err <= 0:
+ * 					y += 1
+ * 					err += 2*y + 1             # <<<<<<<<<<<<<<
+ * 				if err > 0:
+ * 					x -= 1
+ */
+            __pyx_v_err = (__pyx_v_err + ((2 * __pyx_v_y) + 1));
+
+            /* "Drawer/LensedImageDrawer.pyx":71
+ * 				if x0 + x > 0 and y0 - y > 0 and x0 + x < canvasDim and y0 - y < canvasDim:
+ * 						canvas[x0 + x, y0 - y] = 3
+ * 				if err <= 0:             # <<<<<<<<<<<<<<
+ * 					y += 1
+ * 					err += 2*y + 1
+ */
+          }
+
+          /* "Drawer/LensedImageDrawer.pyx":74
+ * 					y += 1
+ * 					err += 2*y + 1
+ * 				if err > 0:             # <<<<<<<<<<<<<<
+ * 					x -= 1
+ * 					err -= 2*x + 1
+ */
+          __pyx_t_6 = ((__pyx_v_err > 0) != 0);
+          if (__pyx_t_6) {
+
+            /* "Drawer/LensedImageDrawer.pyx":75
+ * 					err += 2*y + 1
+ * 				if err > 0:
+ * 					x -= 1             # <<<<<<<<<<<<<<
+ * 					err -= 2*x + 1
+ */
+            __pyx_v_x = (__pyx_v_x - 1);
+
+            /* "Drawer/LensedImageDrawer.pyx":76
+ * 				if err > 0:
+ * 					x -= 1
+ * 					err -= 2*x + 1             # <<<<<<<<<<<<<<
+ */
+            __pyx_v_err = (__pyx_v_err - ((2 * __pyx_v_x) + 1));
+
+            /* "Drawer/LensedImageDrawer.pyx":74
+ * 					y += 1
+ * 					err += 2*y + 1
+ * 				if err > 0:             # <<<<<<<<<<<<<<
+ * 					x -= 1
+ * 					err -= 2*x + 1
+ */
+          }
+        }
+      }
 
       /* "Drawer/LensedImageDrawer.pyx":53
- * 		while x >= y:
- * 			if x0 + x > 0 and y0 + y > 0 and x0 + x < parameters.canvasDim and y0 + y < parameters.canvasDim:
- * 					canvas[int(x0 + x), int(y0 + y)] = 3             # <<<<<<<<<<<<<<
- * 			if x0 + y > 0 and y0 + x > 0 and x0 + y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- * 					canvas[int(x0 + y), int(y0 + x)] = 3
+ * 		cdef int err = 0
+ * 		cdef int canvasDim = parameters.canvasDim
+ * 		with nogil:             # <<<<<<<<<<<<<<
+ * 			while x >= y:
+ * 				if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:
  */
-      __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyNumber_Add(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_GIVEREF(__pyx_t_2);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_3);
-      __pyx_t_2 = 0;
-      __pyx_t_3 = 0;
-      if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_canvas), __pyx_t_1, __pyx_int_3) < 0)) __PYX_ERR(0, 53, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":52
- * 		err = 0
- * 		while x >= y:
- * 			if x0 + x > 0 and y0 + y > 0 and x0 + x < parameters.canvasDim and y0 + y < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 + x), int(y0 + y)] = 3
- * 			if x0 + y > 0 and y0 + x > 0 and x0 + y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- */
-    }
-
-    /* "Drawer/LensedImageDrawer.pyx":54
- * 			if x0 + x > 0 and y0 + y > 0 and x0 + x < parameters.canvasDim and y0 + y < parameters.canvasDim:
- * 					canvas[int(x0 + x), int(y0 + y)] = 3
- * 			if x0 + y > 0 and y0 + x > 0 and x0 + y < parameters.canvasDim and y0 + x < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 + y), int(y0 + x)] = 3
- * 			if x0 - y > 0 and y0 + x > 0 and x0 - y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- */
-    __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L11_bool_binop_done;
-    }
-    __pyx_t_3 = PyNumber_Add(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_3, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L11_bool_binop_done;
-    }
-    __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L11_bool_binop_done;
-    }
-    __pyx_t_2 = PyNumber_Add(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 54, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_4 = __pyx_t_5;
-    __pyx_L11_bool_binop_done:;
-    if (__pyx_t_4) {
-
-      /* "Drawer/LensedImageDrawer.pyx":55
- * 					canvas[int(x0 + x), int(y0 + y)] = 3
- * 			if x0 + y > 0 and y0 + x > 0 and x0 + y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- * 					canvas[int(x0 + y), int(y0 + x)] = 3             # <<<<<<<<<<<<<<
- * 			if x0 - y > 0 and y0 + x > 0 and x0 - y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- * 					canvas[int(x0 - y), int(y0 + x)] = 3
- */
-      __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 55, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyNumber_Add(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 55, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
-      __Pyx_GIVEREF(__pyx_t_2);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
-      __pyx_t_3 = 0;
-      __pyx_t_2 = 0;
-      if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_canvas), __pyx_t_1, __pyx_int_3) < 0)) __PYX_ERR(0, 55, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":54
- * 			if x0 + x > 0 and y0 + y > 0 and x0 + x < parameters.canvasDim and y0 + y < parameters.canvasDim:
- * 					canvas[int(x0 + x), int(y0 + y)] = 3
- * 			if x0 + y > 0 and y0 + x > 0 and x0 + y < parameters.canvasDim and y0 + x < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 + y), int(y0 + x)] = 3
- * 			if x0 - y > 0 and y0 + x > 0 and x0 - y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- */
-    }
-
-    /* "Drawer/LensedImageDrawer.pyx":56
- * 			if x0 + y > 0 and y0 + x > 0 and x0 + y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- * 					canvas[int(x0 + y), int(y0 + x)] = 3
- * 			if x0 - y > 0 and y0 + x > 0 and x0 - y < parameters.canvasDim and y0 + x < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 - y), int(y0 + x)] = 3
- * 			if x0 - x > 0 and y0 + y > 0 and x0 - x < parameters.canvasDim and y0 + y < parameters.canvasDim:
- */
-    __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L16_bool_binop_done;
-    }
-    __pyx_t_2 = PyNumber_Add(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L16_bool_binop_done;
-    }
-    __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L16_bool_binop_done;
-    }
-    __pyx_t_3 = PyNumber_Add(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_3, __pyx_t_2, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 56, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_4 = __pyx_t_5;
-    __pyx_L16_bool_binop_done:;
-    if (__pyx_t_4) {
-
-      /* "Drawer/LensedImageDrawer.pyx":57
- * 					canvas[int(x0 + y), int(y0 + x)] = 3
- * 			if x0 - y > 0 and y0 + x > 0 and x0 - y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- * 					canvas[int(x0 - y), int(y0 + x)] = 3             # <<<<<<<<<<<<<<
- * 			if x0 - x > 0 and y0 + y > 0 and x0 - x < parameters.canvasDim and y0 + y < parameters.canvasDim:
- * 					canvas[int(x0 - x), int(y0 + y)] = 3
- */
-      __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 57, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyNumber_Add(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 57, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_GIVEREF(__pyx_t_2);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_3);
-      __pyx_t_2 = 0;
-      __pyx_t_3 = 0;
-      if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_canvas), __pyx_t_1, __pyx_int_3) < 0)) __PYX_ERR(0, 57, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":56
- * 			if x0 + y > 0 and y0 + x > 0 and x0 + y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- * 					canvas[int(x0 + y), int(y0 + x)] = 3
- * 			if x0 - y > 0 and y0 + x > 0 and x0 - y < parameters.canvasDim and y0 + x < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 - y), int(y0 + x)] = 3
- * 			if x0 - x > 0 and y0 + y > 0 and x0 - x < parameters.canvasDim and y0 + y < parameters.canvasDim:
- */
-    }
-
-    /* "Drawer/LensedImageDrawer.pyx":58
- * 			if x0 - y > 0 and y0 + x > 0 and x0 - y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- * 					canvas[int(x0 - y), int(y0 + x)] = 3
- * 			if x0 - x > 0 and y0 + y > 0 and x0 - x < parameters.canvasDim and y0 + y < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 - x), int(y0 + y)] = 3
- * 			if x0 - x > 0 and y0 - y > 0 and x0 - x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- */
-    __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L21_bool_binop_done;
-    }
-    __pyx_t_3 = PyNumber_Add(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_3, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L21_bool_binop_done;
-    }
-    __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L21_bool_binop_done;
-    }
-    __pyx_t_2 = PyNumber_Add(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 58, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_4 = __pyx_t_5;
-    __pyx_L21_bool_binop_done:;
-    if (__pyx_t_4) {
-
-      /* "Drawer/LensedImageDrawer.pyx":59
- * 					canvas[int(x0 - y), int(y0 + x)] = 3
- * 			if x0 - x > 0 and y0 + y > 0 and x0 - x < parameters.canvasDim and y0 + y < parameters.canvasDim:
- * 					canvas[int(x0 - x), int(y0 + y)] = 3             # <<<<<<<<<<<<<<
- * 			if x0 - x > 0 and y0 - y > 0 and x0 - x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- * 					canvas[int(x0 - x), int(y0 - y)] = 3
- */
-      __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 59, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyNumber_Add(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 59, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 59, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
-      __Pyx_GIVEREF(__pyx_t_2);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
-      __pyx_t_3 = 0;
-      __pyx_t_2 = 0;
-      if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_canvas), __pyx_t_1, __pyx_int_3) < 0)) __PYX_ERR(0, 59, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":58
- * 			if x0 - y > 0 and y0 + x > 0 and x0 - y < parameters.canvasDim and y0 + x < parameters.canvasDim:
- * 					canvas[int(x0 - y), int(y0 + x)] = 3
- * 			if x0 - x > 0 and y0 + y > 0 and x0 - x < parameters.canvasDim and y0 + y < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 - x), int(y0 + y)] = 3
- * 			if x0 - x > 0 and y0 - y > 0 and x0 - x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- */
-    }
-
-    /* "Drawer/LensedImageDrawer.pyx":60
- * 			if x0 - x > 0 and y0 + y > 0 and x0 - x < parameters.canvasDim and y0 + y < parameters.canvasDim:
- * 					canvas[int(x0 - x), int(y0 + y)] = 3
- * 			if x0 - x > 0 and y0 - y > 0 and x0 - x < parameters.canvasDim and y0 - y < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 - x), int(y0 - y)] = 3
- * 			if x0 - y > 0 and y0 - x > 0 and x0 - y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- */
-    __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L26_bool_binop_done;
-    }
-    __pyx_t_2 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L26_bool_binop_done;
-    }
-    __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L26_bool_binop_done;
-    }
-    __pyx_t_3 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_3, __pyx_t_2, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_4 = __pyx_t_5;
-    __pyx_L26_bool_binop_done:;
-    if (__pyx_t_4) {
-
-      /* "Drawer/LensedImageDrawer.pyx":61
- * 					canvas[int(x0 - x), int(y0 + y)] = 3
- * 			if x0 - x > 0 and y0 - y > 0 and x0 - x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- * 					canvas[int(x0 - x), int(y0 - y)] = 3             # <<<<<<<<<<<<<<
- * 			if x0 - y > 0 and y0 - x > 0 and x0 - y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- * 					canvas[int(x0 - y), int(y0 - x)] = 3
- */
-      __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 61, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 61, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 61, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 61, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_GIVEREF(__pyx_t_2);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_3);
-      __pyx_t_2 = 0;
-      __pyx_t_3 = 0;
-      if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_canvas), __pyx_t_1, __pyx_int_3) < 0)) __PYX_ERR(0, 61, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":60
- * 			if x0 - x > 0 and y0 + y > 0 and x0 - x < parameters.canvasDim and y0 + y < parameters.canvasDim:
- * 					canvas[int(x0 - x), int(y0 + y)] = 3
- * 			if x0 - x > 0 and y0 - y > 0 and x0 - x < parameters.canvasDim and y0 - y < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 - x), int(y0 - y)] = 3
- * 			if x0 - y > 0 and y0 - x > 0 and x0 - y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- */
-    }
-
-    /* "Drawer/LensedImageDrawer.pyx":62
- * 			if x0 - x > 0 and y0 - y > 0 and x0 - x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- * 					canvas[int(x0 - x), int(y0 - y)] = 3
- * 			if x0 - y > 0 and y0 - x > 0 and x0 - y < parameters.canvasDim and y0 - x < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 - y), int(y0 - x)] = 3
- * 			if x0 + y > 0 and y0 - x > 0 and x0 + y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- */
-    __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L31_bool_binop_done;
-    }
-    __pyx_t_3 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_3, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L31_bool_binop_done;
-    }
-    __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L31_bool_binop_done;
-    }
-    __pyx_t_2 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 62, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_4 = __pyx_t_5;
-    __pyx_L31_bool_binop_done:;
-    if (__pyx_t_4) {
-
-      /* "Drawer/LensedImageDrawer.pyx":63
- * 					canvas[int(x0 - x), int(y0 - y)] = 3
- * 			if x0 - y > 0 and y0 - x > 0 and x0 - y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- * 					canvas[int(x0 - y), int(y0 - x)] = 3             # <<<<<<<<<<<<<<
- * 			if x0 + y > 0 and y0 - x > 0 and x0 + y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- * 					canvas[int(x0 + y), int(y0 - x)] = 3
- */
-      __pyx_t_1 = PyNumber_Subtract(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 63, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
-      __Pyx_GIVEREF(__pyx_t_2);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
-      __pyx_t_3 = 0;
-      __pyx_t_2 = 0;
-      if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_canvas), __pyx_t_1, __pyx_int_3) < 0)) __PYX_ERR(0, 63, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":62
- * 			if x0 - x > 0 and y0 - y > 0 and x0 - x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- * 					canvas[int(x0 - x), int(y0 - y)] = 3
- * 			if x0 - y > 0 and y0 - x > 0 and x0 - y < parameters.canvasDim and y0 - x < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 - y), int(y0 - x)] = 3
- * 			if x0 + y > 0 and y0 - x > 0 and x0 + y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- */
-    }
-
-    /* "Drawer/LensedImageDrawer.pyx":64
- * 			if x0 - y > 0 and y0 - x > 0 and x0 - y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- * 					canvas[int(x0 - y), int(y0 - x)] = 3
- * 			if x0 + y > 0 and y0 - x > 0 and x0 + y < parameters.canvasDim and y0 - x < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 + y), int(y0 - x)] = 3
- * 			if x0 + x > 0 and y0 - y > 0 and x0 + x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- */
-    __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L36_bool_binop_done;
-    }
-    __pyx_t_2 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L36_bool_binop_done;
-    }
-    __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L36_bool_binop_done;
-    }
-    __pyx_t_3 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_3, __pyx_t_2, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 64, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_4 = __pyx_t_5;
-    __pyx_L36_bool_binop_done:;
-    if (__pyx_t_4) {
-
-      /* "Drawer/LensedImageDrawer.pyx":65
- * 					canvas[int(x0 - y), int(y0 - x)] = 3
- * 			if x0 + y > 0 and y0 - x > 0 and x0 + y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- * 					canvas[int(x0 + y), int(y0 - x)] = 3             # <<<<<<<<<<<<<<
- * 			if x0 + x > 0 and y0 - y > 0 and x0 + x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- * 					canvas[int(x0 + x), int(y0 - y)] = 3
- */
-      __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 65, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_GIVEREF(__pyx_t_2);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_3);
-      __pyx_t_2 = 0;
-      __pyx_t_3 = 0;
-      if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_canvas), __pyx_t_1, __pyx_int_3) < 0)) __PYX_ERR(0, 65, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":64
- * 			if x0 - y > 0 and y0 - x > 0 and x0 - y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- * 					canvas[int(x0 - y), int(y0 - x)] = 3
- * 			if x0 + y > 0 and y0 - x > 0 and x0 + y < parameters.canvasDim and y0 - x < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 + y), int(y0 - x)] = 3
- * 			if x0 + x > 0 and y0 - y > 0 and x0 + x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- */
-    }
-
-    /* "Drawer/LensedImageDrawer.pyx":66
- * 			if x0 + y > 0 and y0 - x > 0 and x0 + y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- * 					canvas[int(x0 + y), int(y0 - x)] = 3
- * 			if x0 + x > 0 and y0 - y > 0 and x0 + x < parameters.canvasDim and y0 - y < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 + x), int(y0 - y)] = 3
- * 			if err <= 0:
- */
-    __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L41_bool_binop_done;
-    }
-    __pyx_t_3 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_3, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L41_bool_binop_done;
-    }
-    __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (__pyx_t_5) {
-    } else {
-      __pyx_t_4 = __pyx_t_5;
-      goto __pyx_L41_bool_binop_done;
-    }
-    __pyx_t_2 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_parameters, __pyx_n_s_canvasDim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_4 = __pyx_t_5;
-    __pyx_L41_bool_binop_done:;
-    if (__pyx_t_4) {
-
-      /* "Drawer/LensedImageDrawer.pyx":67
- * 					canvas[int(x0 + y), int(y0 - x)] = 3
- * 			if x0 + x > 0 and y0 - y > 0 and x0 + x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- * 					canvas[int(x0 + x), int(y0 - y)] = 3             # <<<<<<<<<<<<<<
- * 			if err <= 0:
- * 				y += 1
- */
-      __pyx_t_1 = PyNumber_Add(__pyx_v_x0, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 67, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyNumber_Subtract(__pyx_v_y0, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 67, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
-      __Pyx_GIVEREF(__pyx_t_2);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
-      __pyx_t_3 = 0;
-      __pyx_t_2 = 0;
-      if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_canvas), __pyx_t_1, __pyx_int_3) < 0)) __PYX_ERR(0, 67, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":66
- * 			if x0 + y > 0 and y0 - x > 0 and x0 + y < parameters.canvasDim and y0 - x < parameters.canvasDim:
- * 					canvas[int(x0 + y), int(y0 - x)] = 3
- * 			if x0 + x > 0 and y0 - y > 0 and x0 + x < parameters.canvasDim and y0 - y < parameters.canvasDim:             # <<<<<<<<<<<<<<
- * 					canvas[int(x0 + x), int(y0 - y)] = 3
- * 			if err <= 0:
- */
-    }
-
-    /* "Drawer/LensedImageDrawer.pyx":68
- * 			if x0 + x > 0 and y0 - y > 0 and x0 + x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- * 					canvas[int(x0 + x), int(y0 - y)] = 3
- * 			if err <= 0:             # <<<<<<<<<<<<<<
- * 				y += 1
- * 				err += 2*y + 1
- */
-    __pyx_t_1 = PyObject_RichCompare(__pyx_v_err, __pyx_int_0, Py_LE); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
-    __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 68, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_4) {
-
-      /* "Drawer/LensedImageDrawer.pyx":69
- * 					canvas[int(x0 + x), int(y0 - y)] = 3
- * 			if err <= 0:
- * 				y += 1             # <<<<<<<<<<<<<<
- * 				err += 2*y + 1
- * 			if err > 0:
- */
-      __pyx_t_1 = __Pyx_PyInt_AddObjC(__pyx_v_y, __pyx_int_1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 69, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF_SET(__pyx_v_y, __pyx_t_1);
-      __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":70
- * 			if err <= 0:
- * 				y += 1
- * 				err += 2*y + 1             # <<<<<<<<<<<<<<
- * 			if err > 0:
- * 				x -= 1
- */
-      __pyx_t_1 = PyNumber_Multiply(__pyx_int_2, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyInt_AddObjC(__pyx_t_1, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyNumber_InPlaceAdd(__pyx_v_err, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_DECREF_SET(__pyx_v_err, __pyx_t_1);
-      __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":68
- * 			if x0 + x > 0 and y0 - y > 0 and x0 + x < parameters.canvasDim and y0 - y < parameters.canvasDim:
- * 					canvas[int(x0 + x), int(y0 - y)] = 3
- * 			if err <= 0:             # <<<<<<<<<<<<<<
- * 				y += 1
- * 				err += 2*y + 1
- */
-    }
-
-    /* "Drawer/LensedImageDrawer.pyx":71
- * 				y += 1
- * 				err += 2*y + 1
- * 			if err > 0:             # <<<<<<<<<<<<<<
- * 				x -= 1
- * 				err -= 2*x + 1
- */
-    __pyx_t_1 = PyObject_RichCompare(__pyx_v_err, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
-    __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 71, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_4) {
-
-      /* "Drawer/LensedImageDrawer.pyx":72
- * 				err += 2*y + 1
- * 			if err > 0:
- * 				x -= 1             # <<<<<<<<<<<<<<
- * 				err -= 2*x + 1
- */
-      __pyx_t_1 = __Pyx_PyInt_SubtractObjC(__pyx_v_x, __pyx_int_1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_1);
-      __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":73
- * 			if err > 0:
- * 				x -= 1
- * 				err -= 2*x + 1             # <<<<<<<<<<<<<<
- */
-      __pyx_t_1 = PyNumber_Multiply(__pyx_int_2, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_PyInt_AddObjC(__pyx_t_1, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_1 = PyNumber_InPlaceSubtract(__pyx_v_err, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_DECREF_SET(__pyx_v_err, __pyx_t_1);
-      __pyx_t_1 = 0;
-
-      /* "Drawer/LensedImageDrawer.pyx":71
- * 				y += 1
- * 				err += 2*y + 1
- * 			if err > 0:             # <<<<<<<<<<<<<<
- * 				x -= 1
- * 				err -= 2*x + 1
- */
-    }
+      /*finally:*/ {
+        /*normal exit:*/{
+          #ifdef WITH_THREAD
+          Py_BLOCK_THREADS
+          #endif
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          #ifdef WITH_THREAD
+          Py_BLOCK_THREADS
+          #endif
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
   }
 
-  /* "Drawer/LensedImageDrawer.pyx":44
+  /* "Drawer/LensedImageDrawer.pyx":45
  * 				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3
  * 
  * 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): #***************NOT OPTIMIZED****************             # <<<<<<<<<<<<<<
- * 		x0 = parameters.galaxy.center.x + parameters.canvasDim/2
- * 		y0 = parameters.galaxy.center.y + parameters.canvasDim/2
+ * 		cdef int x0 = parameters.galaxy.center.x + parameters.canvasDim/2
+ * 		cdef int y0 = parameters.galaxy.center.y + parameters.canvasDim/2
  */
 
   /* function exit code */
@@ -4652,12 +4410,6 @@ static void __pyx_f_6Drawer_17LensedImageDrawer_17LensedImageDrawer___drawEinste
   __pyx_L0:;
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_canvas.rcbuffer->pybuffer);
   __pyx_L2:;
-  __Pyx_XDECREF(__pyx_v_x0);
-  __Pyx_XDECREF(__pyx_v_y0);
-  __Pyx_XDECREF(__pyx_v_radius);
-  __Pyx_XDECREF(__pyx_v_x);
-  __Pyx_XDECREF(__pyx_v_y);
-  __Pyx_XDECREF(__pyx_v_err);
   __Pyx_RefNannyFinishContext();
 }
 
@@ -19619,7 +19371,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_Cannot_index_with_type_s, __pyx_k_Cannot_index_with_type_s, sizeof(__pyx_k_Cannot_index_with_type_s), 0, 0, 1, 0},
   {&__pyx_n_s_Ellipsis, __pyx_k_Ellipsis, sizeof(__pyx_k_Ellipsis), 0, 0, 1, 1},
   {&__pyx_kp_s_Empty_shape_tuple_for_cython_arr, __pyx_k_Empty_shape_tuple_for_cython_arr, sizeof(__pyx_k_Empty_shape_tuple_for_cython_arr), 0, 0, 1, 0},
-  {&__pyx_kp_s_End, __pyx_k_End, sizeof(__pyx_k_End), 0, 0, 1, 0},
   {&__pyx_kp_u_Format_string_allocated_too_shor, __pyx_k_Format_string_allocated_too_shor, sizeof(__pyx_k_Format_string_allocated_too_shor), 0, 1, 0, 0},
   {&__pyx_kp_u_Format_string_allocated_too_shor_2, __pyx_k_Format_string_allocated_too_shor_2, sizeof(__pyx_k_Format_string_allocated_too_shor_2), 0, 1, 0, 0},
   {&__pyx_n_s_Graphics, __pyx_k_Graphics, sizeof(__pyx_k_Graphics), 0, 0, 1, 1},
@@ -19667,10 +19418,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_dtype_is_object, __pyx_k_dtype_is_object, sizeof(__pyx_k_dtype_is_object), 0, 0, 1, 1},
   {&__pyx_n_s_einsteinRadius, __pyx_k_einsteinRadius, sizeof(__pyx_k_einsteinRadius), 0, 0, 1, 1},
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
-  {&__pyx_n_s_end, __pyx_k_end, sizeof(__pyx_k_end), 0, 0, 1, 1},
   {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
   {&__pyx_n_s_error, __pyx_k_error, sizeof(__pyx_k_error), 0, 0, 1, 1},
-  {&__pyx_n_s_file, __pyx_k_file, sizeof(__pyx_k_file), 0, 0, 1, 1},
   {&__pyx_n_s_flags, __pyx_k_flags, sizeof(__pyx_k_flags), 0, 0, 1, 1},
   {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
   {&__pyx_n_s_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 0, 1, 1},
@@ -19699,7 +19448,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_obj, __pyx_k_obj, sizeof(__pyx_k_obj), 0, 0, 1, 1},
   {&__pyx_n_s_pack, __pyx_k_pack, sizeof(__pyx_k_pack), 0, 0, 1, 1},
   {&__pyx_n_s_pg, __pyx_k_pg, sizeof(__pyx_k_pg), 0, 0, 1, 1},
-  {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_n_s_pyqtgraph, __pyx_k_pyqtgraph, sizeof(__pyx_k_pyqtgraph), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_getbuffer, __pyx_k_pyx_getbuffer, sizeof(__pyx_k_pyx_getbuffer), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
@@ -19728,7 +19476,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 31, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 32, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 218, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(1, 799, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 989, __pyx_L1_error)
@@ -19747,25 +19495,25 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "Drawer/LensedImageDrawer.pyx":40
+  /* "Drawer/LensedImageDrawer.pyx":41
  * 		xNorm = x
  * 		xInt = Vector2D(int(xNorm.x),int(xNorm.y))
  * 		for i in range(-1,1):             # <<<<<<<<<<<<<<
  * 			for j in range(-1,1):
  * 				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3
  */
-  __pyx_tuple_ = PyTuple_Pack(2, __pyx_int_neg_1, __pyx_int_1); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(2, __pyx_int_neg_1, __pyx_int_1); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "Drawer/LensedImageDrawer.pyx":41
+  /* "Drawer/LensedImageDrawer.pyx":42
  * 		xInt = Vector2D(int(xNorm.x),int(xNorm.y))
  * 		for i in range(-1,1):
  * 			for j in range(-1,1):             # <<<<<<<<<<<<<<
  * 				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3
  * 
  */
-  __pyx_tuple__2 = PyTuple_Pack(2, __pyx_int_neg_1, __pyx_int_1); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(2, __pyx_int_neg_1, __pyx_int_1); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
@@ -21707,238 +21455,6 @@ static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject 
 #endif
 }
 
-/* PyIntBinop */
-      #if !CYTHON_COMPILING_IN_PYPY
-static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED long intval, CYTHON_UNUSED int inplace) {
-    #if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_CheckExact(op1))) {
-        const long b = intval;
-        long x;
-        long a = PyInt_AS_LONG(op1);
-            x = (long)((unsigned long)a + b);
-            if (likely((x^a) >= 0 || (x^b) >= 0))
-                return PyInt_FromLong(x);
-            return PyLong_Type.tp_as_number->nb_add(op1, op2);
-    }
-    #endif
-    #if CYTHON_USE_PYLONG_INTERNALS
-    if (likely(PyLong_CheckExact(op1))) {
-        const long b = intval;
-        long a, x;
-#ifdef HAVE_LONG_LONG
-        const PY_LONG_LONG llb = intval;
-        PY_LONG_LONG lla, llx;
-#endif
-        const digit* digits = ((PyLongObject*)op1)->ob_digit;
-        const Py_ssize_t size = Py_SIZE(op1);
-        if (likely(__Pyx_sst_abs(size) <= 1)) {
-            a = likely(size) ? digits[0] : 0;
-            if (size == -1) a = -a;
-        } else {
-            switch (size) {
-                case -2:
-                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT) {
-                        a = -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 2 * PyLong_SHIFT) {
-                        lla = -(PY_LONG_LONG) (((((unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                case 2:
-                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT) {
-                        a = (long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 2 * PyLong_SHIFT) {
-                        lla = (PY_LONG_LONG) (((((unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                case -3:
-                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT) {
-                        a = -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 3 * PyLong_SHIFT) {
-                        lla = -(PY_LONG_LONG) (((((((unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                case 3:
-                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT) {
-                        a = (long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 3 * PyLong_SHIFT) {
-                        lla = (PY_LONG_LONG) (((((((unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                case -4:
-                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT) {
-                        a = -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 4 * PyLong_SHIFT) {
-                        lla = -(PY_LONG_LONG) (((((((((unsigned PY_LONG_LONG)digits[3]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                case 4:
-                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT) {
-                        a = (long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 4 * PyLong_SHIFT) {
-                        lla = (PY_LONG_LONG) (((((((((unsigned PY_LONG_LONG)digits[3]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                default: return PyLong_Type.tp_as_number->nb_add(op1, op2);
-            }
-        }
-                x = a + b;
-            return PyLong_FromLong(x);
-#ifdef HAVE_LONG_LONG
-        long_long:
-                llx = lla + llb;
-            return PyLong_FromLongLong(llx);
-#endif
-        
-        
-    }
-    #endif
-    if (PyFloat_CheckExact(op1)) {
-        const long b = intval;
-        double a = PyFloat_AS_DOUBLE(op1);
-            double result;
-            PyFPE_START_PROTECT("add", return NULL)
-            result = ((double)a) + (double)b;
-            PyFPE_END_PROTECT(result)
-            return PyFloat_FromDouble(result);
-    }
-    return (inplace ? PyNumber_InPlaceAdd : PyNumber_Add)(op1, op2);
-}
-#endif
-
-/* PyIntBinop */
-      #if !CYTHON_COMPILING_IN_PYPY
-static PyObject* __Pyx_PyInt_SubtractObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED long intval, CYTHON_UNUSED int inplace) {
-    #if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_CheckExact(op1))) {
-        const long b = intval;
-        long x;
-        long a = PyInt_AS_LONG(op1);
-            x = (long)((unsigned long)a - b);
-            if (likely((x^a) >= 0 || (x^~b) >= 0))
-                return PyInt_FromLong(x);
-            return PyLong_Type.tp_as_number->nb_subtract(op1, op2);
-    }
-    #endif
-    #if CYTHON_USE_PYLONG_INTERNALS
-    if (likely(PyLong_CheckExact(op1))) {
-        const long b = intval;
-        long a, x;
-#ifdef HAVE_LONG_LONG
-        const PY_LONG_LONG llb = intval;
-        PY_LONG_LONG lla, llx;
-#endif
-        const digit* digits = ((PyLongObject*)op1)->ob_digit;
-        const Py_ssize_t size = Py_SIZE(op1);
-        if (likely(__Pyx_sst_abs(size) <= 1)) {
-            a = likely(size) ? digits[0] : 0;
-            if (size == -1) a = -a;
-        } else {
-            switch (size) {
-                case -2:
-                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT) {
-                        a = -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 2 * PyLong_SHIFT) {
-                        lla = -(PY_LONG_LONG) (((((unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                case 2:
-                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT) {
-                        a = (long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 2 * PyLong_SHIFT) {
-                        lla = (PY_LONG_LONG) (((((unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                case -3:
-                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT) {
-                        a = -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 3 * PyLong_SHIFT) {
-                        lla = -(PY_LONG_LONG) (((((((unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                case 3:
-                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT) {
-                        a = (long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 3 * PyLong_SHIFT) {
-                        lla = (PY_LONG_LONG) (((((((unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                case -4:
-                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT) {
-                        a = -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 4 * PyLong_SHIFT) {
-                        lla = -(PY_LONG_LONG) (((((((((unsigned PY_LONG_LONG)digits[3]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                case 4:
-                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT) {
-                        a = (long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 4 * PyLong_SHIFT) {
-                        lla = (PY_LONG_LONG) (((((((((unsigned PY_LONG_LONG)digits[3]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                default: return PyLong_Type.tp_as_number->nb_subtract(op1, op2);
-            }
-        }
-                x = a - b;
-            return PyLong_FromLong(x);
-#ifdef HAVE_LONG_LONG
-        long_long:
-                llx = lla - llb;
-            return PyLong_FromLongLong(llx);
-#endif
-        
-        
-    }
-    #endif
-    if (PyFloat_CheckExact(op1)) {
-        const long b = intval;
-        double a = PyFloat_AS_DOUBLE(op1);
-            double result;
-            PyFPE_START_PROTECT("subtract", return NULL)
-            result = ((double)a) - (double)b;
-            PyFPE_END_PROTECT(result)
-            return PyFloat_FromDouble(result);
-    }
-    return (inplace ? PyNumber_InPlaceSubtract : PyNumber_Subtract)(op1, op2);
-}
-#endif
-
 /* RaiseException */
       #if PY_MAJOR_VERSION < 3
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb,
@@ -22517,6 +22033,122 @@ bad:
     return module;
 }
 
+/* PyIntBinop */
+          #if !CYTHON_COMPILING_IN_PYPY
+static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED long intval, CYTHON_UNUSED int inplace) {
+    #if PY_MAJOR_VERSION < 3
+    if (likely(PyInt_CheckExact(op1))) {
+        const long b = intval;
+        long x;
+        long a = PyInt_AS_LONG(op1);
+            x = (long)((unsigned long)a + b);
+            if (likely((x^a) >= 0 || (x^b) >= 0))
+                return PyInt_FromLong(x);
+            return PyLong_Type.tp_as_number->nb_add(op1, op2);
+    }
+    #endif
+    #if CYTHON_USE_PYLONG_INTERNALS
+    if (likely(PyLong_CheckExact(op1))) {
+        const long b = intval;
+        long a, x;
+#ifdef HAVE_LONG_LONG
+        const PY_LONG_LONG llb = intval;
+        PY_LONG_LONG lla, llx;
+#endif
+        const digit* digits = ((PyLongObject*)op1)->ob_digit;
+        const Py_ssize_t size = Py_SIZE(op1);
+        if (likely(__Pyx_sst_abs(size) <= 1)) {
+            a = likely(size) ? digits[0] : 0;
+            if (size == -1) a = -a;
+        } else {
+            switch (size) {
+                case -2:
+                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT) {
+                        a = -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+#ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 2 * PyLong_SHIFT) {
+                        lla = -(PY_LONG_LONG) (((((unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+#endif
+                    }
+                case 2:
+                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT) {
+                        a = (long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+#ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 2 * PyLong_SHIFT) {
+                        lla = (PY_LONG_LONG) (((((unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+#endif
+                    }
+                case -3:
+                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT) {
+                        a = -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+#ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 3 * PyLong_SHIFT) {
+                        lla = -(PY_LONG_LONG) (((((((unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+#endif
+                    }
+                case 3:
+                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT) {
+                        a = (long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+#ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 3 * PyLong_SHIFT) {
+                        lla = (PY_LONG_LONG) (((((((unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+#endif
+                    }
+                case -4:
+                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT) {
+                        a = -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+#ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 4 * PyLong_SHIFT) {
+                        lla = -(PY_LONG_LONG) (((((((((unsigned PY_LONG_LONG)digits[3]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+#endif
+                    }
+                case 4:
+                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT) {
+                        a = (long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+#ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 4 * PyLong_SHIFT) {
+                        lla = (PY_LONG_LONG) (((((((((unsigned PY_LONG_LONG)digits[3]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+#endif
+                    }
+                default: return PyLong_Type.tp_as_number->nb_add(op1, op2);
+            }
+        }
+                x = a + b;
+            return PyLong_FromLong(x);
+#ifdef HAVE_LONG_LONG
+        long_long:
+                llx = lla + llb;
+            return PyLong_FromLongLong(llx);
+#endif
+        
+        
+    }
+    #endif
+    if (PyFloat_CheckExact(op1)) {
+        const long b = intval;
+        double a = PyFloat_AS_DOUBLE(op1);
+            double result;
+            PyFPE_START_PROTECT("add", return NULL)
+            result = ((double)a) + (double)b;
+            PyFPE_END_PROTECT(result)
+            return PyFloat_FromDouble(result);
+    }
+    return (inplace ? PyNumber_InPlaceAdd : PyNumber_Add)(op1, op2);
+}
+#endif
+
 /* None */
           static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname) {
     PyErr_Format(PyExc_UnboundLocalError, "local variable '%s' referenced before assignment", varname);
@@ -22862,112 +22494,6 @@ static void __Pyx_ReleaseBuffer(Py_buffer *view) {
     }
 }
 
-/* Print */
-          #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
-static PyObject *__Pyx_GetStdout(void) {
-    PyObject *f = PySys_GetObject((char *)"stdout");
-    if (!f) {
-        PyErr_SetString(PyExc_RuntimeError, "lost sys.stdout");
-    }
-    return f;
-}
-static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) {
-    int i;
-    if (!f) {
-        if (!(f = __Pyx_GetStdout()))
-            return -1;
-    }
-    Py_INCREF(f);
-    for (i=0; i < PyTuple_GET_SIZE(arg_tuple); i++) {
-        PyObject* v;
-        if (PyFile_SoftSpace(f, 1)) {
-            if (PyFile_WriteString(" ", f) < 0)
-                goto error;
-        }
-        v = PyTuple_GET_ITEM(arg_tuple, i);
-        if (PyFile_WriteObject(v, f, Py_PRINT_RAW) < 0)
-            goto error;
-        if (PyString_Check(v)) {
-            char *s = PyString_AsString(v);
-            Py_ssize_t len = PyString_Size(v);
-            if (len > 0) {
-                switch (s[len-1]) {
-                    case ' ': break;
-                    case '\f': case '\r': case '\n': case '\t': case '\v':
-                        PyFile_SoftSpace(f, 0);
-                        break;
-                    default:  break;
-                }
-            }
-        }
-    }
-    if (newline) {
-        if (PyFile_WriteString("\n", f) < 0)
-            goto error;
-        PyFile_SoftSpace(f, 0);
-    }
-    Py_DECREF(f);
-    return 0;
-error:
-    Py_DECREF(f);
-    return -1;
-}
-#else
-static int __Pyx_Print(PyObject* stream, PyObject *arg_tuple, int newline) {
-    PyObject* kwargs = 0;
-    PyObject* result = 0;
-    PyObject* end_string;
-    if (unlikely(!__pyx_print)) {
-        __pyx_print = PyObject_GetAttr(__pyx_b, __pyx_n_s_print);
-        if (!__pyx_print)
-            return -1;
-    }
-    if (stream) {
-        kwargs = PyDict_New();
-        if (unlikely(!kwargs))
-            return -1;
-        if (unlikely(PyDict_SetItem(kwargs, __pyx_n_s_file, stream) < 0))
-            goto bad;
-        if (!newline) {
-            end_string = PyUnicode_FromStringAndSize(" ", 1);
-            if (unlikely(!end_string))
-                goto bad;
-            if (PyDict_SetItem(kwargs, __pyx_n_s_end, end_string) < 0) {
-                Py_DECREF(end_string);
-                goto bad;
-            }
-            Py_DECREF(end_string);
-        }
-    } else if (!newline) {
-        if (unlikely(!__pyx_print_kwargs)) {
-            __pyx_print_kwargs = PyDict_New();
-            if (unlikely(!__pyx_print_kwargs))
-                return -1;
-            end_string = PyUnicode_FromStringAndSize(" ", 1);
-            if (unlikely(!end_string))
-                return -1;
-            if (PyDict_SetItem(__pyx_print_kwargs, __pyx_n_s_end, end_string) < 0) {
-                Py_DECREF(end_string);
-                return -1;
-            }
-            Py_DECREF(end_string);
-        }
-        kwargs = __pyx_print_kwargs;
-    }
-    result = PyObject_Call(__pyx_print, arg_tuple, kwargs);
-    if (unlikely(kwargs) && (kwargs != __pyx_print_kwargs))
-        Py_DECREF(kwargs);
-    if (!result)
-        return -1;
-    Py_DECREF(result);
-    return 0;
-bad:
-    if (kwargs != __pyx_print_kwargs)
-        Py_XDECREF(kwargs);
-    return -1;
-}
-#endif
-
 /* CIntFromPyVerify */
           #define __PYX_VERIFY_RETURN_INT(target_type, func_type, func_value)\
     __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, 0)
@@ -22989,6 +22515,78 @@ bad:
         }\
         return (target_type) value;\
     }
+
+/* MemviewSliceIsContig */
+          static int
+__pyx_memviewslice_is_contig(const __Pyx_memviewslice mvs,
+                             char order, int ndim)
+{
+    int i, index, step, start;
+    Py_ssize_t itemsize = mvs.memview->view.itemsize;
+    if (order == 'F') {
+        step = 1;
+        start = 0;
+    } else {
+        step = -1;
+        start = ndim - 1;
+    }
+    for (i = 0; i < ndim; i++) {
+        index = start + step * i;
+        if (mvs.suboffsets[index] >= 0 || mvs.strides[index] != itemsize)
+            return 0;
+        itemsize *= mvs.shape[index];
+    }
+    return 1;
+}
+
+/* OverlappingSlices */
+          static void
+__pyx_get_array_memory_extents(__Pyx_memviewslice *slice,
+                               void **out_start, void **out_end,
+                               int ndim, size_t itemsize)
+{
+    char *start, *end;
+    int i;
+    start = end = slice->data;
+    for (i = 0; i < ndim; i++) {
+        Py_ssize_t stride = slice->strides[i];
+        Py_ssize_t extent = slice->shape[i];
+        if (extent == 0) {
+            *out_start = *out_end = start;
+            return;
+        } else {
+            if (stride > 0)
+                end += stride * (extent - 1);
+            else
+                start += stride * (extent - 1);
+        }
+    }
+    *out_start = start;
+    *out_end = end + itemsize;
+}
+static int
+__pyx_slices_overlap(__Pyx_memviewslice *slice1,
+                     __Pyx_memviewslice *slice2,
+                     int ndim, size_t itemsize)
+{
+    void *start1, *end1, *start2, *end2;
+    __pyx_get_array_memory_extents(slice1, &start1, &end1, ndim, itemsize);
+    __pyx_get_array_memory_extents(slice2, &start2, &end2, ndim, itemsize);
+    return (start1 < end2) && (start2 < end1);
+}
+
+/* Capsule */
+          static CYTHON_INLINE PyObject *
+__pyx_capsule_create(void *p, CYTHON_UNUSED const char *sig)
+{
+    PyObject *cobj;
+#if PY_VERSION_HEX >= 0x02070000
+    cobj = PyCapsule_New(p, sig, NULL);
+#else
+    cobj = PyCObject_FromVoidPtr(p, NULL);
+#endif
+    return cobj;
+}
 
 /* Declarations */
           #if CYTHON_CCOMPLEX
@@ -23330,115 +22928,6 @@ bad:
                                      little, !is_unsigned);
     }
 }
-
-/* MemviewSliceIsContig */
-          static int
-__pyx_memviewslice_is_contig(const __Pyx_memviewslice mvs,
-                             char order, int ndim)
-{
-    int i, index, step, start;
-    Py_ssize_t itemsize = mvs.memview->view.itemsize;
-    if (order == 'F') {
-        step = 1;
-        start = 0;
-    } else {
-        step = -1;
-        start = ndim - 1;
-    }
-    for (i = 0; i < ndim; i++) {
-        index = start + step * i;
-        if (mvs.suboffsets[index] >= 0 || mvs.strides[index] != itemsize)
-            return 0;
-        itemsize *= mvs.shape[index];
-    }
-    return 1;
-}
-
-/* OverlappingSlices */
-          static void
-__pyx_get_array_memory_extents(__Pyx_memviewslice *slice,
-                               void **out_start, void **out_end,
-                               int ndim, size_t itemsize)
-{
-    char *start, *end;
-    int i;
-    start = end = slice->data;
-    for (i = 0; i < ndim; i++) {
-        Py_ssize_t stride = slice->strides[i];
-        Py_ssize_t extent = slice->shape[i];
-        if (extent == 0) {
-            *out_start = *out_end = start;
-            return;
-        } else {
-            if (stride > 0)
-                end += stride * (extent - 1);
-            else
-                start += stride * (extent - 1);
-        }
-    }
-    *out_start = start;
-    *out_end = end + itemsize;
-}
-static int
-__pyx_slices_overlap(__Pyx_memviewslice *slice1,
-                     __Pyx_memviewslice *slice2,
-                     int ndim, size_t itemsize)
-{
-    void *start1, *end1, *start2, *end2;
-    __pyx_get_array_memory_extents(slice1, &start1, &end1, ndim, itemsize);
-    __pyx_get_array_memory_extents(slice2, &start2, &end2, ndim, itemsize);
-    return (start1 < end2) && (start2 < end1);
-}
-
-/* Capsule */
-          static CYTHON_INLINE PyObject *
-__pyx_capsule_create(void *p, CYTHON_UNUSED const char *sig)
-{
-    PyObject *cobj;
-#if PY_VERSION_HEX >= 0x02070000
-    cobj = PyCapsule_New(p, sig, NULL);
-#else
-    cobj = PyCObject_FromVoidPtr(p, NULL);
-#endif
-    return cobj;
-}
-
-/* PrintOne */
-          #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
-static int __Pyx_PrintOne(PyObject* f, PyObject *o) {
-    if (!f) {
-        if (!(f = __Pyx_GetStdout()))
-            return -1;
-    }
-    Py_INCREF(f);
-    if (PyFile_SoftSpace(f, 0)) {
-        if (PyFile_WriteString(" ", f) < 0)
-            goto error;
-    }
-    if (PyFile_WriteObject(o, f, Py_PRINT_RAW) < 0)
-        goto error;
-    if (PyFile_WriteString("\n", f) < 0)
-        goto error;
-    Py_DECREF(f);
-    return 0;
-error:
-    Py_DECREF(f);
-    return -1;
-    /* the line below is just to avoid C compiler
-     * warnings about unused functions */
-    return __Pyx_Print(f, NULL, 0);
-}
-#else
-static int __Pyx_PrintOne(PyObject* stream, PyObject *o) {
-    int res;
-    PyObject* arg_tuple = PyTuple_Pack(1, o);
-    if (unlikely(!arg_tuple))
-        return -1;
-    res = __Pyx_Print(stream, arg_tuple, 1);
-    Py_DECREF(arg_tuple);
-    return res;
-}
-#endif
 
 /* CIntFromPy */
           static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {

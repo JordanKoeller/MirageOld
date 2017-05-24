@@ -13,6 +13,8 @@ cdef class LensedImageDrawer(ImageDrawer):
 
 	def __init__(self,signal):
 		ImageDrawer.__init__(self,signal)
+
+	
 	cpdef draw(self,object args):
 		cdef object parameters = args[0]
 		cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]
@@ -25,7 +27,6 @@ cdef class LensedImageDrawer(ImageDrawer):
 			parameters.quasar.draw(canvas,parameters)
 		cdef int pixel = 0
 		cdef int end = pixels.shape[0]
-		print("End = "+str(end))
 		if end > 1:
 			with nogil:
 				for pixel in range(0,end):
@@ -42,32 +43,34 @@ cdef class LensedImageDrawer(ImageDrawer):
 				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3
 
 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): #***************NOT OPTIMIZED****************
-		x0 = parameters.galaxy.center.x + parameters.canvasDim/2
-		y0 = parameters.galaxy.center.y + parameters.canvasDim/2
-		radius = parameters.einsteinRadius/parameters.dTheta.value
-		x = abs(radius)
-		y = 0
-		err = 0
-		while x >= y:
-			if x0 + x > 0 and y0 + y > 0 and x0 + x < parameters.canvasDim and y0 + y < parameters.canvasDim:
-					canvas[int(x0 + x), int(y0 + y)] = 3
-			if x0 + y > 0 and y0 + x > 0 and x0 + y < parameters.canvasDim and y0 + x < parameters.canvasDim:
-					canvas[int(x0 + y), int(y0 + x)] = 3
-			if x0 - y > 0 and y0 + x > 0 and x0 - y < parameters.canvasDim and y0 + x < parameters.canvasDim:
-					canvas[int(x0 - y), int(y0 + x)] = 3
-			if x0 - x > 0 and y0 + y > 0 and x0 - x < parameters.canvasDim and y0 + y < parameters.canvasDim:
-					canvas[int(x0 - x), int(y0 + y)] = 3
-			if x0 - x > 0 and y0 - y > 0 and x0 - x < parameters.canvasDim and y0 - y < parameters.canvasDim:
-					canvas[int(x0 - x), int(y0 - y)] = 3
-			if x0 - y > 0 and y0 - x > 0 and x0 - y < parameters.canvasDim and y0 - x < parameters.canvasDim:
-					canvas[int(x0 - y), int(y0 - x)] = 3
-			if x0 + y > 0 and y0 - x > 0 and x0 + y < parameters.canvasDim and y0 - x < parameters.canvasDim:
-					canvas[int(x0 + y), int(y0 - x)] = 3
-			if x0 + x > 0 and y0 - y > 0 and x0 + x < parameters.canvasDim and y0 - y < parameters.canvasDim:
-					canvas[int(x0 + x), int(y0 - y)] = 3
-			if err <= 0:
-				y += 1
-				err += 2*y + 1
-			if err > 0:
-				x -= 1
-				err -= 2*x + 1
+		cdef int x0 = parameters.galaxy.center.x + parameters.canvasDim/2
+		cdef int y0 = parameters.galaxy.center.y + parameters.canvasDim/2
+		cdef int radius = parameters.einsteinRadius/parameters.dTheta.value
+		cdef int x = abs(radius)
+		cdef int y = 0
+		cdef int err = 0
+		cdef int canvasDim = parameters.canvasDim
+		with nogil:
+			while x >= y:
+				if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:
+						canvas[x0 + x, y0 + y] = 3
+				if x0 + y > 0 and y0 + x > 0 and x0 + y < canvasDim and y0 + x < canvasDim:
+						canvas[x0 + y, y0 + x] = 3
+				if x0 - y > 0 and y0 + x > 0 and x0 - y < canvasDim and y0 + x < canvasDim:
+						canvas[x0 - y, y0 + x] = 3
+				if x0 - x > 0 and y0 + y > 0 and x0 - x < canvasDim and y0 + y < canvasDim:
+						canvas[x0 - x, y0 + y] = 3
+				if x0 - x > 0 and y0 - y > 0 and x0 - x < canvasDim and y0 - y < canvasDim:
+						canvas[x0 - x, y0 - y] = 3
+				if x0 - y > 0 and y0 - x > 0 and x0 - y < canvasDim and y0 - x < canvasDim:
+						canvas[x0 - y, y0 - x] = 3
+				if x0 + y > 0 and y0 - x > 0 and x0 + y < canvasDim and y0 - x < canvasDim:
+						canvas[x0 + y, y0 - x] = 3
+				if x0 + x > 0 and y0 - y > 0 and x0 + x < canvasDim and y0 - y < canvasDim:
+						canvas[x0 + x, y0 - y] = 3
+				if err <= 0:
+					y += 1
+					err += 2*y + 1
+				if err > 0:
+					x -= 1
+					err -= 2*x + 1
