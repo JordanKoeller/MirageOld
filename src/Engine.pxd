@@ -28,7 +28,6 @@ cdef class Engine:
 	cdef:
 		__parameters
 		bool __preCalculating
-		bool __needsReconfiguring
 		public double time
 		__trueLuminosity
 

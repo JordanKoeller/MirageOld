@@ -57,7 +57,6 @@ class Parameters(object):
 		self.__starMassVariation = starMassVariation
 		self.dt = 0.1
 		self.time = 0
-		# self.setMicrolensing(False)
 
 	def generateStars(self):
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen/100
@@ -130,20 +129,14 @@ class Parameters(object):
 	def setStars(self,stars):
 		self.__galaxy.update(stars = stars)
 
-
-
-	def setMicrolensing(self,isMicrolensing):
-		if isMicrolensing:
-			self.microlensing = True
-			self.__galaxy.update(center = Vector2D(0,self.einsteinRadius.value,'rad')) #Will refactor later, once how this works is figured out
-		else:
-			self.microlensing = False
-			self.__galaxy.update(center = zeroVector)
-
+	def incrementTime(self,dt):
+		self.time += dt
+		self.__quasar.incrementTime(dt)
+	
 	def setTime(self,time):
 		self.time = time
 		self.__quasar.setTime(time)
-	
+
 	@property
 	def queryQuasarX(self):
 		return self.quasar.observedPosition.x

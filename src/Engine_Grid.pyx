@@ -60,22 +60,18 @@ cdef class Engine_Grid(Engine):
 		cdef vector[Pixel] ret = self.__grid.find_within(x, y, radius)
 		return ret
 
-	cpdef reconfigure(self):
+	def reconfigure(self):
 		begin = time.clock()
 		self.__preCalculating = True
 		finalData = self.ray_trace(use_GPU=True)
 		self.build_data(finalData[0], finalData[1],int(finalData[0].shape[0]**2/2))
 		self.__preCalculating = False
-		self.__needsReconfiguring = False
 		print("Time calculating = " + str(time.clock() - begin) + " seconds.")
-		print(self.__parameters)
 
 
 	@cython.boundscheck(False)  # turn off bounds-checking for entire function
 	@cython.wraparound(False)
 	cpdef getFrame(self):
-		if self.__needsReconfiguring:
-			self.reconfigure()
 		while self.__preCalculating:
 			print("waiting")
 		cdef double qx = self.__parameters.queryQuasarX

@@ -32,9 +32,7 @@ cdef class Engine:
 	def __init__(self, parameter=Parameters()):
 		self.__parameters = parameter
 		self.__preCalculating = False
-		self.time = 0.0
 		self.__trueLuminosity = math.pi * (self.__parameters.quasar.radius.value / self.__parameters.dTheta.value) ** 2
-		self.__needsReconfiguring = True
 
 	@property
 	def parameters(self):
@@ -112,13 +110,8 @@ cdef class Engine:
 		cdef b = np.float64 (self.__tree.query_point_count(self.__parameters.quasar.observedPosition.x, self.__parameters.quasar.observedPosition.y, self.__parameters.quasar.radius.value))
 		return b / a
 
-	def incrementTime(self, dt):
-		self.time += dt 
-		self.parameters.setTime(self.time)
-
-	def setTime(self, t):
-		self.time = t 
-		self.parameters.setTime(t)
+	def reconfigure(self):
+		pass
 		
 	cdef cythonMakeLightCurve(self, mmin, mmax, resolution, progressBar, smoothing): #Needs updateing
 		if not self.__tree:
@@ -159,10 +152,10 @@ cdef class Engine:
 		cdef np.ndarray[np.float64_t, ndim=2] x
 		cdef np.ndarray[np.float64_t, ndim=2] y
 		x,y = self.ray_trace(use_GPU=True)
-		cdef int xm = x.min()
-		cdef int ym = y.min()
-		x = (x - xm)
-		y = (y - ym)
+		cdef double xm = abs(x.min())
+		cdef double ym = abs(y.min())
+		x = (x + xm)
+		y = (y + ym)
 		extrema  = [abs(x.min()),abs(y.min()),abs(x.max()),abs(y.max())]
 		cdef double extreme = max(extrema)
 		x = x*(x.shape[0]-1)/extreme
@@ -173,6 +166,9 @@ cdef class Engine:
 		cdef int i,j
 		for i in range(0,endX):
 			for j in range(0,endY):
+				# for k in range(0,3):
+				# 	for l in range(0,3):
+				# 		img[<int> x[i-k,j-l],<int> y[i-k,j-l]] += 1
 				img[<int> x[i,j],<int> y[i,j]] += 1
 		return img
 
@@ -185,12 +181,12 @@ cdef class Engine:
 			self.__parameters = parameters
 			if self.__parameters.galaxy.percentStars > 0:
 				self.__parameters.generateStars()
-			self.__needsReconfiguring = True
+			self.reconfigure()
 		elif not self.__parameters.isSimilar(parameters):
 			self.__parameters = parameters
 			if self.__parameters.galaxy.percentStars > 0:
 				self.__parameters.generateStars()
-			self.__needsReconfiguring = True
+			self.reconfigure()
 		else:
 			parameters.setStars(self.__parameters.stars)
 			self.__parameters = parameters

@@ -130,7 +130,7 @@
              <item row="3" column="1">
               <widget class="QLineEdit" name="qVelocity">
                <property name="text">
-                <string>(0.0,0.0)</string>
+                <string>(0.1,0.0)</string>
                </property>
               </widget>
              </item>
@@ -301,7 +301,7 @@
              <item row="3" column="1">
               <widget class="QLineEdit" name="gShearMag">
                <property name="text">
-                <string>0</string>
+                <string>0.306</string>
                </property>
               </widget>
              </item>
@@ -338,7 +338,7 @@
                 <bool>true</bool>
                </property>
                <property name="text">
-                <string>600</string>
+                <string>300</string>
                </property>
               </widget>
              </item>
@@ -362,7 +362,7 @@
                 <bool>true</bool>
                </property>
                <property name="text">
-                <string>800</string>
+                <string>2000</string>
                </property>
               </widget>
              </item>
@@ -509,7 +509,35 @@
               </layout>
               <zorder></zorder>
              </widget>
+             <widget class="QWidget" name="developerTab">
+              <attribute name="title">
+               <string>Magnification Map</string>
+              </attribute>
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <item>
+                <layout class="QGridLayout" name="gridLayout_6">
+                 <item row="1" column="0">
+                  <widget class="QPushButton" name="developerExportButton">
+                   <property name="text">
+                    <string>Save As...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QPushButton" name="visualizeDataButton">
+                   <property name="text">
+                    <string>Make Magnification Map</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
              <widget class="QWidget" name="lightCurveTab">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <attribute name="title">
                <string>Light Curve</string>
               </attribute>
@@ -588,44 +616,12 @@
                </item>
               </layout>
              </widget>
-             <widget class="QWidget" name="tab">
-              <attribute name="title">
-               <string>Developer</string>
-              </attribute>
-              <layout class="QVBoxLayout" name="verticalLayout_6">
-               <item>
-                <layout class="QGridLayout" name="gridLayout_6">
-                 <item row="1" column="0">
-                  <widget class="QPushButton" name="developerExportButton">
-                   <property name="text">
-                    <string>Export</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QPushButton" name="visualizeDataButton">
-                   <property name="text">
-                    <string>Visualize Data</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QPushButton" name="binSizeTestButton">
-                   <property name="text">
-                    <string>Test Bin Sizes</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="progressLabel">
              <property name="text">
-              <string>This does things now!</string>
+              <string/>
              </property>
             </widget>
            </item>
@@ -833,13 +829,16 @@
     <addaction name="separator"/>
     <addaction name="record_button"/>
     <addaction name="separator"/>
-    <addaction name="actionExit"/>
+    <addaction name="shutdown"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
-  <action name="actionExit">
+  <action name="shutdown">
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="load_setup">

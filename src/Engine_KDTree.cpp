@@ -997,7 +997,6 @@ struct __pyx_obj_6Engine_Engine {
   struct __pyx_vtabstruct_6Engine_Engine *__pyx_vtab;
   PyObject *__pyx___parameters;
   bool __pyx___preCalculating;
-  bool __pyx___needsReconfiguring;
   double time;
   PyObject *__pyx___trueLuminosity;
 };
@@ -1449,6 +1448,24 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
 /* ExtTypeTest.proto */
 static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type);
 
+/* PyObjectSetAttrStr.proto */
+#if CYTHON_USE_TYPE_SLOTS
+#define __Pyx_PyObject_DelAttrStr(o,n) __Pyx_PyObject_SetAttrStr(o,n,NULL)
+static CYTHON_INLINE int __Pyx_PyObject_SetAttrStr(PyObject* obj, PyObject* attr_name, PyObject* value) {
+    PyTypeObject* tp = Py_TYPE(obj);
+    if (likely(tp->tp_setattro))
+        return tp->tp_setattro(obj, attr_name, value);
+#if PY_MAJOR_VERSION < 3
+    if (likely(tp->tp_setattr))
+        return tp->tp_setattr(obj, PyString_AS_STRING(attr_name), value);
+#endif
+    return PyObject_SetAttr(obj, attr_name, value);
+}
+#else
+#define __Pyx_PyObject_DelAttrStr(o,n)   PyObject_DelAttr(o,n)
+#define __Pyx_PyObject_SetAttrStr(o,n,v) PyObject_SetAttr(o,n,v)
+#endif
+
 /* RaiseException.proto */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
 
@@ -1845,6 +1862,7 @@ static const char __pyx_k_pyopencl_tools[] = "pyopencl.tools";
 static const char __pyx_k_Time_calculating[] = "Time calculating = ";
 static const char __pyx_k_astropy_cosmology[] = "astropy.cosmology";
 static const char __pyx_k_queryQuasarRadius[] = "queryQuasarRadius";
+static const char __pyx_k_needsReconfiguring[] = "__needsReconfiguring";
 static const char __pyx_k_setDataFromNumpies[] = "setDataFromNumpies";
 static const char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous";
 static const char __pyx_k_numpy_core_multiarray_failed_to[] = "numpy.core.multiarray failed to import";
@@ -1894,6 +1912,7 @@ static PyObject *__pyx_n_s_math;
 static PyObject *__pyx_kp_u_ndarray_is_not_C_contiguous;
 static PyObject *__pyx_kp_u_ndarray_is_not_Fortran_contiguou;
 static PyObject *__pyx_n_s_ndmin;
+static PyObject *__pyx_n_s_needsReconfiguring;
 static PyObject *__pyx_n_s_np;
 static PyObject *__pyx_n_s_numpy;
 static PyObject *__pyx_kp_s_numpy_core_multiarray_failed_to;
@@ -2559,7 +2578,7 @@ static PyObject *__pyx_f_13Engine_KDTree_13Engine_KDTree_reconfigure(struct __py
  * 		print("Time calculating = " + str(time.clock() - begin) + " seconds.")
  * 
  */
-  __pyx_v_self->__pyx_base.__pyx___needsReconfiguring = 0;
+  if (__Pyx_PyObject_SetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_needsReconfiguring, Py_False) < 0) __PYX_ERR(0, 52, __pyx_L1_error)
 
   /* "Engine_KDTree.pyx":53
  * 		self.__preCalculating = False
@@ -2745,7 +2764,10 @@ static PyObject *__pyx_f_13Engine_KDTree_13Engine_KDTree_getFrame(struct __pyx_o
  * 			self.reconfigure()
  * 		while self.__preCalculating:
  */
-  __pyx_t_5 = (__pyx_v_self->__pyx_base.__pyx___needsReconfiguring != 0);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_needsReconfiguring); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_5) {
 
     /* "Engine_KDTree.pyx":60
@@ -5683,6 +5705,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u_ndarray_is_not_C_contiguous, __pyx_k_ndarray_is_not_C_contiguous, sizeof(__pyx_k_ndarray_is_not_C_contiguous), 0, 1, 0, 0},
   {&__pyx_kp_u_ndarray_is_not_Fortran_contiguou, __pyx_k_ndarray_is_not_Fortran_contiguou, sizeof(__pyx_k_ndarray_is_not_Fortran_contiguou), 0, 1, 0, 0},
   {&__pyx_n_s_ndmin, __pyx_k_ndmin, sizeof(__pyx_k_ndmin), 0, 0, 1, 1},
+  {&__pyx_n_s_needsReconfiguring, __pyx_k_needsReconfiguring, sizeof(__pyx_k_needsReconfiguring), 0, 0, 1, 1},
   {&__pyx_n_s_np, __pyx_k_np, sizeof(__pyx_k_np), 0, 0, 1, 1},
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
   {&__pyx_kp_s_numpy_core_multiarray_failed_to, __pyx_k_numpy_core_multiarray_failed_to, sizeof(__pyx_k_numpy_core_multiarray_failed_to), 0, 0, 1, 0},

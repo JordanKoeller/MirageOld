@@ -42,15 +42,15 @@ private:
 		}
 	}
 
-	// inline bool overlap(const double &objx, const double& objy, const double &radius, const int &i, const int &j) const
-	// {
-	// 	double tnx = tlx + i*NODE_WIDTH;
-	// 	double tny = tly + j*NODE_HEIGHT;
-	// 	double bnx = tlx + (i+1)*NODE_WIDTH;
-	// 	double bny = tly + (j+1)*NODE_HEIGHT;
-	// 	// bool flag1 = 
-	// 	return objx - radius <= bnx && objx + radius > tnx && objy - radius <= bny && objy + radius > tny; //BIG possible bug spot.
-	// }
+	inline bool overlap(const double &objx, const double& objy, const double &radius, const int &i, const int &j) const
+	{
+		double tnx = tlx + i*NODE_WIDTH;
+		double tny = tly + j*NODE_HEIGHT;
+		double bnx = tlx + (i+1)*NODE_WIDTH;
+		double bny = tly + (j+1)*NODE_HEIGHT;
+		// bool flag1 = 
+		return objx - radius <= bnx && objx + radius > tnx && objy - radius <= bny && objy + radius > tny; //BIG possible bug spot.
+	}
 
 	inline pair<double,double> getIndices(const double &x,const double &y)
 	{
@@ -191,15 +191,26 @@ public:
 		int cy = ceil((y-tly)/NODE_HEIGHT);
 		int rx = ceil(r/(NODE_WIDTH));
 		int ry = ceil(r/(NODE_HEIGHT));
-		// cout << "X,Y = " << rx << "," << ry << "\n";
 		int hypot2 = rx*rx+ry*ry;
 		vector<Pixel> ret;
 		vector<Pixel> tmp = data[cx][cy].queryNode(x,y,r);
-		// ret.insert(ret.end\\(),tmp.begn(),tmp.end());
-		for (size_t i = 0; i <= rx; ++i) // Possible indexing issue here?
+		ret.insert(ret.end(),tmp.begin(),tmp.end());
+		for (size_t i=1; i <= rx; i++) {
+				tmp = data[cx+i][cy].queryNode(x,y,r);
+				ret.insert(ret.end(),tmp.begin(),tmp.end());
+				tmp = data[cx-i][cy].queryNode(x,y,r);
+				ret.insert(ret.end(),tmp.begin(),tmp.end());
+		}
+		for (size_t i=1; i <= ry; i++) {
+				tmp = data[cx][cy+i].queryNode(x,y,r);
+				ret.insert(ret.end(),tmp.begin(),tmp.end());
+				tmp = data[cx][cy-i].queryNode(x,y,r);
+				ret.insert(ret.end(),tmp.begin(),tmp.end());
+		}
+		for (size_t i = 1; i <= rx; ++i) // Possible indexing issue here?
 		{
 			int ryLow = ceil(sqrt(hypot2 - i*i))+1;
-			for (size_t j = 0; j <= ryLow;++j) //Improvement by using symmetry possible
+			for (size_t j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
 			{
 				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r)
 				{
@@ -248,7 +259,6 @@ public:
 	bool insert(const double& x, const double& y, const int& px, const int &py)
 	{
 		auto indices = getIndices(x,y);
-		// //cout << "Pixel = " << d.x << "," << d.y << endl;
 		if (get<0>(indices) >= 0 && get<1>(indices) >= 0 && get<0>(indices) < data.size() && get<1>(indices) < data[0].size())
 		{
 			data[lrint(get<0>(indices))][lrint(get<1>(indices))].addData(x,y,px,py);
@@ -273,5 +283,7 @@ public:
 		}
 		return true;
 	}
+
+	// pair<double,double> 
 
 };

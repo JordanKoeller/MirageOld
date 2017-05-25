@@ -35,11 +35,11 @@ class FileManager(object):
 		return QtWidgets.QFileDialog.getOpenFileName(filter=filetype)[0]
 
 	def writeParams(self, parameters):
-		self.filename = self.__makeFile()
+		self.filename = self.__makeFile(self.paramType)
 		with open(self.filename,"wb+") as file:
 			pickle.dump(parameters,file)
 	def readParams(self):
-		self.filename = self.__getFile()
+		self.filename = self.__getFile(self.paramType)
 		if self.filename:
 			with open(self.filename,"rb") as file:
 				return pickle.load(file)

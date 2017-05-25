@@ -14,7 +14,6 @@ import time
 import imageio
 import numpy as np
 from Drawer.Drawer import CompositeDrawer
-# from Drawer import DiagnosticCompositeDrawer
 from Drawer.Drawer import ImageDrawer 
 from Drawer.DataVisualizerDrawer import DataVisualizerDrawer 
 from Drawer import LensedImageLightCurveComposite
@@ -63,17 +62,21 @@ class SimThread(QtCore.QThread):
         self.image_canvas_update = signals[2]
         self.curve_canvas_update = signals[3]
         self.progress_bar_max_update = signals[4]
+        self.sourcePos_label_update = signals[5]
         self.__calculating = False
         self.__frameRate = 60
         self.engine = engine
         self.__drawer = LensedImageLightCurveComposite(self.image_canvas_update,self.curve_canvas_update)
-
+        self.parameters = None
 
     def updateParameters(self,params):
+        if self.parameters:
+            params.setTime(self .parameters.time)
+            params.quasar.setPos(self.parameters.quasar.observedPosition)
         self.parameters = params
 
     def run(self):
-        self.progress_label_update.emit("Calculating. Please Wait.")
+        self.progress_label_update.emit("Ray-Tracing. Please Wait.")
         self.engine.updateParameters(self.parameters)
         self.__calculating = True
         interval = 1/self.__frameRate
@@ -84,27 +87,34 @@ class SimThread(QtCore.QThread):
             timer = time.clock()
             pixels = self.engine.getFrame()
             img = self.__drawer.draw([self.parameters,pixels],[len(pixels)])
-            self.engine.incrementTime(self.parameters.dt)
+            self.sourcePos_label_update.emit(str(self.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
+            self.parameters.incrementTime(self.parameters.dt)
             deltaT = time.clock() - timer
             if deltaT < interval:
                 time.sleep(interval-deltaT)
 
 
     def pause(self):
+        self.progress_label_update.emit("Paused.")
         self.__calculating = False
 
     def restart(self):
+        self.progress_label_update.emit("Restarted.")
         self.__calculating = False
-        self.engine.setTime(0)
+        self.parameters.setTime(0)
         pixels = self.engine.getFrame()
         frame = self.__drawer.draw([self.parameters,pixels],[len(pixels)])
+        self.sourcePos_label_update.emit(str(self.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
         self.__drawer.reset()
 
     def visualize(self,params):
+        self.progress_label_update.emit("Ray-Tracing. Please Wait.")
         drawer = DataVisualizerDrawer(self.image_canvas_update)
         self.engine.updateParameters(params)
+        self.progress_label_update.emit("Calculating Magnification Coefficients. Please Wait.")
         pixels = self.engine.visualize()
         frame = drawer.draw([pixels])
+        self.progress_label_update.emit("Done.")
 
     def bin_test(self):
         binszs = np.arange(7000,65000,100)
@@ -112,7 +122,6 @@ class SimThread(QtCore.QThread):
         prevRunner = self.run
         self.progress_label_update.emit("Calculating Various Bin Sizes.")
         self.progress_bar_max_update.emit(len(binszs))
-        # self.__calculating = True
         def runner():
             self.engine.gridTest(binszs, reps,self.curve_canvas_update,self.progress_bar_update)
             # self.__calculating = False

@@ -195,11 +195,24 @@ public:
 		int hypot2 = rx*rx+ry*ry;
 		vector<Pixel> ret;
 		vector<Pixel> tmp = data[cx][cy].queryNode(x,y,r);
+		ret.insert(ret.end(),tmp.begin(),tmp.end());
+		for (size_t i=1; i <= rx; i++) {
+				tmp = data[cx+i][cy].queryNode(x,y,r);
+				ret.insert(ret.end(),tmp.begin(),tmp.end());
+				tmp = data[cx-i][cy].queryNode(x,y,r);
+				ret.insert(ret.end(),tmp.begin(),tmp.end());
+		}
+		for (size_t i=1; i <= ry; i++) {
+				tmp = data[cx][cy+i].queryNode(x,y,r);
+				ret.insert(ret.end(),tmp.begin(),tmp.end());
+				tmp = data[cx][cy-i].queryNode(x,y,r);
+				ret.insert(ret.end(),tmp.begin(),tmp.end());
+		}
 		// ret.insert(ret.end\\(),tmp.begn(),tmp.end());
-		for (size_t i = 0; i <= rx; ++i) // Possible indexing issue here?
+		for (size_t i = 1; i <= rx; ++i) // Possible indexing issue here?
 		{
 			int ryLow = ceil(sqrt(hypot2 - i*i))+1;
-			for (size_t j = 0; j <= ryLow;++j) //Improvement by using symmetry possible
+			for (size_t j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
 			{
 				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r)
 				{

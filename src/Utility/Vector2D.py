@@ -1,6 +1,6 @@
 from astropy import units as u
 import math
-
+from math import log10, floor
 class Vector2D(object): #TODO: Make compatable with astropy units package
 	"""Simple 2-dimensional ordered pair with an x and y coordinate. Not recommended for heavy calculations."""
 	def __init__(self,x,y,unit = None):
@@ -45,6 +45,10 @@ class Vector2D(object): #TODO: Make compatable with astropy units package
 
 	def unitless(self):
 		return Vector2D(self.x,self.y)
+
+	@property
+	def orthogonal(self):
+		return Vector2D(self.y,self.x,self.unit)
 
 	def angle():
 		return math.atan2(self.y,self.x)
@@ -100,12 +104,18 @@ class Vector2D(object): #TODO: Make compatable with astropy units package
 	def __neq__(self,other):
 		return not self.__eq__(other)
 
+	def __round_to_n(self, x,n = 6):
+		if x == 0.0:
+			return 0
+		else:
+			return round(float(x), -int(floor(log10(abs(float(x))))) + (n - 1))
+
 	def __str__(self):
 		"Pretty print"
 		if self.unit != None:
-			return "<"+str(self.x)+","+str(self.y)+" " +self.unit + ">"
+			return "("+str(self.__round_to_n(self.x))+","+str(self.__round_to_n(self.y))+" " +self.unit + ")"
 		else:
-			return "<"+str(self.x)+","+str(self.y)+">"
+			return "("+str(self.__round_to_n(self.x))+","+str(self.__round_to_n(self.y))+")"
 
 
 

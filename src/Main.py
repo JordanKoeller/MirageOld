@@ -22,12 +22,14 @@ from Graphics import DynamicCanvas
 import pyqtgraph as pg
 from Main import FileManager
 from Engine_Grid import Engine_Grid
-# from Engine_Quadtree import Engine_Quadtree
 from Engine_KDTree import Engine_KDTree
+import sys
+
 
 class GUIManager(QtWidgets.QMainWindow):
     progress_bar_update = QtCore.pyqtSignal(int)
     progress_label_update = QtCore.pyqtSignal(str)
+    sourcePos_label_update = QtCore.pyqtSignal(str)
     image_canvas_update = QtCore.pyqtSignal(object)
     curve_canvas_update = QtCore.pyqtSignal(object,object)
     progress_bar_max_update = QtCore.pyqtSignal(int)
@@ -36,7 +38,7 @@ class GUIManager(QtWidgets.QMainWindow):
         super(GUIManager, self).__init__(parent)
         uic.loadUi('Resources/GUI/gui.ui', self)
         signals = self.makeSignals()
-        self.simThread = SimThread(Engine_KDTree(),signals)
+        self.simThread = SimThread(Engine_Grid(),signals)
         self.fileManager = FileManager(signals)
         self.setupUi()
         self.setupSignals()
@@ -49,9 +51,10 @@ class GUIManager(QtWidgets.QMainWindow):
         self.progress_bar_update.connect(self.progress_bar_slot)
         self.progress_bar_max_update.connect(self.progress_bar_max_slot)
         self.progress_label_update.connect(self.progress_label_slot)
+        self.sourcePos_label_update.connect(self.sourcePos_label_slot)
 
     def makeSignals(self):
-        return [self.progress_bar_update,self.progress_label_update,self.image_canvas_update,self.curve_canvas_update,self.progress_bar_max_update]
+        return [self.progress_bar_update,self.progress_label_update,self.image_canvas_update,self.curve_canvas_update,self.progress_bar_max_update, self.sourcePos_label_update]
 
     def setupUi(self):
         """
@@ -63,15 +66,16 @@ class GUIManager(QtWidgets.QMainWindow):
         self.displayQuasar.clicked.connect(self.drawQuasarHelper)
         self.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
         self.progressBar.setValue(0)
-        self.lightCurveStartButton.clicked.connect(self.calcLightCurve)
+        # self.lightCurveStartButton.clicked.connect(self.calcLightCurve)
         self.pauseButton.clicked.connect(self.simThread.pause)
         self.resetButton.clicked.connect(self.restart)
         self.load_setup.triggered.connect(self.loadParams)
         self.save_setup.triggered.connect(self.saveParams)
+        self.shutdown.triggered.connect(sys.exit)
         self.record_button.triggered.connect(self.record)
         self.visualizeDataButton.clicked.connect(self.visualizeData)
         self.developerExportButton.clicked.connect(self.saveVisualization)
-        self.binSizeTestButton.clicked.connect(self.simThread.bin_test)
+        # self.binSizeTestButton.clicked.connect(self.simThread.bin_test)
         filler_img = QtGui.QImage(2000,2000, QtGui.QImage.Format_Indexed8)
         filler_img.setColorTable([QtGui.qRgb(0,0,0)])
         filler_img.fill(0)
@@ -103,27 +107,32 @@ class GUIManager(QtWidgets.QMainWindow):
         Stores them in instances of a Quasar class, Galaxy class, and Configs class.
         Returns the instances in that order as a tuple.
         """
-        qVelocity = self.__vector_from_qstring(self.qVelocity.text()).setUnit('arcsec').to('rad')
-        qPosition = self.__vector_from_qstring(self.qPosition.text()).setUnit('arcsec').to('rad')
-        qRadius = u.Quantity(float(self.qRadius.text()),'arcsec')
-        qRedshift = float(self.qRedshift.text())
+        try:
+            qVelocity = self.__vector_from_qstring(self.qVelocity.text()).setUnit('arcsec').to('rad')
+            qPosition = self.__vector_from_qstring(self.qPosition.text()).setUnit('arcsec').to('rad')
+            qRadius = u.Quantity(float(self.qRadius.text()),'arcsec')
+            qRedshift = float(self.qRedshift.text())
 
-        gRedshift = float(self.gRedshift.text())
-        gVelDispersion = u.Quantity(float(self.gVelDispersion.text()),'km/s')
-        gNumStars = int(self.gNumStars.text())
-        gShearMag = float(self.gShearMag.text())
-        gShearAngle = u.Quantity(float(self.gShearAngle.text()),'degree')
+            gRedshift = float(self.gRedshift.text())
+            gVelDispersion = u.Quantity(float(self.gVelDispersion.text()),'km/s')
+            gNumStars = int(self.gNumStars.text())
+            gShearMag = float(self.gShearMag.text())
+            gShearAngle = u.Quantity(float(self.gShearAngle.text()),'degree')
 
-        displayCenter = self.__vector_from_qstring(self.gCenter.text()).setUnit('arcsec').to('rad')
-        dTheta = u.Quantity(float(self.scaleInput.text()),'arcsec').to('rad')
-        canvasDim = int(self.dimensionInput.text())
-        displayQuasar = self.displayQuasar.isChecked()
-        displayGalaxy = self.displayGalaxy.isChecked()
+            displayCenter = self.__vector_from_qstring(self.gCenter.text()).setUnit('arcsec').to('rad')
+            dTheta = u.Quantity(float(self.scaleInput.text()),'arcsec').to('rad')
+            canvasDim = int(self.dimensionInput.text())
+            displayQuasar = self.displayQuasar.isChecked()
+            displayGalaxy = self.displayGalaxy.isChecked()
 
-        quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity)
-        galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center = displayCenter)
-        params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
-        return params
+            quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity)
+            galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center = displayCenter)
+            params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
+            return params
+        except ValueError:
+            self.progress_label_slot("Error. Input could not be parsed to numbers.")
+            return None
+
 
 
     def drawQuasarHelper(self):
@@ -144,6 +153,8 @@ class GUIManager(QtWidgets.QMainWindow):
         Called by default when the "Play" button is presssed.
         """
         parameters = self.makeParameters()
+        if parameters is None:
+            return
         self.simThread.updateParameters(parameters)
         self.simThread.start()
 
@@ -192,8 +203,6 @@ class GUIManager(QtWidgets.QMainWindow):
         self.dimensionInput.setText(str(parameters.canvasDim))
         self.displayQuasar.setChecked(parameters.showQuasar)
         self.displayGalaxy.setChecked(parameters.showGalaxy)
-        # self.enableMicrolensingBox.setChecked(parameters.microlensing)
-        # self.autoConfigCheckBox.setChecked(parameters.autoConfigure)
 
 
 
@@ -215,10 +224,12 @@ class GUIManager(QtWidgets.QMainWindow):
     def progress_label_slot(self,text):
         self.progressLabel.setText(text)
 
+    def sourcePos_label_slot(self,text):
+        self.sourcePosLabel.setText(text)
+
 
 
 if __name__ == "__main__":
-    import sys
     import os
     print("Process ID = "+str(os.getpid()))
     app = QtWidgets.QApplication(sys.argv)

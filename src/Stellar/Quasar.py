@@ -4,7 +4,6 @@ from Utility import Vector2D
 from Utility.Vector2D import zeroVector
 from astropy import constants as const
 import random as rand
-from matplotlib.patches import Circle
 import math
 import time
 from Stellar.Drawable import Drawable
@@ -35,7 +34,7 @@ class Quasar(Drawable,Cosmic):
 
 	def draw(self, img, parameters):
 		begin = time.clock()
-		center = (self.observedPosition)/parameters.dTheta.value
+		center = (self.observedPosition + parameters.galaxy.position)/parameters.dTheta.value
 		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
 		radius = int(self.radius.value/parameters.dTheta.value)
 		rSquared = radius * radius
@@ -71,13 +70,18 @@ class Quasar(Drawable,Cosmic):
 	def setTime(self, t):
 		self.__observedPosition = self._Drawable__position + (self.velocity * t)
 
+	def incrementTime(self,dt):
+		self.__observedPosition = self.__observedPosition + self.velocity * dt
+
 	def __str__(self):
 		return "QUASAR:\n" + self.cosmicString() + "\n" + self.drawableString() + "\nvelocity = " + str(self.velocity) + "\nradius = " + str(self.radius) + "\n\n"
 
 
-	def setPos(self,x,y):
-		self.__observedPosition = Vector2D(x,y)
-
+	def setPos(self,x,y = None):
+		if y == None:
+			self.__observedPosition = x
+		else:
+			self.__observedPosition = Vector2D(x,y)
 
 defaultQuasar = Quasar(redshift = 0.073,
 	position = Vector2D(-0.0003,0,"rad"),
