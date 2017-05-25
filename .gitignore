@@ -24,7 +24,6 @@ a.out
 *.jpg
 *.mp4
 *.png
-*.param
 
 # Distribution / packaging
 .Python
