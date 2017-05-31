@@ -8,3 +8,4 @@ from Drawer.CompositeDrawerFactory import LensedImageLightCurveComposite
 from Drawer.Drawer import PlotDrawer
 from Drawer.Drawer import ImageDrawer
 from Drawer.DataVisualizerDrawer import DataVisualizerDrawer
+from Drawer.ShapeDrawer import ShapeDrawer

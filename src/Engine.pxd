@@ -32,6 +32,6 @@ cdef class Engine:
 		__trueLuminosity
 
 	cdef ray_trace_gpu(self,use_GPU)
-	cpdef getMagnification(self)
+	cpdef getMagnification(self, pixelCount)
 	cdef cythonMakeLightCurve(self,mmin, mmax,resolution, progressBar, smoothing)
 	cpdef visualize(self)

@@ -50,7 +50,12 @@ class Vector2D(object): #TODO: Make compatable with astropy units package
 	def orthogonal(self):
 		return Vector2D(self.y,self.x,self.unit)
 
-	def angle():
+	@property
+	def asTuple(self):
+		return (self.x,self.y)
+
+	@property
+	def angle(self):
 		return math.atan2(self.y,self.x)
 	def __add__(self, that):
 		"Returns a new vector that is the sum of self and the passed in vector."

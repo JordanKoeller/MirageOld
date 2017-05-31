@@ -28,17 +28,30 @@ from libcpp.pair cimport pair
 from libcpp cimport bool
 
 cdef class Engine:
+	"""
+		Abstract class for storing and calculating an arbitrarily complex lensing system.
+
+		Contains heavily optimized code, written in cython and utilizing OpenCL for further optimization by performing calculations on the 
+		graphics processing unit when hardware permits.
+	"""
 
 	def __init__(self, parameter=Parameters()):
 		self.__parameters = parameter
 		self.__preCalculating = False
-		self.__trueLuminosity = math.pi * (self.__parameters.quasar.radius.value / self.__parameters.dTheta.value) ** 2
+		self.__trueLuminosity = math.pi * ((self.__parameters.quasar.radius.to('rad') / self.__parameters.dTheta.to('rad')) ** 2)
 
 	@property
 	def parameters(self):
 		return self.__parameters
 
 	def ray_trace(self, use_GPU=False):
+		"""Python-callable wrapper for ray_trace_gpu.
+			Reverse-ray-traces possible paths a photon could take from the observer to source plane.
+			Returns a tuple of numpy arrays, the first of which contains the x and y-coordinates of each path's intersection with
+			the source plane, respectively.
+
+			Performs calculations with OpenCL acceleration. If the computer's graphics processor supports 64-bit floating-point arithmetic,
+			the graphics processor may be used. Otherwise, will perform calculations on the CPU."""
 		return self.ray_trace_gpu(False)
 
 
@@ -103,17 +116,28 @@ cdef class Engine:
 
 	@property
 	def data(self):
+		"""
+		Read-only access to the spatial data structure used to store pixel locations where they intersect the source plane."""
 		return self.__data
 
-	cpdef getMagnification(self):
-		cdef a = np.float64 (self.__trueLuminosity)
-		cdef b = np.float64 (self.__tree.query_point_count(self.__parameters.quasar.observedPosition.x, self.__parameters.quasar.observedPosition.y, self.__parameters.quasar.radius.value))
-		return b / a
+	cpdef getMagnification(self, pixelCount):
+		"""
+		Returns the magnification coefficient of the quasar seen by the observer, after lensing effects have been accounted for."""
+		a = int(math.pi * (self.parameters.quasar.radius.value/self.parameters.dTheta.value)**2)
+		if pixelCount:
+			return pixelCount/a
+		else:
+			b = np.float64 (self.__tree.query_point_count(self.__parameters.quasar.observedPosition.x, self.__parameters.quasar.observedPosition.y, self.__parameters.quasar.radius.value))
+			return b / a
 
 	def reconfigure(self):
+		"""
+		Virtual method to be implemented by subclasses. Provides an interface for configuring the engine by calculating and storing ray-tracing data.
+		Automatically called upon calling update parameters, when a new set of parameters warranting a recalculation of the system is passed in."""
 		pass
 		
 	cdef cythonMakeLightCurve(self, mmin, mmax, resolution, progressBar, smoothing): #Needs updateing
+		"""Deprecatedf"""
 		if not self.__tree:
 			self.reconfigure()
 		begin = time.clock()
@@ -149,6 +173,10 @@ cdef class Engine:
 			return (xVals, yAxis)
 
 	cpdef visualize(self):
+		"""
+		Calcualtes and returns an image of the system's magnification map for a point source. 
+
+		This calculation is performed by correlating the density of rays on the source plane to a magnification coefficient at that location."""
 		cdef np.ndarray[np.float64_t, ndim=2] x
 		cdef np.ndarray[np.float64_t, ndim=2] y
 		x,y = self.ray_trace(use_GPU=True)
@@ -173,10 +201,14 @@ cdef class Engine:
 		return img
 
 	def makeLightCurve(self, mmin, mmax, resolution=200, canvas=None, progressBar=None, smoothing=True):
+		"""Deprecated"""
 		return self.cythonMakeLightCurve(mmin, mmax, resolution, progressBar, smoothing)
 
 
 	def updateParameters(self, parameters):
+		"""Provides an interface for updating the parameters describing the lensed system to be modeled.
+
+		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
 		if self.__parameters is None:
 			self.__parameters = parameters
 			if self.__parameters.galaxy.percentStars > 0:

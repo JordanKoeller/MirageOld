@@ -8,11 +8,17 @@ from Calculator import ImageFinder
 from Utility import Vector2D
 from astropy import constants as const
 from Drawer cimport ImageDrawer
+from ShapeDrawer cimport ShapeDrawer
+import math
+from astropy import constants as const
+from scipy.cluster.vq import vq, kmeans, whiten
+
 
 cdef class LensedImageDrawer(ImageDrawer):
 
 	def __init__(self,signal):
 		ImageDrawer.__init__(self,signal)
+		self.__shapeDrawer = ShapeDrawer(signal)
 
 	
 	cpdef draw(self,object args):
@@ -31,6 +37,8 @@ cdef class LensedImageDrawer(ImageDrawer):
 			with nogil:
 				for pixel in range(0,end):
 					canvas[pixels[pixel,0],pixels[pixel,1]] = 1
+		# self.drawCriticalRadius(canvas,parameters)
+		# self.drawCritLines(pixels,parameters,canvas)
 		return self.drawImage(canvas,None)
 		
 		
@@ -42,35 +50,36 @@ cdef class LensedImageDrawer(ImageDrawer):
 			for j in range(-1,1):
 				canvas[i+xInt.x+ int(parameters.canvasDim/2)][int(parameters.canvasDim/2) - (j+xInt.y)] = 3
 
-	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): #***************NOT OPTIMIZED****************
+	def drawCriticalRadius(self,canvas,parameters):
+		nu = 2*(parameters.galaxy.shearAngle.to('rad').value - parameters.quasar.position.angle)
+		b = (4*math.pi*(parameters.galaxy.velocityDispersion/const.c)**2)*parameters.dLS/parameters.quasar.angDiamDist
+		beta = parameters.quasar.position.magnitude()
+		r = (b - beta)/(1+parameters.galaxy.shearMag*math.cos(nu))
+		r /= parameters.dTheta.value
+		self.__shapeDrawer.drawCircle(int(parameters.canvasDim/2),int(parameters.canvasDim/2),r,canvas)
+
+	def drawCritLines(self,pixels,parameters,canvas):
+		pixels = whiten(pixels)
+		imgs = kmeans(pixels,4)
+		yInt = parameters.canvasDim/2
+		yAx = parameters.canvasDim/2
+		for i in imgs[0]:
+			m = -i[0]/i[1]
+			self.__shapeDrawer.drawLine(int(parameters.canvasDim),m,0,canvas)
+		# nu = math.tan(2*parameters.galaxy.shearAngle.to('rad').value)
+		# beta = parameters.quasar.position.to('rad').orthogonal
+		# radicand = math.sqrt(4+2*beta.y*nu/beta.x + nu*nu*(4+beta.y*beta.y/beta.x/beta.x))/2/nu
+		# # print(radicand)
+		# slope1 = beta.y*(nu-2)/(2*nu*beta.x) + radicand
+		# slope2 = beta.y*(nu-2)/(2*nu*beta.x) - radicand
+		# self.__shapeDrawer.drawLine(int(yInt),slope1,int(yAx),canvas)
+		# self.__shapeDrawer.drawLine(int(yInt),slope2,int(yAx),canvas)
+
+
+
+
+	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): 
 		cdef int x0 = parameters.galaxy.center.x + parameters.canvasDim/2
 		cdef int y0 = parameters.galaxy.center.y + parameters.canvasDim/2
 		cdef int radius = parameters.einsteinRadius/parameters.dTheta.value
-		cdef int x = abs(radius)
-		cdef int y = 0
-		cdef int err = 0
-		cdef int canvasDim = parameters.canvasDim
-		with nogil:
-			while x >= y:
-				if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:
-						canvas[x0 + x, y0 + y] = 3
-				if x0 + y > 0 and y0 + x > 0 and x0 + y < canvasDim and y0 + x < canvasDim:
-						canvas[x0 + y, y0 + x] = 3
-				if x0 - y > 0 and y0 + x > 0 and x0 - y < canvasDim and y0 + x < canvasDim:
-						canvas[x0 - y, y0 + x] = 3
-				if x0 - x > 0 and y0 + y > 0 and x0 - x < canvasDim and y0 + y < canvasDim:
-						canvas[x0 - x, y0 + y] = 3
-				if x0 - x > 0 and y0 - y > 0 and x0 - x < canvasDim and y0 - y < canvasDim:
-						canvas[x0 - x, y0 - y] = 3
-				if x0 - y > 0 and y0 - x > 0 and x0 - y < canvasDim and y0 - x < canvasDim:
-						canvas[x0 - y, y0 - x] = 3
-				if x0 + y > 0 and y0 - x > 0 and x0 + y < canvasDim and y0 - x < canvasDim:
-						canvas[x0 + y, y0 - x] = 3
-				if x0 + x > 0 and y0 - y > 0 and x0 + x < canvasDim and y0 - y < canvasDim:
-						canvas[x0 + x, y0 - y] = 3
-				if err <= 0:
-					y += 1
-					err += 2*y + 1
-				if err > 0:
-					x -= 1
-					err -= 2*x + 1
+		self.__drawCircle(x0,y0,radius, canvas)

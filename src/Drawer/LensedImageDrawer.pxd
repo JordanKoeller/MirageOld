@@ -1,6 +1,8 @@
 from Drawer cimport ImageDrawer
 cimport numpy as np 
+from ShapeDrawer cimport ShapeDrawer
 cdef class LensedImageDrawer(ImageDrawer):
+	cdef ShapeDrawer __shapeDrawer
 	# cdef signal
 	# cdef object pixmap
 	# cdef object drawImage(self,np.ndarray[np.int8_t, ndim=2] pixels, object pixmap=*)

@@ -2,6 +2,7 @@ import pickle
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 import imageio
 import numpy as np
+from astropy.io import fits 
 
 class IOThread(QtCore.QThread):
 	"""docstring for IOThread"""
@@ -38,11 +39,13 @@ class FileManager(object):
 		self.filename = self.__makeFile(self.paramType)
 		with open(self.filename,"wb+") as file:
 			pickle.dump(parameters,file)
+		self.progress_label_update.emit("Setup Saved.")
 	def readParams(self):
 		self.filename = self.__getFile(self.paramType)
 		if self.filename:
 			with open(self.filename,"rb") as file:
 				return pickle.load(file)
+		self.progress_label_update.emit("Setup Loaded.")
 
 	def __asNPArray(self,im):
 		im = im.convertToFormat(4)
@@ -82,8 +85,16 @@ class FileManager(object):
 				self.progress_label_update.emit("Rendering. Please Wait.")
 				self.IOThread.start()
 			self.recording = False
+		self.progress_label_update.emit("Video Saved.")
 
 	def save_still(self,img):
 		self.filename = self.__makeFile(self.imgtype)
 		if self.filename:
 			img.pixmap().save(self.filename)
+		self.progress_label_update.emit("Image Saved.")
+
+	def save_fitsFile(self,data):
+		self.filename = self.__makeFile('Fits (*.fits)')
+		if self.filename:
+			fits.writeto(self.filename,data)
+		self.progress_label_update.emit("FITS File Saved.")

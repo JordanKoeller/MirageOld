@@ -3,6 +3,7 @@ from pyqtgraph import QtCore, QtGui
 cimport numpy as np 
 import numpy as np 
 from astropy.io import fits
+
 cdef class DataVisualizerDrawer(ImageDrawer):
 
 	def __init__(self,signal):
@@ -13,10 +14,6 @@ cdef class DataVisualizerDrawer(ImageDrawer):
 
 	cpdef draw(self,object args):
 		cdef np.ndarray[np.float64_t, ndim=2] data = np.array(args[0], dtype=np.float64)
-		# fits.writeto('test.fits',data)
-		# print("Fits made")
-		# print("Fits made")
-		# data = np.log(data)
 		cdef double maxx = data.max()
 		data *= 255.0/maxx
 		formattedData = np.array(data,dtype=np.uint8)

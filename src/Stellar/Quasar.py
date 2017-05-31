@@ -38,17 +38,32 @@ class Quasar(Drawable,Cosmic):
 		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
 		radius = int(self.radius.value/parameters.dTheta.value)
 		rSquared = radius * radius
+		count = 0
 		for x in range(0,radius+1):
 			for y in range(0,radius+1):
 				if x*x + y*y <= rSquared:
 					if center.x+x > 0 and center.y+y > 0 and center.x+x < parameters.canvasDim and center.y+y < parameters.canvasDim:
 						img[center.x+x,center.y+y] = self._Drawable__colorKey
+						count += 1
 					if center.x+x > 0 and center.y-y > 0 and center.x+x < parameters.canvasDim and center.y-y < parameters.canvasDim:
 						img[center.x+x,center.y-y] = self._Drawable__colorKey
+						count += 1
 					if center.x-x > 0 and center.y+y > 0 and center.x-x < parameters.canvasDim and center.y+y < parameters.canvasDim:
 						img[center.x-x,center.y+y] = self._Drawable__colorKey
+						count += 1
 					if center.x-x > 0 and center.y-y > 0 and center.x-x < parameters.canvasDim and center.y-y < parameters.canvasDim:
 						img[center.x-x,center.y-y] = self._Drawable__colorKey
+						count += 1
+
+	def circularPath(self):
+		vel = self.velocity.magnitude()
+		x,y = self.observedPosition.asTuple
+		tangent = 0
+		try:
+			tangent = -x/y
+		except ZeroDivisionError as e:
+			tangent = -0
+		self.__velocity = Vector2D(1,tangent).normalized()*self.velocity.magnitude()
 
 	def pixelRadius(self,dTheta):
 		return (self.__radius.to('rad')/dTheta).value

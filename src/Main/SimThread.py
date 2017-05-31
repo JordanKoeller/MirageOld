@@ -68,6 +68,7 @@ class SimThread(QtCore.QThread):
         self.engine = engine
         self.__drawer = LensedImageLightCurveComposite(self.image_canvas_update,self.curve_canvas_update)
         self.parameters = None
+        self.circularPath = False
 
     def updateParameters(self,params):
         if self.parameters:
@@ -86,8 +87,11 @@ class SimThread(QtCore.QThread):
             counter += 1
             timer = time.clock()
             pixels = self.engine.getFrame()
-            img = self.__drawer.draw([self.parameters,pixels],[len(pixels)])
+            mag = self.engine.getMagnification(len(pixels))
+            img = self.__drawer.draw([self.parameters,pixels],[mag])
             self.sourcePos_label_update.emit(str(self.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
+            # if self.circularPath:
+            self.parameters.quasar.circularPath()
             self.parameters.incrementTime(self.parameters.dt)
             deltaT = time.clock() - timer
             if deltaT < interval:
@@ -103,7 +107,8 @@ class SimThread(QtCore.QThread):
         self.__calculating = False
         self.parameters.setTime(0)
         pixels = self.engine.getFrame()
-        frame = self.__drawer.draw([self.parameters,pixels],[len(pixels)])
+        mag = self.engine.getMagnification(len(pixels))
+        frame = self.__drawer.draw([self.parameters,pixels],[mag])
         self.sourcePos_label_update.emit(str(self.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
         self.__drawer.reset()
 
@@ -115,6 +120,7 @@ class SimThread(QtCore.QThread):
         pixels = self.engine.visualize()
         frame = drawer.draw([pixels])
         self.progress_label_update.emit("Done.")
+        return pixels
 
     def bin_test(self):
         binszs = np.arange(7000,65000,100)

@@ -1026,7 +1026,7 @@ struct __pyx_obj_13Engine_KDTree_Engine_KDTree {
 
 struct __pyx_vtabstruct_6Engine_Engine {
   PyObject *(*ray_trace_gpu)(struct __pyx_obj_6Engine_Engine *, PyObject *);
-  PyObject *(*getMagnification)(struct __pyx_obj_6Engine_Engine *, int __pyx_skip_dispatch);
+  PyObject *(*getMagnification)(struct __pyx_obj_6Engine_Engine *, PyObject *, int __pyx_skip_dispatch);
   PyObject *(*cythonMakeLightCurve)(struct __pyx_obj_6Engine_Engine *, PyObject *, PyObject *, PyObject *, PyObject *, PyObject *);
   PyObject *(*visualize)(struct __pyx_obj_6Engine_Engine *, int __pyx_skip_dispatch);
 };
