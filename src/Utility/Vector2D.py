@@ -67,11 +67,10 @@ class Vector2D(object): #TODO: Make compatable with astropy units package
 
 	def __mul__(self, that):
 		"Returns the dot product of two vectors."
-		return Vector2D(self.x*that.x,self.y*that.y)
-
-	def __mul__(self, scalar):
-		"Returns a new vector after multiplying self by a scalar."
-		return Vector2D(self.x*scalar,self.y*scalar)
+		if isinstance(that,float) or isinstance(that, int):
+			return Vector2D(self.x*that,self.y*that)
+		else:
+			return Vector2D(self.x*that.x,self.y*that.y)
 
 	def __neg__(self):
 		"Returns a new vector in the opposite direction of self."

@@ -6,7 +6,7 @@ from libcpp cimport bool
 
 # STUFF = "Hi"
 
-cdef extern from "SpatialTree_new.h":
+cdef extern from "SpatialTree_new.hpp":
 	cdef cppclass Pixel:
 		int x
 		int y

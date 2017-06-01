@@ -12,15 +12,17 @@
 #
 ##################################################
 
-import numpy as np
-import time
-import pdb
 import logging
+import pdb
+import time
+
+import numpy as np
+
 
 log = logging.getLogger('imf')
 
 class IMF(object):
-    def __init__(self, massLimits=np.array([0.1,150]), multiplicity=None):
+    def __init__(self, massLimits=np.array([0.1, 150]), multiplicity=None):
         """
         The IMF base class. The multiplicity implementation is here.
         """
@@ -65,7 +67,7 @@ class IMF(object):
         """
 
         if (self._mass_limits[-1] > totalMass):
-            log.info('sample_imf: Setting maximum allowed mass to %d' %
+            log.info('sample_imf: Setting maximum allowed mass to %d' % 
                       (totalMass))
             self._mass_limits[-1] = totalMass
 
@@ -101,7 +103,7 @@ class IMF(object):
                 
             # Dealing with multiplicity
             if self._multi_props != None:
-                #compMasses = [[] for newMass in newMasses]
+                # compMasses = [[] for newMass in newMasses]
                 compMasses = np.empty((len(newMasses),), dtype=np.object)
                 compMasses.fill([])
                 
@@ -118,7 +120,7 @@ class IMF(object):
                 new = True
                 if new:
                     # Function to calculate multiple systems more efficiently
-                    #t1 = time.time()
+                    # t1 = time.time()
                     compMasses, newSystemMasses, newIsMultiple = self.calc_multi(newMasses, compMasses,
                                                                                  newSystemMasses, newIsMultiple,
                                                                                  CSF, MF)
@@ -126,8 +128,8 @@ class IMF(object):
                     newTotalMassTally = newSystemMasses.sum()
                     isMultiple = np.append(isMultiple, newIsMultiple)
                     systemMasses = np.append(systemMasses, newSystemMasses)
-                    #t2 = time.time()
-                    #print 'Generate multiples: {0}'.format(t2 - t1)
+                    # t2 = time.time()
+                    # print 'Generate multiples: {0}'.format(t2 - t1)
                 #------Previous code------#
                 old = False
                 if old:
@@ -136,7 +138,7 @@ class IMF(object):
                     for ii in range(len(newMasses)):
                         if newIsMultiple[ii]:
                             # determine number of companions
-                            n_comp = 1 + np.random.poisson((CSF[ii]/MF[ii]) - 1)
+                            n_comp = 1 + np.random.poisson((CSF[ii] / MF[ii]) - 1)
 
                             # Determine the mass ratios of the companions
                             q_values = self._multi_props.random_q(np.random.rand(n_comp))
@@ -166,7 +168,7 @@ class IMF(object):
             masses = np.append(masses, newMasses)
             
             if (loopCnt >= 0):
-                log.info('sample_imf: Loop %d added %.2e Msun to previous total of %.2e Msun' %
+                log.info('sample_imf: Loop %d added %.2e Msun to previous total of %.2e Msun' % 
                          (loopCnt, newTotalMassTally, totalMassTally))
 
             totalMassTally += newTotalMassTally
@@ -183,12 +185,12 @@ class IMF(object):
         # total mass.
         idx = np.abs(massCumSum - totalMass).argmin()
 
-        masses = masses[:idx+1]
+        masses = masses[:idx + 1]
 
         if self._multi_props:
-            systemMasses = systemMasses[:idx+1]
-            isMultiple = isMultiple[:idx+1]
-            compMasses = compMasses[:idx+1]
+            systemMasses = systemMasses[:idx + 1]
+            isMultiple = isMultiple[:idx + 1]
+            compMasses = compMasses[:idx + 1]
         else:
             isMultiple = np.zeros(len(masses), dtype=bool)
             systemMasses = masses
@@ -268,10 +270,10 @@ class IMF_broken_powerlaw(IMF):
         if len(mass_limits) != len(powers) + 1:
             msg = 'Incorrect specification of multi-part powerlaw.\n'
             msg += '    len(massLimts) != len(powers)+1\n'
-            msg += '    len(massLimits) = \n' + len(massLimits)
+            msg += '    len(massLimits) = \n' + len(mass_limits)
             msg += '    len(powers) = \n' + len(powers)
 
-            raise RuntimeException(msg)
+#             raise RuntimeException(msg)
 
         self._mass_limits = np.atleast_1d(mass_limits)
         self._m_limits_low = mass_limits[0:-1]
@@ -291,10 +293,10 @@ class IMF_broken_powerlaw(IMF):
         # First term is just 1.0
         # Subsequent terms are products of previous terms and then some.
         for i in range(1, nterms):
-            y = self._m_limits_low[i] ** self._powers[i-1]
+            y = self._m_limits_low[i] ** self._powers[i - 1]
             z = self._m_limits_low[i] ** self._powers[i]
 
-            coeffs[i] *= coeffs[i-1] * y / z
+            coeffs[i] *= coeffs[i - 1] * y / z
 
         self.nterms = nterms
         self.coeffs = coeffs
@@ -315,7 +317,7 @@ class IMF_broken_powerlaw(IMF):
         
         for i in range(len(xi)):
             tmp = gamma_closed(m[i], self._m_limits_low, self._m_limits_high)
-            tmp *= self.coeffs * m[i]**self.powers
+            tmp *= self.coeffs * m[i] ** self.powers
             y = tmp.sum()
             z = delta(m[i] - self._m_limits_high).prod()
             xi[i] = self.k * z * y
@@ -335,7 +337,7 @@ class IMF_broken_powerlaw(IMF):
         
         for i in range(len(mxi)):
             tmp = gamma_closed(m[i], self._m_limits_low, self._m_limits_high)
-            tmp *= self.coeffs * m[i]**(self.powers+1)
+            tmp *= self.coeffs * m[i] ** (self.powers + 1)
             y = tmp.sum()
             z = delta(m[i] - self._m_limits_high).prod()
             mxi[i] = self.k * z * y
@@ -399,14 +401,14 @@ class IMF_broken_powerlaw(IMF):
 
         for i in range(len(val)):
             t1 = theta_open(a[i] - self._m_limits_high) * self.coeffs
-            t2 = prim_power(self._m_limits_high, self._powers+1)
-            t3 = prim_power(self._m_limits_low, self._powers+1)
+            t2 = prim_power(self._m_limits_high, self._powers + 1)
+            t3 = prim_power(self._m_limits_low, self._powers + 1)
             y1 = (t1 * (t2 - t3)).sum()
             
             t1 = gamma_closed(a[i], self._m_limits_low, self._m_limits_high) 
             t1 *= self.coeffs
-            t2 = prim_power(a[i], self._powers+1)
-            t3 = prim_power(self._m_limits_low, self._powers+1)
+            t2 = prim_power(a[i], self._powers + 1)
+            t3 = prim_power(self._m_limits_low, self._powers + 1)
             y2 = (t1 * (t2 - t3)).sum()
 
             val[i] = self.k * (y1 + y2)
@@ -467,7 +469,7 @@ class IMF_broken_powerlaw(IMF):
         a = Mmin
         c = Mmax
         b = (c + a) / 2.0
-        while (((c/b)-(a/b)) > 0.00001):
+        while (((c / b) - (a / b)) > 0.00001):
             mb = self.int_mxi(Mmin, b) / self.int_xi(b, Mmax)
             if mb < Mcl:
                 a = b
@@ -496,7 +498,7 @@ class IMF_broken_powerlaw(IMF):
         t5 = theta_closed(left - self.norm_Mmax)
         t6 = self.int_xi(self.norm_Mmax, left)
 
-        return (t1 - t2*t3) - (t4 - t5*t6)
+        return (t1 - t2 * t3) - (t4 - t5 * t6)
 
     def int_mxi_cl(self, left, right):
         t1 = self.prim_mxi(right)
@@ -506,7 +508,7 @@ class IMF_broken_powerlaw(IMF):
         t5 = theta_closed(left - self.norm_Mmax)
         t6 = self.int_mxi(self.norm_Mmax, left)
 
-        return (t1 - t2*t3) - (t4 - t5*t6)
+        return (t1 - t2 * t3) - (t4 - t5 * t6)
 
     def dice_star_cl(self, r):
         """
@@ -521,8 +523,8 @@ class IMF_broken_powerlaw(IMF):
         z = np.ones(len(r), dtype=float)
 
         # Loop through the different parts of the power law.
-        for i in range(self.nterms): #-----For i = 1 --> n, where n is the number of intervals?
-            aux = x - self.lamda[i] #---Should this be i - 1?
+        for i in range(self.nterms):  #-----For i = 1 --> n, where n is the number of intervals?
+            aux = x - self.lamda[i]  #---Should this be i - 1?
             
             # Only continue for those entries that are in later segments
             idx = np.where(aux >= 0)[0]
@@ -536,14 +538,14 @@ class IMF_broken_powerlaw(IMF):
 
             t1 = aux_tmp / (self.coeffs[i] * self.k)
             t1 += prim_power(self._m_limits_low[i], self._powers[i])
-            y_i = gamma_closed(x_tmp, self.lamda[i], self.lamda[i+1])
+            y_i = gamma_closed(x_tmp, self.lamda[i], self.lamda[i + 1])
             y_i *= inv_prim_power(t1, self._powers[i])
 
             # Save results into the y array
             y[idx] += y_i
 
-            z *= delta(x - self.lamda[i+1]) # new version
-            #z *= delta(x - self.lamda[i])   # old version
+            z *= delta(x - self.lamda[i + 1])  # new version
+            # z *= delta(x - self.lamda[i])   # old version
 
         if returnFloat:
             return y[0] * z[0]
@@ -613,7 +615,7 @@ def prim_power(m, power):
         power = np.repeat(power, len(m))
 
     z = 1.0 + power
-    val = (m**z) / z
+    val = (m ** z) / z
         
     val[power == -1] = np.log(m[power == -1])
 
@@ -642,7 +644,7 @@ def inv_prim_power(x, power):
         pdb.set_trace()
     
     z = 1.0 + power
-    val = (z * x)**(1.0 / z)
+    val = (z * x) ** (1.0 / z)
 
     #--------------BUG CHECK---------------------#
     # This line doesn't make sense if x is an N-element array and
@@ -661,11 +663,11 @@ def log_normal(m, mean_logm, sigma_logm):
         (type(sigma_logm) == float)
 
     m = np.atleast_1d(m)
-    mean_logm = np.atleat_1d(mean_logm)
-    sigma_logm = np.atleat_1d(sigma_logm)
+    mean_logm = np.atleast_1d(mean_logm)
+    sigma_logm = np.atleast_1d(sigma_logm)
 
     z = np.log10(m) - mean_logm
-    val = np.exp(-z**2 / (2.0 * sigma_logm**2)) / m
+    val = np.exp(-z ** 2 / (2.0 * sigma_logm ** 2)) / m
     
     if returnFloat:
         return val[0]
@@ -677,8 +679,8 @@ def prim_log_normal(m, mean_logm, sigma_logm):
         (type(sigma_logm) == float)
 
     m = np.atleast_1d(m)
-    mean_logm = np.atleat_1d(mean_logm)
-    sigma_logm = np.atleat_1d(sigma_logm)
+    mean_logm = np.atleast_1d(mean_logm)
+    sigma_logm = np.atleast_1d(sigma_logm)
 
     mu = (np.log10(m) - mean_logm) / (1.4142135623731 * sigma_logm)
     val = 2.88586244942136 * sigma_logm * error(mu)
@@ -689,15 +691,15 @@ def prim_log_normal(m, mean_logm, sigma_logm):
         return val
 
 def inv_prim_log_normal(x, mean_logm, sigma_logm):
-    returnFloat = (type(m) == float) and (type(mean_logm) == float) and \
+    returnFloat = (type(x) == float) and (type(mean_logm) == float) and \
         (type(sigma_logm) == float)
 
-    m = np.atleast_1d(m)
-    mean_logm = np.atleat_1d(mean_logm)
-    sigma_logm = np.atleat_1d(sigma_logm)
+    m = np.atleast_1d(x)
+    mean_logm = np.atleast_1d(mean_logm)
+    sigma_logm = np.atleast_1d(sigma_logm)
     
     mu = inv_error(0.346516861952484 * x / sigma_logm)
-    val = 10.0**(1.4142135623731 * sigma_logm * mu + mean_logm)
+    val = 10.0 ** (1.4142135623731 * sigma_logm * mu + mean_logm)
     
     if returnFloat:
         return val[0]
@@ -705,15 +707,15 @@ def inv_prim_log_normal(x, mean_logm, sigma_logm):
         return val
 
 def mlog_normal(x, mean_logm, sigma_logm):
-    returnFloat = (type(m) == float) and (type(mean_logm) == float) and \
+    returnFloat = (type(x) == float) and (type(mean_logm) == float) and \
         (type(sigma_logm) == float)
 
-    m = np.atleast_1d(m)
-    mean_logm = np.atleat_1d(mean_logm)
-    sigma_logm = np.atleat_1d(sigma_logm)
+    m = np.atleast_1d(x)
+    mean_logm = np.atleast_1d(mean_logm)
+    sigma_logm = np.atleast_1d(sigma_logm)
 
     z = np.log10(m) - mean_logm
-    val = np.exp(-z**2 / (2.0 * sigma_logm**2))
+    val = np.exp(-z ** 2 / (2.0 * sigma_logm ** 2))
     
     if returnFloat:
         return val[0]
@@ -721,17 +723,17 @@ def mlog_normal(x, mean_logm, sigma_logm):
         return val
 
 def prim_mlog_normal(x, mean_logm, sigma_logm):
-    returnFloat = (type(m) == float) and (type(mean_logm) == float) and \
+    returnFloat = (type(x) == float) and (type(mean_logm) == float) and \
         (type(sigma_logm) == float)
 
-    m = np.atleast_1d(m)
-    mean_logm = np.atleat_1d(mean_logm)
-    sigma_logm = np.atleat_1d(sigma_logm)
+    m = np.atleast_1d(x)
+    mean_logm = np.atleast_1d(mean_logm)
+    sigma_logm = np.atleast_1d(sigma_logm)
 
-    eta = np.log10(m) - mean_logm - (sigma_logm**2 * 2.30258509299405)
+    eta = np.log10(m) - mean_logm - (sigma_logm ** 2 * 2.30258509299405)
     eta /= 1.4142135623731 * sigma_logm
 
-    t1 = (1.15129254649702 * sigma_logm**2) + mean_logm
+    t1 = (1.15129254649702 * sigma_logm ** 2) + mean_logm
 
     val = error(eta)
     val *= 2.88586244942136 * sigma_logm * np.exp(2.30258509299405 * t1)
@@ -798,25 +800,22 @@ def gamma_closed(m, left, right):
 
 
 def error(x):
-    x2 = x**2
+    x2 = x ** 2
     ax2 = 0.140012288686666 * x2
     
-    val = np.sqrt(1.0 - np.exp(-x2*(1.27323954473516+ax2)/(1+ax2)))
+    val = np.sqrt(1.0 - np.exp(-x2 * (1.27323954473516 + ax2) / (1 + ax2)))
 
-    if x >=0:
+    if x >= 0:
         return val
     else:
         return -val
 
 def inv_error(x):
-    x2 = x**2
+    x2 = x ** 2
     lnx2 = np.log(1.0 - x2)
     aux = 4.54688497944829 + (lnx2 / 2.0)
-    y = -aux + np.sqrt(aux**2 - (lnx2 / 0.140012288686666))
-    
-    val = np.sqrt(y)
-
-    if x>=0:
+    y = -aux + np.sqrt(aux ** 2 - (lnx2 / 0.140012288686666))
+    if x >= 0:
         return y
     else:
         return -y

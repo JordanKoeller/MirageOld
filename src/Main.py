@@ -1,28 +1,22 @@
 # -*- coding: utf-8 -*-
+import sys
+
+from PyQt5 import QtWidgets, QtCore, uic, QtGui
+from astropy import units as u
+
+from Calculator import Engine_Grid
+from Controllers import SimThread, FileManager
+from Models import Parameters
+from Models import Quasar, Galaxy
+from Utility import Vector2D
+import numpy as np
+
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.6
 #
 # WARNING! All changes made in this file will be lost!
-
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from Stellar import Galaxy
-from Stellar import Quasar
-import threading as par
-from Utility import Vector2D, zeroVector
-import time
-from astropy import units as u
-from Parameters import Parameters
-from Main import SimThread
-from Graphics import DynamicCanvas
-import pyqtgraph as pg
-from Main import FileManager
-from Engine_Grid import Engine_Grid
-from Engine_KDTree import Engine_KDTree
-import sys
-
-
 class GUIManager(QtWidgets.QMainWindow):
 	progress_bar_update = QtCore.pyqtSignal(int)
 	progress_label_update = QtCore.pyqtSignal(str)

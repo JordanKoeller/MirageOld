@@ -1,6 +1,4 @@
 from scipy import spatial as sp
-from Utility import Vector2D
-import time
 
 class WrappedTree(object):
 	"Spatial Tree map data structure. Based on the Scipy spatial tree algorithms."
