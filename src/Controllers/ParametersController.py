@@ -6,11 +6,13 @@ Created on May 31, 2017
 
 
 #Code associated with constructing/deconstructing an instance of a Parameters Class 
-from Controllers.GUIController import GUIController
+from PyQt5 import QtCore
+
+from Controllers import GUIController
+from Controllers.FileManagers import ParametersFileManager
 from Models import Galaxy
 from Models import Parameters
 from Models import Quasar
-from Utility import Vector2D
 import astropy.units as u
 
 
@@ -19,14 +21,23 @@ class ParametersController(GUIController):
     For Controlling user input to specify the parameters for the run
     '''
 
+    paramLabel_signal = QtCore.pyqtSignal(str)
+    paramSetter_signal = QtCore.pyqtSignal(object)
 
-    def __init__(self, params):
+    def __init__(self,view):
         '''
         Constructor
         '''
+        GUIController.__init__(self, view)
+        view.addSignals(paramLabel = self.paramLabel_signal, paramSetter = self.paramSetter_signal)
+        self.view.load_setup.triggered.connect(self.loadParams)
+        self.view.save_setup.triggered.connect(self.saveParams)
+        self.view.signals['paramSetter'].connect(self.bindFields)
+        self.fileManager = ParametersFileManager(self.view.signals)
         
         
-    def makeParameters(self,view):
+        
+    def makeParameters(self):
         """
         Collects and parses all the information from the various user input fields/checkboxes.
         Stores them in a Parameters object.
@@ -34,22 +45,22 @@ class ParametersController(GUIController):
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
         try:
-            qVelocity = self.__vector_from_qstring(view.qVelocity.text()).setUnit('arcsec').to('rad')
-            qPosition = self.__vector_from_qstring(view.qPosition.text()).setUnit('arcsec').to('rad')
-            qRadius = u.Quantity(float(view.qRadius.text()), 'arcsec')
-            qRedshift = float(view.qRedshift.text())
+            qVelocity = self.view.vectorFromQString(self.view.qVelocity.text()).setUnit('arcsec').to('rad')
+            qPosition = self.view.vectorFromQString(self.view.qPosition.text()).setUnit('arcsec').to('rad')
+            qRadius = u.Quantity(float(self.view.qRadius.text()), 'arcsec')
+            qRedshift = float(self.view.qRedshift.text())
 
-            gRedshift = float(view.gRedshift.text())
-            gVelDispersion = u.Quantity(float(view.gVelDispersion.text()), 'km/s')
-            gNumStars = int(view.gNumStars.text())
-            gShearMag = float(view.gShearMag.text())
-            gShearAngle = u.Quantity(float(view.gShearAngle.text()), 'degree')
+            gRedshift = float(self.view.gRedshift.text())
+            gVelDispersion = u.Quantity(float(self.view.gVelDispersion.text()), 'km/s')
+            gNumStars = int(self.view.gNumStars.text())
+            gShearMag = float(self.view.gShearMag.text())
+            gShearAngle = u.Quantity(float(self.view.gShearAngle.text()), 'degree')
 
-            displayCenter = self.__vector_from_qstring(view.gCenter.text()).setUnit('arcsec').to('rad')
-            dTheta = u.Quantity(float(view.scaleInput.text()), 'arcsec').to('rad')
-            canvasDim = int(view.dimensionInput.text())
-            displayQuasar = view.displayQuasar.isChecked()
-            displayGalaxy = view.displayGalaxy.isChecked()
+            displayCenter = self.view.vectorFromQString(self.view.gCenter.text()).setUnit('arcsec').to('rad')
+            dTheta = u.Quantity(float(self.view.scaleInput.text()), 'arcsec').to('rad')
+            canvasDim = int(self.view.dimensionInput.text())
+            displayQuasar = self.view.displayQuasar.isChecked()
+            displayGalaxy = self.view.displayGalaxy.isChecked()
 
             quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity)
             galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter)
@@ -61,49 +72,37 @@ class ParametersController(GUIController):
             return None
 
 
-    def bindFields(self, parameters,view):
+    def bindFields(self, parameters):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""
         qV = parameters.quasar.velocity.to('arcsec').unitless()
         qP = parameters.quasar.position.to('arcsec').unitless()
         gP = parameters.galaxy.position.to('arcsec').unitless()
-        view.qVelocity.setText("(" + str(qV.y) + "," + str(qV.x) + ")")
-        view.qPosition.setText("(" + str(qP.y) + "," + str(qP.x) + ")")
-        view.gCenter.setText("(" + str(gP.y) + "," + str(gP.x) + ")")
-        view.qRadius.setText(str(parameters.quasar.radius.to('arcsec').value))
-        view.qRedshift.setText(str(parameters.quasar.redshift))
-        view.gRedshift.setText(str(parameters.galaxy.redshift))
-        view.gVelDispersion.setText(str(parameters.galaxy.velocityDispersion.value))
-        view.gNumStars.setText(str(parameters.galaxy.numStars))
-        view.gShearMag.setText(str(parameters.galaxy.shearMag))
-        view.gShearAngle.setText(str(parameters.galaxy.shearAngle.to('degree').value))
-        view.scaleInput.setText(str(parameters.dTheta.to('arcsec').value * parameters.canvasDim))
-        view.dimensionInput.setText(str(parameters.canvasDim))
-        view.displayQuasar.setChecked(parameters.showQuasar)
-        view.displayGalaxy.setChecked(parameters.showGalaxy)
+        self.view.qVelocity.setText("(" + str(qV.y) + "," + str(qV.x) + ")")
+        self.view.qPosition.setText("(" + str(qP.y) + "," + str(qP.x) + ")")
+        self.view.gCenter.setText("(" + str(gP.y) + "," + str(gP.x) + ")")
+        self.view.qRadius.setText(str(parameters.quasar.radius.to('arcsec').value))
+        self.view.qRedshift.setText(str(parameters.quasar.redshift))
+        self.view.gRedshift.setText(str(parameters.galaxy.redshift))
+        self.view.gVelDispersion.setText(str(parameters.galaxy.velocityDispersion.value))
+        self.view.gNumStars.setText(str(parameters.galaxy.numStars))
+        self.view.gShearMag.setText(str(parameters.galaxy.shearMag))
+        self.view.gShearAngle.setText(str(parameters.galaxy.shearAngle.to('degree').value))
+        self.view.scaleInput.setText(str(parameters.dTheta.to('arcsec').value * parameters.canvasDim))
+        self.view.dimensionInput.setText(str(parameters.canvasDim))
+        self.view.displayQuasar.setChecked(parameters.showQuasar)
+        self.view.displayGalaxy.setChecked(parameters.showGalaxy)
         
-    def __vector_from_qstring(self, string, reverse_y=False, transpose=True):
-        """
-        Converts an ordered pair string of the form (x,y) into a Vector2D of x and y.
 
-        Parameters:
-            reverse_y : Boolean
-                specify whether or not to negate y-coordinates to convert a conventional coordinate system of positive y in the up direction to
-                positive y in the down direction as used by graphics libraries. Default False
+            
+    def saveParams(self):
+        """Prompts the user for a file name, then saves the lensing system's parameters to be loaded in at a later session."""
+        print("Firing")
+        self.fileManager.write(self.makeParameters())
 
-            transpose : Boolean
-                Specify whether or not to flip x and y coordinates. In other words, return a Vector2D of (y,x) rather than (x,y). Default True
-        """
-        x, y = (string.strip('()')).split(',')
-
-        if transpose:
-            if reverse_y:
-                return Vector2D(-float(y), float(x))
-            else:
-                return Vector2D(float(y), float(x))
-        else:
-            if reverse_y:
-                return Vector2D(float(x), -float(y))
-            else:
-                return Vector2D(float(x), float(y))
+    def loadParams(self):
+        """Prompts the user to select a previously saved lensing system configuration, then when selected loads the system to model"""
+        params = self.fileManager.read()
+        if params:
+            self.view.signals['paramSetter'].emit(params)
             
             

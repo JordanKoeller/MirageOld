@@ -1,14 +1,13 @@
+from Models import Movable
 from Utility import Vector2D
-from Utility.Vector2D import zeroVector
+from Utility import zeroVector
 import astropy.units as u
-from astropy import constants as const
-import math
-import numpy as np
-from Models import Drawable
 
-class PointLenser(Drawable):
+
+class PointLenser(Movable):
 	__mass = 0
-	def __init__(self, position = None, mass = u.Quantity(0)):
+	def __init__(self, position = None, mass = u.Quantity(0),velocity=zeroVector):
+		Movable.__init__(self,position,velocity)
 		self.__mass = mass 
 		self.updateDrawable(position = position, colorKey = 2)
 

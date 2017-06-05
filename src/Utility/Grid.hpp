@@ -42,6 +42,31 @@ private:
 		}
 	}
 
+	static bool withinQuad(const pair<double,double> &p,const vector<pair<double,double>> &corners)
+	{
+		unsigned int crossings = 0;
+		for (int c = 0; c < corners.size(); ++c)
+		{
+			auto &c1 = corners[c];
+			auto &c2 = corners[c%corners.size()];
+			if (get<0>(c1) >= get<0>(p) || get<0>(c2) >= get<0>(p))
+			{
+				if ((get<1>(c1) < get<1>(p) && get<1>(c2) > get<1>(c2)) || (get<1>(c1) > get<1>(p) && get<1>(c2) < get<1>(c2)))
+				{
+					crossings++;
+				}
+			}
+		}
+		if (crossings % 2 == 1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	inline bool overlap(const double &objx, const double& objy, const double &radius, const int &i, const int &j) const
 	{
 		double tnx = tlx + i*NODE_WIDTH;
@@ -56,11 +81,22 @@ private:
 	{
 		double xx  = (x - tlx)/NODE_WIDTH;
 		double yy  = (y - tly)/NODE_HEIGHT;
-		//cout << "xx = " << lrint(xx+0.5) << " , yy = " << lrint(0.5+yy) << "\n";
-		// //cout << "for x = " << x << ", y = " << y << endl;
 		return make_pair(xx,yy);				
 	}
 
+
+	void constructGrid(const double& x1, const double& y1, const double& x2, const double& y2, const int &node_count)
+	{
+		tlx = x1;
+		tly = y1;
+		int rootNodes = (int) sqrt(node_count);
+		// cout << "Number of nodes = " << rootNodes << "\n";
+		data = std::vector<std::vector<Node>>(rootNodes+1,std::vector<Node>(rootNodes+1));
+		NODE_HEIGHT = (y2 - y1)/ (float) rootNodes;
+		NODE_WIDTH = (x2 - x1)/(float) rootNodes;
+		NODE_HEIGHT > NODE_WIDTH ? LARGE_AXIS = NODE_HEIGHT : LARGE_AXIS = NODE_WIDTH;
+
+	}
 	class Node
 	{
 	private:
@@ -84,16 +120,6 @@ private:
 			return ret;
 		}
 
-		void printNode() const
-		{
-			//cout << " | ";
-			for (size_t i = 0; i < node_data.size(); ++i)
-			{
-				//cout << node_data[i].x << "," << node_data[i].y << " ; ";
-			}
-			//cout << "|";
-		}
-
 		Node()=default;
 		~Node()=default;
 
@@ -108,47 +134,10 @@ private:
 	std::vector<std::vector<Node>> data;
 public:
 
-	/* ------------------------------------------
-	   ------ Debugging methods -----------------
-	   ------------------------------------------
-	*/
-	void debug() const
-	{
-		//cout << "Node width = " << NODE_WIDTH << endl;
-		//cout << "tlx = " << tlx << endl;
-		//cout << "tly = " << tly << endl;
-	}
-
-	void printGrid() const
-	{
-		for (auto i:data)
-		{
-			for (auto j:i) 
-			{
-				//cout << "<" << counter++ << ">";
-				j.printNode();
-			}
-			//cout <<"\n";
-		}
-	}
-
 	Grid(const double &top_left_x, const double& top_left_y, const double& bottom_right_x,const double& bottom_right_y, const int &node_count)
 	{
 		constructGrid(top_left_x, top_left_y, bottom_right_x,bottom_right_y,node_count);
 		sz = 0;
-	}
-
-	void constructGrid(const double& x1, const double& y1, const double& x2, const double& y2, const int &node_count)
-	{
-		tlx = x1;
-		tly = y1;
-		int rootNodes = (int) sqrt(node_count);
-		// cout << "Number of nodes = " << rootNodes << "\n";
-		data = std::vector<std::vector<Node>>(rootNodes+1,std::vector<Node>(rootNodes+1));
-		NODE_HEIGHT = (y2 - y1)/ (float) rootNodes;
-		NODE_WIDTH = (x2 - x1)/(float) rootNodes;
-		NODE_HEIGHT > NODE_WIDTH ? LARGE_AXIS = NODE_HEIGHT : LARGE_AXIS = NODE_WIDTH;
-
 	}
 
 	Grid(const vector<pair<pair<double,double>,pair<int,int>>>::iterator i1, const vector<pair<pair<double,double>,pair<int,int>>>::iterator i2, const int &node_count)
@@ -171,19 +160,9 @@ public:
 			pair<pair<double,double>,pair<int,int>> &t = *i;
 			insert(get<0>(get<0>(t)),get<1>(get<0>(t)),get<0>(get<1>(t)),get<1>(get<1>(t)));
 		}
+		// printBucketSizes();
 	}
 	Grid()=default;
-
-	vector<Pixel> find_within_brute(const double &x, const double &y, const double &r) const {
-		vector<Pixel> ret;
-		for (auto i:data) {
-			for (auto j:i) {
-				vector<Pixel> tmp = j.queryNode(x,y,r);
-				ret.insert(ret.end(),tmp.begin(),tmp.end());
-			}
-		}
-		return ret;
-	}
 
 	vector<Pixel> find_within(const double &x, const double &y, const double &r) const
 	{
@@ -266,6 +245,22 @@ public:
 			return true;
 		}
 		return false;
+	}
+
+	void printBucketSizes()
+	{
+		vector<size_t> ret;
+		for (auto i:data)
+		{
+			for (auto j:i)
+			{
+				ret.push_back(j.node_data.size());
+			}
+		}
+		for (auto i:ret)
+		{
+			cout << i << "\n";
+		}
 	}
 
 

@@ -1,23 +1,18 @@
-import numpy as np
-import astropy.units as u
+
+from Models import Cosmic
+from Models import Movable
 from Utility import Vector2D
 from Utility.Vector2D import zeroVector
-from astropy import constants as const
-import random as rand
-import math
-import time
-from Models import Drawable
-from Models import Cosmic
+import astropy.units as u
 
-class Quasar(Drawable,Cosmic):
+
+class Quasar(Movable,Cosmic):
 	__radius = 0
-	__observedPosition = zeroVector
-	__velocity = zeroVector
+
 
 
 	def __init__(self,redshift = 0,radius = u.Quantity(0,'rad'),position = zeroVector,velocity = zeroVector):
-		self.__velocity = velocity
-		self.__observedPosition = position
+		Movable.__init__(self,position,velocity)
 		self.__radius = radius
 		self.updateDrawable(position = position,colorKey = 3)
 		self.updateCosmic(redshift = redshift)
@@ -25,15 +20,12 @@ class Quasar(Drawable,Cosmic):
 	def update(self, redshift = None, position = None, radius = None, velocity = None):
 		self.updateCosmic(redshift = redshift)
 		self.updateDrawable(position = position)
-		if velocity != None:
-			self.__velocity = velocity
-		self.__observedPosition = self.position
+		self.updateMovable(position,velocity)
 		if radius != None:
 			self.__radius = radius
 
 
 	def draw(self, img, parameters):
-		begin = time.clock()
 		center = (self.observedPosition + parameters.galaxy.position)/parameters.dTheta.value
 		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
 		radius = int(self.radius.value/parameters.dTheta.value)
@@ -55,48 +47,21 @@ class Quasar(Drawable,Cosmic):
 						img[center.x-x,center.y-y] = self._Drawable__colorKey
 						count += 1
 
-	def circularPath(self):
-		vel = self.velocity.magnitude()
-		x,y = self.observedPosition.asTuple
-		tangent = 0
-		try:
-			tangent = -x/y
-		except ZeroDivisionError as e:
-			tangent = -0
-		self.__velocity = Vector2D(1,tangent).normalized()*self.velocity.magnitude()
+
 
 	def pixelRadius(self,dTheta):
 		return (self.__radius.to('rad')/dTheta).value
-	@property
-	def velocity(self):
-		return self.__velocity.to('rad')
 
 	@property
 	def radius(self):
 		return self.__radius.to('rad')
 
-	@property
-	def position(self):
-		return self.__observedPosition.to('rad')
-	@property
-	def observedPosition(self):
-		return self.__observedPosition.to('rad')
 
-	def setTime(self, t):
-		self.__observedPosition = self._Drawable__position + (self.velocity * t)
-
-	def incrementTime(self,dt):
-		self.__observedPosition = self.__observedPosition + self.velocity * dt
-
+			
 	def __str__(self):
 		return "QUASAR:\n" + self.cosmicString() + "\n" + self.drawableString() + "\nvelocity = " + str(self.velocity) + "\nradius = " + str(self.radius) + "\n\n"
 
 
-	def setPos(self,x,y = None):
-		if y == None:
-			self.__observedPosition = x
-		else:
-			self.__observedPosition = Vector2D(x,y)
 
 defaultQuasar = Quasar(redshift = 0.073,
 	position = Vector2D(-0.0003,0,"rad"),

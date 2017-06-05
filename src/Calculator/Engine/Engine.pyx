@@ -16,7 +16,6 @@ import cython
 import pyopencl.tools
 from scipy import interpolate
 
-
 from Utility import Vector2D
 from Utility import zeroVector
 import numpy as np
@@ -140,20 +139,16 @@ cdef class Engine:
 		Virtual method to be implemented by subclasses. Provides an interface for configuring the engine by calculating and storing ray-tracing data.
 		Automatically called upon calling update parameters, when a new set of parameters warranting a recalculation of the system is passed in."""
 		pass
+	
+	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil:
+		return 0
 		
-	cdef cythonMakeLightCurve(self, mmin, mmax, resolution, progressBar, smoothing):  # Needs updateing
-		"""Deprecatedf"""
-		if not self.__tree:
-			self.reconfigure()
-		begin = time.clock()
-		if progressBar:
-			progressBar.setMinimum(0)
-			progressBar.setMaximum(int(resolution))
-		cdef int counter = 0
-		stepX = (mmax.x - mmin.x) / resolution
-		stepY = (mmax.y - mmin.y) / resolution
-		yAxis = np.ones(resolution)
-		xVals = np.arange(0, 1, 1 / resolution)
+	cdef makeLightCurve(self, object mmin, object mmax, int resolution):  # Needs updateing
+		"""Deprecated"""
+		cdef double stepX = (mmax.x - mmin.x) / resolution
+		cdef double stepY = (mmax.y - mmin.y) / resolution
+		cdef np.ndarray[np.float64_t, ndim=1] yAxis = np.ones(resolution)
+		cdef np.ndarray[np.float64_t, ndim=2] xVals = np.ndarray((resolution,2))
 		cdef int i = 0
 		cdef double radius = self.__parameters.quasar.radius.value
 		cdef double x = mmin.x
@@ -163,19 +158,13 @@ cdef class Engine:
 		for i in range(0, resolution):
 			x += stepX
 			y += stepY
-			yAxis[i] = self.__tree.query_point_count(x + gx, y + gy, radius)  # Incorrect interfrace
-			counter += 1
-			if progressBar:
-				progressBar.setValue(counter)
-		print("clocked at = " + str(time.clock() - begin) + " seconds")
-		if smoothing:
-			xNew = np.arange(0, 1, 1 / (resolution * 10))
-			yNew = np.empty_like(xNew)
-			tck = interpolate.splrep(xVals, yAxis, s=0)
-			yNew = interpolate.splev(xNew, tck, der=0)
-			return (xNew, yNew)
-		else:
-			return (xVals, yAxis)
+			xVals[i,0] = x
+			xVals[i,1] = y
+			yAxis[i] = self.query_data_length(x + gx, y + gy, radius)  # Incorrect interface
+			if self.__parameters.galaxy.hasStarVel:
+				self.__parameters.galaxy.moveStars(self.__parameters.dt)
+				self.reconfigure()
+		return (xVals, yAxis)
 
 	cpdef visualize(self):
 		"""
@@ -199,15 +188,9 @@ cdef class Engine:
 		cdef int i, j
 		for i in range(0, endX):
 			for j in range(0, endY):
-				# for k in range(0,3):
-				# 	for l in range(0,3):
-				# 		img[<int> x[i-k,j-l],<int> y[i-k,j-l]] += 1
 				img[ < int > x[i, j], < int > y[i, j]] += 1
 		return img
 
-	def makeLightCurve(self, mmin, mmax, resolution=200, canvas=None, progressBar=None, smoothing=True):
-		"""Deprecated"""
-		return self.cythonMakeLightCurve(mmin, mmax, resolution, progressBar, smoothing)
 
 
 	def updateParameters(self, parameters):

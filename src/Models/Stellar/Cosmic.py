@@ -2,6 +2,9 @@ from astropy.cosmology import WMAP7 as cosmo
 
 class Cosmic(object):
 	__redshift = 0.0
+	
+	def __init__(self):
+		pass
 
 	@property
 	def angDiamDist(self):

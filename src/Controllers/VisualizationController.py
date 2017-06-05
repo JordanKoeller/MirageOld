@@ -3,54 +3,64 @@ Created on May 31, 2017
 
 @author: jkoeller
 '''
-import time
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 
-from Controllers.GUIController import GUIController
-import Models
-from Views.Drawer import DataVisualizerDrawer
-from Views.Drawer.CompositeDrawerFactory import LensedImageLightCurveComposite
+from Controllers import GUIController
+from Controllers import VisualizerThread
+from Controllers.FileManagers.VisualizationFileManager import VisualizationFileManager
+from Models import Model
+from Controllers.FileManagers.FITSFileManager import FITSFileManager
 
 
-class VisualizationController(GUIController, QtCore.QThread):
+class VisualizationController(GUIController):
     '''
     classdocs
     '''
-    image_canvas_update = QtCore.pyqtSignal(object)
-    curve_canvas_update = QtCore.pyqtSignal(object, object)
+    imageCanvas_signal = QtCore.pyqtSignal(object)
+    curveCanvas_signal = QtCore.pyqtSignal(object, object)
 
     def __init__(self, view):
         '''
         Constructor
         '''
-        GUIController.__init__(self)
-        QtCore.QThread.__init__(self)
-        self.progress_bar_update = view.signals[0]
-        self.progress_label_update = view.signals[1]
-        self.image_canvas_update = view.signals[2]
-        self.curve_canvas_update = view.signals[3]
-        self.progress_bar_max_update = view.signals[4]
-        self.sourcePos_label_update = view.signals[5]
-        self.__calculating = False
-        self.__frameRate = 60
-        self.__drawer = LensedImageLightCurveComposite(self.image_canvas_update, self.curve_canvas_update)
-        self.parameters = None
-        self.circularPath = False
+        GUIController.__init__(self,view)
+        view.addSignals(imageCanvas = self.imageCanvas_signal, curveCanvas = self.curveCanvas_signal)
+        self.thread = VisualizerThread(self.view.signals)
+        self.view.pauseButton.clicked.connect(self.thread.pause)
+        self.view.resetButton.clicked.connect(self.restart)
+        self.view.playButton.clicked.connect(self.simImage)
+        self.view.displayQuasar.clicked.connect(self.drawQuasarHelper)
+        self.view.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
+        self.view.record_button.triggered.connect(self.record)
+        self.view.visualizeDataButton.clicked.connect(self.visualizeData)
+        self.view.developerExportButton.clicked.connect(self.saveVisualization)
+        filler_img = QtGui.QImage(2000, 2000, QtGui.QImage.Format_Indexed8)
+        filler_img.setColorTable([QtGui.qRgb(0, 0, 0)])
+        filler_img.fill(0)
+        self.view.main_canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
+        self.view.signals["imageCanvas"].connect(self.main_canvas_slot)
+        self.view.signals["curveCanvas"].connect(self.curve_canvas_slot)
+        self.parametersController = self.view.parametersController
+        self.fileManager = VisualizationFileManager(self.view.signals)
         
-    @property
-    def signals(self):
-        return {"image_canvas_update":self.image_canvas_update, "curve_canvas_update":self.curve_canvas_update}
+    def show(self):
+        self.view.visualizationFrame.setHidden(False)
+        self.view.visualizationBox.setHidden(False)
         
-    @property
-    def slots(self):
-        return {"image_canvas_slot":self.main_canvas_slot, "curve_canvas_slot":self.curve_canvas_slot}
+    def hide(self):
+        self.view.visualizationBox.setHidden(True)
+        self.view.visualizationFrame.setHidden(True)
+        
+    def drawQuasarHelper(self):
+        """Interface for updating an animation in real time of whether or not to draw the physical location of the quasar to the screen as a guide."""
+        Model.parameters.showQuasar = self.view.displayQuasar.isChecked()
 
     def drawGalaxyHelper(self):
         """
         Interface for updating an animation in real time of whether or not to draw the lensing galaxy's center of mass, along with any stars".
         """
-        self.simThread.engine.parameters.showGalaxy = self.displayGalaxy.isChecked()
+        Model.parameters.showGalaxy = self.view.displayGalaxy.isChecked()
 
     def simImage(self):
         """
@@ -59,11 +69,11 @@ class VisualizationController(GUIController, QtCore.QThread):
 
         Called by default when the "Play" button is presssed.
         """
-        parameters = self.makeParameters()
+        parameters = self.parametersController.makeParameters()
         if parameters is None:
             return
-        self.simThread.updateParameters(parameters)
-        self.simThread.start()
+        Model.updateParameters(parameters)
+        self.thread.start()
 
     def record(self):
         """Calling this method will configure the system to save each frame of an animation, for compiling to a video that can be saved."""
@@ -73,73 +83,28 @@ class VisualizationController(GUIController, QtCore.QThread):
     def restart(self):
         """Returns the system to its t=0 configuration. If the system was configured to record, will automatically prompt the user for a file name,
         render and save the video."""
-        self.progress_label_update.emit("Restarted.")
-        self.__calculating = False
-        self.parameters.setTime(0)
-        pixels = Models.engine.getFrame()
-        mag = Models.engine.getMagnification(len(pixels))
-        frame = self.__drawer.draw([self.parameters, pixels], [mag])
-        self.sourcePos_label_update.emit(str(self.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
-        self.__drawer.reset()
-        self.fileManager.save_recording()
+        self.thread.restart()
+        self.fileManager.write()
         
         
     def visualizeData(self):
-        params = self.makeParameters()
-        return self.simThread.visualize(params)
+        params = self.parametersController.makeParameters()
+        return self.thread.visualize(params)
 
     def saveVisualization(self):
         """Calculates and saves a point-source magnification map as a FITS file"""
-        self.fileManager.recording = True
+        fitsFileManager = FITSFileManager(self.view.signals)
         data = self.visualizeData()
-        self.fileManager.save_fitsFile(data)
+        fitsFileManager.write(data)
+        # self.fileManager.save_still(self.main_canvas)
+
         
     def main_canvas_slot(self, img):
-        self.main_canvas.pixmap().convertFromImage(img)
-        self.main_canvas.update()
+        self.view.main_canvas.pixmap().convertFromImage(img)
+        self.view.main_canvas.update()
         self.fileManager.giveFrame(img)
 
     def curve_canvas_slot(self, x, y):
-        self.curve_canvas.plot(x, y, clear=True)
+        self.view.curve_canvas.plot(x, y, clear=True)
         
-    def updateParameters(self, params):
-        if self.parameters:
-            params.setTime(self .parameters.time)
-            params.quasar.setPos(self.parameters.quasar.observedPosition)
-        self.parameters = params
-
-    def run(self):
-        self.progress_label_update.emit("Ray-Tracing. Please Wait.")
-        Models.engine.updateParameters(self.parameters)
-        self.__calculating = True
-        interval = 1 / self.__frameRate
-        counter = 0
-        self.progress_label_update.emit("Animating.")
-        while self.__calculating:
-            counter += 1
-            timer = time.clock()
-            pixels = Models.engine.getFrame()
-            mag = Models.engine.getMagnification(len(pixels))
-            img = self.__drawer.draw([self.parameters, pixels], [mag])
-            self.sourcePos_label_update.emit(str(self.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
-            # if self.circularPath:
-            self.parameters.quasar.circularPath()
-            self.parameters.incrementTime(self.parameters.dt)
-            deltaT = time.clock() - timer
-            if deltaT < interval:
-                time.sleep(interval - deltaT)
-
-
-    def pause(self):
-        self.progress_label_update.emit("Paused.")
-        self.__calculating = False
-
-    def visualize(self, params):
-        self.progress_label_update.emit("Ray-Tracing. Please Wait.")
-        drawer = DataVisualizerDrawer(self.image_canvas_update)
-        Models.engine.updateParameters(params)
-        self.progress_label_update.emit("Calculating Magnification Coefficients. Please Wait.")
-        pixels = Models.engine.visualize()
-        frame = drawer.draw([pixels])
-        self.progress_label_update.emit("Done.")
-        return pixels
+# 

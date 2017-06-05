@@ -17,6 +17,5 @@ cdef extern from "Grid.hpp":
 		Grid() except +
 		Grid(vector[pair[pair[double,double],pair[int,int]]].iterator,vector[pair[pair[double,double],pair[int,int]]].iterator,int) nogil
 		vector[Pixel] find_within(double,double,double) nogil
-		vector[Pixel] find_within_brute(const double, double, double) nogil
 		bool insert(double,double, int, int) nogil
 		bool clear() except +

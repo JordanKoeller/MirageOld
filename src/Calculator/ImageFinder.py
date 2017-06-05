@@ -1,5 +1,4 @@
 from scipy.optimize import broyden1 as Solver
-import numpy as np 
 import math
 from astropy import constants as const
 from Utility import Vector2D

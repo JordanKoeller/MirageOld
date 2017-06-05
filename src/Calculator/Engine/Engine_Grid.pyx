@@ -71,6 +71,9 @@ cdef class Engine_Grid(Engine):
 		"""Returns all rays that intersect the source plane within a specified radius of a location on the source plane."""
 		cdef vector[Pixel] ret = self.__grid.find_within(x, y, radius)
 		return ret
+	
+	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil:
+		return self.query_data(x,y,radius).size()
 
 	def reconfigure(self):
 		begin = time.clock()

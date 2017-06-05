@@ -4,6 +4,9 @@ from Utility.Vector2D import zeroVector
 class Drawable(object):
 	__position = zeroVector
 	__colorKey = 0
+	
+	def __init__(self):
+		pass
 
 	def draw(self, img, parameters):
 		"""Draws the entity to the canvas.

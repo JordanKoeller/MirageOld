@@ -5,6 +5,7 @@ from astropy.cosmology import WMAP7 as cosmo
 from astropy import constants as const
 from astropy import units as u 
 import math
+from Utility.Vector2D import zeroVector
 
 class Parameters(object):
 	"""Stores and processes all the information regarding the setup for a 
@@ -52,6 +53,7 @@ class Parameters(object):
 		self.__starMassVariation = starMassVariation
 		self.dt = 0.1
 		self.time = 0
+		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
 
 	def generateStars(self):
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen/100
@@ -97,6 +99,7 @@ class Parameters(object):
 	@property
 	def displayGalaxy(self):
 		return self.showGalaxy
+	
 
 	@property
 	def displayStars(self):
@@ -131,6 +134,9 @@ class Parameters(object):
 	def setTime(self,time):
 		self.time = time
 		self.__quasar.setTime(time)
+		
+	def generateStarVelocity(self):
+		return zeroVector
 
 	@property
 	def queryQuasarX(self):
