@@ -644,7 +644,7 @@
           <item>
            <widget class="QTabWidget" name="tabWidget_2">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="tab">
              <attribute name="title">
@@ -661,7 +661,11 @@
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QPlainTextEdit" name="experimentDescEntry"/>
+                 <widget class="QPlainTextEdit" name="experimentDescEntry">
+                  <property name="plainText">
+                   <string>fdaf</string>
+                  </property>
+                 </widget>
                 </item>
                 <item row="1" column="0">
                  <widget class="QLabel" name="label_28">
@@ -671,7 +675,11 @@
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QLineEdit" name="experimentNameEntry"/>
+                 <widget class="QLineEdit" name="experimentNameEntry">
+                  <property name="text">
+                   <string>fdsa</string>
+                  </property>
+                 </widget>
                 </item>
                 <item row="2" column="0">
                  <widget class="QLabel" name="label_31">
@@ -683,14 +691,14 @@
                 <item row="4" column="1">
                  <widget class="QLineEdit" name="quasarPathEnd">
                   <property name="text">
-                   <string>(0,0)</string>
+                   <string>(10,0)</string>
                   </property>
                  </widget>
                 </item>
                 <item row="2" column="1">
                  <widget class="QLineEdit" name="quasarPathStart">
                   <property name="text">
-                   <string>(0,0)</string>
+                   <string>(-10,0)</string>
                   </property>
                  </widget>
                 </item>
@@ -820,7 +828,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <property name="usesScrollButtons">
           <bool>true</bool>
@@ -947,88 +955,6 @@
                 <string>Make Magnification Map</string>
                </property>
               </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="lightCurveTab">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <attribute name="title">
-           <string>Light Curve</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout">
-           <item>
-            <layout class="QGridLayout" name="gridLayout_7">
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="lightCurveMinField">
-               <property name="text">
-                <string>(-1,-1)</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="3">
-              <widget class="QLabel" name="label_25">
-               <property name="text">
-                <string>Arcseconds</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_6"/>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_23">
-               <property name="text">
-                <string>Path</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QLineEdit" name="lightCurveMaxField">
-               <property name="text">
-                <string>(1,1)</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <item>
-              <spacer name="horizontalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="lightCurveStartButton">
-               <property name="text">
-                <string>Calculate</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </item>

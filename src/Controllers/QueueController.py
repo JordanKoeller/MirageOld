@@ -14,7 +14,7 @@ from PyQt5 import QtCore
 from Controllers import GUIController
 from Controllers.FileManagers import QueueFileManager
 from Controllers.Threads.QueueThread import QueueThread
-from Models.ExperimentQueue.Experiment import Experiment
+# from Models.ExperimentQueue.Experiment import Experiment
 from Models.ExperimentQueue.ExperimentQueueTable import ExperimentQueueTable
 from Models.Parameters.ExperimentParams import ExperimentParams
 
@@ -71,8 +71,7 @@ class QueueController(GUIController):
              
                 
     def addToQueue(self):
-        params = self.makeParameters()
-        exp = Experiment(params)
+        exp = self.makeParameters()
         if self.editing == -1:
             self.table.addExperiment(exp)
         else:
@@ -97,16 +96,17 @@ class QueueController(GUIController):
             variance *= 2
         if self.view.pathVarianceCheckBox.isChecked():
             variance *= 3
-        pstart = self.view.vectorFromQString(self.view.quasarPathStart.text(),False,False)
-        pend = self.view.vectorFromQString(self.view.quasarPathEnd.text(),False,False)
+        pstart = self.view.vectorFromQString(self.view.quasarPathStart.text(),False,False,'arcsec')
+        pend = self.view.vectorFromQString(self.view.quasarPathEnd.text(),False,False,'arcsec')
         extras = ExperimentParams(name,desc,numTrials,variance,pathStart = pstart,pathEnd = pend, resolution = resolution)
         regParams.extras = extras
         return regParams
     
     def runExperiments(self):
-        runner = QueueThread(self.view.signals)
         fileRunner = QueueFileManager(self.view.signals)
-        fileRunner.getDirectory()
+        experiments = self.table.experiments
+        runner = QueueThread(self.view.signals,experiments,fileRunner)
+        runner.run()
         
 
     def hide(self):

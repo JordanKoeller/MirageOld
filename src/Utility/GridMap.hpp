@@ -11,9 +11,8 @@ template<typename T>
 class GridMap
 {
 	
-
-	vector<vector<T>> rawData;
-	unordered_map<T> buckets;
+	T* rawData;
+	unordered_map<int,unordered_map<int,Node>> buckets;
 private:
 	class Node
 	{

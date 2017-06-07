@@ -47,8 +47,8 @@ class ParametersController(GUIController):
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
         try:
-            qVelocity = self.view.vectorFromQString(self.view.qVelocity.text()).setUnit('arcsec').to('rad')
-            qPosition = self.view.vectorFromQString(self.view.qPosition.text()).setUnit('arcsec').to('rad')
+            qVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit='arcsec')
+            qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit='arcsec')
             qRadius = u.Quantity(float(self.view.qRadius.text()), 'arcsec')
             qRedshift = float(self.view.qRedshift.text())
             qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')
@@ -59,13 +59,14 @@ class ParametersController(GUIController):
             gShearMag = float(self.view.gShearMag.text())
             gShearAngle = u.Quantity(float(self.view.gShearAngle.text()), 'degree')
 
-            displayCenter = self.view.vectorFromQString(self.view.gCenter.text()).setUnit('arcsec').to('rad')
+            displayCenter = self.view.vectorFromQString(self.view.gCenter.text(), unit='arcsec')
             dTheta = u.Quantity(float(self.view.scaleInput.text()), 'arcsec').to('rad')
             canvasDim = int(self.view.dimensionInput.text())
             displayQuasar = self.view.displayQuasar.isChecked()
             displayGalaxy = self.view.displayGalaxy.isChecked()
 
             quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity, mass = qBHMass)
+            print(quasar)
             galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter)
             params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
             self.view.pixelAngleLabel_angle.setText(str(self.__round_to_n(params.pixelScale_angle.value,4)))

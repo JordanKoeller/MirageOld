@@ -80,7 +80,7 @@ class GUIManager(QtWidgets.QMainWindow):
             self.__signals.pop(i)
             
             
-    def vectorFromQString(self, string, reverse_y=False, transpose=True):
+    def vectorFromQString(self, string, reverse_y=False, transpose=True,unit = None):
         """
         Converts an ordered pair string of the form (x,y) into a Vector2D of x and y.
 
@@ -96,14 +96,14 @@ class GUIManager(QtWidgets.QMainWindow):
 
         if transpose:
             if reverse_y:
-                return Vector2D(-float(y), float(x))
+                return Vector2D(-float(y), float(x),unit)
             else:
-                return Vector2D(float(y), float(x))
+                return Vector2D(float(y), float(x),unit)
         else:
             if reverse_y:
-                return Vector2D(float(x), -float(y))
+                return Vector2D(float(x), -float(y),unit)
             else:
-                return Vector2D(float(x), float(y))
+                return Vector2D(float(x), float(y),unit)
             
     @property
     def signals(self):

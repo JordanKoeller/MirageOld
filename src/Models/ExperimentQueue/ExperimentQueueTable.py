@@ -26,7 +26,7 @@ class ExperimentQueueTable(TableWidget):
         exptButton = QPushButton()
         exptButton.setText("Edit")
         exptButton.setMinimumWidth(50)
-        exptButton.clicked.connect(lambda: self.signal.emit(experiment.parameters,self.numRows-1))
+        exptButton.clicked.connect(lambda: self.signal.emit(experiment,self.numRows-1))
         self.setCellWidget(self.numRows,len(txtRow),exptButton)
         
     def updateExperiment(self,exp,num):
@@ -34,7 +34,7 @@ class ExperimentQueueTable(TableWidget):
         tmp = self.experiments[:]
         self.clear()
         self.__initClearTable()
-        self.experiments = []
+        self.__experiments = []
         for i in tmp:
             self.addExperiment(i)
             
@@ -49,7 +49,8 @@ class ExperimentQueueTable(TableWidget):
         self.setHorizontalHeaderLabels(headers)
             
                   
-    def __mkRow(self,experiment):
+    def __mkRow(self,params):
+        experiment = params.extras
         return [experiment.name,experiment.desc,experiment.numTrials]
     
     @property

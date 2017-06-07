@@ -9,32 +9,21 @@
 using namespace std;
 
 
-class Pixel
-{
-public:
-	double x;
-	double y;
-	int pixelX;
-	int pixelY;
-	Pixel() {}
-	Pixel(const double dx, const double dy, const int px, const int py):x{dx},y{dy},pixelX{px},pixelY{py} {}
-};
-
-
 class Grid
 {
 private:
 
-	inline static double hypot(const double& x1, const double& y1, const double& x2, const double& y2) 
+	double* rawData;
+
+	inline static double hypot( double& x1,  double& y1,  double& x2,  double& y2) 
 	{
 		double dx = x2 - x1;
 		double dy = y2-y1;
 		return sqrt(dx*dx+dy*dy);
 	}
-
-	inline static bool within(const double &ptx, const double &pty, const double &radius, const Pixel& data)
+	inline static bool within( double &ptx,  double &pty,  double &radius,  double *data)
 	{
-		if (hypot(ptx,pty,data.x,data.y) <= radius)
+		if (hypot(ptx,pty,*data,*(data+1)) <= radius)
 		{
 			return true;
 		}
@@ -43,32 +32,32 @@ private:
 		}
 	}
 
-	static bool withinQuad(const pair<double,double> &p,const vector<pair<double,double>> &corners)
-	{
-		unsigned int crossings = 0;
-		for (int c = 0; c < corners.size(); ++c)
-		{
-			auto &c1 = corners[c];
-			auto &c2 = corners[c%corners.size()];
-			if (get<0>(c1) >= get<0>(p) || get<0>(c2) >= get<0>(p))
-			{
-				if ((get<1>(c1) < get<1>(p) && get<1>(c2) > get<1>(c2)) || (get<1>(c1) > get<1>(p) && get<1>(c2) < get<1>(c2)))
-				{
-					crossings++;
-				}
-			}
-		}
-		if (crossings % 2 == 1)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
+	// static bool withinQuad( pair<double,double> &p, vector<pair<double,double>> &corners)
+	// {
+	// 	unsigned int crossings = 0;
+	// 	for (int c = 0; c < corners.size(); ++c)
+	// 	{
+	// 		auto &c1 = corners[c];
+	// 		auto &c2 = corners[c%corners.size()];
+	// 		if (get<0>(c1) >= get<0>(p) || get<0>(c2) >= get<0>(p))
+	// 		{
+	// 			if ((get<1>(c1) < get<1>(p) && get<1>(c2) > get<1>(c2)) || (get<1>(c1) > get<1>(p) && get<1>(c2) < get<1>(c2)))
+	// 			{
+	// 				crossings++;
+	// 			}
+	// 		}
+	// 	}
+	// 	if (crossings % 2 == 1)
+	// 	{
+	// 		return true;
+	// 	}
+	// 	else
+	// 	{
+	// 		return false;
+	// 	}
+	// }
 
-	inline bool overlap(const double &objx, const double& objy, const double &radius, const int &i, const int &j) const
+	inline bool overlap( double &objx,  double& objy,  double &radius,  int &i,  int &j) 
 	{
 		double tnx = tlx + i*NODE_WIDTH;
 		double tny = tly + j*NODE_HEIGHT;
@@ -78,22 +67,28 @@ private:
 		return objx - radius <= bnx && objx + radius > tnx && objy - radius <= bny && objy + radius > tny; //BIG possible bug spot.
 	}
 
-	inline pair<double,double> getIndices(const double &x,const double &y)
+	inline pair<int,int> pos_from_pointer(double* pos)
 	{
-		double xx  = (x - tlx)/NODE_WIDTH;
-		double yy  = (y - tly)/NODE_HEIGHT;
+		int diff = (pos - rawData)/2;
+		int y = diff % width;
+		int x = diff / height;
+		return make_pair(x,y);
+	}
+
+	inline pair<double,double> getIndices( double *x, double *y)
+	{
+		double xx  = (*x - tlx)/NODE_WIDTH;
+		double yy  = (*y - tly)/NODE_HEIGHT;
 		return make_pair(xx,yy);				
 	}
 
 
-	void constructGrid(const double& x1, const double& y1, const double& x2, const double& y2, const int &node_count)
+	void ructGrid( double& x1,  double& y1,  double& x2,  double& y2,  int &node_count)
 	{
 		tlx = x1;
 		tly = y1;
 		int rootNodes = (int) sqrt(node_count);
-		// cout << "Number of nodes = " << rootNodes << "\n";
 		data = std::unordered_map<int,std::unordered_map<int,Node>>();
-//		data = std::vector<std::vector<Node>>(rootNodes+1,std::vector<Node>(rootNodes+1));
 		NODE_HEIGHT = (y2 - y1)/ (float) rootNodes;
 		NODE_WIDTH = (x2 - x1)/(float) rootNodes;
 		NODE_HEIGHT > NODE_WIDTH ? LARGE_AXIS = NODE_HEIGHT : LARGE_AXIS = NODE_WIDTH;
@@ -103,15 +98,14 @@ private:
 	{
 	private:
 	public:
-		std::vector<Pixel> node_data;
-		void addData(const double& x, const double& y, const int& px, const int& py)
+		std::vector<double*> node_data;
+		void addData(double* x)
 		{
-			auto putting = Pixel(x,y,px,py);
-			node_data.push_back(putting);
+			node_data.push_back(x);
 		}
-		std::vector<Pixel> queryNode(const double& ptx, const double& pty,const double &radius) const
+		std::vector<double*> queryNode( double& ptx,  double& pty, double &radius) 
 		{
-			std::vector<Pixel> ret;
+			std::vector<double*> ret;
 			for (size_t i = 0; i < node_data.size(); ++i)
 			{
 				if (within(ptx,pty,radius,node_data[i]))
@@ -133,41 +127,15 @@ private:
 	double tlx;
 	double tly;
 	unsigned int sz;
+	int width;
+	int height;
 	std::unordered_map<int,std::unordered_map<int,Node>> data;
-//	std::vector<std::vector<Node>> data;
+
 public:
-
-	Grid(const double &top_left_x, const double& top_left_y, const double& bottom_right_x,const double& bottom_right_y, const int &node_count)
+	Grid(double* data, int h, int w, int ndim, int node_count)
 	{
-		constructGrid(top_left_x, top_left_y, bottom_right_x,bottom_right_y,node_count);
-		sz = 0;
-	}
-
-	Grid(const vector<pair<pair<double,double>,pair<int,int>>>::iterator i1, const vector<pair<pair<double,double>,pair<int,int>>>::iterator i2, const int &node_count)
-	{
-		double minX = DBL_MAX;
-		double minY = DBL_MAX;
-		double maxX = DBL_MIN;
-		double maxY = DBL_MIN;
-		sz = 0;
-		for (auto i=i1; i != i2; i++)
-		{
-			pair<pair<double,double>,pair<int,int>> &t = *i;
-			get<0>(get<0>(t)) > maxX ? maxX = get<0>(get<0>(t)) : maxX = maxX;
-			get<0>(get<0>(t)) < minX ? minX = get<0>(get<0>(t)) : minX = minX;
-			get<1>(get<0>(t)) > maxY ? maxY = get<1>(get<0>(t)) : maxY = maxY;
-			get<1>(get<0>(t)) < minY ? minY = get<1>(get<0>(t)) : minY = minY;
-		}
-		constructGrid(minX,minY,maxX,maxY,node_count);		
-		for (auto i=i1; i != i2; i++) {
-			pair<pair<double,double>,pair<int,int>> &t = *i;
-			insert(get<0>(get<0>(t)),get<1>(get<0>(t)),get<0>(get<1>(t)),get<1>(get<1>(t)));
-		}
-		// printBucketSizes();
-	}
-
-	Grid(const double* xx, const double *yy, int h, int w, const int &node_count)
-	{
+		width = w;
+		height = h;
 		double minX = DBL_MAX;
 		double minY = DBL_MAX;
 		double maxX = DBL_MIN;
@@ -177,36 +145,36 @@ public:
 		{
 			for (int y = 0; y < h; ++y)
 			{
-				i = x*w + y;
-				minX = min(minX,xx[i]);
-				minY = min(minY,yy[i]);
-				maxX = max(maxX,xx[i]);
-				maxY = max(maxY,yy[i]);
+				i = 2*(x*w + y);
+				minX = min(minX,data[i]);
+				minY = min(minY,data[i+1]);
+				maxX = max(maxX,data[i]);
+				maxY = max(maxY,data[i+1]);
 			}
 		}
-		constructGrid(minX,minY,maxX,maxY,node_count);
+		ructGrid(minX,minY,maxX,maxY,node_count);
 		for (int x = 0; x < w; ++x)
 		{
 			for (int y = 0; y < h; ++y)
 			{
-				i = x*w+y;
+				i = 2*(x*w+y);
 				// cout << "Index of " << i << "\n";
-				insert(xx[i],yy[i],x,y);
+				insert(&data[i],&data[i+1]);
 			}
 		}
 	}
 
 	Grid()=default;
 
-	vector<Pixel> find_within(const double &x, const double &y, const double &r)
+	vector<pair<int,int>> find_within( double &x,  double &y,  double &r)
 	{
 		int cx = ceil((x-tlx)/NODE_WIDTH);
 		int cy = ceil((y-tly)/NODE_HEIGHT);
 		int rx = ceil(r/(NODE_WIDTH));
 		int ry = ceil(r/(NODE_HEIGHT));
 		int hypot2 = rx*rx+ry*ry;
-		vector<Pixel> ret;
-		vector<Pixel> tmp = data[cx][cy].queryNode(x,y,r);
+		vector<double*> ret;
+		vector<double*> tmp = data[cx][cy].queryNode(x,y,r);
 		ret.insert(ret.end(),tmp.begin(),tmp.end());
 		for (size_t i=1; i <= rx; i++) {
 				tmp = data[cx+i][cy].queryNode(x,y,r);
@@ -266,30 +234,27 @@ public:
 				}
 			}
 		}
-		return ret;
+		vector<pair<int,int>> ret2;
+		for (int i = 0; i < ret.size(); ++i)
+		{
+			pair<int,int> pos;
+			pos = pos_from_pointer(ret[i]);
+			ret2.push_back(pos);
+		}
+		return ret2;
 	}
 
-	bool insert(const double& x, const double& y, const int& px, const int &py)
+	bool insert( double* x, double* y)
 	{
 		auto indices = getIndices(x,y);
-		// if (get<0>(indices) >= 0 && get<1>(indices) >= 0 && get<0>(indices) < data.size() && get<1>(indices) < data[0].size())
-		// {
-			int i = lrint(get<0>(indices));
-			int j = lrint(get<1>(indices));
-			// if (data.find(i) == data.end())
-			// {
-			// 	data.insert(make_pair(i,unordered_map<int,Node>()));
-			// }
-			// if (data[i].find(j) == data[i].end())
-			// {
-			// 	data[i].insert(make_pair(j,Node()));
-			// }
-			data[i][j].addData(x,y,px,py);
-			++sz;
-			return true;
-		// }
-		// return false;
+		int i = lrint(get<0>(indices));
+		int j = lrint(get<1>(indices));
+		data[i][j].addData(x);
+		++sz;
+		return true;
 	}
+
+
 
 	void printBucketSizes()
 	{

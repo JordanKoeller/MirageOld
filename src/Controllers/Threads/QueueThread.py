@@ -15,24 +15,36 @@ class QueueThread(QtCore.QThread):
     '''
 
 
-    def __init__(self, signals):
+    def __init__(self, signals, experimentQueue,filemanager):
         '''
         Constructor
         '''
+        QtCore.QThread.__init__(self)
+        filemanager.getDirectory()
+        self.experimentQueue = experimentQueue
+        self.filemanager = filemanager
+        self.signals = signals
         
-    def run(self, experimentQueue,filemanager):
-        for params in experimentQueue:
+    def run(self):
+        print("Running")
+        ctr = 0
+        for params in self.experimentQueue:
+            ctr += 1
+            print("On params" + str(ctr))
             numTrials = params.extras.numTrials 
-            filemanager.newExperiment(params) #NEED TO IMPLIMENT
+            self.filemanager.newExperiment(params) #NEED TO IMPLIMENT
             exptRunner = ExperimentResultCalculator(params)
+            tc = 0
             for expt in range(0,numTrials):
-                params = params.extras.varyTrial(params) #NEED TO IMPLIMENT
+                print("On trial" + str(tc) + " Of params " + str(ctr))
+                params = exptRunner.varyTrial(params) #NEED TO IMPLIMENT
                 Model.updateParameters(params)
                 data = exptRunner.runExperiment() #NEED TO IMPLIMENT
-                filemanager.sendTrial(data)
-            filemanager.closeExperiment()
-        filemanager.flush()
-        filemanager.close()
+                self.filemanager.sendTrial(data)
+            self.filemanager.closeExperiment()
+        self.filemanager.flush()
+        self.filemanager.close()
+        self.signals['progressLabel'].emit("All experiments going in " + self.filemanager.name + " are finished.")
         
         
     def runTrial(self,params):

@@ -1,5 +1,5 @@
 #!/bin/sh
 cd src
-python Main.py
+python Main.py $@
 cd ..
 echo "\n\n\nDone"

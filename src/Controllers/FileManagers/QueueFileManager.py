@@ -42,15 +42,17 @@ class QueueFileManager(FileManager,QtCore.QThread):
 
     def getDirectory(self):
         self.directory = QtWidgets.QFileDialog.getExistingDirectory()
+        self.__name = self.directory
         return self.directory
     
-    def newExperiment(self,name,params):
+    def newExperiment(self,params):
+        name = params.extras.name
         filename = self.directory+"/"+name+".dat"
         self.exptFile = open(filename,'wb+')
         self.dataSizeArray = self.getDataSizeArray(params)
         self.__paramsFileManager.fileWriter(self.exptFile,params)
         self.signals['progressLabel'].emit("Processing "+self.getPretty(filename))
-        self.signals['progressBarMax'].emit(len(params.extras.numTrials))
+        self.signals['progressBarMax'].emit(params.extras.numTrials)
         self.dataSizeLoc = self.exptFile.tell()
         self.trialCount = 0 #Trial number to be written next. Important because it is the index used for indexing into the dataSizeArray to specify the size of the data for that trial.
         np.save(self.exptFile,self.dataSizeArray)
@@ -90,9 +92,12 @@ class QueueFileManager(FileManager,QtCore.QThread):
         ret = np.zeros((numtrials,numDataPoints),dtype=np.int64)
         return ret
     
-    def writeTrial(self, data):
+    def sendTrial(self, data):
         self.run(data)
-
+        
+    @property
+    def name(self):
+        return self.__name
         
     def run(self,data):
         '''

@@ -12,9 +12,13 @@ Memory profiling:
 		Jumps up to max after calling build_data. Maybe optimize the Grid???
 
 Experiment Queue
-	Finish, more parameters to specify, can flesh out in the 1-run case
+	add "clear" functionality to the tableview
+	
+Analysis package
+	I need to do that
 
 	
 Write functions to give stars velocity from a gaussian of velocities (specify peak, sigma) - 3D, so need to project to 2D
 
 Pixel scale in terms of angle (uas), theta_e of 0.5 M_sol point lenser, and R_g of quasar ------------------------------------DONE, NEEDS TESTING
+	Need to be able to input values with different scales. Right now can only output them.

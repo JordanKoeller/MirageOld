@@ -12,7 +12,7 @@ class ResultTypes(Enum):
     LIGHT_CURVE = 1
     MAGMAP = 2
     STARFIELD = 3
-    VIDEO = 4
+#     VIDEO = 4
 
 class ExperimentParams(object):
     '''
@@ -37,4 +37,10 @@ class ExperimentParams(object):
         
     def generatePath(self,params):
         pass #Need to impliment
+    
+
+    
+    @property
+    def desc(self):
+        return self.description
         

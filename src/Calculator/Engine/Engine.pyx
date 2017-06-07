@@ -198,28 +198,52 @@ cdef class Engine:
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil:
 		return 0
 		
-	cdef makeLightCurve(self, object mmin, object mmax, int resolution):  # Needs updateing
+	cpdef makeLightCurve(self, object mmin, object mmax, int resolution):  # Needs updateing
 		"""Deprecated"""
+		print("MAKING LIGHT CURVE")
+		while self.__preCalculating:
+			print("Waiting")
+			time.sleep(0.1)
+		mmax = mmax.to('rad')
+		mmin = mmin.to('rad')
 		cdef double stepX = (mmax.x - mmin.x) / resolution
 		cdef double stepY = (mmax.y - mmin.y) / resolution
 		cdef np.ndarray[np.float64_t, ndim=1] yAxis = np.ones(resolution)
-		cdef np.ndarray[np.float64_t, ndim=2] xVals = np.ndarray((resolution,2))
+# 		cdef np.ndarray[np.float64_t, ndim=2] xVals = np.ndarray((resolution,2))
 		cdef int i = 0
-		cdef double radius = self.__parameters.quasar.radius.value
+		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double x = mmin.x
 		cdef double y = mmin.y
-		cdef double gx = self.__parameters.galaxy.position.x  # Incorrect interfaced
-		cdef double gy = self.__parameters.galaxy.position.y  # Incorrect interfaced
-		for i in range(0, resolution):
-			x += stepX
-			y += stepY
-			xVals[i,0] = x
-			xVals[i,1] = y
-			yAxis[i] = self.query_data_length(x + gx, y + gy, radius)  # Incorrect interface
-			if self.__parameters.galaxy.hasStarVel:
-				self.__parameters.galaxy.moveStars(self.__parameters.dt)
-				self.reconfigure()
-		return (xVals, yAxis)
+		cdef bool hasVel = self.__parameters.galaxy.hasStarVel
+		cdef double trueLuminosity = self.trueLuminosity
+		cdef int aptLuminosity = 0
+		with nogil:
+			for i in range(0, resolution):
+				x += stepX
+				y += stepY
+# 				xVals[i,0] = x
+# 				xVals[i,1] = y
+				aptLuminosity = self.query_data_length(x, y, radius)  # Incorrect interface
+				yAxis[i] = (<double> aptLuminosity)/trueLuminosity
+				if hasVel:
+					with gil:
+						self.__parameters.galaxy.moveStars(self.__parameters.dt)
+						self.reconfigure()
+# 		return (xVals, yAxis)
+		return yAxis
+	
+	cpdef makeMagMap(self, object topLeft, double height, double width, int resolution): #######Possibly slow implementation. Temporary
+		########################## I STILL WANT TO SEE IF CAN MAKE MAGMAP FROM THE SOURCEPLANE RAY TRACE LOCATIONS, BUT IN THE MEANTIME
+		########################## I'M DOING IT THE OLD-FASHIONED WAY #################################################################
+		cdef double stepDown = height/resolution
+		retArr = np.ndarray((resolution,resolution), dtype=np.float64)
+		cdef int i = 0
+		for i in range(0,resolution):
+			s = topLeft - Vector2D(0,stepDown*i)
+			f = topLeft + Vector2D(width,-stepDown*i)
+			retArr[i] = self.makeLightCurve(s,f,resolution)
+		return retArr
+		
 
 	cpdef visualize(self):
 		"""

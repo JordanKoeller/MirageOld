@@ -12,7 +12,7 @@ class TrialVariance(Enum):
     Path = 3
     StarFieldAndPath = 6
 
-class Experiment(object):
+class ExperimentTMPBROKEN(object):
     '''
     classdocs
     '''

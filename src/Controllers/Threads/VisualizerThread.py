@@ -76,8 +76,6 @@ class VisualizerThread(QtCore.QThread):
             mag = Model.engine.getMagnification(len(pixels))
             self.__drawer.draw([Model.parameters,pixels],[mag])
             self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
-            # if self.circularPath:
-            Model.parameters.quasar.circularPath()
             Model.parameters.incrementTime(Model.parameters.dt)
             Model.moveStars()
             deltaT = time.clock() - timer
@@ -94,10 +92,10 @@ class VisualizerThread(QtCore.QThread):
         self.__calculating = False
         Model.parameters.setTime(0)
         pixels = Model.engine.getFrame()
+        self.__drawer.reset()
         mag = Model.engine.getMagnification(len(pixels))
         self.__drawer.draw([Model.parameters,pixels],[mag])
         self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
-        self.__drawer.reset()
 
     def visualize(self,params):
         self.progress_label_update.emit("Ray-Tracing. Please Wait.")

@@ -30,6 +30,7 @@ class Vector2D(object): #TODO: Make compatable with astropy units package
 		return complex(self.x,self.y)
 	def to(self,unit):
 		if self.unit == None:
+# 			print("Error. Tried to convert a unitless Vector2D to "+str(unit))
 			pass
 		else:
 			self.x = u.Quantity(self.x,self.unit)

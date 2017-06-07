@@ -211,10 +211,12 @@ public:
 
 	vector<Pixel> find_within(const double &x, const double &y, const double &r)
 	{
+//		cout << "Finding " << x << "," << y << ".\n";
 		int cx = ceil((x-tlx)/NODE_WIDTH);
 		int cy = ceil((y-tly)/NODE_HEIGHT);
 		int rx = ceil(r/(NODE_WIDTH));
 		int ry = ceil(r/(NODE_HEIGHT));
+//		cout << "Focused on " << cx << "," << cy << " With radii " << rx << "," << ry << ".\n";
 		int hypot2 = rx*rx+ry*ry;
 		vector<Pixel> ret;
 		vector<Pixel> tmp = data[cx][cy].queryNode(x,y,r);

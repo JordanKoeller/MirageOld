@@ -52,12 +52,3 @@ class Movable(Drawable):
         else:
             self.__observedPosition = Vector2D(x,y)
     
-    def circularPath(self):
-        vel = self.velocity.magnitude()
-        x,y = self.observedPosition.asTuple
-        tangent = 0
-        try:
-            tangent = -x/y
-        except ZeroDivisionError as e:
-            tangent = -0
-        self.__velocity = Vector2D(1,tangent).normalized()*self.velocity.magnitude()

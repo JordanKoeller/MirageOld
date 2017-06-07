@@ -42,6 +42,7 @@ class VisualizationController(GUIController):
         self.view.main_canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
         self.view.signals["imageCanvas"].connect(self.main_canvas_slot)
         self.view.signals["curveCanvas"].connect(self.curve_canvas_slot)
+        self.view.signals['paramLabel'].connect(self.qPoslabel_slot)
         self.parametersController = self.view.parametersController
         self.fileManager = VisualizationFileManager(self.view.signals)
         
@@ -107,5 +108,8 @@ class VisualizationController(GUIController):
 
     def curve_canvas_slot(self, x, y):
         self.view.curve_canvas.plot(x, y, clear=True)
+    
+    def qPoslabel_slot(self,pos):
+        self.view.sourcePosLabel.setText(pos)
         
 # 

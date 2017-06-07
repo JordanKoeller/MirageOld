@@ -84,6 +84,7 @@ cdef class Engine_Grid(Engine):
 		"""
 		while self.__preCalculating:
 			print("waiting")
+			time.sleep(0.1)
 		cdef double qx = self.__parameters.queryQuasarX
 		cdef double qy = self.__parameters.queryQuasarY
 		cdef double qr = self.__parameters.queryQuasarRadius

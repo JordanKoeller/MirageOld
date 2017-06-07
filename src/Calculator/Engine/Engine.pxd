@@ -35,7 +35,8 @@ cdef class Engine:
 	cdef ray_trace_gpu(self)
 	cpdef getMagnification(self, pixelCount)
 	cpdef visualize(self)
-	cdef makeLightCurve(self, object mmin, object mmax, int resolution)
+	cpdef makeLightCurve(self, object mmin, object mmax, int resolution)
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil
 	cdef ray_trace_cpu(self)
+	cpdef makeMagMap(self, object topLeft, double height, double width, int resolution)
 
