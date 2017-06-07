@@ -7,6 +7,7 @@ from Models import Model
 from Views.Drawer import DataVisualizerDrawer
 from Views.Drawer.CompositeDrawerFactory import LensedImageLightCurveComposite
 import numpy as np
+from memory_profiler import profile
 
 
 # Form implementation generated from reading ui file 'mainwindow.ui'

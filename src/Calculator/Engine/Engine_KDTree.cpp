@@ -1030,6 +1030,7 @@ struct __pyx_vtabstruct_10Calculator_6Engine_6Engine_Engine {
   PyObject *(*visualize)(struct __pyx_obj_10Calculator_6Engine_6Engine_Engine *, int __pyx_skip_dispatch);
   PyObject *(*makeLightCurve)(struct __pyx_obj_10Calculator_6Engine_6Engine_Engine *, PyObject *, PyObject *, int);
   unsigned int (*query_data_length)(struct __pyx_obj_10Calculator_6Engine_6Engine_Engine *, double, double, double);
+  PyObject *(*ray_trace_cpu)(struct __pyx_obj_10Calculator_6Engine_6Engine_Engine *);
 };
 static struct __pyx_vtabstruct_10Calculator_6Engine_6Engine_Engine *__pyx_vtabptr_10Calculator_6Engine_6Engine_Engine;
 

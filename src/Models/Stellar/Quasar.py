@@ -11,11 +11,12 @@ class Quasar(Movable,Cosmic):
 
 
 
-	def __init__(self,redshift = 0,radius = u.Quantity(0,'rad'),position = zeroVector,velocity = zeroVector):
+	def __init__(self,redshift = 0,radius = u.Quantity(0,'rad'),position = zeroVector,velocity = zeroVector, mass = u.Quantity(0,'solMass')):
 		Movable.__init__(self,position,velocity)
 		self.__radius = radius
 		self.updateDrawable(position = position,colorKey = 3)
 		self.updateCosmic(redshift = redshift)
+		self.__mass = mass
 
 	def update(self, redshift = None, position = None, radius = None, velocity = None):
 		self.updateCosmic(redshift = redshift)
@@ -55,7 +56,10 @@ class Quasar(Movable,Cosmic):
 	@property
 	def radius(self):
 		return self.__radius.to('rad')
-
+	
+	@property
+	def mass(self):
+		return self.__mass
 
 			
 	def __str__(self):

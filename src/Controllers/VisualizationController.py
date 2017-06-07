@@ -8,9 +8,9 @@ from PyQt5 import QtCore, QtGui
 
 from Controllers import GUIController
 from Controllers import VisualizerThread
+from Controllers.FileManagers.FITSFileManager import FITSFileManager
 from Controllers.FileManagers.VisualizationFileManager import VisualizationFileManager
 from Models import Model
-from Controllers.FileManagers.FITSFileManager import FITSFileManager
 
 
 class VisualizationController(GUIController):
@@ -19,6 +19,7 @@ class VisualizationController(GUIController):
     '''
     imageCanvas_signal = QtCore.pyqtSignal(object)
     curveCanvas_signal = QtCore.pyqtSignal(object, object)
+
 
     def __init__(self, view):
         '''

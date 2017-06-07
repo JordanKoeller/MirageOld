@@ -123,6 +123,29 @@ class Parameters(object):
 	@property
 	def correctedVelocityDispersion(self):
 		return math.sqrt(1-self.__galaxy.percentStars)*self.__galaxy.velocityDispersion
+	
+	@property
+	def pixelScale_angle(self):
+		return self.dTheta.to('arcsec')
+	
+	@property
+	def pixelScale_Rg(self):
+		absRg = (self.__quasar.mass*const.G/const.c/const.c).to('m')
+		angle = absRg/self.quasar.angDiamDist.to('m')
+		pixAngle = self.pixelScale_angle.to('rad').value
+		return pixAngle/angle
+	
+	@property
+	def pixelScale_thetaE(self):
+		pixAngle = self.pixelScale_angle.to('rad').value
+		thetaE = 4*const.G*u.Quantity(0.5,'solMass')*self.dLS/const.c/const.c/self.galaxy.angDiamDist/self.quasar.angDiamDist
+		return pixAngle/math.sqrt(thetaE)
+	
+	@property
+	def quasarRadius_rg(self):
+		absRg = (self.__quasar.mass*const.G/const.c/const.c).to('m')
+		angle = absRg/self.quasar.angDiamDist.to('m')
+		return self.quasar.radius.to('rad').value/angle.value
 
 	def setStars(self,stars):
 		self.__galaxy.update(stars = stars)

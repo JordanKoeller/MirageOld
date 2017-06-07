@@ -3,13 +3,14 @@ Created on Jun 4, 2017
 
 @author: jkoeller
 '''
+from PyQt5 import QtCore
 import imageio
 
 from Controllers.FileManagers.FileManager import FileManager
 import numpy as np
 
 
-class VisualizationFileManager(FileManager):
+class VisualizationFileManager(FileManager,QtCore.QThread):
     '''
     classdocs
     '''
@@ -20,6 +21,7 @@ class VisualizationFileManager(FileManager):
         Constructor
         '''
         FileManager.__init__(self,signals)
+        QtCore.QThread.__init__(self)
         self.__frames = []
         self.recording = False
         
@@ -66,6 +68,10 @@ class VisualizationFileManager(FileManager):
     def write(self, data = None):
         if self.recording:
             self.run()
+            self.recording = False
+            
+    def cancelRecording(self):
+        self.recording = False
             
     def run(self):
         self.writeHelper(None)

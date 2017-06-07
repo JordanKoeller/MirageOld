@@ -32,9 +32,10 @@ cdef class Engine:
 		public double time
 		__trueLuminosity
 
-	cdef ray_trace_gpu(self,use_GPU)
+	cdef ray_trace_gpu(self)
 	cpdef getMagnification(self, pixelCount)
 	cpdef visualize(self)
 	cdef makeLightCurve(self, object mmin, object mmax, int resolution)
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil
+	cdef ray_trace_cpu(self)
 

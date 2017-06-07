@@ -50,22 +50,12 @@ cdef class Engine_Grid(Engine):
 	cdef build_data(self, np.ndarray[np.float64_t, ndim=2] xArray, np.ndarray[np.float64_t, ndim=2] yArray,int binsize):
 		"""Builds the spatial data structure, based on the passed in numpy arrays representing the x and y values of each
 			pixel where it intersects the source plane after lensing effects have been accounted for."""
-		cdef int hw
-		hw = xArray.shape[0]
-		cdef int x, y
-		cdef int nodeSz = hw * hw
-		cdef pair[double, double] sp 
-		cdef pair[int, int] pp
-		cdef vector[pair[pair[double, double], pair[int, int]]] tmpVect
+		cdef int w = xArray.shape[0]
+		cdef int h = xArray.shape[1]
+		cdef double* x = <double*> xArray.data
+		cdef double* y = <double*> yArray.data
 		with nogil:
-			x = 0
-			y = 0
-			for x in range(0, hw):
-				for y in range(0, hw):
-					sp = pair[double, double](xArray[x, y], yArray[x, y])
-					pp = pair[int, int](< int > x, < int > y)
-					tmpVect.push_back(pair[pair[double, double], pair[int, int]](sp, pp))
-			self.__grid = Grid(tmpVect.begin(), tmpVect.end(), binsize)
+			self.__grid = Grid(x,y,w,h,binsize)
 
 	cdef vector[Pixel] query_data(self, double x, double y, double radius) nogil:
 		"""Returns all rays that intersect the source plane within a specified radius of a location on the source plane."""
@@ -80,8 +70,10 @@ cdef class Engine_Grid(Engine):
 		self.__preCalculating = True
 		finalData = self.ray_trace(use_GPU=True)
 		self.build_data(finalData[0], finalData[1],int(finalData[0].shape[0]**2/2))
+		del(finalData)
 		self.__preCalculating = False
 		print("Time calculating = " + str(time.clock() - begin) + " seconds.")
+# 		time.sleep(3)
 
 
 	@cython.boundscheck(False)  # turn off bounds-checking for entire function

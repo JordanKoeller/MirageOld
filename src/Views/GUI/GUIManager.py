@@ -5,6 +5,7 @@ Created on May 31, 2017
 '''
 
 import sys
+import time
 
 from PyQt5 import QtWidgets, uic, QtCore
 
@@ -24,7 +25,7 @@ class GUIManager(QtWidgets.QMainWindow):
     __signals = {}
     
 
-    def __init__(self, parent=None):
+    def __init__(self, timer, parent=None):
         '''
         Constructor
         '''

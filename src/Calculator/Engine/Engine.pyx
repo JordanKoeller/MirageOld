@@ -3,16 +3,17 @@
 from __future__ import division
 
 import ctypes
-import math
 import os
 import random
 import time
+import math
 
 from PyQt5 import QtGui, QtCore
 from astropy import constants as const
 from astropy import units as u
 from astropy.cosmology import WMAP7 as cosmo
 import cython
+from cython.parallel import prange
 import pyopencl.tools
 from scipy import interpolate
 
@@ -24,9 +25,10 @@ import pyopencl as cl
 
 cimport numpy as np
 from libcpp.vector cimport vector
-from libc.math cimport sin, cos, atan2, sqrt
+from libc cimport math as CMATH
 from libcpp.pair cimport pair
 from libcpp cimport bool
+
 
 cdef class Engine:
 	"""
@@ -52,10 +54,9 @@ cdef class Engine:
 
 			Performs calculations with OpenCL acceleration. If the computer's graphics processor supports 64-bit floating-point arithmetic,
 			the graphics processor may be used. Otherwise, will perform calculations on the CPU."""
-		return self.ray_trace_gpu(False)
+		return self.ray_trace_gpu()
 
-
-	cdef ray_trace_gpu(self, use_GPU):
+	cdef ray_trace_gpu(self):
 		begin = time.clock()
 		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
 		os.environ['PYOPENCL_CTX'] = '2'
@@ -64,6 +65,7 @@ cdef class Engine:
 		cdef double dTheta = self.__parameters.dTheta.value
 		cdef np.ndarray result_nparray_x = np.zeros((width, height), dtype=np.float64)
 		cdef np.ndarray result_nparray_y = np.zeros((width, height), dtype=np.float64)
+# 		cdef double* lol = <double*> result_nparray_x.data/
 		cdef double dS = self.__parameters.quasar.angDiamDist.value
 		cdef double dL = self.__parameters.galaxy.angDiamDist.value
 		cdef double dLS = self.__parameters.dLS.value
@@ -104,10 +106,63 @@ cdef class Engine:
 
 		cl.enqueue_copy(queue, result_nparray_x, result_buffer_x)
 		cl.enqueue_copy(queue, result_nparray_y, result_buffer_y)
+		del(result_buffer_x)
+		del(result_buffer_y)
 		print("Time Ray-Tracing = " + str(time.clock() - begin))
 		return (result_nparray_x, result_nparray_y)
 
 
+	@cython.boundscheck(False)
+	@cython.wraparound(False)
+	cdef ray_trace_cpu(self):
+		begin = time.clock()
+		cdef int height = self.__parameters.canvasDim
+		cdef int width = self.__parameters.canvasDim
+		cdef double dTheta = self.__parameters.dTheta.value
+		cdef np.ndarray[np.float64_t,ndim = 2] result_nparray_x = np.zeros((width, height), dtype=np.float64)
+		cdef np.ndarray[np.float64_t,ndim = 2] result_nparray_y = np.zeros((width, height), dtype=np.float64)
+		cdef double dS = self.__parameters.quasar.angDiamDist.value
+		cdef double dL = self.__parameters.galaxy.angDiamDist.value
+		cdef double dLS = self.__parameters.dLS.value
+		cdef np.ndarray[np.float64_t,ndim = 1] stars_mass, stars_x, stars_y
+		stars_mass, stars_x, stars_y = self.__parameters.galaxy.starArray
+		cdef double shearMag = self.__parameters.galaxy.shear.magnitude
+		cdef double shearAngle = self.__parameters.galaxy.shear.angle.value
+		cdef double centerX = self.__parameters.galaxy.position.to('rad').x
+		cdef double centerY = self.__parameters.galaxy.position.to('rad').y
+		cdef double sis_constant = 	np.float64(4 * math.pi * self.__parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
+		cdef double point_constant = (4 * const.G / (const.c * const.c)).to("lyr/solMass").value * dLS / dS / dL
+		cdef int numStars = len(stars_x)
+		cdef double pi2 = math.pi/2
+		cdef int x, y, i
+		cdef double incident_angle_x, incident_angle_y, r, deltaR_x, deltaR_y, phi
+		for x in prange(0,width,1,nogil=True,schedule='static',chunksize=int(width/4),num_threads=4):
+			for y in range(0,height):
+				incident_angle_x = (x - width/2)*dTheta
+				incident_angle_y = (y-height/2)*dTheta
+				
+				#SIS
+				deltaR_x = incident_angle_x - centerX
+				deltaR_y = incident_angle_y - centerY
+				r = sqrt(deltaR_x*deltaR_x+deltaR_y*deltaR_y)
+				if r == 0.0:
+					result_nparray_x[x,y] += deltaR_x 
+					result_nparray_y[x,y] += deltaR_y
+				else:
+					result_nparray_x[x,y] += deltaR_x*sis_constant/r 
+					result_nparray_y[x,y] += deltaR_y*sis_constant/r 
+				
+				#Shear
+				phi = 2*(shearAngle+pi2)-CMATH.atan2(deltaR_y,deltaR_x)
+				result_nparray_x[x,y] += shearMag*r*CMATH.cos(phi)
+				result_nparray_y[x,y] += shearMag*r*CMATH.sin(phi)
+				result_nparray_x[x,y] = deltaR_x - result_nparray_x[x,y]
+				result_nparray_y[x,y] = deltaR_y - result_nparray_y[x,y]	
+		print("Time Ray-Tracing = " + str(time.clock() - begin))			
+		return (result_nparray_x,result_nparray_y)
+	
+	
+	
 	def calTheta(self):
 		k = (4 * math.pi * (const.c ** -2).to('s2/km2').value * self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value * self.__parameters.galaxy.velocityDispersion.value * self.__parameters.galaxy.velocityDispersion.value) + (self.__parameters.quasar.position - self.__parameters.galaxy.position).magnitude()
 		theta = (k / (1 - (self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value) * self.__parameters.galaxy.shearMag))
@@ -131,7 +186,7 @@ cdef class Engine:
 		if pixelCount:
 			return pixelCount / self.trueLuminosity
 		else:
-			b = np.float64 (self.__tree.query_point_count(self.__parameters.quasar.observedPosition.x, self.__parameters.quasar.observedPosition.y, self.__parameters.quasar.radius.value))
+			b = np.float64 (self.query_data_length(self.__parameters.quasar.observedPosition.x, self.__parameters.quasar.observedPosition.y, self.__parameters.quasar.radius.value))
 			return b / self.trueLuminosity
 
 	def reconfigure(self):

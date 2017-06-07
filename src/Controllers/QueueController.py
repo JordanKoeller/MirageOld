@@ -12,6 +12,7 @@ Created on Jun 1, 2017
 from PyQt5 import QtCore
 
 from Controllers import GUIController
+from Controllers.FileManagers import QueueFileManager
 from Controllers.Threads.QueueThread import QueueThread
 from Models.ExperimentQueue.Experiment import Experiment
 from Models.ExperimentQueue.ExperimentQueueTable import ExperimentQueueTable
@@ -42,7 +43,7 @@ class QueueController(GUIController):
         tableSignal = self.view.signals['editExpt']
         self.table = ExperimentQueueTable(tableSignal,self.view.groupBox_5,editable = False)
         self.view.queueFrameLayout.insertWidget(1,self.table)
-#         self.view.queueStartButton.clicked.connect(self.printModel)
+        self.view.queueStartButton.clicked.connect(self.runExperiments)
         self.view.queueEditCancelButton.clicked.connect(self.cancelEdit)
         self.view.queueEditCancelButton.setEnabled(False)
         
@@ -105,6 +106,7 @@ class QueueController(GUIController):
     def runExperiments(self):
         runner = QueueThread(self.view.signals)
         fileRunner = QueueFileManager(self.view.signals)
+        fileRunner.getDirectory()
         
 
     def hide(self):

@@ -1,0 +1,28 @@
+An experiment Data File is as follows:
+	
+'.sim' extension
+NONCOMPRESSED. Compressed at the end upon closing the file. Not upon writing each part
+
+Layout:
+
+FILE HEAD
+pickled parameters file
+	--Includes the special parameters for the experiment
+	--Includes the name, description, number of trials, etc.
+	--Includes specification of magnification map for entire experiment, per-trial basis, or other
+.npy np.ndarray[np.int64_t, ndim={specified by parameters}] 
+	--array is of numtrials length
+	--upon initial writing, is all zeros
+	--after end of experiment, updated with head position of the file, relative to SEEK_HEAD.
+		--This way, can index to a specific trial just like an array by SEEKing to that position relative to SEEK_HEAD
+	--different dimensions specify the number of arrays necessary to express a trial
+	--key for what each array means is is the pickled parameters instance
+		--Options are:
+			--light curve
+			--fits data for mag map
+			--starfield data
+
+FILE DATA
+All the .npy data for each trial.
+	--specified in the parameters file, what each array is.
+	

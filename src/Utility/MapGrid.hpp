@@ -4,6 +4,7 @@
 #include <utility>
 #include <algorithm>
 #include <cfloat>
+#include <unordered_map>
 
 using namespace std;
 
@@ -91,7 +92,8 @@ private:
 		tly = y1;
 		int rootNodes = (int) sqrt(node_count);
 		// cout << "Number of nodes = " << rootNodes << "\n";
-		data = std::vector<std::vector<Node>>(rootNodes+1,std::vector<Node>(rootNodes+1));
+		data = std::unordered_map<int,std::unordered_map<int,Node>>();
+//		data = std::vector<std::vector<Node>>(rootNodes+1,std::vector<Node>(rootNodes+1));
 		NODE_HEIGHT = (y2 - y1)/ (float) rootNodes;
 		NODE_WIDTH = (x2 - x1)/(float) rootNodes;
 		NODE_HEIGHT > NODE_WIDTH ? LARGE_AXIS = NODE_HEIGHT : LARGE_AXIS = NODE_WIDTH;
@@ -131,7 +133,8 @@ private:
 	double tlx;
 	double tly;
 	unsigned int sz;
-	std::vector<std::vector<Node>> data;
+	std::unordered_map<int,std::unordered_map<int,Node>> data;
+//	std::vector<std::vector<Node>> data;
 public:
 
 	Grid(const double &top_left_x, const double& top_left_y, const double& bottom_right_x,const double& bottom_right_y, const int &node_count)
@@ -160,10 +163,8 @@ public:
 			pair<pair<double,double>,pair<int,int>> &t = *i;
 			insert(get<0>(get<0>(t)),get<1>(get<0>(t)),get<0>(get<1>(t)),get<1>(get<1>(t)));
 		}
-		cout << "Size == " <<getSize() << "\n";
 		// printBucketSizes();
 	}
-	Grid()=default;
 
 	Grid(const double* xx, const double *yy, int h, int w, const int &node_count)
 	{
@@ -195,19 +196,7 @@ public:
 		}
 	}
 
-	int getSize()
-	{
-		int ret = 0;
-		for (auto i:data)
-		{
-			for (auto j:i)
-			{
-				ret += j.node_data.capacity()*sizeof(j.node_data[0]) + sizeof(j);
-			}
-			ret += i.capacity()*sizeof(i[0]);
-		}
-		return ret + sizeof(*this);
-	}
+	Grid()=default;
 
 	vector<Pixel> find_within(const double &x, const double &y, const double &r)
 	{
@@ -283,13 +272,23 @@ public:
 	bool insert(const double& x, const double& y, const int& px, const int &py)
 	{
 		auto indices = getIndices(x,y);
-		if (get<0>(indices) >= 0 && get<1>(indices) >= 0 && get<0>(indices) < data.size() && get<1>(indices) < data[0].size())
-		{
-			data[lrint(get<0>(indices))][lrint(get<1>(indices))].addData(x,y,px,py);
+		// if (get<0>(indices) >= 0 && get<1>(indices) >= 0 && get<0>(indices) < data.size() && get<1>(indices) < data[0].size())
+		// {
+			int i = lrint(get<0>(indices));
+			int j = lrint(get<1>(indices));
+			// if (data.find(i) == data.end())
+			// {
+			// 	data.insert(make_pair(i,unordered_map<int,Node>()));
+			// }
+			// if (data[i].find(j) == data[i].end())
+			// {
+			// 	data[i].insert(make_pair(j,Node()));
+			// }
+			data[i][j].addData(x,y,px,py);
 			++sz;
 			return true;
-		}
-		return false;
+		// }
+		// return false;
 	}
 
 	void printBucketSizes()
@@ -297,9 +296,9 @@ public:
 		vector<size_t> ret;
 		for (auto i:data)
 		{
-			for (auto j:i)
+			for (auto j:get<1>(i))
 			{
-				ret.push_back(j.node_data.size());
+				ret.push_back(get<1>(j).node_data.size());
 			}
 		}
 		for (auto i:ret)
@@ -323,7 +322,5 @@ public:
 		}
 		return true;
 	}
-
-	// pair<double,double> 
 
 };

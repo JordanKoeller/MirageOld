@@ -6,6 +6,8 @@ Created on May 31, 2017
 
 
 #Code associated with constructing/deconstructing an instance of a Parameters Class 
+import math
+
 from PyQt5 import QtCore
 
 from Controllers import GUIController
@@ -49,6 +51,7 @@ class ParametersController(GUIController):
             qPosition = self.view.vectorFromQString(self.view.qPosition.text()).setUnit('arcsec').to('rad')
             qRadius = u.Quantity(float(self.view.qRadius.text()), 'arcsec')
             qRedshift = float(self.view.qRedshift.text())
+            qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')
 
             gRedshift = float(self.view.gRedshift.text())
             gVelDispersion = u.Quantity(float(self.view.gVelDispersion.text()), 'km/s')
@@ -62,13 +65,16 @@ class ParametersController(GUIController):
             displayQuasar = self.view.displayQuasar.isChecked()
             displayGalaxy = self.view.displayGalaxy.isChecked()
 
-            quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity)
+            quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity, mass = qBHMass)
             galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter)
             params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
-            # params.circularPath = self.circularPathBox.isChecked()
+            self.view.pixelAngleLabel_angle.setText(str(self.__round_to_n(params.pixelScale_angle.value,4)))
+            self.view.pixelAngleLabel_thetaE.setText(str(self.__round_to_n(params.pixelScale_thetaE,4)))
+            self.view.pixelAngleLabel_Rg.setText(str(self.__round_to_n(params.pixelScale_Rg,4)))
+            self.view.quasarRadiusRGEntry.setText(str(self.__round_to_n(params.quasarRadius_rg, 4)))
             return params
         except ValueError:
-            self.progress_label_slot("Error. Input could not be parsed to numbers.")
+            self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
             return None
 
 
@@ -91,8 +97,13 @@ class ParametersController(GUIController):
         self.view.dimensionInput.setText(str(parameters.canvasDim))
         self.view.displayQuasar.setChecked(parameters.showQuasar)
         self.view.displayGalaxy.setChecked(parameters.showGalaxy)
+        self.view.quasarBHMassEntry.setText(str(parameters.quasar.mass.to('solMass').value))
         
-
+    def __round_to_n(self, x,n = 6):
+        if x == 0.0:
+            return 0
+        else:
+            return round(float(x), -int(math.floor(math.log10(abs(float(x))))) + (n - 1))
             
     def saveParams(self):
         """Prompts the user for a file name, then saves the lensing system's parameters to be loaded in at a later session."""
