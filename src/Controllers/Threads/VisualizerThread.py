@@ -6,8 +6,6 @@ from PyQt5 import QtCore
 from Models import Model
 from Views.Drawer import DataVisualizerDrawer
 from Views.Drawer.CompositeDrawerFactory import LensedImageLightCurveComposite
-import numpy as np
-from memory_profiler import profile
 
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
@@ -91,11 +89,18 @@ class VisualizerThread(QtCore.QThread):
         self.progress_label_update.emit("Restarted.")
         self.__calculating = False
         Model.parameters.setTime(0)
+        print("Set frame done")
         pixels = Model.engine.getFrame()
-        self.__drawer.reset()
+        print("Got frame")
         mag = Model.engine.getMagnification(len(pixels))
+        print("Got magnification")
         self.__drawer.draw([Model.parameters,pixels],[mag])
+        print("Drawn")
         self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
+        print("emitted spl update")
+        self.__drawer.reset()
+        print("Reseting drawer")
+        print("\n\n\nDONE\n\n\n")
 
     def visualize(self,params):
         self.progress_label_update.emit("Ray-Tracing. Please Wait.")

@@ -75,6 +75,7 @@ cdef class PlotDrawer(Drawer):
 		self.xAxis = np.arange(0,1000,dtype=np.float64)
 		self.yAxis = np.zeros_like(self.xAxis,dtype=np.float64)
 		self.index = 0
+# 		self.plotAxes(self.xAxis,self.yAxis)
 
 
 cdef class CompositeDrawer:

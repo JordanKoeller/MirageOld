@@ -14,7 +14,7 @@ class __Model(object):
     def __init__(self):
         self.__Engine = Engine()
     
-    def updateParameters(self,params):
+    def updateParameters(self, params):
         if self.parameters:
             params.setTime(self.parameters.time)
             params.quasar.setPos(self.parameters.quasar.observedPosition)

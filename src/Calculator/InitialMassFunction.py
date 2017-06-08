@@ -14,7 +14,6 @@
 
 import logging
 import pdb
-import time
 
 import numpy as np
 
@@ -134,7 +133,6 @@ class IMF(object):
                 old = False
                 if old:
                     # Calculate number and masses of companions
-                    t1 = time.time()
                     for ii in range(len(newMasses)):
                         if newIsMultiple[ii]:
                             # determine number of companions
@@ -154,13 +152,10 @@ class IMF(object):
 
                             # Double check for the case when we drop all companions.
                             # This happens a lot near the minimum allowed mass.
-                            if len(compMasses) == 0:
-                                newIsMultiple[ii] == False
                 #-----------------------------------#
                     newTotalMassTally = newSystemMasses.sum()
                     isMultiple = np.append(isMultiple, newIsMultiple)
                     systemMasses = np.append(systemMasses, newSystemMasses)
-                    t2 = time.time()
             else:
                 newTotalMassTally = newMasses.sum()
 
@@ -694,7 +689,6 @@ def inv_prim_log_normal(x, mean_logm, sigma_logm):
     returnFloat = (type(x) == float) and (type(mean_logm) == float) and \
         (type(sigma_logm) == float)
 
-    m = np.atleast_1d(x)
     mean_logm = np.atleast_1d(mean_logm)
     sigma_logm = np.atleast_1d(sigma_logm)
     

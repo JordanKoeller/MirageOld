@@ -56,14 +56,13 @@ class Parameters(object):
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
 
 	def generateStars(self):
-		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen/100
+		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
 		generator = Kroupa_2001()
-		if m_stars < 1:
-			print("Not enough mass in stars")
-			m_stars = 10.0
-		print("Starting generator with mass of "+str(m_stars))
+		m_stars = m_stars.value
+		if m_stars < 1.0:
+			print("NOT ENOUGH MASS FOR STAR FIELD. GENERATION TERMINATED")
+			return
 		starMasses = generator.generate_cluster(m_stars)[0]
-		print("Done.")
 		self.__galaxy.setStarMasses(starMasses,self)
 
 	@property
@@ -116,9 +115,8 @@ class Parameters(object):
 	def smoothMassOnScreen(self): # WILL NEED TO COME BACK TO THIS
 		l = (self.dTheta*self.canvasDim).to('rad').value*self.__galaxy.angDiamDist.to('m')
 		r_in = self.__galaxy.position.to('rad').magnitude()*self.__galaxy.angDiamDist.to('m')
-		ret = (l * self.__galaxy.velocityDispersion**2 * math.log(1+l/r_in)/2/const.G).to('solMass')
-		print(ret)
-		return ret.value
+		ret = ((self.__galaxy.velocityDispersion**2)*l*l/2/const.G/r_in).to('solMass')
+		return ret
 
 	@property
 	def correctedVelocityDispersion(self):
@@ -163,11 +161,11 @@ class Parameters(object):
 
 	@property
 	def queryQuasarX(self):
-		return self.quasar.observedPosition.x
+		return self.quasar.observedPosition.to('rad').x
 
 	@property
 	def queryQuasarY(self):
-		return self.quasar.observedPosition.y
+		return self.quasar.observedPosition.to('rad').y
 				
 	@property
 	def queryQuasarRadius(self):
@@ -177,14 +175,19 @@ class Parameters(object):
 
 	def isSimilar(self,other):
 		if self.dTheta != other.dTheta:
+			print('failed dtheta')
 			return False
 		if self.canvasDim != other.canvasDim:
+			print('failed canvasdim')
 			return False
 		if self.starMassVariation != other.starMassVariation:
+			print('faield starmassvariation')
 			return False
-		if self.galaxy != other.galaxy:
+		if not self.galaxy.isSimilar(other.galaxy):
+			print('failed galaxy')
 			return False
 		if self.quasar.redshift != other.quasar.redshift:
+			print('faield qredshift')
 			return False
 		return True
 

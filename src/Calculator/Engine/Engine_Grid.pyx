@@ -66,13 +66,13 @@ cdef class Engine_Grid(Engine):
 		return self.query_data(x,y,radius).size()
 
 	def reconfigure(self):
-		begin = time.clock()
 		self.__preCalculating = True
 		finalData = self.ray_trace(use_GPU=True)
+		begin = time.clock()
 		self.build_data(finalData[0], finalData[1],int(finalData[0].shape[0]**2/2))
 		del(finalData)
 		self.__preCalculating = False
-		print("Time calculating = " + str(time.clock() - begin) + " seconds.")
+		print("Time building grid = " + str(time.clock() - begin) + " seconds.")
 # 		time.sleep(3)
 
 
@@ -88,6 +88,8 @@ cdef class Engine_Grid(Engine):
 		cdef double qx = self.__parameters.queryQuasarX
 		cdef double qy = self.__parameters.queryQuasarY
 		cdef double qr = self.__parameters.queryQuasarRadius
+		print(self.__parameters.quasar.position)
+# 		print("Querying" + str(qx)+","+str(qy)+","+str(qr))
 		cdef vector[Pixel] ret = self.query_data(qx,qy,qr)
 		cdef int retf = ret.size()
 		cdef int i = 0

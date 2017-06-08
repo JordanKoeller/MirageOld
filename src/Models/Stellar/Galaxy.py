@@ -51,6 +51,7 @@ class Galaxy(Drawable, Cosmic):
 		return (massArr, xArr, yArr)
 
 	def setStarMasses(self, masses, parameters):
+		self.__stars = []
 		for i in range(0, len(masses)):
 			self.__stars.append(PointLenser(Vector2D(rand.random() - 0.5,
 					rand.random() - 0.5, 'rad') * (parameters.canvasDim - 2) * parameters.dTheta.value,
@@ -80,17 +81,27 @@ class Galaxy(Drawable, Cosmic):
 
 
 	def __eq__(self, other):
+		if self.isSimilar(other) and self.__stars == other.stars:
+			return True
+		else:
+			return False
+	
+	def isSimilar(self,other):
 		if other == None:
 			return False
+		if self.redshift != other.redshift:
+			print("failed gredshift")
 		if self.percentStars != other.percentStars:
+			print('failed percent')
 			return False
 		if self.shear != other.shear:
+			print('failed shear')
 			return False
-		if self.center != other.center:
+		if self.center.to('arcsec') != other.center.to('arcsec'):
+			print('failed gcenter')
 			return False
 		if self.velocityDispersion != other.velocityDispersion:
-			return False
-		if self.stars != other.stars:
+			print('failed vd')
 			return False
 		return True
 

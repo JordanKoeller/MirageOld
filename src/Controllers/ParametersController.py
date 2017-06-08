@@ -66,7 +66,6 @@ class ParametersController(GUIController):
             displayGalaxy = self.view.displayGalaxy.isChecked()
 
             quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity, mass = qBHMass)
-            print(quasar)
             galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter)
             params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
             self.view.pixelAngleLabel_angle.setText(str(self.__round_to_n(params.pixelScale_angle.value,4)))
