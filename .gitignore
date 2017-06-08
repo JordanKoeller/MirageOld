@@ -14,7 +14,7 @@ __pycache__/
 # Cython generated files
 *.html
 *.c
-#*.cpp MIGHT BE A BAD IDEA TO COMMENT THIS OUT
+*.cpp
 
 # C Code Testing Stuff
 a.out
@@ -24,6 +24,10 @@ a.out
 *.jpg
 *.mp4
 *.png
+
+#Profiling files, stray results data files
+*.dat
+
 
 # Distribution / packaging
 .Python

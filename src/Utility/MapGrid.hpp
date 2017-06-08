@@ -21,9 +21,9 @@ private:
 		double dy = y2-y1;
 		return sqrt(dx*dx+dy*dy);
 	}
-	inline static bool within( double &ptx,  double &pty,  double &radius,  double *data)
+	inline static bool within( double &ptx,  double &pty,  double &radius,  double *dats)
 	{
-		if (hypot(ptx,pty,*data,*(data+1)) <= radius)
+		if (hypot(ptx,pty,*dats,*(dats+1)) <= radius)
 		{
 			return true;
 		}
@@ -31,31 +31,6 @@ private:
 			return false;
 		}
 	}
-
-	// static bool withinQuad( pair<double,double> &p, vector<pair<double,double>> &corners)
-	// {
-	// 	unsigned int crossings = 0;
-	// 	for (int c = 0; c < corners.size(); ++c)
-	// 	{
-	// 		auto &c1 = corners[c];
-	// 		auto &c2 = corners[c%corners.size()];
-	// 		if (get<0>(c1) >= get<0>(p) || get<0>(c2) >= get<0>(p))
-	// 		{
-	// 			if ((get<1>(c1) < get<1>(p) && get<1>(c2) > get<1>(c2)) || (get<1>(c1) > get<1>(p) && get<1>(c2) < get<1>(c2)))
-	// 			{
-	// 				crossings++;
-	// 			}
-	// 		}
-	// 	}
-	// 	if (crossings % 2 == 1)
-	// 	{
-	// 		return true;
-	// 	}
-	// 	else
-	// 	{
-	// 		return false;
-	// 	}
-	// }
 
 	inline bool overlap( double &objx,  double& objy,  double &radius,  int &i,  int &j) 
 	{
@@ -69,8 +44,8 @@ private:
 
 	inline pair<int,int> pos_from_pointer(double* pos)
 	{
-		int diff = (pos - rawData)/2;
-		int y = diff % width;
+		unsigned int diff = (pos-rawData)/2;
+		int y = diff % height;
 		int x = diff / height;
 		return make_pair(x,y);
 	}
@@ -83,14 +58,14 @@ private:
 	}
 
 
-	void ructGrid( double& x1,  double& y1,  double& x2,  double& y2,  int &node_count)
+	void constructGrid( double& x1,  double& y1,  double& x2,  double& y2,  int &node_count)
 	{
 		tlx = x1;
 		tly = y1;
 		int rootNodes = (int) sqrt(node_count);
-		data = std::unordered_map<int,std::unordered_map<int,Node>>();
-		NODE_HEIGHT = (y2 - y1)/ (float) rootNodes;
-		NODE_WIDTH = (x2 - x1)/(float) rootNodes;
+		// data = std::vector<std::vector<Node>>(rootNodes+1,std::vector<Node>(rootNodes+1));
+		NODE_HEIGHT = (y2 - y1)/ (double) rootNodes;
+		NODE_WIDTH = (x2 - x1)/(double) rootNodes;
 		NODE_HEIGHT > NODE_WIDTH ? LARGE_AXIS = NODE_HEIGHT : LARGE_AXIS = NODE_WIDTH;
 
 	}
@@ -129,13 +104,14 @@ private:
 	unsigned int sz;
 	int width;
 	int height;
-	std::unordered_map<int,std::unordered_map<int,Node>> data;
+	unordered_map<int,unordered_map<int,Node>> data;
 
 public:
-	Grid(double* data, int h, int w, int ndim, int node_count)
+	Grid(double* dats, int h, int w, int ndim, int node_count)
 	{
 		width = w;
 		height = h;
+		rawData = dats;
 		double minX = DBL_MAX;
 		double minY = DBL_MAX;
 		double maxX = DBL_MIN;
@@ -146,20 +122,20 @@ public:
 			for (int y = 0; y < h; ++y)
 			{
 				i = 2*(x*w + y);
-				minX = min(minX,data[i]);
-				minY = min(minY,data[i+1]);
-				maxX = max(maxX,data[i]);
-				maxY = max(maxY,data[i+1]);
+				minX = min(minX,dats[i]);
+				minY = min(minY,dats[i+1]);
+				maxX = max(maxX,dats[i]);
+				maxY = max(maxY,dats[i+1]);
 			}
 		}
-		ructGrid(minX,minY,maxX,maxY,node_count);
+		constructGrid(minX,minY,maxX,maxY,node_count);
 		for (int x = 0; x < w; ++x)
 		{
 			for (int y = 0; y < h; ++y)
 			{
 				i = 2*(x*w+y);
 				// cout << "Index of " << i << "\n";
-				insert(&data[i],&data[i+1]);
+				insert(rawData+i);
 			}
 		}
 	}
@@ -196,37 +172,37 @@ public:
 				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r)
 				{
 					if ((i+2)*NODE_WIDTH*(i+2)*NODE_WIDTH + (j+2)*NODE_HEIGHT*(j+2)*NODE_HEIGHT < r*r) {
-						if (i+cx >= 0 && i+cx < data.size() && j+cy >= 0 && j+cy < data[0].size()) {
+						if (data.find(i+cx) != data.end() && data[i+cx].find(cy+j) != data[i+cx].end())  {
 							auto &node = data[i+cx][j+cy];
 							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
 						}
-						if (cx-i >= 0 && cx-i < data.size() && j+cy >= 0 && j+cy < data[0].size()) {	
+						if (data.find(cx-i) != data.end() && data[cx-i].find(cy+j) != data[cx-i].end()) {	
 							auto &node = data[cx-i][cy+j];
 							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
 						}
-							if (cx+i >= 0 && cx+i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
+							if (data.find(cx+i) != data.end() && data[cx+i].find(cy-j) != data[cx+i].end()) {	
 							auto &node = data[i+cx][cy-j];
 							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
 						}
-							if (cx-i >= 0 && cx-i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
+							if (data.find(cx-i) != data.end() && data[cx-i].find(cy-j) != data[cx-i].end()) {	
 							auto &node = data[cx-i][cy-j];
 							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
 						}						
 					}
 					else {
-						if (i+cx >= 0 && i+cx < data.size() && j+cy >= 0 && j+cy < data[0].size()) {
+						if (data.find(i+cx) != data.end() && data[i+cx].find(cy+j) != data[i+cx].end()) {
 							tmp = data[i+cx][j+cy].queryNode(x,y,r);
 							ret.insert(ret.end(),tmp.begin(),tmp.end());
 						}
-						if (cx-i >= 0 && cx-i < data.size() && j+cy >= 0 && j+cy < data[0].size()) {	
+						if (data.find(cx-i) != data.end() && data[cx-i].find(cy+j) != data[cx-i].end()) {	
 							tmp = data[cx-i][cy+j].queryNode(x,y,r);
 							ret.insert(ret.end(),tmp.begin(),tmp.end());
 						}
-							if (cx+i >= 0 && cx+i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
+							if (data.find(cx+i) != data.end() && data[cx+i].find(cy-j) != data[cx+i].end()) {	
 							tmp = data[i+cx][cy-j].queryNode(x,y,r);
 							ret.insert(ret.end(),tmp.begin(),tmp.end());
 						}
-							if (cx-i >= 0 && cx-i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
+							if (data.find(cx-i) != data.end() && data[cx-i].find(cy-j) != data[cx-i].end()) {	
 							tmp = data[cx-i][cy-j].queryNode(x,y,r);
 							ret.insert(ret.end(),tmp.begin(),tmp.end());
 						}
@@ -244,33 +220,38 @@ public:
 		return ret2;
 	}
 
-	bool insert( double* x, double* y)
+	bool insert( double* x)
 	{
+		cout << "Inserting " << x << "\n";
+		double * y = x + 1;
 		auto indices = getIndices(x,y);
-		int i = lrint(get<0>(indices));
-		int j = lrint(get<1>(indices));
-		data[i][j].addData(x);
-		++sz;
-		return true;
+		// if (get<0>(indices) >= 0 && get<1>(indices) >= 0 && get<0>(indices) < data.size() && get<1>(indices) < data[0].size())
+		// {
+			int i = get<0>(indices);
+			int j = get<1>(indices);
+			data[i][j].addData(x);
+			++sz;
+			return true;
+		// }
 	}
 
 
 
-	void printBucketSizes()
-	{
-		vector<size_t> ret;
-		for (auto i:data)
-		{
-			for (auto j:get<1>(i))
-			{
-				ret.push_back(get<1>(j).node_data.size());
-			}
-		}
-		for (auto i:ret)
-		{
-			cout << i << "\n";
-		}
-	}
+	// void printBucketSizes()
+	// {
+	// 	vector<size_t> ret;
+	// 	for (auto i:data)
+	// 	{
+	// 		for (auto j:get<1>(i))
+	// 		{
+	// 			ret.push_back(get<1>(j).node_data.size());
+	// 		}
+	// 	}
+	// 	for (auto i:ret)
+	// 	{
+	// 		cout << i << "\n";
+	// 	}
+	// }
 
 
 	~Grid()=default;

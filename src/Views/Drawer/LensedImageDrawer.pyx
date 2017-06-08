@@ -32,10 +32,12 @@ cdef class LensedImageDrawer(ImageDrawer):
 			parameters.quasar.draw(canvas,parameters)
 		cdef int pixel = 0
 		cdef int end = pixels.shape[0]
-		if end > 1:
-			with nogil:
-				for pixel in range(0,end):
-					canvas[pixels[pixel,0],pixels[pixel,1]] = 1
+# 		if end > 1:
+# 			with nogil:
+# 				for pixel in range(0,end):
+# 					canvas[pixels[pixel,0],pixels[pixel,1]] = 1
+		for i in pixels:
+			canvas[i[0],i[1]] = 1
 		# self.drawCriticalRadius(canvas,parameters)
 		# self.drawCritLines(pixels,parameters,canvas)
 		return self.drawImage(canvas,None)
