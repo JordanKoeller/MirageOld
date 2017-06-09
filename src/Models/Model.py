@@ -4,7 +4,6 @@ Created on Jun 1, 2017
 @author: jkoeller
 '''
 
-import time
 
 
 from Calculator.Engine.Engine_Grid import Engine_Grid as Engine

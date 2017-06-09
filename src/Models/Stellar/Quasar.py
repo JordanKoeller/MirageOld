@@ -2,7 +2,7 @@
 from Models import Cosmic
 from Models import Movable
 from Utility import Vector2D
-from Utility.Vector2D import zeroVector
+from Utility import zeroVector
 import astropy.units as u
 
 
@@ -36,16 +36,16 @@ class Quasar(Movable,Cosmic):
 			for y in range(0,radius+1):
 				if x*x + y*y <= rSquared:
 					if center.x+x > 0 and center.y+y > 0 and center.x+x < parameters.canvasDim and center.y+y < parameters.canvasDim:
-						img[center.x+x,center.y+y] = self._Drawable__colorKey
+						img[int(center.x+x),int(center.y+y)] = self._Drawable__colorKey
 						count += 1
 					if center.x+x > 0 and center.y-y > 0 and center.x+x < parameters.canvasDim and center.y-y < parameters.canvasDim:
-						img[center.x+x,center.y-y] = self._Drawable__colorKey
+						img[int(center.x+x),int(center.y-y)] = self._Drawable__colorKey
 						count += 1
 					if center.x-x > 0 and center.y+y > 0 and center.x-x < parameters.canvasDim and center.y+y < parameters.canvasDim:
-						img[center.x-x,center.y+y] = self._Drawable__colorKey
+						img[int(center.x-x),int(center.y+y)] = self._Drawable__colorKey
 						count += 1
 					if center.x-x > 0 and center.y-y > 0 and center.x-x < parameters.canvasDim and center.y-y < parameters.canvasDim:
-						img[center.x-x,center.y-y] = self._Drawable__colorKey
+						img[int(center.x-x),int(center.y-y)] = self._Drawable__colorKey
 						count += 1
 
 

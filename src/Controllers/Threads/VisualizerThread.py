@@ -86,6 +86,7 @@ class VisualizerThread(QtCore.QThread):
         self.__calculating = False
 
     def restart(self):
+        print(Model.parameters)
         self.progress_label_update.emit("Restarted.")
         self.__calculating = False
         Model.parameters.setTime(0)

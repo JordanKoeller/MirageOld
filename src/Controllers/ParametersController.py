@@ -47,8 +47,8 @@ class ParametersController(GUIController):
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
         try:
-            qVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit='arcsec')
-            qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit='arcsec')
+            qVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit='arcsec').to('rad')
+            qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit='arcsec').to('rad')
             qRadius = u.Quantity(float(self.view.qRadius.text()), 'arcsec')
             qRedshift = float(self.view.qRedshift.text())
             qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')
@@ -59,7 +59,7 @@ class ParametersController(GUIController):
             gShearMag = float(self.view.gShearMag.text())
             gShearAngle = u.Quantity(float(self.view.gShearAngle.text()), 'degree')
 
-            displayCenter = self.view.vectorFromQString(self.view.gCenter.text(), unit='arcsec')
+            displayCenter = self.view.vectorFromQString(self.view.gCenter.text(), unit='arcsec').to('rad')
             dTheta = u.Quantity(float(self.view.scaleInput.text()), 'arcsec').to('rad')
             canvasDim = int(self.view.dimensionInput.text())
             displayQuasar = self.view.displayQuasar.isChecked()
@@ -72,8 +72,10 @@ class ParametersController(GUIController):
             self.view.pixelAngleLabel_thetaE.setText(str(self.__round_to_n(params.pixelScale_thetaE,4)))
             self.view.pixelAngleLabel_Rg.setText(str(self.__round_to_n(params.pixelScale_Rg,4)))
             self.view.quasarRadiusRGEntry.setText(str(self.__round_to_n(params.quasarRadius_rg, 4)))
+#             print(zeroVector)
+#             print(params)
             return params
-        except ValueError:
+        except AttributeError:
             self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
             return None
 

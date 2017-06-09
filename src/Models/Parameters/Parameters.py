@@ -5,7 +5,7 @@ from astropy.cosmology import WMAP7 as cosmo
 from astropy import constants as const
 from astropy import units as u 
 import math
-from Utility.Vector2D import zeroVector
+from Utility import zeroVector
 
 class Parameters(object):
 	"""Stores and processes all the information regarding the setup for a 

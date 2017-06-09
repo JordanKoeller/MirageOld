@@ -51,4 +51,5 @@ class Movable(Drawable):
             self.__observedPosition = x
         else:
             self.__observedPosition = Vector2D(x,y)
+            print("Throwing second possetter")
     

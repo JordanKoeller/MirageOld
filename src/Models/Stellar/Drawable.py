@@ -1,4 +1,4 @@
-from Utility.Vector2D import zeroVector
+from Utility import zeroVector
 
 
 class Drawable(object):
@@ -18,6 +18,7 @@ class Drawable(object):
 	def updateDrawable(self,**kwargs):
 		for key,value in kwargs.items():
 			try:
+# 				print(str(value))
 				getattr(self,"_Drawable__"+key)
 				if value != None:
 					setattr(self,"_Drawable__"+key,value)
@@ -30,7 +31,7 @@ class Drawable(object):
 
 	@property
 	def position(self):
-		return self.__position
+		return self.__position.to('rad')
 
 	@property
 	def colorKey(self):
