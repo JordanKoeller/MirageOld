@@ -14,7 +14,7 @@ class AbstractFileWrapper(object):
     '''
 
 
-    def __init__(self, filepath, fileobject=None, params=None, lookuptable=None):
+    def __init__(self, filepath, fileobject=None, params=None, lookuptable=[]):
         '''
         Constructor
         '''
@@ -30,21 +30,36 @@ class AbstractFileWrapper(object):
                 self._params = pickle.load(self._fileobject)
         else:
             self._params = params
-        if not lookuptable:
+        if lookuptable == []:
             self._lookupTable = np.load(self._fileobject)
         else:
             self._lookupTable = lookuptable
-        self._exptTypes = self._params.extras.desiredResults
+        self._exptTypes = {}
+        for i in range(0,len(self._params.extras.desiredResults)):
+            self._exptTypes[self._params.extras.desiredResults[i]] = i
+#         self._exptTypes = self._params.extras.desiredResults
 
 
-    def getDataSet(self,trialNo,tableNo):
+    def _getDataSet(self,trialNo,tableNo):
             self._fileobject.seek(self._lookupTable[trialNo,tableNo])
             return np.load(self._fileobject)
+    
+    def prettyPath(self,filename):
+        prettyString = filename
+        while prettyString.partition('/')[2] != "":
+            prettyString = prettyString.partition('/')[2]
+        return prettyString
+    
+    def has(self,restype):
+        return restype in self._exptTypes
 
     @property
     def file(self):
         return self._fileobject
     
+    @property
+    def filename(self):
+        return self.prettyPath(self._filepath)
     
     @property
     def describe(self):

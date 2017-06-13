@@ -1,11 +1,19 @@
 from __future__ import division
-from Utility import Vector2D
-from Calculator import Kroupa_2001
-from astropy.cosmology import WMAP7 as cosmo
+
+import math
+
 from astropy import constants as const
 from astropy import units as u 
-import math
+from astropy.cosmology import WMAP7 as cosmo
+from scipy.stats import norm
+import numpy as np 
+import random as rand 
+
+
+from Calculator import Kroupa_2001
+from Utility import Vector2D
 from Utility import zeroVector
+
 
 class Parameters(object):
 	"""Stores and processes all the information regarding the setup for a 
@@ -40,6 +48,7 @@ class Parameters(object):
 		center position
 		velocity
 		base position"""
+		
 	def __init__(self, galaxy = None, quasar = None, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0, curveDim = Vector2D(800,200)):
 		self.__galaxy = galaxy
 		self.__quasar = quasar
@@ -63,8 +72,34 @@ class Parameters(object):
 			print("NOT ENOUGH MASS FOR STAR FIELD. GENERATION TERMINATED")
 			return
 		starMasses = generator.generate_cluster(m_stars)[0]
-		self.__galaxy.setStarMasses(starMasses,self)
-
+		if self.galaxy.starVelocityParams != None:
+			velocityMag = norm.rvs(loc = self.galaxy.starVelocityParams[0],
+							scale = self.galaxy.starVelocityParams[1],
+							size = len(starMasses)) #Loc = mean, scale = sigma, size = number
+			velocityDir = np.random.rand(len(velocityMag),3) - 0.5
+			velocityDirMag = np.sqrt(velocityDir[:,0]**2 + velocityDir[:,1]**2+velocityDir[:,2]**2)
+			for i in range(0,len(starMasses)):
+				velocityDir[i,0] = velocityDir[i,0]/velocityDirMag[i]
+				velocityDir[i,1] = velocityDir[i,1]/velocityDirMag[i]
+			velocities = np.ndarray((len(velocityDir),2))
+			for i in range(0,len(starMasses)):
+				velocities[i] = [velocityDir[i,0]*velocityMag[i], velocityDir[i,1]*velocityMag[i]]
+			velocities = velocities/self.galaxy.angDiamDist.to('km').value * 1e9
+			print(velocities)
+			starArray = np.ndarray((len(starMasses),5))
+			for i in range(0,len(starMasses)): #PROTOCOL of X, Y, Mass, Vx, Vy
+				x = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.value
+				y = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.value
+				starArray[i] = [x,y, starMasses[i],velocities[i,0],velocities[i,1]]
+			return starArray
+		else:
+			starArray = np.ndarray((len(starMasses),3))
+			for i in range(0,len(starMasses)):
+				x = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.value
+				y = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.value
+				starArray[i] = [x,y, starMasses[i]]
+			return starArray
+		
 	@property
 	def galaxy(self):
 		return self.__galaxy
@@ -117,30 +152,26 @@ class Parameters(object):
 		r_in = self.__galaxy.position.to('rad').magnitude()*self.__galaxy.angDiamDist.to('m')
 		ret = ((self.__galaxy.velocityDispersion**2)*l*l/2/const.G/r_in).to('solMass')
 		return ret
-
-	@property
-	def correctedVelocityDispersion(self):
-		return math.sqrt(1-self.__galaxy.percentStars)*self.__galaxy.velocityDispersion
 	
 	@property
 	def pixelScale_angle(self):
 		return self.dTheta.to('arcsec')
 	
 	@property
-	def pixelScale_Rg(self):
+	def pixelScale_Rg(self): #Depends on mass, distance, pixel scale
 		absRg = (self.__quasar.mass*const.G/const.c/const.c).to('m')
 		angle = absRg/self.quasar.angDiamDist.to('m')
 		pixAngle = self.pixelScale_angle.to('rad').value
 		return pixAngle/angle
 	
 	@property
-	def pixelScale_thetaE(self):
+	def pixelScale_thetaE(self): #Depends on distances, pixel scale
 		pixAngle = self.pixelScale_angle.to('rad').value
 		thetaE = 4*const.G*u.Quantity(0.5,'solMass')*self.dLS/const.c/const.c/self.galaxy.angDiamDist/self.quasar.angDiamDist
 		return pixAngle/math.sqrt(thetaE)
 	
 	@property
-	def quasarRadius_rg(self):
+	def quasarRadius_rg(self): #Depends on distances
 		absRg = (self.__quasar.mass*const.G/const.c/const.c).to('m')
 		angle = absRg/self.quasar.angDiamDist.to('m')
 		return self.quasar.radius.to('rad').value/angle.value

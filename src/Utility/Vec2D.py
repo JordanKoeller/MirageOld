@@ -107,6 +107,10 @@ class Vector2D(object):
     @property
     def angle(self):
         return math.atan2(self.y,self.x)
+
+
+    def unitless(self):
+        return Vector2D(self.x,self.y,None)
     
     def __round_to_n(self, x,n = 6):
         if x == 0.0:

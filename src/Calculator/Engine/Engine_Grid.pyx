@@ -72,7 +72,7 @@ cdef class Engine_Grid(Engine):
 		self.build_data(finalData[0], finalData[1],int(finalData[0].shape[0]**2/2))
 		del(finalData)
 		self.__preCalculating = False
-		print("Time building grid = " + str(time.clock() - begin) + " seconds.")
+# 		print("Time building grid = " + str(time.clock() - begin) + " seconds.")
 # 		time.sleep(3)
 
 
@@ -88,8 +88,6 @@ cdef class Engine_Grid(Engine):
 		cdef double qx = self.__parameters.queryQuasarX
 		cdef double qy = self.__parameters.queryQuasarY
 		cdef double qr = self.__parameters.queryQuasarRadius
-		print(self.__parameters.quasar.position)
-# 		print("Querying" + str(qx)+","+str(qy)+","+str(qr))
 		cdef vector[Pixel] ret = self.query_data(qx,qy,qr)
 		cdef int retf = ret.size()
 		cdef int i = 0
@@ -98,6 +96,7 @@ cdef class Engine_Grid(Engine):
 			for i in range(0, retf):
 				fret[i,0] = <int> ret[i].pixelX
 				fret[i,1] = <int> ret[i].pixelY
+# 		print("Got frame")
 		return fret
 
 	def gridTest(self,binsizes,queryPerTest,curveSignal,barSignal):

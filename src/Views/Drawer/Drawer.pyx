@@ -13,7 +13,13 @@ cdef class ImageDrawer(Drawer):
 
 	def __init__(self,signal):
 		Drawer.__init__(self,signal)
-		self.pixmap = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66)]
+		self.pixmap = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66), QtGui.qRgb(53,252,92)]
+		#Index 0: Black
+		#Index 1: Yellow
+		#Index 2: White
+		#Index 3: Blue
+		#Index 4: Orange
+		#Index 5: Green
 	cdef object drawImage(self,np.ndarray[np.uint8_t, ndim=2] pixels, object pixmap=None):
 		if pixmap == None:
 			pixmap = self.pixmap

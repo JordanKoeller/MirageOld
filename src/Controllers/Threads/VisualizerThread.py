@@ -86,22 +86,14 @@ class VisualizerThread(QtCore.QThread):
         self.__calculating = False
 
     def restart(self):
-        print(Model.parameters)
         self.progress_label_update.emit("Restarted.")
         self.__calculating = False
         Model.parameters.setTime(0)
-        print("Set frame done")
         pixels = Model.engine.getFrame()
-        print("Got frame")
         mag = Model.engine.getMagnification(len(pixels))
-        print("Got magnification")
         self.__drawer.draw([Model.parameters,pixels],[mag])
-        print("Drawn")
         self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
-        print("emitted spl update")
         self.__drawer.reset()
-        print("Reseting drawer")
-        print("\n\n\nDONE\n\n\n")
 
     def visualize(self,params):
         self.progress_label_update.emit("Ray-Tracing. Please Wait.")

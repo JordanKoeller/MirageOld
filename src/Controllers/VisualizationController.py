@@ -36,6 +36,7 @@ class VisualizationController(GUIController):
         self.view.record_button.triggered.connect(self.record)
         self.view.visualizeDataButton.clicked.connect(self.visualizeData)
         self.view.developerExportButton.clicked.connect(self.saveVisualization)
+        self.view.regenerateStars.clicked.connect(self.regenerateStarsHelper)
         filler_img = QtGui.QImage(2000, 2000, QtGui.QImage.Format_Indexed8)
         filler_img.setColorTable([QtGui.qRgb(0, 0, 0)])
         filler_img.fill(0)
@@ -63,6 +64,11 @@ class VisualizationController(GUIController):
         Interface for updating an animation in real time of whether or not to draw the lensing galaxy's center of mass, along with any stars".
         """
         Model.parameters.showGalaxy = self.view.displayGalaxy.isChecked()
+        
+    def regenerateStarsHelper(self):
+        stars = Model.parameters.generateStars()
+        Model.parameters.setStars(stars)
+        Model.engine.reconfigure()
 
     def simImage(self):
         """

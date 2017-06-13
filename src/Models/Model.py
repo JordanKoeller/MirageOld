@@ -28,9 +28,9 @@ class __Model(object):
         return self.__Engine
     
     def moveStars(self):
-        if self.parameters.galaxy.hasStarVel:
+        if self.parameters.galaxy.starVelocityParams != None:
             self.parameters.galaxy.moveStars(self.parameters.dt)
-            self.__engine.reconfigure()
+            self.__Engine.reconfigure()
             
 Model = __Model()
 

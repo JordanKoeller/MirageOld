@@ -39,4 +39,4 @@ cdef class Engine:
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil
 	cdef ray_trace_cpu(self)
 	cpdef makeMagMap(self, object topLeft, double height, double width, int resolution)
-
+# 	cdef int getColorCode(self, double x, double y)

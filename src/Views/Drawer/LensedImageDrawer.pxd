@@ -1,8 +1,6 @@
 from Views.Drawer.Drawer cimport ImageDrawer
-from Views.Drawer.ShapeDrawer cimport ShapeDrawer
 cimport numpy as np 
 cdef class LensedImageDrawer(ImageDrawer):
-	cdef ShapeDrawer __shapeDrawer
 	# cdef signal
 	# cdef object pixmap
 	# cdef object drawImage(self,np.ndarray[np.int8_t, ndim=2] pixels, object pixmap=*)
@@ -13,3 +11,4 @@ cdef class LensedImageDrawer(ImageDrawer):
 	cdef void __drawTrackers(self,np.ndarray[np.uint8_t,ndim=2] canvas, object parameters)
 
 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters)
+	cdef getColorCode(self, np.ndarray[np.int32_t,ndim=2] pixels, object parameters)

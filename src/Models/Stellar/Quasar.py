@@ -4,6 +4,7 @@ from Models import Movable
 from Utility import Vector2D
 from Utility import zeroVector
 import astropy.units as u
+from Views.Drawer.ShapeDrawer import drawSolidCircle
 
 
 class Quasar(Movable,Cosmic):
@@ -30,23 +31,24 @@ class Quasar(Movable,Cosmic):
 		center = (self.observedPosition + parameters.galaxy.position)/parameters.dTheta.value
 		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
 		radius = int(self.radius.value/parameters.dTheta.value)
-		rSquared = radius * radius
-		count = 0
-		for x in range(0,radius+1):
-			for y in range(0,radius+1):
-				if x*x + y*y <= rSquared:
-					if center.x+x > 0 and center.y+y > 0 and center.x+x < parameters.canvasDim and center.y+y < parameters.canvasDim:
-						img[int(center.x+x),int(center.y+y)] = self._Drawable__colorKey
-						count += 1
-					if center.x+x > 0 and center.y-y > 0 and center.x+x < parameters.canvasDim and center.y-y < parameters.canvasDim:
-						img[int(center.x+x),int(center.y-y)] = self._Drawable__colorKey
-						count += 1
-					if center.x-x > 0 and center.y+y > 0 and center.x-x < parameters.canvasDim and center.y+y < parameters.canvasDim:
-						img[int(center.x-x),int(center.y+y)] = self._Drawable__colorKey
-						count += 1
-					if center.x-x > 0 and center.y-y > 0 and center.x-x < parameters.canvasDim and center.y-y < parameters.canvasDim:
-						img[int(center.x-x),int(center.y-y)] = self._Drawable__colorKey
-						count += 1
+		drawSolidCircle(int(center.x),int(center.y),radius,img,3)
+# 		rSquared = radius * radius
+# 		count = 0
+# 		for x in range(0,radius+1):
+# 			for y in range(0,radius+1):
+# 				if x*x + y*y <= rSquared:
+# 					if center.x+x > 0 and center.y+y > 0 and center.x+x < parameters.canvasDim and center.y+y < parameters.canvasDim:
+# 						img[int(center.x+x),int(center.y+y)] = self._Drawable__colorKey
+# 						count += 1
+# 					if center.x+x > 0 and center.y-y > 0 and center.x+x < parameters.canvasDim and center.y-y < parameters.canvasDim:
+# 						img[int(center.x+x),int(center.y-y)] = self._Drawable__colorKey
+# 						count += 1
+# 					if center.x-x > 0 and center.y+y > 0 and center.x-x < parameters.canvasDim and center.y+y < parameters.canvasDim:
+# 						img[int(center.x-x),int(center.y+y)] = self._Drawable__colorKey
+# 						count += 1
+# 					if center.x-x > 0 and center.y-y > 0 and center.x-x < parameters.canvasDim and center.y-y < parameters.canvasDim:
+# 						img[int(center.x-x),int(center.y-y)] = self._Drawable__colorKey
+# 						count += 1
 
 
 

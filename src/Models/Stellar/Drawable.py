@@ -18,7 +18,6 @@ class Drawable(object):
 	def updateDrawable(self,**kwargs):
 		for key,value in kwargs.items():
 			try:
-# 				print(str(value))
 				getattr(self,"_Drawable__"+key)
 				if value != None:
 					setattr(self,"_Drawable__"+key,value)

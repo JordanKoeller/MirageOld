@@ -70,21 +70,23 @@ cdef class Engine:
 		cdef double dL = self.__parameters.galaxy.angDiamDist.value
 		cdef double dLS = self.__parameters.dLS.value
 		stars_nparray_mass, stars_nparray_x, stars_nparray_y = self.__parameters.galaxy.starArray
-
+# 		print(len(stars_nparray_mass))
 		# create a context and a job queue
 		context = cl.create_some_context()
 		queue = cl.CommandQueue(context)
-
 		# create buffers to send to device
 		mf = cl.mem_flags		
 		# input buffers
-		stars_buffer_mass = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_mass)
-		stars_buffer_x = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_x)
-		stars_buffer_y = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_y)
+		stars_buffer_mass = np.float64(0.0)
+		stars_buffer_x = np.float64(0.0)
+		stars_buffer_y = np.float64(0.0)
+		if len(stars_nparray_mass) > 0:
+			stars_buffer_mass = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_mass)
+			stars_buffer_x = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_x)
+			stars_buffer_y = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_y)	
 		# output buffers
 		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
-
 		prg = cl.Program(context, open('Calculator/ray_tracer.cl').read()).build()
 		prg.ray_trace(queue, (width, height), None,
 			stars_buffer_mass,
@@ -108,7 +110,7 @@ cdef class Engine:
 		cl.enqueue_copy(queue, result_nparray_y, result_buffer_y)
 		del(result_buffer_x)
 		del(result_buffer_y)
-		print("Time Ray-Tracing = " + str(time.clock() - begin))
+# 		print("Time Ray-Tracing = " + str(time.clock() - begin))
 		return (result_nparray_x, result_nparray_y)
 
 
@@ -161,7 +163,8 @@ cdef class Engine:
 		print("Time Ray-Tracing = " + str(time.clock() - begin))			
 		return (result_nparray_x,result_nparray_y)
 	
-	
+
+		
 	
 	def calTheta(self):
 		k = (4 * math.pi * (const.c ** -2).to('s2/km2').value * self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value * self.__parameters.galaxy.velocityDispersion.value * self.__parameters.galaxy.velocityDispersion.value) + (self.__parameters.quasar.position - self.__parameters.galaxy.position).magnitude()
@@ -279,12 +282,14 @@ cdef class Engine:
 		if self.__parameters is None:
 			self.__parameters = parameters
 			if self.__parameters.galaxy.percentStars > 0:
-				self.__parameters.generateStars()
+				stars = self.__parameters.generateStars()
+				parameters.setStars(stars)
 			self.reconfigure()
 		elif not self.__parameters.isSimilar(parameters):
 			self.__parameters = parameters
 			if self.__parameters.galaxy.percentStars > 0:
-				self.__parameters.generateStars()
+				stars = self.__parameters.generateStars()
+				parameters.setStars(stars)
 			self.reconfigure()
 		else:
 			parameters.setStars(self.__parameters.stars)

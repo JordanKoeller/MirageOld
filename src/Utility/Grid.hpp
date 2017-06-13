@@ -211,27 +211,42 @@ public:
 
 	vector<Pixel> find_within(const double &x, const double &y, const double &r)
 	{
-//		cout << "Finding " << x << "," << y << ".\n";
+//		 cout << "Finding " << x << "," << y << ".\n";
 		int cx = ceil((x-tlx)/NODE_WIDTH);
 		int cy = ceil((y-tly)/NODE_HEIGHT);
 		int rx = ceil(r/(NODE_WIDTH));
 		int ry = ceil(r/(NODE_HEIGHT));
-//		cout << "Focused on " << cx << "," << cy << " With radii " << rx << "," << ry << ".\n";
 		int hypot2 = rx*rx+ry*ry;
 		vector<Pixel> ret;
-		vector<Pixel> tmp = data[cx][cy].queryNode(x,y,r);
+		vector<Pixel> tmp;
+		if (cx >= 0 && cy >= 0 && cx < data.size() && cy < data[0].size())
+		{
+			tmp = data[cx][cy].queryNode(x,y,r);
+		}
 		ret.insert(ret.end(),tmp.begin(),tmp.end());
 		for (size_t i=1; i <= rx; i++) {
+			if (cx+i >= 0 && cy >= 0 && cx+i < data.size() && cy < data[0].size())
+			{
 				tmp = data[cx+i][cy].queryNode(x,y,r);
 				ret.insert(ret.end(),tmp.begin(),tmp.end());
+			}
+			if (cx-i >= 0 && cy >= 0 && cx-i < data.size() && cy < data[0].size())
+			{
 				tmp = data[cx-i][cy].queryNode(x,y,r);
 				ret.insert(ret.end(),tmp.begin(),tmp.end());
+			}
 		}
 		for (size_t i=1; i <= ry; i++) {
+			if (cx >= 0 && cy+i >= 0 && cx < data.size() && cy+i < data[0].size())
+			{
 				tmp = data[cx][cy+i].queryNode(x,y,r);
 				ret.insert(ret.end(),tmp.begin(),tmp.end());
+			}
+			if (cx >= 0 && cy-i >= 0 && cx < data.size() && cy-i < data[0].size())
+			{
 				tmp = data[cx][cy-i].queryNode(x,y,r);
 				ret.insert(ret.end(),tmp.begin(),tmp.end());
+			}
 		}
 		for (size_t i = 1; i <= rx; ++i) // Possible indexing issue here?
 		{

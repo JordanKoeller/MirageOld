@@ -1,19 +1,18 @@
-import numpy as np
 import astropy.units as u
 from Utility import Vector2D
 from Utility import zeroVector
-import random as rand
 from Models import ShearLenser
-from Models import PointLenser
 from Models import Drawable
 from Models import Cosmic
+from Views.Drawer.ShapeDrawer import drawPointLensers
+
 class Galaxy(Drawable, Cosmic):
 	__velocityDispersion = u.Quantity(0, 'km/s')
 	__pcntStar = 0
 	__shear = None
 	__stars = []
 
-	def __init__(self, redshift=0.0, velocityDispersion=u.Quantity(0, 'km/s'), shearMag=0, shearAngle=0, percentStars=0, center=zeroVector, hasStarVel=False):
+	def __init__(self, redshift=0.0, velocityDispersion=u.Quantity(0, 'km/s'), shearMag=0, shearAngle=0, percentStars=0, center=zeroVector, starVelocityParams = None):
 		Drawable.__init__(self)
 		Cosmic.__init__(self)
 		self.__velocityDispersion = velocityDispersion
@@ -21,11 +20,11 @@ class Galaxy(Drawable, Cosmic):
 		self.__shear = ShearLenser(shearMag, shearAngle)
 		self.updateDrawable(position=center, colorKey=4)
 		self.updateCosmic(redshift=redshift)
-		self.hasStarVel = hasStarVel
+		self.__starVelocityParams = starVelocityParams
 
 	def drawStars(self, img, parameters):
-		for star in self.__stars:
-			star.draw(img, parameters)
+		if len(self.__stars) != 0:
+			drawPointLensers(self.__stars, img, parameters)
 
 	def drawGalaxy(self, img, parameters):
 		center = Vector2D(self.position.x / parameters.dTheta.value + (parameters.canvasDim / 2), self.position.y / parameters.dTheta.value + (parameters.canvasDim / 2))
@@ -37,34 +36,25 @@ class Galaxy(Drawable, Cosmic):
 
 	@property
 	def starArray(self):
-		massArr = np.ndarray(len(self.__stars) + 1, dtype=np.float64)
-		xArr = np.ndarray(len(self.__stars) + 1, dtype=np.float64)
-		yArr = np.ndarray(len(self.__stars) + 1, dtype=np.float64)
-		for i in range(0, len(self.__stars)):
-			star = self.__stars[i]
-			massArr[i] = star.mass.value
-			xArr[i] = star.position.to('rad').x
-			yArr[i] = star.position.y
-		massArr[len(self.__stars)] = 0.0
-		xArr[len(self.__stars)] = 0.0
-		yArr[len(self.__stars)] = 0.0
-		return (massArr, xArr, yArr)
-
-	def setStarMasses(self, masses, parameters):
-		self.__stars = []
-		for i in range(0, len(masses)):
-			self.__stars.append(PointLenser(Vector2D(rand.random() - 0.5,
-					rand.random() - 0.5, 'rad') * (parameters.canvasDim - 2) * parameters.dTheta.value,
-				u.Quantity(masses[i], 'solMass'),
-				parameters.generateStarVelocity()))
-			
+		if len(self.__stars) > 0:
+			massArr = self.__stars[:,2]
+			xArr = self.__stars[:,0]
+			yArr = self.__stars[:,1]
+			return (massArr, xArr, yArr)	
+		else:
+			return ([],[],[])
+	@property
+	def starVelocityParams(self):
+		return self.__starVelocityParams
+		
 	def clearStars(self):
 		self.__stars = []
 			
 			
 	def moveStars(self, dt):
 		for i in self.__stars:
-			i.incrementTime(dt)
+			i[0] = i[0] + i[3]*dt
+			i[1] = i[1] + i[4]*dt
 			
 	def update(self, redshift=None, velocityDispersion=None, shearMag=None, shearAngle=None, center=None, percentStars=None, stars=None):
 		self.__velocityDispersion = velocityDispersion or self.__velocityDispersion

@@ -6,7 +6,6 @@ Created on Jun 7, 2017
 
 import pickle
 
-from Models.Parameters.ExperimentParams import ResultTypes
 from lens_analysis.AbstractFileWrapper import AbstractFileWrapper
 from lens_analysis.Trial import Trial
 
@@ -17,49 +16,59 @@ class Experiment(AbstractFileWrapper):
     '''
 
 
-    def __init__(self, filepath, fileobject=None,params=None,lookuptable=None):
+    def __init__(self, filepath, fileobject=None,params=None,lookuptable=[]):
         '''
         Constructor
         '''
         AbstractFileWrapper.__init__(self,filepath,fileobject,params,lookuptable)
         self.__index = 0
         
-        
-
-    
-    
-    @property
-    def lightcurves(self):
-        if ResultTypes.MAGMAP in self._exptTypes:
-            pass ###WILL NEED TO FILL IN A WAY TO GET BACK TYPE
-        else:
-            raise AttributeError("No light curve data present in this experiment")
-    
-        
-    @property
-    def magmaps(self):
-        if ResultTypes.LIGHT_CURVE in self._exptTypes:
-            pass ###WILL NEED TO FILL IN A WAY TO GET BACK TYPE
-        else:
-            raise AttributeError("No magnification map data present in this experiment")        
-        
 
     @property
-    def starfields(self):
-        if ResultTypes.STARFIELD in self._exptTypes:
-            pass ###WILL NEED TO FILL IN A WAY TO GET BACK TYPE
-        else:
-            raise AttributeError("No star field data present in this experiment")        
+    def regenerate(self):
+        return Experiment(self._filepath)
+        
+#     @property
+#     def lightcurves(self):
+#         if ResultTypes.MAGMAP in self._exptTypes:
+#             pass ###WILL NEED TO FILL IN A WAY TO GET BACK TYPE
+#         else:
+#             raise AttributeError("No light curve data present in this experiment")
+#     
+#         
+#     @property
+#     def magmaps(self):
+#         if ResultTypes.LIGHT_CURVE in self._exptTypes:
+#             pass ###WILL NEED TO FILL IN A WAY TO GET BACK TYPE
+#         else:
+#             raise AttributeError("No magnification map data present in this experiment")        
+#         
+# 
+#     @property
+#     def starfields(self):
+#         if ResultTypes.STARFIELD in self._exptTypes:
+#             pass ###WILL NEED TO FILL IN A WAY TO GET BACK TYPE
+#         else:
+#             raise AttributeError("No star field data present in this experiment")        
 
 
     
     def __next__(self):
-        if self.index < len(self._lookuptable):
+        if self.__index < len(self._lookupTable):
             ret =  Trial(self._filepath,self.__index,self._fileobject,self._params,self._lookupTable)
             self.__index += 1
             return ret 
         else:
-            return StopIteration
+            self.__index = 0
+            raise StopIteration
+    def __getitem__(self,ind):
+        if isinstance(ind,int):
+            if ind < len(self.__lookupTable):
+                return Trial(self._filepath,ind,self._fileobject,self._params,self._lookupTable)
+            else:
+                raise IndexError("Index out of range.")
+        else:
+            raise ValueError("Index must be of type int")
         
     def exportParameters(self,filename):
         file = open(filename,'wb+')
@@ -69,20 +78,4 @@ class Experiment(AbstractFileWrapper):
     def __iter__(self):
         return self
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
 
-    
-        
