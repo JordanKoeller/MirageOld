@@ -65,17 +65,18 @@ cdef class Engine:
 		cdef double dTheta = self.__parameters.dTheta.value
 		cdef np.ndarray result_nparray_x = np.zeros((width, height), dtype=np.float64)
 		cdef np.ndarray result_nparray_y = np.zeros((width, height), dtype=np.float64)
-# 		cdef double* lol = <double*> result_nparray_x.data/
 		cdef double dS = self.__parameters.quasar.angDiamDist.value
 		cdef double dL = self.__parameters.galaxy.angDiamDist.value
 		cdef double dLS = self.__parameters.dLS.value
 		stars_nparray_mass, stars_nparray_x, stars_nparray_y = self.__parameters.galaxy.starArray
-# 		print(len(stars_nparray_mass))
+
 		# create a context and a job queue
 		context = cl.create_some_context()
 		queue = cl.CommandQueue(context)
+		
 		# create buffers to send to device
-		mf = cl.mem_flags		
+		mf = cl.mem_flags	
+			
 		# input buffers
 		stars_buffer_mass = np.float64(0.0)
 		stars_buffer_x = np.float64(0.0)
@@ -84,6 +85,7 @@ cdef class Engine:
 			stars_buffer_mass = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_mass)
 			stars_buffer_x = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_x)
 			stars_buffer_y = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_y)	
+
 		# output buffers
 		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
@@ -110,7 +112,6 @@ cdef class Engine:
 		cl.enqueue_copy(queue, result_nparray_y, result_buffer_y)
 		del(result_buffer_x)
 		del(result_buffer_y)
-# 		print("Time Ray-Tracing = " + str(time.clock() - begin))
 		return (result_nparray_x, result_nparray_y)
 
 
@@ -212,27 +213,23 @@ cdef class Engine:
 		cdef double stepX = (mmax.x - mmin.x) / resolution
 		cdef double stepY = (mmax.y - mmin.y) / resolution
 		cdef np.ndarray[np.float64_t, ndim=1] yAxis = np.ones(resolution)
-# 		cdef np.ndarray[np.float64_t, ndim=2] xVals = np.ndarray((resolution,2))
 		cdef int i = 0
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double x = mmin.x
 		cdef double y = mmin.y
-		cdef bool hasVel = self.__parameters.galaxy.hasStarVel
+		cdef bool hasVel = False #Will change later
 		cdef double trueLuminosity = self.trueLuminosity
 		cdef int aptLuminosity = 0
 		with nogil:
 			for i in range(0, resolution):
 				x += stepX
 				y += stepY
-# 				xVals[i,0] = x
-# 				xVals[i,1] = y
 				aptLuminosity = self.query_data_length(x, y, radius)  # Incorrect interface
 				yAxis[i] = (<double> aptLuminosity)/trueLuminosity
 				if hasVel:
 					with gil:
 						self.__parameters.galaxy.moveStars(self.__parameters.dt)
 						self.reconfigure()
-# 		return (xVals, yAxis)
 		return yAxis
 	
 	cpdef makeMagMap(self, object topLeft, double height, double width, int resolution): #######Possibly slow implementation. Temporary

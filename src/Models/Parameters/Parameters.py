@@ -187,8 +187,6 @@ class Parameters(object):
 		self.time = time
 		self.__quasar.setTime(time)
 		
-	def generateStarVelocity(self):
-		return zeroVector
 
 	@property
 	def queryQuasarX(self):
@@ -200,8 +198,7 @@ class Parameters(object):
 				
 	@property
 	def queryQuasarRadius(self):
-		return self.quasar.radius.value
-
+		return self.quasar.radius.to('rad').value
 
 
 	def isSimilar(self,other):
@@ -222,6 +219,7 @@ class Parameters(object):
 			return False
 		return True
 
+
 	def __eq__(self,other):
 		if not self.isSimilar(other):
 			return False
@@ -233,5 +231,8 @@ class Parameters(object):
 			return False
 		return True
 
+
 	def __str__(self):
 		return ("dTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("\nEinstein Radius = " + str(self.einsteinRadius))
+	
+	

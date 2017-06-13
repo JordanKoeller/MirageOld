@@ -72,8 +72,6 @@ cdef class Engine_Grid(Engine):
 		self.build_data(finalData[0], finalData[1],int(finalData[0].shape[0]**2/2))
 		del(finalData)
 		self.__preCalculating = False
-# 		print("Time building grid = " + str(time.clock() - begin) + " seconds.")
-# 		time.sleep(3)
 
 
 	@cython.boundscheck(False)  # turn off bounds-checking for entire function
@@ -96,8 +94,8 @@ cdef class Engine_Grid(Engine):
 			for i in range(0, retf):
 				fret[i,0] = <int> ret[i].pixelX
 				fret[i,1] = <int> ret[i].pixelY
-# 		print("Got frame")
 		return fret
+
 
 	def gridTest(self,binsizes,queryPerTest,curveSignal,barSignal):
 		"""

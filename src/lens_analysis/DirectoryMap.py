@@ -63,11 +63,11 @@ class DirectoryMap(object):
     def __getitem__(self,ind):
         if isinstance(ind,int):
             if ind < len(self.__files):
-                return Experiment(self.__directory + "/" + self.__files[ind])
+                return Experiment(self.__files[ind])
             else:
                 raise IndexError("Index out of range.")
         elif ind in self.__files:
-            return Experiment(self.__directory + "/" + self.__files[self.__files.index(ind)])
+            return Experiment(self.__files[self.__files.index(ind)])
         else:
             raise IndexError("Invalid index of DirectoryMap instance. Index must be a number or filename.")
         
@@ -76,7 +76,7 @@ class DirectoryMap(object):
     
     def __next__(self):
         if self.__index < self.size:
-            ret = Experiment(self.__directory+"/"+self.__files[self.__index])
+            ret = Experiment(self.__files[self.__index])
             self.__index += 1
             return ret 
         else:
