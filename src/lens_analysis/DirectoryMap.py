@@ -72,13 +72,16 @@ class DirectoryMap(object):
             raise IndexError("Invalid index of DirectoryMap instance. Index must be a number or filename.")
         
     def __iter__(self):
-        return self
+        return DirectoryMap(self.__directory)
     
     def __next__(self):
         if self.__index < self.size:
-            ret = Experiment(self.__files[self.__index])
-            self.__index += 1
-            return ret 
+            try:
+                ret = Experiment(self.__files[self.__index])
+                self.__index += 1
+                return ret
+            except:
+                self.__index = 0 
         else:
             self.__index = 0
             raise StopIteration

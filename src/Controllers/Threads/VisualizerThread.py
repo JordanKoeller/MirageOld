@@ -6,6 +6,7 @@ from PyQt5 import QtCore
 from Models import Model
 from Views.Drawer import DataVisualizerDrawer
 from Views.Drawer.CompositeDrawerFactory import LensedImageLightCurveComposite
+from Utility.NullSignal import NullSignal
 
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
@@ -48,7 +49,7 @@ class VisualizerThread(QtCore.QThread):
 
     """
 
-    def __init__(self,signals):
+    def __init__(self,signals=NullSignal):
         QtCore.QThread.__init__(self)
         self.progress_bar_update  = signals['progressBar']
         self.progress_label_update = signals['progressLabel']

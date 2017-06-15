@@ -1,12 +1,13 @@
 from Views.Drawer.Drawer cimport ImageDrawer
 from pyqtgraph import QtCore, QtGui
+from Utility.NullSignal import NullSignal
 cimport numpy as np 
 import numpy as np 
 from astropy.io import fits
 
 cdef class DataVisualizerDrawer(ImageDrawer):
 
-	def __init__(self,signal):
+	def __init__(self,signal=NullSignal):
 		ImageDrawer.__init__(self,signal)
 		self.pixmap = []
 		for i in range(0,255):

@@ -27,30 +27,6 @@ class Experiment(AbstractFileWrapper):
     @property
     def regenerate(self):
         return Experiment(self._filepath)
-        
-#     @property
-#     def lightcurves(self):
-#         if ResultTypes.MAGMAP in self._exptTypes:
-#             pass ###WILL NEED TO FILL IN A WAY TO GET BACK TYPE
-#         else:
-#             raise AttributeError("No light curve data present in this experiment")
-#     
-#         
-#     @property
-#     def magmaps(self):
-#         if ResultTypes.LIGHT_CURVE in self._exptTypes:
-#             pass ###WILL NEED TO FILL IN A WAY TO GET BACK TYPE
-#         else:
-#             raise AttributeError("No magnification map data present in this experiment")        
-#         
-# 
-#     @property
-#     def starfields(self):
-#         if ResultTypes.STARFIELD in self._exptTypes:
-#             pass ###WILL NEED TO FILL IN A WAY TO GET BACK TYPE
-#         else:
-#             raise AttributeError("No star field data present in this experiment")        
-
 
     
     def __next__(self):
@@ -63,7 +39,7 @@ class Experiment(AbstractFileWrapper):
             raise StopIteration
     def __getitem__(self,ind):
         if isinstance(ind,int):
-            if ind < len(self.__lookupTable):
+            if ind < len(self._lookupTable):
                 return Trial(self._filepath,ind,self._fileobject,self._params,self._lookupTable)
             else:
                 raise IndexError("Index out of range.")
@@ -76,6 +52,6 @@ class Experiment(AbstractFileWrapper):
         
     
     def __iter__(self):
-        return self
+        return Experiment(self._filepath,self._fileobject,self._params,self._lookupTable)
         
 

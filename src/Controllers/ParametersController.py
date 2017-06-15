@@ -39,7 +39,14 @@ class ParametersController(GUIController):
         self.view.signals['paramSetter'].connect(self.bindFields)
         self.fileManager = ParametersFileManager(self.view.signals)
         
+    def hide(self):
+        self.view.mainSplitter.setSizes([0,100,100])
+#         self.view.paramFrame.setHidden(True)
+#         self.view.queueBox.setHidden(True)
+#         self.view.visualizationBox.setHidden(True)
         
+    def show(self):
+        pass
         
     def makeParameters(self):
         """

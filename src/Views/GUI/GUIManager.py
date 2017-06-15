@@ -24,7 +24,7 @@ class GUIManager(QtWidgets.QMainWindow):
     __signals = {}
     
 
-    def __init__(self, timer, parent=None):
+    def __init__(self, parent=None):
         '''
         Constructor
         '''
@@ -69,8 +69,12 @@ class GUIManager(QtWidgets.QMainWindow):
         else:
             self.__switchToPerspective(QueueController(self))
             
-    def fullParamSetter(self):
-        pass
+    def hideParameters(self):
+        self.parametersController.hide()
+            
+    def showParameters(self):
+        self.parametersController.show()
+            
     def addSignals(self,**kwargs):
         self.__signals.update(kwargs)
 

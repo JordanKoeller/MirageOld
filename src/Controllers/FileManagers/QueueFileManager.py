@@ -9,6 +9,7 @@ from PyQt5 import QtCore, QtWidgets
 from Controllers.FileManagers import ParametersFileManager
 from Controllers.FileManagers.FileManager import FileManager
 import numpy as np
+from Utility.NullSignal import NullSignal
 
 
 class QueueFileManager(FileManager,QtCore.QThread):
@@ -17,7 +18,7 @@ class QueueFileManager(FileManager,QtCore.QThread):
     '''
 
 
-    def __init__(self, signals):
+    def __init__(self, signals = NullSignal):
         '''
         Constructor
         '''

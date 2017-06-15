@@ -14,13 +14,13 @@
    <string>Gravitational Lensing</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QSplitter" name="splitter2">
+   <widget class="QSplitter" name="mainSplitter">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>20</y>
-      <width>1671</width>
-      <height>981</height>
+      <width>1661</width>
+      <height>1021</height>
      </rect>
     </property>
     <property name="maximumSize">
@@ -70,7 +70,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-78</y>
+        <y>0</y>
         <width>584</width>
         <height>1057</height>
        </rect>
@@ -147,7 +147,7 @@
             <item row="2" column="1">
              <widget class="QLineEdit" name="qRadius">
               <property name="text">
-               <string>1</string>
+               <string>1e6</string>
               </property>
              </widget>
             </item>
@@ -693,7 +693,7 @@
                 <item row="1" column="1">
                  <widget class="QPlainTextEdit" name="experimentDescEntry">
                   <property name="plainText">
-                   <string>fdaf</string>
+                   <string>Description</string>
                   </property>
                  </widget>
                 </item>
@@ -707,7 +707,7 @@
                 <item row="0" column="1">
                  <widget class="QLineEdit" name="experimentNameEntry">
                   <property name="text">
-                   <string>fdsa</string>
+                   <string>Untitled</string>
                   </property>
                  </widget>
                 </item>
@@ -814,19 +814,57 @@
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="0">
-                 <widget class="QCheckBox" name="starVarianceCheckBox">
-                  <property name="text">
-                   <string>Vary Star Field Between Trials</string>
-                  </property>
-                 </widget>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_7">
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout">
+                  <item>
+                   <widget class="QLabel" name="label_8">
+                    <property name="text">
+                     <string>Data Sets</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="lightCurveCheckBox">
+                    <property name="text">
+                     <string>Light Curve</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="magMapCheckBox">
+                    <property name="text">
+                     <string>Magnification Map</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="starFieldCheckBox">
+                    <property name="text">
+                     <string>Starfield</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
-                <item row="1" column="1">
-                 <widget class="QCheckBox" name="pathVarianceCheckBox">
-                  <property name="text">
-                   <string>Vary Quasar Path</string>
+                <item>
+                 <spacer name="horizontalSpacer_9">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
                   </property>
-                 </widget>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
                 </item>
                </layout>
               </item>
@@ -1153,8 +1191,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>516</width>
-               <height>71</height>
+               <width>511</width>
+               <height>74</height>
               </rect>
              </property>
              <property name="sizePolicy">

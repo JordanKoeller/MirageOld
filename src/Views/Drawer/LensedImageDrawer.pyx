@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from Utility.NullSignal import NullSignal
 cimport numpy as np
 import pyqtgraph as pg 
 from pyqtgraph import QtCore, QtGui
@@ -15,7 +16,7 @@ from scipy.cluster.vq import vq, kmeans, whiten
 
 cdef class LensedImageDrawer(ImageDrawer):
 
-	def __init__(self,signal):
+	def __init__(self,signal=NullSignal):
 		ImageDrawer.__init__(self,signal)
 
 	

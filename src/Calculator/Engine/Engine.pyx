@@ -202,9 +202,9 @@ cdef class Engine:
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil:
 		return 0
 		
-	cpdef makeLightCurve(self, object mmin, object mmax, int resolution):  # Needs updateing
+	cdef makeLightCurve_helper(self, object mmin, object mmax, int resolution):  # Needs updateing
 		"""Deprecated"""
-		print("MAKING LIGHT CURVE")
+# 		print("MAKING LIGHT CURVE")
 		while self.__preCalculating:
 			print("Waiting")
 			time.sleep(0.1)
@@ -232,15 +232,21 @@ cdef class Engine:
 						self.reconfigure()
 		return yAxis
 	
-	cpdef makeMagMap(self, object topLeft, double height, double width, int resolution): #######Possibly slow implementation. Temporary
+	def makeLightCurve(self,mmin, mmax, resolution):
+		return self.makeLightCurve_helper(mmin,mmax,resolution)
+	
+	
+	cpdef makeMagMap(self, object topLeft, double height, double width, int resolution, object signal, object signalMax): #######Possibly slow implementation. Temporary
 		########################## I STILL WANT TO SEE IF CAN MAKE MAGMAP FROM THE SOURCEPLANE RAY TRACE LOCATIONS, BUT IN THE MEANTIME
 		########################## I'M DOING IT THE OLD-FASHIONED WAY #################################################################
 		cdef double stepDown = height/resolution
 		retArr = np.ndarray((resolution,resolution), dtype=np.float64)
 		cdef int i = 0
+		signalMax.emit(resolution)
 		for i in range(0,resolution):
-			s = topLeft - Vector2D(0,stepDown*i)
-			f = topLeft + Vector2D(width,-stepDown*i)
+			signal.emit(i)
+			s = topLeft - Vector2D(0,stepDown*i,topLeft.unit)
+			f = topLeft + Vector2D(width,-stepDown*i,topLeft.unit)
 			retArr[i] = self.makeLightCurve(s,f,resolution)
 		return retArr
 		

@@ -6,6 +6,7 @@ Created on Jun 3, 2017
 import pickle
 
 from Controllers.FileManagers.FileManager import FileManager
+from Utility.NullSignal import NullSignal
 
 
 class ParametersFileManager(FileManager):
@@ -14,7 +15,7 @@ class ParametersFileManager(FileManager):
     '''
 
 
-    def __init__(self, signals):
+    def __init__(self, signals = NullSignal):
         '''
         Constructor
         '''

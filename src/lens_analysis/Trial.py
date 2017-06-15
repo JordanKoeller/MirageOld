@@ -89,4 +89,3 @@ class Trial(AbstractFileWrapper):
     def _getDataSet(self,tableNo):
             self._fileobject.seek(self._lookupTable[self.__trialNo,tableNo])
             return np.load(self._fileobject)
-          

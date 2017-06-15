@@ -20,4 +20,9 @@ class __NullSignal(object):
     def emit(self,*args,**kwargs):
         pass
     
+    def __getattr__(self,arg):
+        pass
+    def __getitem__(self,args):
+        return self
+    
 NullSignal = __NullSignal()

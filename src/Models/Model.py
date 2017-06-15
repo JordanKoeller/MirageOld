@@ -6,12 +6,14 @@ Created on Jun 1, 2017
 
 
 
-from Calculator.Engine.Engine_Grid import Engine_Grid as Engine
+from Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Pointer
+from Calculator.Engine.Engine_ShapeGrid import Engine_ShapeGrid as Engine_Shape
+from Calculator.Engine.Engine_Grid import Engine_Grid as Engine_Grid
 
 
 class __Model(object):
     def __init__(self):
-        self.__Engine = Engine()
+        self.__Engine = Engine_Pointer()
     
     def updateParameters(self, params):
         if self.parameters:

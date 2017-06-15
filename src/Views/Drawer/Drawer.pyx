@@ -1,4 +1,5 @@
 from pyqtgraph import QtCore, QtGui
+from Utility.NullSignal import NullSignal
 cimport numpy as np
 import numpy as np
 import math 
@@ -11,7 +12,7 @@ cdef class Drawer(object):
 
 cdef class ImageDrawer(Drawer):
 
-	def __init__(self,signal):
+	def __init__(self,signal=NullSignal):
 		Drawer.__init__(self,signal)
 		self.pixmap = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66), QtGui.qRgb(53,252,92)]
 		#Index 0: Black
@@ -36,11 +37,12 @@ cdef class ImageDrawer(Drawer):
 
 cdef class PlotDrawer(Drawer):
 
-	def __init__(self,signal):
+	def __init__(self,signal=NullSignal):
 		Drawer.__init__(self,signal)
 		self.reset()
 
 	cdef append(self, double y, double x=-1):
+		# print(y)
 		cdef np.ndarray[np.float64_t, ndim=1] replaceX
 		cdef np.ndarray[np.float64_t, ndim=1] replaceY
 		cdef int i

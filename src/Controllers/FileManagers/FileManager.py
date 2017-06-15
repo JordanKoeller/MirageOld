@@ -4,6 +4,7 @@ Created on Jun 3, 2017
 @author: jkoeller
 '''
 from PyQt5 import QtWidgets
+from Utility.NullSignal import NullSignal
 
 
 class FileManager(object):
@@ -12,7 +13,7 @@ class FileManager(object):
     '''
 
 
-    def __init__(self, signals):
+    def __init__(self, signals = NullSignal):
         '''
         Constructor
         '''

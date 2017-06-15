@@ -12,7 +12,6 @@ import random as rand
 
 from Calculator import Kroupa_2001
 from Utility import Vector2D
-from Utility import zeroVector
 
 
 class Parameters(object):
@@ -233,6 +232,6 @@ class Parameters(object):
 
 
 	def __str__(self):
-		return ("dTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("\nEinstein Radius = " + str(self.einsteinRadius))
+		return ("\nPARAMETERS:\ndTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("\nEinstein Radius = " + str(self.einsteinRadius) + "\n\nEXTRAS:\n"+str(self.extras))
 	
 	

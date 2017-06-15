@@ -5,6 +5,7 @@ Created on Jun 12, 2017
 '''
 
 from Controllers.ParameterInputParser.ParameterInputParser import ParameterInputParser
+from Utility.NullSignal import NullSignal
 
 
 class ArcsecParameterInputParser(ParameterInputParser):
@@ -20,4 +21,4 @@ class ArcsecParameterInputParser(ParameterInputParser):
         ParameterInputParser.__init__(self)
         self._inputUnit = 'arcsec'
         
-    def parse(self, view, errorSignal):
+    def parse(self, view, errorSigna=NullSignall):

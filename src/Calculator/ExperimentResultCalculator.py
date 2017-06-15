@@ -9,6 +9,7 @@ from Models import Model
 from Models.Parameters.ExperimentParams import ResultTypes
 from Utility import Vector2D
 import numpy as np
+from Utility.NullSignal import NullSignal
 
 
 
@@ -18,11 +19,12 @@ class ExperimentResultCalculator(object):
     '''
 
 
-    def __init__(self, parameters):
+    def __init__(self, parameters,signals = NullSignal):
         '''
         Constructor
         '''
         expTypes = parameters.extras.desiredResults
+        self.signals = signals
         #Parse expTypes to functions to run.
         self.experimentRunners = []
         for exp in expTypes:
@@ -54,8 +56,8 @@ class ExperimentResultCalculator(object):
         start,finish = (Model.parameters.extras.pathStart,Model.parameters.extras.pathEnd)
         midpt = (start+finish)/2
         border = (finish-midpt).magnitude()*math.sqrt(2)
-        topleft = midpt + Vector2D(-border,border)
-        return Model.engine.makeMagMap(topleft,border*2,border*2,int(Model.parameters.extras.resolution*2*math.sqrt(2))) #Assumes args are (topleft,height,width,resolution)
+        topleft = midpt + Vector2D(-border,border,start.unit)
+        return Model.engine.makeMagMap(topleft,border*2,border*2,int(Model.parameters.extras.resolution*2*math.sqrt(2)),self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
     def __STARFIELD(self):
         stars = Model.parameters.galaxy.stars 

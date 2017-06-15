@@ -211,87 +211,97 @@ public:
 
 	vector<Pixel> find_within(const double &x, const double &y, const double &r)
 	{
-//		 cout << "Finding " << x << "," << y << ".\n";
-		int cx = ceil((x-tlx)/NODE_WIDTH);
-		int cy = ceil((y-tly)/NODE_HEIGHT);
-		int rx = ceil(r/(NODE_WIDTH));
-		int ry = ceil(r/(NODE_HEIGHT));
-		int hypot2 = rx*rx+ry*ry;
+////		 cout << "Finding " << x << "," << y << ".\n";
+//		int cx = ceil((x-tlx)/NODE_WIDTH);
+//		int cy = ceil((y-tly)/NODE_HEIGHT);
+//		int rx = ceil(r/(NODE_WIDTH));
+//		int ry = ceil(r/(NODE_HEIGHT));
+//		int hypot2 = rx*rx+ry*ry;
+//		vector<Pixel> ret;
+//		vector<Pixel> tmp;
+//		if (cx >= 0 && cy >= 0 && cx < data.size() && cy < data[0].size())
+//		{
+//			tmp = data[cx][cy].queryNode(x,y,r);
+//		}
+//		ret.insert(ret.end(),tmp.begin(),tmp.end());
+//		for (size_t i=1; i <= rx; i++) {
+//			if (cx+i >= 0 && cy >= 0 && cx+i < data.size() && cy < data[0].size())
+//			{
+//				tmp = data[cx+i][cy].queryNode(x,y,r);
+//				ret.insert(ret.end(),tmp.begin(),tmp.end());
+//			}
+//			if (cx-i >= 0 && cy >= 0 && cx-i < data.size() && cy < data[0].size())
+//			{
+//				tmp = data[cx-i][cy].queryNode(x,y,r);
+//				ret.insert(ret.end(),tmp.begin(),tmp.end());
+//			}
+//		}
+//		for (size_t i=1; i <= ry; i++) {
+//			if (cx >= 0 && cy+i >= 0 && cx < data.size() && cy+i < data[0].size())
+//			{
+//				tmp = data[cx][cy+i].queryNode(x,y,r);
+//				ret.insert(ret.end(),tmp.begin(),tmp.end());
+//			}
+//			if (cx >= 0 && cy-i >= 0 && cx < data.size() && cy-i < data[0].size())
+//			{
+//				tmp = data[cx][cy-i].queryNode(x,y,r);
+//				ret.insert(ret.end(),tmp.begin(),tmp.end());
+//			}
+//		}
+//		for (size_t i = 1; i <= rx; ++i) // Possible indexing issue here?
+//		{
+//			int ryLow = ceil(sqrt(hypot2 - i*i))+1;
+//			for (size_t j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
+//			{
+//				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r)
+//				{
+//					if ((i+2)*NODE_WIDTH*(i+2)*NODE_WIDTH + (j+2)*NODE_HEIGHT*(j+2)*NODE_HEIGHT < r*r) {
+//						if (i+cx >= 0 && i+cx < data.size() && j+cy >= 0 && j+cy < data[0].size()) {
+//							auto &node = data[i+cx][j+cy];
+//							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
+//						}
+//						if (cx-i >= 0 && cx-i < data.size() && j+cy >= 0 && j+cy < data[0].size()) {
+//							auto &node = data[cx-i][cy+j];
+//							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
+//						}
+//							if (cx+i >= 0 && cx+i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {
+//							auto &node = data[i+cx][cy-j];
+//							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
+//						}
+//							if (cx-i >= 0 && cx-i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {
+//							auto &node = data[cx-i][cy-j];
+//							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
+//						}
+//					}
+//					else {
+//						if (i+cx >= 0 && i+cx < data.size() && j+cy >= 0 && j+cy < data[0].size()) {
+//							tmp = data[i+cx][j+cy].queryNode(x,y,r);
+//							ret.insert(ret.end(),tmp.begin(),tmp.end());
+//						}
+//						if (cx-i >= 0 && cx-i < data.size() && j+cy >= 0 && j+cy < data[0].size()) {
+//							tmp = data[cx-i][cy+j].queryNode(x,y,r);
+//							ret.insert(ret.end(),tmp.begin(),tmp.end());
+//						}
+//							if (cx+i >= 0 && cx+i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {
+//							tmp = data[i+cx][cy-j].queryNode(x,y,r);
+//							ret.insert(ret.end(),tmp.begin(),tmp.end());
+//						}
+//							if (cx-i >= 0 && cx-i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {
+//							tmp = data[cx-i][cy-j].queryNode(x,y,r);
+//							ret.insert(ret.end(),tmp.begin(),tmp.end());
+//						}
+//					}
+//				}
+//			}
+//		}
 		vector<Pixel> ret;
-		vector<Pixel> tmp;
-		if (cx >= 0 && cy >= 0 && cx < data.size() && cy < data[0].size())
+//		vector<Pixel> tmp;
+		for (auto i:data)
 		{
-			tmp = data[cx][cy].queryNode(x,y,r);
-		}
-		ret.insert(ret.end(),tmp.begin(),tmp.end());
-		for (size_t i=1; i <= rx; i++) {
-			if (cx+i >= 0 && cy >= 0 && cx+i < data.size() && cy < data[0].size())
+			for (auto j:i)
 			{
-				tmp = data[cx+i][cy].queryNode(x,y,r);
+				auto tmp = j.queryNode(x,y,r);
 				ret.insert(ret.end(),tmp.begin(),tmp.end());
-			}
-			if (cx-i >= 0 && cy >= 0 && cx-i < data.size() && cy < data[0].size())
-			{
-				tmp = data[cx-i][cy].queryNode(x,y,r);
-				ret.insert(ret.end(),tmp.begin(),tmp.end());
-			}
-		}
-		for (size_t i=1; i <= ry; i++) {
-			if (cx >= 0 && cy+i >= 0 && cx < data.size() && cy+i < data[0].size())
-			{
-				tmp = data[cx][cy+i].queryNode(x,y,r);
-				ret.insert(ret.end(),tmp.begin(),tmp.end());
-			}
-			if (cx >= 0 && cy-i >= 0 && cx < data.size() && cy-i < data[0].size())
-			{
-				tmp = data[cx][cy-i].queryNode(x,y,r);
-				ret.insert(ret.end(),tmp.begin(),tmp.end());
-			}
-		}
-		for (size_t i = 1; i <= rx; ++i) // Possible indexing issue here?
-		{
-			int ryLow = ceil(sqrt(hypot2 - i*i))+1;
-			for (size_t j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
-			{
-				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r)
-				{
-					if ((i+2)*NODE_WIDTH*(i+2)*NODE_WIDTH + (j+2)*NODE_HEIGHT*(j+2)*NODE_HEIGHT < r*r) {
-						if (i+cx >= 0 && i+cx < data.size() && j+cy >= 0 && j+cy < data[0].size()) {
-							auto &node = data[i+cx][j+cy];
-							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
-						}
-						if (cx-i >= 0 && cx-i < data.size() && j+cy >= 0 && j+cy < data[0].size()) {	
-							auto &node = data[cx-i][cy+j];
-							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
-						}
-							if (cx+i >= 0 && cx+i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
-							auto &node = data[i+cx][cy-j];
-							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
-						}
-							if (cx-i >= 0 && cx-i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
-							auto &node = data[cx-i][cy-j];
-							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
-						}						
-					}
-					else {
-						if (i+cx >= 0 && i+cx < data.size() && j+cy >= 0 && j+cy < data[0].size()) {
-							tmp = data[i+cx][j+cy].queryNode(x,y,r);
-							ret.insert(ret.end(),tmp.begin(),tmp.end());
-						}
-						if (cx-i >= 0 && cx-i < data.size() && j+cy >= 0 && j+cy < data[0].size()) {	
-							tmp = data[cx-i][cy+j].queryNode(x,y,r);
-							ret.insert(ret.end(),tmp.begin(),tmp.end());
-						}
-							if (cx+i >= 0 && cx+i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
-							tmp = data[i+cx][cy-j].queryNode(x,y,r);
-							ret.insert(ret.end(),tmp.begin(),tmp.end());
-						}
-							if (cx-i >= 0 && cx-i < data.size() && cy-j >= 0 && cy-j< data[0].size()) {	
-							tmp = data[cx-i][cy-j].queryNode(x,y,r);
-							ret.insert(ret.end(),tmp.begin(),tmp.end());
-						}
-					}
-				}
 			}
 		}
 		return ret;

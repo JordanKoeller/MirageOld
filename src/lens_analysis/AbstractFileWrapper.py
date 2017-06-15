@@ -63,7 +63,7 @@ class AbstractFileWrapper(object):
     
     @property
     def describe(self):
-        print(str(self))
+        print(str(self._exptTypes)+str(self))
         
     @property
     def parameters(self):

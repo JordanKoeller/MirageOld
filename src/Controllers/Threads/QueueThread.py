@@ -26,17 +26,16 @@ class QueueThread(QtCore.QThread):
         self.signals = signals
         
     def run(self):
-        print("Running")
         ctr = 0
         for params in self.experimentQueue:
             ctr += 1
-            print("On params" + str(ctr))
             numTrials = params.extras.numTrials 
             self.filemanager.newExperiment(params) #NEED TO IMPLIMENT
-            exptRunner = ExperimentResultCalculator(params)
+            exptRunner = ExperimentResultCalculator(params,self.signals)
             tc = 0
             for expt in range(0,numTrials):
-                print("On trial" + str(tc) + " Of params " + str(ctr))
+                self.signals['progressLabel'].emit("Processing trial "+str(tc+1) +" of " + str(numTrials+1) + ".")
+                tc += 1
                 params = exptRunner.varyTrial(params) #NEED TO IMPLIMENT
                 Model.updateParameters(params)
                 data = exptRunner.runExperiment() #NEED TO IMPLIMENT

@@ -8,6 +8,7 @@ import imageio
 
 from Controllers.FileManagers.FileManager import FileManager
 import numpy as np
+from Utility.NullSignal import NullSignal
 
 
 class VisualizationFileManager(FileManager,QtCore.QThread):
@@ -16,7 +17,7 @@ class VisualizationFileManager(FileManager,QtCore.QThread):
     '''
 
 
-    def __init__(self, signals):
+    def __init__(self, signals=NullSignal):
         '''
         Constructor
         '''
