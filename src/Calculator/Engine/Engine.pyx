@@ -285,14 +285,12 @@ cdef class Engine:
 		if self.__parameters is None:
 			self.__parameters = parameters
 			if self.__parameters.galaxy.percentStars > 0:
-				stars = self.__parameters.generateStars()
-				parameters.setStars(stars)
+				self.__parameters.regenerateStars()
 			self.reconfigure()
 		elif not self.__parameters.isSimilar(parameters):
 			self.__parameters = parameters
 			if self.__parameters.galaxy.percentStars > 0:
-				stars = self.__parameters.generateStars()
-				parameters.setStars(stars)
+				self.__parameters.regenerateStars()
 			self.reconfigure()
 		else:
 			parameters.setStars(self.__parameters.stars)

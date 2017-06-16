@@ -1,5 +1,4 @@
 #!/bin/sh
-cd src
+cd /home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/
 python Main.py $@
-cd ..
 echo "\n\n\nDone"

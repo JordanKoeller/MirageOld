@@ -5,7 +5,6 @@ Created on Jun 4, 2017
 '''
 from enum import Enum
 
-from Models.ExperimentQueue.Experiment import TrialVariance
 
 
 class ResultTypes(Enum):
@@ -31,7 +30,7 @@ class ExperimentParams(object):
         self.name = name
         self.description = description
         self.numTrials = numTrials
-        self.trialVariance = TrialVariance(trialVariance)
+        self.trialVarianceFunction = trialVariance
         self.resolution = resolution
         self.desiredResults = desiredResults
         

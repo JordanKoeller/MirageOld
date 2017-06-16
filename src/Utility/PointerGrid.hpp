@@ -119,6 +119,7 @@ public:
 		width = w;
 		height = h;
 		rawData = new double[w*h*2];
+//		cout << "Size is " </< h*w << "\n";
 		double minX = DBL_MAX;
 		double minY = DBL_MAX;
 		double maxX = DBL_MIN;
@@ -289,7 +290,7 @@ public:
 
 	~PointerGrid()
 	{
-		cout << "deleted\n";
+//		cout << "deleted\n";
 	}
 
 	bool clear()

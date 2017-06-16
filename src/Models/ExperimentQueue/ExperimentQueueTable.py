@@ -58,7 +58,8 @@ class ExperimentQueueTable(TableWidget):
     def experiments(self):
         return self.__experiments
     
-    
+    def __len__(self):
+        return len(self.experiments)
 
         
     @property

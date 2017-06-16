@@ -25,7 +25,7 @@ class VisualizationController(GUIController):
         '''
         Constructor
         '''
-        GUIController.__init__(self,view)
+        GUIController.__init__(self,view,None,None)
         view.addSignals(imageCanvas = self.imageCanvas_signal, curveCanvas = self.curveCanvas_signal)
         self.thread = VisualizerThread(self.view.signals)
         self.view.pauseButton.clicked.connect(self.thread.pause)
@@ -66,8 +66,7 @@ class VisualizationController(GUIController):
         Model.parameters.showGalaxy = self.view.displayGalaxy.isChecked()
         
     def regenerateStarsHelper(self):
-        stars = Model.parameters.generateStars()
-        Model.parameters.setStars(stars)
+        Model.parameters.regenerateStars()
         Model.engine.reconfigure()
 
     def simImage(self):
@@ -77,7 +76,7 @@ class VisualizationController(GUIController):
 
         Called by default when the "Play" button is presssed.
         """
-        parameters = self.parametersController.makeParameters()
+        parameters = self.parametersController.buildParameters()
         if parameters is None:
             return
         Model.updateParameters(parameters)
@@ -96,7 +95,7 @@ class VisualizationController(GUIController):
         
         
     def visualizeData(self):
-        params = self.parametersController.makeParameters()
+        params = self.parametersController.buildParameters()
         return self.thread.visualize(params)
 
     def saveVisualization(self):

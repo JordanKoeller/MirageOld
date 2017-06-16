@@ -63,7 +63,7 @@ class Parameters(object):
 		self.time = 0
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
 
-	def generateStars(self):
+	def regenerateStars(self):
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
 		generator = Kroupa_2001()
 		m_stars = m_stars.value
@@ -90,6 +90,7 @@ class Parameters(object):
 				x = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.value
 				y = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.value
 				starArray[i] = [x,y, starMasses[i],velocities[i,0],velocities[i,1]]
+			self.__galaxy.update(stars=starArray)
 			return starArray
 		else:
 			starArray = np.ndarray((len(starMasses),3))
@@ -97,7 +98,7 @@ class Parameters(object):
 				x = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.value
 				y = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.value
 				starArray[i] = [x,y, starMasses[i]]
-			return starArray
+			self.__galaxy.update(stars=starArray)
 		
 	@property
 	def galaxy(self):

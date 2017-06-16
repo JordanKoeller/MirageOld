@@ -31,7 +31,7 @@ class ParametersController(GUIController):
         '''
         Constructor
         '''
-        GUIController.__init__(self, view)
+        GUIController.__init__(self, view,None,None)
         view.addSignals(paramLabel = self.paramLabel_signal, paramSetter = self.paramSetter_signal)
         self.view.load_setup.triggered.connect(self.loadParams)
         self.view.save_setup.triggered.connect(self.saveParams)
@@ -48,7 +48,7 @@ class ParametersController(GUIController):
     def show(self):
         pass
         
-    def makeParameters(self):
+    def buildParameters(self,extrasBuilder = None):
         """
         Collects and parses all the information from the various user input fields/checkboxes.
         Stores them in a Parameters object.
@@ -94,6 +94,8 @@ class ParametersController(GUIController):
             self.view.pixelAngleLabel_thetaE.setText(str(self.__round_to_n(params.pixelScale_thetaE,4)))
             self.view.pixelAngleLabel_Rg.setText(str(self.__round_to_n(params.pixelScale_Rg,4)))
             self.view.quasarRadiusRGEntry.setText(str(self.__round_to_n(params.quasarRadius_rg, 4)))
+            if extrasBuilder:
+                extrasBuilder(self.view,params)
             return params
         except AttributeError:
             self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
@@ -105,7 +107,7 @@ class ParametersController(GUIController):
         self.view.unitLabel_3.setText(unitString)
         self.view.unitLabel_4.setText(unitString)
 
-    def bindFields(self, parameters):
+    def bindFields(self, parameters,bindExtras = None):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""
         qV = parameters.quasar.velocity.to('arcsec').unitless()
         qP = parameters.quasar.position.to('arcsec').unitless()
@@ -125,6 +127,8 @@ class ParametersController(GUIController):
         self.view.displayQuasar.setChecked(parameters.showQuasar)
         self.view.displayGalaxy.setChecked(parameters.showGalaxy)
         self.view.quasarBHMassEntry.setText(str(parameters.quasar.mass.to('solMass').value))
+        if bindExtras:
+            bindExtras(self.view,parameters)
         
     def __round_to_n(self, x,n = 6):
         if x == 0.0:
@@ -135,7 +139,7 @@ class ParametersController(GUIController):
     def saveParams(self):
         """Prompts the user for a file name, then saves the lensing system's parameters to be loaded in at a later session."""
         print("Firing")
-        self.fileManager.write(self.makeParameters())
+        self.fileManager.write(self.buildParameters())
 
     def loadParams(self):
         """Prompts the user to select a previously saved lensing system configuration, then when selected loads the system to model"""

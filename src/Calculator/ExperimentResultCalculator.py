@@ -10,7 +10,10 @@ from Models.Parameters.ExperimentParams import ResultTypes
 from Utility import Vector2D
 import numpy as np
 from Utility.NullSignal import NullSignal
-
+# from Controllers.QueueController import defaultVariance
+def defaultVariance(params,trialNo):
+    print("Defaulting")
+    return params
 
 
 class ExperimentResultCalculator(object):
@@ -43,10 +46,16 @@ class ExperimentResultCalculator(object):
         for exp in self.experimentRunners:
             ret.append(exp())
         return ret
+
             
-            
-    def varyTrial(self,params):
-        return params
+    def varyTrial(self,params,trialNo):
+        from astropy import units as u
+        varianceStr = params.extras.trialVarianceFunction
+        oldParams = params
+        nspace = {}
+        exec(varianceStr,{'oldParams':oldParams,'trialNumber':trialNo,'u':u,'np':np},nspace)
+        return nspace['newParams']
+
     
     def __LIGHT_CURVE(self):
         start,finish = (Model.parameters.extras.pathStart,Model.parameters.extras.pathEnd)

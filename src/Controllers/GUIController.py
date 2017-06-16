@@ -13,16 +13,20 @@ class GUIController(QtCore.QObject):
     thread = None
     fileManager = None
     view = None
+    extrasBinder = None
+    extrasBuilder = None
 
-    def __init__(self,view):
+    def __init__(self,view,binder=None,builder=None):
         '''
         Constructor
         '''
         QtCore.QObject.__init__(self)
         self.view = view
+        self.extrasBinder = binder
+        self.extrasBuilder = builder
         
-    def __del__(self):
-        self.hide()
+#     def __del__(self):
+#         self.hide()
         
     def show(self):
         pass

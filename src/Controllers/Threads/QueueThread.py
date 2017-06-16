@@ -3,10 +3,12 @@ Created on Jun 1, 2017
 
 @author: jkoeller
 '''
+import copy
+
 from PyQt5 import QtCore
 
-from Models import Model
 from Calculator.ExperimentResultCalculator import ExperimentResultCalculator
+from Models import Model
 
 
 class QueueThread(QtCore.QThread):
@@ -36,8 +38,13 @@ class QueueThread(QtCore.QThread):
             for expt in range(0,numTrials):
                 self.signals['progressLabel'].emit("Processing trial "+str(tc+1) +" of " + str(numTrials+1) + ".")
                 tc += 1
-                params = exptRunner.varyTrial(params) #NEED TO IMPLIMENT
-                Model.updateParameters(params)
+                oldP = copy.deepcopy(Model.parameters)
+                newP = exptRunner.varyTrial(params,tc) #NEED TO IMPLIMENT
+#                 oldP = Model.parameters
+                Model.updateParameters(newP)
+                if oldP  and oldP.isSimilar(newP) == False:
+                    print("Intelligent reconfigure")
+                    Model.engine.reconfigure()
                 data = exptRunner.runExperiment() #NEED TO IMPLIMENT
                 self.filemanager.sendTrial(data)
             self.filemanager.closeExperiment()

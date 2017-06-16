@@ -77,6 +77,12 @@ class GUIManager(QtWidgets.QMainWindow):
             
     def addSignals(self,**kwargs):
         self.__signals.update(kwargs)
+    
+    def bindFields(self,parameters):
+        self.parametersController.bindFields(parameters,self.perspective.extrasBinder)
+        
+    def buildParameters(self):
+        return self.parametersController.buildParameters(self.perspective.extrasBuilder)
 
     def removeSignals(self,args):
         for i in args:

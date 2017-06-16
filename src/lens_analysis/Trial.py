@@ -77,6 +77,10 @@ class Trial(AbstractFileWrapper):
     def testFails(self,ind1,ind2):
         print(ind1)
         print(ind2)
+        
+    @property
+    def trialNumber(self):
+        return self.__trialNo
     
     
     @property
