@@ -27,10 +27,13 @@ class VisualizationController(GUIController):
         '''
         GUIController.__init__(self,view,None,None)
         view.addSignals(imageCanvas = self.imageCanvas_signal, curveCanvas = self.curveCanvas_signal)
+        self.playToggle = False
         self.thread = VisualizerThread(self.view.signals)
-        self.view.pauseButton.clicked.connect(self.thread.pause)
+        self.view.pauseButton.clicked.connect(self.pause)
         self.view.resetButton.clicked.connect(self.restart)
         self.view.playButton.clicked.connect(self.simImage)
+        self.view.playPauseAction.triggered.connect(self.togglePlaying)
+        self.view.resetAction.triggered.connect(self.restart)
         self.view.displayQuasar.clicked.connect(self.drawQuasarHelper)
         self.view.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
         self.view.record_button.triggered.connect(self.record)
@@ -46,7 +49,16 @@ class VisualizationController(GUIController):
         self.view.signals['paramLabel'].connect(self.qPoslabel_slot)
         self.parametersController = self.view.parametersController
         self.fileManager = VisualizationFileManager(self.view.signals)
+
+    def togglePlaying(self):
+        if self.playToggle:
+            self.playToggle = False
+            self.pause()
+        else:
+            self.playToggle = True
+            self.simImage()
         
+
     def show(self):
         self.view.visualizationFrame.setHidden(False)
         self.view.visualizationBox.setHidden(False)
@@ -76,6 +88,7 @@ class VisualizationController(GUIController):
 
         Called by default when the "Play" button is presssed.
         """
+        self.playToggle = True
         parameters = self.parametersController.buildParameters()
         if parameters is None:
             return
@@ -87,9 +100,14 @@ class VisualizationController(GUIController):
         self.fileManager.recording = True
         self.simImage()
 
+    def pause(self):
+        self.playToggle = False
+        self.thread.pause()
+
     def restart(self):
         """Returns the system to its t=0 configuration. If the system was configured to record, will automatically prompt the user for a file name,
         render and save the video."""
+        self.playToggle = False
         self.thread.restart()
         self.fileManager.write()
         

@@ -20,10 +20,10 @@ class __Model(object):
         if self.parameters:
             params.setTime(self.parameters.time)
             params.quasar.setPos(self.parameters.quasar.observedPosition)
-            if params.galaxy.starVelocityParams:
+            if params.galaxy.starVelocityParams and isinstance(self.__Engine,Engine_Pointer):
                 self.__Engine = Engine_Brute()
                 print("Brute Forcing")
-            else:
+            elif isinstance(self.__Engine,Engine_Brute):
                 self.__Engine = Engine_Pointer()
                 print("Grid Structure")
         self.__Engine.updateParameters(params)
