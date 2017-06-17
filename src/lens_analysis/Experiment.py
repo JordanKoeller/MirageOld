@@ -45,6 +45,21 @@ class Experiment(AbstractFileWrapper):
                 raise IndexError("Index out of range.")
         else:
             raise ValueError("Index must be of type int")
+
+    def __len__(self):
+        return len(self._lookupTable)
+        
+
+
+
+    @property
+    def size(self):
+        return len(self)
+    
+    @property
+    def length(self):
+        return len(self)
+        
         
     def exportParameters(self,filename):
         file = open(filename,'wb+')

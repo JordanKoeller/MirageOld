@@ -84,7 +84,6 @@ class Parameters(object):
 			for i in range(0,len(starMasses)):
 				velocities[i] = [velocityDir[i,0]*velocityMag[i], velocityDir[i,1]*velocityMag[i]]
 			velocities = velocities/self.galaxy.angDiamDist.to('km').value * 1e9
-			print(velocities)
 			starArray = np.ndarray((len(starMasses),5))
 			for i in range(0,len(starMasses)): #PROTOCOL of X, Y, Mass, Vx, Vy
 				x = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.value

@@ -7,7 +7,7 @@ import copy
 
 from PyQt5 import QtCore
 
-from Calculator.ExperimentResultCalculator import ExperimentResultCalculator
+from Calculator.ExperimentResultCalculator import ExperimentResultCalculator, varyTrial
 from Models import Model
 
 
@@ -39,7 +39,7 @@ class QueueThread(QtCore.QThread):
                 self.signals['progressLabel'].emit("Processing trial "+str(tc+1) +" of " + str(numTrials+1) + ".")
                 tc += 1
                 oldP = copy.deepcopy(Model.parameters)
-                newP = exptRunner.varyTrial(params,tc) #NEED TO IMPLIMENT
+                newP = varyTrial(params,tc) #NEED TO IMPLIMENT
 #                 oldP = Model.parameters
                 Model.updateParameters(newP)
                 if oldP  and oldP.isSimilar(newP) == False:

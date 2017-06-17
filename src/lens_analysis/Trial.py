@@ -17,6 +17,7 @@ from Utility.Vec2D import Vector2D
 from lens_analysis.AbstractFileWrapper import AbstractFileWrapper
 import numpy as np
 from Controllers.FileManagers.ParametersFileManager import ParametersFileManager
+from Calculator.ExperimentResultCalculator import varyTrial
 
 
 class Trial(AbstractFileWrapper):
@@ -81,6 +82,12 @@ class Trial(AbstractFileWrapper):
     @property
     def trialNumber(self):
         return self.__trialNo
+
+    @property
+    def parameters(self):
+        params = varyTrial(self._params,self.trialNumber)
+        return params 
+
     
     
     @property

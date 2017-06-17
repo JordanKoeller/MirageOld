@@ -15,6 +15,14 @@ def defaultVariance(params,trialNo):
     print("Defaulting")
     return params
 
+def varyTrial(params,trialNo):
+    from astropy import units as u
+    import copy
+    varianceStr = params.extras.trialVarianceFunction
+    oldParams = params
+    nspace = {}
+    exec(varianceStr,{'oldParams':oldParams,'trialNumber':trialNo,'u':u,'np':np,'copy':copy},nspace)
+    return nspace['newParams']
 
 class ExperimentResultCalculator(object):
     '''
@@ -48,13 +56,6 @@ class ExperimentResultCalculator(object):
         return ret
 
             
-    def varyTrial(self,params,trialNo):
-        from astropy import units as u
-        varianceStr = params.extras.trialVarianceFunction
-        oldParams = params
-        nspace = {}
-        exec(varianceStr,{'oldParams':oldParams,'trialNumber':trialNo,'u':u,'np':np},nspace)
-        return nspace['newParams']
 
     
     def __LIGHT_CURVE(self):

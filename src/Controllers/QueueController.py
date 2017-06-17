@@ -16,6 +16,7 @@ from Controllers.FileManagers import QueueFileManager
 from Controllers.Threads.QueueThread import QueueThread
 from Models.ExperimentQueue.ExperimentQueueTable import ExperimentQueueTable
 from Models.Parameters.ExperimentParams import ExperimentParams, ResultTypes
+from Calculator.ExperimentResultCalculator import varyTrial
 
 def _queueExtrasBuilder(view,parameters):
     name = view.experimentNameEntry.text()
@@ -34,6 +35,10 @@ def _queueExtrasBuilder(view,parameters):
     pend = view.vectorFromQString(view.quasarPathEnd.text(),False,False,'arcsec')
     extras = ExperimentParams(name=name,description=desc,numTrials=numTrials,trialVariance=varianceStr,pathStart = pstart,pathEnd = pend, resolution = resolution,desiredResults=datasets)
     parameters.extras = extras
+    try:
+        varyTrial(parameters,0)
+    except:
+        raise AttributeError
 
 def _queueExtrasBinder(view,obj):
     if obj.extras:
