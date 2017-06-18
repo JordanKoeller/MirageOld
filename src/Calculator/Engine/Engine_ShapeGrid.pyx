@@ -52,19 +52,9 @@ cdef class Engine_ShapeGrid(Engine):
 			pixel where it intersects the source plane after lensing effects have been accounted for."""
 		cdef int w = xArray.shape[0]
 		cdef int h = xArray.shape[1]
-# 		cdef double *contiguous = <double *>malloc(w*h*2*sizeof(double)) 
-# 		cdef int i = 0
-# 		cdef int j = 0
 		cdef int nd = 2
 		cdef double* x = <double*> xArray.data 
 		cdef double* y = <double*> yArray.data 
-# 		with nogil:
-# 			for i in range(0,w):
-# 				for j in range(0,h):
-# 					contiguous[2*(i*w + j)] = xArray[i,j]
-# 					contiguous[2*(i*w+j)+1] = yArray[i,j]
-# # 					gridData[i,j,0] = xArray[i,j]
-# # 					gridData[i,j,1] = yArray[i,j]
 		with nogil:
 			self.__grid = ShapeGrid(x,y,h,w,nd,binsize)
 
@@ -80,7 +70,7 @@ cdef class Engine_ShapeGrid(Engine):
 		begin = time.clock()
 		self.__preCalculating = True
 		finalData = self.ray_trace(use_GPU=True)
-		self.build_data(finalData[0], finalData[1],int(finalData[0].shape[0]**2/2))
+		self.build_data(finalData[0], finalData[1],int(7*finalData[0].shape[0]**2))
 		del(finalData)
 		self.__preCalculating = False
 		print("Time calculating = " + str(time.clock() - begin) + " seconds.")

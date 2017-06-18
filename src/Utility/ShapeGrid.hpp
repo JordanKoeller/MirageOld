@@ -349,15 +349,6 @@ public:
 		return *this;
 	}
 
-	// void query_small(double &x, double &y, double &r, vector<double*> &return_buffer)
-	// {
-	// 	int cx = round((x-tlx)/NODE_WIDTH);
-	// 	int cy = round((y-tly)/NODE_HEIGHT);
-	// 	int rx = ceil(r/(NODE_WIDTH))+1;
-	// 	int ry = ceil(r/(NODE_HEIGHT))+1;
-	// 	int hypot2 = rx*rx+ry*ry;	
-	// }
-
 
 	vector<pair<int,int>> find_within( double &x,  double &y,  double &r)
 	{

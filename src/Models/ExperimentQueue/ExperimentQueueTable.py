@@ -29,6 +29,24 @@ class ExperimentQueueTable(TableWidget):
         exptButton.setMinimumWidth(50)
         exptButton.clicked.connect(lambda: self.signal.emit(experiment,self.numRows-1))
         self.setCellWidget(self.numRows,len(txtRow),exptButton)
+        clearButton = QPushButton()
+        clearButton.setText("Remove")
+        clearButton.setMinimumWidth(50)
+        clearButton.clicked.connect(lambda: self.removeItem(experiment))
+        self.setCellWidget(self.numRows,len(txtRow)+1,clearButton)
+
+    def removeItem(self,expt):
+        tmp = self.experiments[:]
+        self.clear()
+        self.__initClearTable()
+        self.__experiments = []
+        for i in tmp:
+            if i is not expt:
+                self.addExperiment(i)
+
+
+    def clearTable(self):
+        self.__initClearTable()
         
     def updateExperiment(self,exp,num):
         self.experiments[num] = exp
@@ -40,12 +58,13 @@ class ExperimentQueueTable(TableWidget):
             self.addExperiment(i)
             
     def __initClearTable(self):
-        self.setData([["","","",""]])
-        headers = ['Name','Description','Number of Trials','Parameters']
+        self.setData([["","","","",""]])
+        headers = ['Name','Description','Number of Trials','Parameters','Remove']
         self.setColumnWidth(0,100)
         self.setColumnWidth(1,400)
         self.setColumnWidth(2,130)
         self.setColumnWidth(3,100)
+        self.setColumnWidth(4,100)
         self.horizontalHeader().setStretchLastSection(True)
         self.setHorizontalHeaderLabels(headers)
             

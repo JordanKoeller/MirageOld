@@ -59,7 +59,7 @@ class ParametersController(GUIController):
             inputUnit = 'arcsec'
             if self.view.scaleUnitOption.currentIndex() == 1:
                 inputUnit = 'uas'
-            qVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit=inputUnit).to('rad')
+            qVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit='km/s')
             qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit=inputUnit).to('rad')
             qRedshift = float(self.view.qRedshift.text())
             qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')

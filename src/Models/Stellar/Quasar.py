@@ -17,6 +17,8 @@ class Quasar(Movable,Cosmic):
 		self.__radius = radius
 		self.updateDrawable(position = position,colorKey = 3)
 		self.updateCosmic(redshift = redshift)
+		normVel = velocity.to('km/s')/self.angDiamDist.to('km').value
+		self.updateMovable(position = position, velocity = normVel.setUnit('rad'))
 		self.__mass = mass
 
 	def update(self, redshift = None, position = None, radius = None, velocity = None):
@@ -54,9 +56,9 @@ class Quasar(Movable,Cosmic):
 defaultQuasar = Quasar(redshift = 0.073,
 	position = Vector2D(-0.0003,0,"rad"),
 	radius = u.Quantity(5,"arcsecond"),
-	velocity = Vector2D(0,0,"rad"))
+	velocity = Vector2D(0,0,"km/s"))
 
 microQuasar = Quasar(redshift = 0.073,
 	position = Vector2D(0,0,"rad"),
 	radius = u.Quantity(1.7037e-6,"rad"),
-	velocity = Vector2D(1.59016e-8,0,"rad"))
+	velocity = Vector2D(1.59016e-8,0,"km/s"))

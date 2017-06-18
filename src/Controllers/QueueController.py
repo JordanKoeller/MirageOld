@@ -79,6 +79,7 @@ class QueueController(GUIController):
         self.view.queueStartButton.clicked.connect(self.runExperiments)
         self.view.queueEditCancelButton.clicked.connect(self.cancelEdit)
         self.view.queueEditCancelButton.setEnabled(False)
+        self.view.clearTableButton.clicked.connect(self.table.clearTable)
     
     
     def show(self):
@@ -109,30 +110,6 @@ class QueueController(GUIController):
         self.editing = -1
         
         
-        
-#     def buildParameters(self):
-#         try:
-#             regParams = self.view.parametersController.buildParameters()
-#             name = self.view.experimentNameEntry.text()
-#             desc = self.view.experimentDescEntry.toPlainText()
-#             numTrials = self.view.trialSpinBox.value()
-#             resolution = self.view.dataPointSpinBox.value()
-#             varianceStr = self.view.varianceTextArea.toPlainText()
-#             datasets = []
-#             if self.view.lightCurveCheckBox.isChecked():
-#                 datasets.append(ResultTypes.LIGHT_CURVE)
-#             if self.view.magMapCheckBox.isChecked():
-#                 datasets.append(ResultTypes.MAGMAP)
-#             if self.view.starFieldCheckBox.isChecked():
-#                 datasets.append(ResultTypes.STARFIELD)
-#             pstart = self.view.vectorFromQString(self.view.quasarPathStart.text(),False,False,'arcsec')
-#             pend = self.view.vectorFromQString(self.view.quasarPathEnd.text(),False,False,'arcsec')
-#             extras = ExperimentParams(name=name,description=desc,numTrials=numTrials,trialVariance=varianceStr,pathStart = pstart,pathEnd = pend, resolution = resolution,desiredResults=datasets)
-#             regParams.extras = extras
-#             return regParams
-#         except:
-#             self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
-#             return None
         
     def runExperiments(self):
         fileRunner = QueueFileManager(self.view.signals)

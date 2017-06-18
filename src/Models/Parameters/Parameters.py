@@ -59,7 +59,7 @@ class Parameters(object):
 		self.numStars = numStars
 		self.__starMassTolerance = starMassTolerance
 		self.__starMassVariation = starMassVariation
-		self.dt = 0.1
+		self.dt = 2.6e9
 		self.time = 0
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
 
@@ -83,7 +83,7 @@ class Parameters(object):
 			velocities = np.ndarray((len(velocityDir),2))
 			for i in range(0,len(starMasses)):
 				velocities[i] = [velocityDir[i,0]*velocityMag[i], velocityDir[i,1]*velocityMag[i]]
-			velocities = velocities/self.galaxy.angDiamDist.to('km').value * 1e9
+			velocities = velocities/self.galaxy.angDiamDist.to('km').value
 			starArray = np.ndarray((len(starMasses),5))
 			for i in range(0,len(starMasses)): #PROTOCOL of X, Y, Mass, Vx, Vy
 				x = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.value
