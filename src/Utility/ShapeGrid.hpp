@@ -6,6 +6,7 @@
 #include <cfloat>
 #include <unordered_map>
 #include <unordered_set>
+#include <climits>
 using namespace std;
 
 
@@ -56,6 +57,25 @@ private:
 		}
 	}
 
+	static bool lineIntersects(double* a1, double* a2, double* b1, double*b2) //Two points each on line A and line B
+	{
+		double m_a = (a2[1]-a1[1])/(a2[0]-a1[0]);
+		double m_b = (b2[1]-b1[1])/(b2[0]-b1[0]);
+		double y_a = a1[1] - m_a*a1[0];
+		double y_b = b1[1] - m_b*b1[0];
+		double x = (y_b-y_a)/(m_a-m_b);
+		// double y = x*m_a+y_a;
+		if (abs(a2[0]-a1[0]) == abs(x-a1[0]) + abs(x-a2[0]) &&
+			abs(b2[0]-b1[0]) == abs(x-b1[0]) + abs(x-b2[0]))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	inline bool overlap( double &objx,  double& objy,  double &radius,  int &i,  int &j) 
 	{
 		double tnx = tlx + i*NODE_WIDTH;
@@ -87,7 +107,7 @@ private:
 		return 2*(i*width+j);
 	}
 
-	inline static double project(double* vStart, double*vEnd, double &cx, double &cy)
+	inline static double project(double* vStart, double*vEnd, double &cx, double &cy, double &r2)
 	{
 		//Calculates distance from the line connecting vStart and vEnd to (cx,cy). Done by projecting vector to cx onto the line.
 		double C[2];
@@ -96,14 +116,73 @@ private:
 		A[1] = vEnd[1]-vStart[1];
 		C[0] = cx-vStart[0];
 		C[1] = cy-vStart[1];
+		double C2 = (C[0])*(C[0])+(C[1])*(C[1]);
+		double A2 = ((A[0])*(A[0])+(A[1])*(A[1]));
 		double dot = (C[0])*(A[0])+(C[1])*(A[1]);
-		double ret =  (C[0])*(C[0])+(C[1])*(C[1])-(dot*dot/((A[0])*(A[0])+(A[1])*(A[1])));
-		return ret;
+		double CCos = (dot*dot/A2);
+		if (CCos > A2)
+		{
+			return false;
+		}
+		else if (C2 - CCos <= r2)
+		{
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
-	inline static bool intersect(Datum &datum, double &x, double &y, double &r)
+	static bool winding_algorithm(double ** V, double* P)
+	{
+		int wn = 0;
+		for (int i=0;i < 4;i++)
+		{
+			// cout << V[i][0] << "," << V[i][1] << "\n";
+			if (V[i][1] <= P[1])
+			{
+				if (V[i+1][1] > P[1])
+				{
+					if (isLeft(V[i],V[i+1],P) > 0)
+					{
+						wn++;
+					}
+				}
+			}
+			else
+			{
+				if (V[i+1][1] <= P[1])
+				{
+					if (isLeft(V[i],V[i+1],P) < 0)
+					{
+						wn--;
+					}
+				}
+			}
+		}
+		if (wn != 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
+	}
+
+	static bool intersect(Datum &datum, double &x, double &y, double &r)
 	{
 		double r2 = r*r;
+		double *V [5];
+		V[0] = datum.tl;
+		V[1] = datum.tr;
+		V[2] = datum.br;
+		V[3] = datum.bl;
+		V[4] = datum.tl;
+		double P[2];
+		P[0] = x;
+		P[1] = y;
 		//Check if a corner is within the circle
 		if (hypot2(datum.tl[0],datum.tl[1],x,y) <= r2 ||
 			hypot2(datum.tr[0],datum.tr[1],x,y) <= r2 ||
@@ -115,59 +194,23 @@ private:
 		// return false;
 
 		//Check if circle is within the polygon using the Winding Number Algorithm
-		int wn = 0;
-		double* V [5];
-		V[0] = datum.tl;
-		V[1] = datum.tr;
-		V[2] = datum.br;
-		V[3] = datum.bl;
-		V[4] = datum.tl;
-		double P[2];
-		P[0] = x;
-		P[1] = y;
-		for (int i=0;i < 4;i++)
+		if (winding_algorithm(V, P))
 		{
-			// cout << V[i][0] << "," << V[i][1] << "\n";
-			if (V[i][1] <= y)
-			{
-				if (V[i+1][1] > y)
-				{
-					if (isLeft(V[i],V[i+1],P) > 0)
-					{
-						wn++;
-					}
-				}
-			}
-			else
-			{
-				if (V[i+1][1] <= y)
-				{
-					if (isLeft(V[i],V[i+1],P) < 0)
-					{
-						wn--;
-					}
-				}
-			}
-		}
-		if (wn != 0)
-		{
-			cout << "wound\n";
 			return true;
 		}
-		// cout << "\n\n";
 
 		// Check if circle intersects an edge of the shape
-		if (abs(project(datum.tr,datum.tl,x,y)) <= r2 ||
-			abs(project(datum.br,datum.tr,x,y)) <= r2 ||
-			abs(project(datum.bl,datum.br,x,y)) <= r2 ||
-			abs(project(datum.tl,datum.bl,x,y)) <= r2)
+		if (project(datum.tr,datum.tl,x,y,r2) ||
+			project(datum.br,datum.tr,x,y,r2) ||
+			project(datum.bl,datum.br,x,y,r2) ||
+			project(datum.tl,datum.bl,x,y,r2))
 		{
 			return true;
 		}
 		return false;
 	}
 
-	inline static int isLeft(double* p0, double* p1, double* p2)
+	inline static double isLeft(double* p0, double* p1, double* p2)
 	{
 //    Input:  three points P0, P1, and P2
 //    Return: >0 for P2 left of the line through P0 to P1
@@ -183,6 +226,7 @@ private:
 		tlx = x1;
 		tly = y1;
 		int rootNodes = (int) sqrt(node_count);
+		dim = rootNodes;
 		NODE_HEIGHT = (y2 - y1)/ (double) rootNodes;
 		NODE_WIDTH = (x2 - x1)/(double) rootNodes;
 		NODE_HEIGHT > NODE_WIDTH ? LARGE_AXIS = NODE_HEIGHT : LARGE_AXIS = NODE_WIDTH;
@@ -208,6 +252,12 @@ private:
 				// if (within(ptx,pty,radius,node_data[i].tl))
 				if (intersect(node_data[i],ptx,pty,radius))
 				{
+					// cout << ptx << "," << pty << "," << radius<<"\n";
+					// cout << node_data[i].tl[0] << "," << node_data[i].tl[1] << "\n";
+					// cout << node_data[i].tr[0] << "," << node_data[i].tr[1] << "\n";
+					// cout << node_data[i].br[0] << "," << node_data[i].br[1] << "\n";
+					// cout << node_data[i].bl[0] << "," << node_data[i].bl[1] << "\n";
+					// cout << "\n\n";
 					ret.push_back(node_data[i].tl);
 				}
 			}
@@ -220,6 +270,7 @@ private:
 	};
 	double NODE_WIDTH;
 	double NODE_HEIGHT;
+	int dim;
 	double LARGE_AXIS;
 	double tlx;
 	double tly;
@@ -295,110 +346,109 @@ public:
 		data = other.data;
 		delete[] rawData;
 		rawData = other.rawData;
+		return *this;
 	}
 
-	void query_small(double &x, double &y, double &r, vector<double*> &return_buffer)
-	{
-		int cx = round((x-tlx)/NODE_WIDTH);
-		int cy = round((y-tly)/NODE_HEIGHT);
-		int rx = ceil(r/(NODE_WIDTH))+1;
-		int ry = ceil(r/(NODE_HEIGHT))+1;
-		int hypot2 = rx*rx+ry*ry;
+	// void query_small(double &x, double &y, double &r, vector<double*> &return_buffer)
+	// {
+	// 	int cx = round((x-tlx)/NODE_WIDTH);
+	// 	int cy = round((y-tly)/NODE_HEIGHT);
+	// 	int rx = ceil(r/(NODE_WIDTH))+1;
+	// 	int ry = ceil(r/(NODE_HEIGHT))+1;
+	// 	int hypot2 = rx*rx+ry*ry;	
+	// }
 
-		
-				
-	}
 
 	vector<pair<int,int>> find_within( double &x,  double &y,  double &r)
 	{
+		unordered_set<double*> ret;
 		int cx = round((x-tlx)/NODE_WIDTH);
 		int cy = round((y-tly)/NODE_HEIGHT);
 		int rx = ceil(r/(NODE_WIDTH))+1;
 		int ry = ceil(r/(NODE_HEIGHT))+1;
 		int hypot2 = rx*rx+ry*ry;
-		unordered_set<double*> ret;
-		// vector<double*> tmp;
-		// tmp = data[cx][cy].queryNode(x,y,r);
-		// ret.insert(ret.end(),tmp.begin(),tmp.end());
-		// for (size_t i=1; i <= rx; i++) {
-		// 		tmp = data[cx+i][cy].queryNode(x,y,r);
-		// 		ret.insert(ret.end(),tmp.begin(),tmp.end());
-		// 		tmp = data[cx-i][cy].queryNode(x,y,r);
-		// 		ret.insert(ret.end(),tmp.begin(),tmp.end());
-		// }
-		// for (size_t i=1; i <= ry; i++) {
-		// 		tmp = data[cx][cy+i].queryNode(x,y,r);
-		// 		ret.insert(ret.end(),tmp.begin(),tmp.end());
-		// 		tmp = data[cx][cy-i].queryNode(x,y,r);
-		// 		ret.insert(ret.end(),tmp.begin(),tmp.end());
-		// }
-		// for (size_t i = 1; i <= rx; ++i) // Possible indexing issue here?
-		// {
-		// 	int ryLow = ceil(sqrt(hypot2 - i*i))+1;
-		// 	for (size_t j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
-		// 	{
-		// 		if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r)
-		// 		{
-		// 			if ((i+2)*NODE_WIDTH*(i+2)*NODE_WIDTH + (j+2)*NODE_HEIGHT*(j+2)*NODE_HEIGHT < r*r) {
-		// 				if (data.find(i+cx) != data.end() && data[i+cx].find(cy+j) != data[i+cx].end())  {
-		// 					auto &node = data[i+cx][j+cy];
-		// 					for (auto i:node.node_data)
-		// 					{
-		// 						ret.push_back(i.tl);
-		// 					}
-		// 				}
-		// 				if (data.find(cx-i) != data.end() && data[cx-i].find(cy+j) != data[cx-i].end()) {
-		// 					auto &node = data[cx-i][cy+j];
-		// 					for (auto i:node.node_data)
-		// 					{
-		// 						ret.push_back(i.tl);
-		// 					}
-
-		// 				}
-		// 					if (data.find(cx+i) != data.end() && data[cx+i].find(cy-j) != data[cx+i].end()) {
-		// 					auto &node = data[i+cx][cy-j];
-		// 					for (auto i:node.node_data)
-		// 					{
-		// 						ret.push_back(i.tl);
-		// 					}
-		// 				}
-		// 					if (data.find(cx-i) != data.end() && data[cx-i].find(cy-j) != data[cx-i].end()) {
-		// 					auto &node = data[cx-i][cy-j];
-		// 					for (auto i:node.node_data)
-		// 					{
-		// 						ret.push_back(i.tl);
-		// 					}
-		// 				}
-		// 			}
-		// 			else {
-		// 				if (data.find(i+cx) != data.end() && data[i+cx].find(cy+j) != data[i+cx].end()) {
-		// 					tmp = data[i+cx][j+cy].queryNode(x,y,r);
-		// 					ret.insert(ret.end(),tmp.begin(),tmp.end());
-		// 				}
-		// 				if (data.find(cx-i) != data.end() && data[cx-i].find(cy+j) != data[cx-i].end()) {
-		// 					tmp = data[cx-i][cy+j].queryNode(x,y,r);
-		// 					ret.insert(ret.end(),tmp.begin(),tmp.end());
-		// 				}
-		// 					if (data.find(cx+i) != data.end() && data[cx+i].find(cy-j) != data[cx+i].end()) {
-		// 					tmp = data[i+cx][cy-j].queryNode(x,y,r);
-		// 					ret.insert(ret.end(),tmp.begin(),tmp.end());
-		// 				}
-		// 					if (data.find(cx-i) != data.end() && data[cx-i].find(cy-j) != data[cx-i].end()) {
-		// 					tmp = data[cx-i][cy-j].queryNode(x,y,r);
-		// 					ret.insert(ret.end(),tmp.begin(),tmp.end());
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
-		for (auto i:data)
-		{
-			for (auto j:i.second)
-			{
-				auto tmp = j.second.queryNode(x,y,r);
+		vector<double*> tmp;
+		tmp = data[cx][cy].queryNode(x,y,r);
+		ret.insert(tmp.begin(),tmp.end());
+		for (size_t i=1; i <= rx; i++) {
+				tmp = data[cx+i][cy].queryNode(x,y,r);
 				ret.insert(tmp.begin(),tmp.end());
+				tmp = data[cx-i][cy].queryNode(x,y,r);
+				ret.insert(tmp.begin(),tmp.end());
+		}
+		for (size_t i=1; i <= ry; i++) {
+				tmp = data[cx][cy+i].queryNode(x,y,r);
+				ret.insert(tmp.begin(),tmp.end());
+				tmp = data[cx][cy-i].queryNode(x,y,r);
+				ret.insert(tmp.begin(),tmp.end());
+		}
+		for (size_t i = 1; i <= rx; ++i) // Possible indexing issue here?
+		{
+			int ryLow = ceil(sqrt(hypot2 - i*i))+1;
+			for (size_t j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
+			{
+				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r)
+				{
+					if ((i+2)*NODE_WIDTH*(i+2)*NODE_WIDTH + (j+2)*NODE_HEIGHT*(j+2)*NODE_HEIGHT < r*r) {
+						if (data.find(i+cx) != data.end() && data[i+cx].find(cy+j) != data[i+cx].end())  {
+							auto &node = data[i+cx][j+cy];
+							for (auto i:node.node_data)
+							{
+								ret.insert(i.tl);
+							}
+						}
+						if (data.find(cx-i) != data.end() && data[cx-i].find(cy+j) != data[cx-i].end()) {
+							auto &node = data[cx-i][cy+j];
+							for (auto i:node.node_data)
+							{
+								ret.insert(i.tl);
+							}
+
+						}
+							if (data.find(cx+i) != data.end() && data[cx+i].find(cy-j) != data[cx+i].end()) {
+							auto &node = data[i+cx][cy-j];
+							for (auto i:node.node_data)
+							{
+								ret.insert(i.tl);
+							}
+						}
+							if (data.find(cx-i) != data.end() && data[cx-i].find(cy-j) != data[cx-i].end()) {
+							auto &node = data[cx-i][cy-j];
+							for (auto i:node.node_data)
+							{
+								ret.insert(i.tl);
+							}
+						}
+					}
+					else {
+						if (data.find(i+cx) != data.end() && data[i+cx].find(cy+j) != data[i+cx].end()) {
+							tmp = data[i+cx][j+cy].queryNode(x,y,r);
+							ret.insert(tmp.begin(),tmp.end());
+						}
+						if (data.find(cx-i) != data.end() && data[cx-i].find(cy+j) != data[cx-i].end()) {
+							tmp = data[cx-i][cy+j].queryNode(x,y,r);
+							ret.insert(tmp.begin(),tmp.end());
+						}
+							if (data.find(cx+i) != data.end() && data[cx+i].find(cy-j) != data[cx+i].end()) {
+							tmp = data[i+cx][cy-j].queryNode(x,y,r);
+							ret.insert(tmp.begin(),tmp.end());
+						}
+							if (data.find(cx-i) != data.end() && data[cx-i].find(cy-j) != data[cx-i].end()) {
+							tmp = data[cx-i][cy-j].queryNode(x,y,r);
+							ret.insert(tmp.begin(),tmp.end());
+						}
+					}
+				}
 			}
 		}
+		// for (auto i:data)
+		// {
+		// 	for (auto j:i.second)
+		// 	{
+		// 		auto tmp = j.second.queryNode(x,y,r);
+		// 		ret.insert(tmp.begin(),tmp.end());
+		// 	}
+		// }
 		vector<pair<int,int>> ret2;
 		for (auto pt:ret)
 		{
@@ -415,27 +465,45 @@ public:
 
 	bool insert( double* tl, double *tr, double * bl, double * br)
 	{
-		// if (*tl > *tr)
-		// {
-		// 	swap(tl,tr);
-		// }
-		// if (*bl > *br)
-		// {
-		// 	swap(bl,br);
-		// }
-		// if (tl[1] < bl[1])
-		// {
-		// 	swap(tl,bl);
-		// }
-		// if (tr[1] < br[1])
-		// {
-		// 	swap(tr,br);
-		// }
-		double * yy = tl + 1;
-		auto indices = getIndices(tl,yy);
-		int i = get<0>(indices);
-		int j = get<1>(indices);
-		data[i][j].addData(tl,tr,bl,br);
+
+		int minX = INT_MAX;
+		int minY = INT_MAX;
+		int maxX = INT_MIN;
+		int maxY = INT_MIN;
+		
+		auto indices = getIndices(tl,tl+1);
+		indices.first < minX ? minX = indices.first : minX = minX;
+		indices.first > maxX ? maxX = indices.first : maxX = maxX;
+		indices.second < minY ? minY = indices.second : minY = minY;
+		indices.second > maxY ? maxY = indices.second : maxY = maxY;
+		
+		indices = getIndices(tr,tr+1);
+		indices.first < minX ? minX = indices.first : minX = minX;
+		indices.first > maxX ? maxX = indices.first : maxX = maxX;
+		indices.second < minY ? minY = indices.second : minY = minY;
+		indices.second > maxY ? maxY = indices.second : maxY = maxY;
+
+		indices = getIndices(bl,bl+1);
+		indices.first < minX ? minX = indices.first : minX = minX;
+		indices.first > maxX ? maxX = indices.first : maxX = maxX;
+		indices.second < minY ? minY = indices.second : minY = minY;
+		indices.second > maxY ? maxY = indices.second : maxY = maxY;
+
+		indices = getIndices(br,br+1);
+		indices.first < minX ? minX = indices.first : minX = minX;
+		indices.first > maxX ? maxX = indices.first : maxX = maxX;
+		indices.second < minY ? minY = indices.second : minY = minY;
+		indices.second > maxY ? maxY = indices.second : maxY = maxY;
+
+		// cout << minX << "," << maxX << "\n";
+		for (int i = minX; i <= maxX;++i)
+		{
+			for (int j = minY; j <= maxY; ++j)
+			{
+				data[i][j].addData(tl,tr,bl,br);
+
+			}
+		}
 		++sz;
 		return true;
 	}
