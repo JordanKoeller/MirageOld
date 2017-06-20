@@ -107,10 +107,12 @@ celerybeat-schedule
 .venv/
 venv/
 ENV/
-
+.settings/
+.idea/
+.externalBuildTools/
 # Spyder project settings
 .spyderproject
-
+.pydevproject
 # Rope project settings
 .ropeproject
 
