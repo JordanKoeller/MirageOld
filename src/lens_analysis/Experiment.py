@@ -37,6 +37,7 @@ class Experiment(AbstractFileWrapper):
         else:
             self.__index = 0
             raise StopIteration
+            
     def __getitem__(self,ind):
         if isinstance(ind,int):
             if ind < len(self._lookupTable):

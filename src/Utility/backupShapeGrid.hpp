@@ -7,20 +7,38 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <climits>
-
 using namespace std;
 
 
 class ShapeGrid
 {
-	class Node;
-public:
-	typedef unsigned int Index;
-	friend class ShapeGrid::Node;
-
 private:
+	class Datum
+	{
+	public:
+		double *tl;
+		double *tr;
+		double *bl;
+		double *br;
+		Datum()=default;
+		Datum(double *& topleft, double *& topright, double *& bottomleft, double *& bottomright)
+		{
+			tl = topleft;
+			tr = topright;
+			bl = bottomleft;
+			br = bottomright;
+		}
+		~Datum()=default;
+	};
+
 	double* rawData;
 
+	inline static double hypot( double& x1,  double& y1,  double& x2,  double& y2) 
+	{
+		double dx = x2 - x1;
+		double dy = y2-y1;
+		return sqrt(dx*dx+dy*dy);
+	}
 
 	inline static double hypot2( double& x1,  double& y1,  double& x2,  double& y2)
 	{
@@ -28,7 +46,16 @@ private:
 		double dy = y2-y1;
 		return dx*dx+dy*dy;
 	}
-
+	inline static bool within( double &ptx,  double &pty,  double &radius,  double *dats)
+	{
+		if (hypot2(ptx,pty,*dats,*(dats+1)) <= radius*radius)
+		{
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
 	static bool lineIntersects(double* a1, double* a2, double* b1, double*b2) //Two points each on line A and line B
 	{
@@ -37,6 +64,7 @@ private:
 		double y_a = a1[1] - m_a*a1[0];
 		double y_b = b1[1] - m_b*b1[0];
 		double x = (y_b-y_a)/(m_a-m_b);
+		// double y = x*m_a+y_a;
 		if (abs(a2[0]-a1[0]) == abs(x-a1[0]) + abs(x-a2[0]) &&
 			abs(b2[0]-b1[0]) == abs(x-b1[0]) + abs(x-b2[0]))
 		{
@@ -48,20 +76,23 @@ private:
 		}
 	}
 
-	inline pair<int,int> pos_from_pointer(Index &ind)
+	inline bool overlap( double &objx,  double& objy,  double &radius,  int &i,  int &j) 
 	{
-		int diff = ind/2;
+		double tnx = tlx + i*NODE_WIDTH;
+		double tny = tly + j*NODE_HEIGHT;
+		double bnx = tlx + (i+1)*NODE_WIDTH;
+		double bny = tly + (j+1)*NODE_HEIGHT;
+		// bool flag1 = 
+		return objx - radius <= bnx && objx + radius > tnx && objy - radius <= bny && objy + radius > tny; //BIG possible bug spot.
+	}
+
+	inline pair<int,int> pos_from_pointer(double* pos)
+	{
+//		cout << pos-rawData << "\n";
+		int diff = (pos-rawData)/2;
 		int y = diff % width;
 		int x = diff / width;
 		return make_pair(x,y);
-	}
-
-	inline tuple<double*,double*,double*,double*> getCorners(Index &tl)
-	{
-		double* tr = rawData + (tl+2);
-		double* bl = rawData + (tl+2*width);
-		double* br = rawData + (tl+2*(width+1));
-		return make_tuple(rawData+tl,tr,bl,br);
 	}
 
 	inline pair<double,double> getIndices( double *x, double *y)
@@ -71,13 +102,14 @@ private:
 		return make_pair(xx,yy);				
 	}
 
-	Index contigIndex(Index &i, Index &j)
+	int contigIndex(int i, int j)
 	{
 		return 2*(i*width+j);
 	}
 
 	inline static double project(double* vStart, double*vEnd, double &cx, double &cy, double &r2)
 	{
+		//Calculates distance from the line connecting vStart and vEnd to (cx,cy). Done by projecting vector to cx onto the line.
 		double C[2];
 		double A[2];
 		A[0] = vEnd[0]-vStart[0];
@@ -103,11 +135,6 @@ private:
 
 	static bool winding_algorithm(double ** V, double* P)
 	{
-		//Arguments are as follows:
-		/* V : double**. 5-long array of double*, where each element is a pointer to the next corner of a 4-sided polygon.
-				for arbitrary i, V[i+1] correlates to the y-coordinate of the corner.
-		   P : double*. Pointer to the point to check if within the shape described by V. P[0] = P.x, P[1] = P.y
-		*/
 		int wn = 0;
 		for (int i=0;i < 4;i++)
 		{
@@ -144,24 +171,23 @@ private:
 		
 	}
 
-	bool intersect(Index &tl, double &x, double &y, double &r)
+	static bool intersect(Datum &datum, double &x, double &y, double &r)
 	{
 		double r2 = r*r;
 		double *V [5];
-		auto corners = getCorners(tl);
-		V[0] = get<0>(corners); //tl
-		V[1] = get<1>(corners); //tr
-		V[2] = get<3>(corners); //br
-		V[3] = get<2>(corners); //bl
-		V[4] = get<0>(corners);
+		V[0] = datum.tl;
+		V[1] = datum.tr;
+		V[2] = datum.br;
+		V[3] = datum.bl;
+		V[4] = datum.tl;
 		double P[2];
 		P[0] = x;
 		P[1] = y;
 		//Check if a corner is within the circle
-		if (hypot2(V[0][0],V[0][1],x,y) <= r2 ||
-			hypot2(V[1][0],V[1][1],x,y) <= r2 ||
-			hypot2(V[2][0],V[2][1],x,y) <= r2 ||
-			hypot2(V[3][0],V[3][1],x,y) <= r2)
+		if (hypot2(datum.tl[0],datum.tl[1],x,y) <= r2 ||
+			hypot2(datum.tr[0],datum.tr[1],x,y) <= r2 ||
+			hypot2(datum.bl[0],datum.bl[1],x,y) <= r2 ||
+			hypot2(datum.br[0],datum.br[1],x,y) <= r2)
 		{
 			return true;
 		}
@@ -174,10 +200,10 @@ private:
 		}
 
 		// Check if circle intersects an edge of the shape
-		if (project(V[1],V[0],x,y,r2) ||
-			project(V[3],V[1],x,y,r2) ||
-			project(V[2],V[3],x,y,r2) ||
-			project(V[0],V[2],x,y,r2))
+		if (project(datum.tr,datum.tl,x,y,r2) ||
+			project(datum.br,datum.tr,x,y,r2) ||
+			project(datum.bl,datum.br,x,y,r2) ||
+			project(datum.tl,datum.bl,x,y,r2))
 		{
 			return true;
 		}
@@ -186,61 +212,13 @@ private:
 
 	inline static double isLeft(double* p0, double* p1, double* p2)
 	{
+//    Input:  three points P0, P1, and P2
+//    Return: >0 for P2 left of the line through P0 to P1
+//          =0 for P2 on the line
+//          <0 for P2 right of the line
 		return ((p1[0] - p0[0])*(p2[1]-p0[1])-(p2[0]-p0[0])*(p1[1]-p0[1]));
 	}
 
-	bool grid_overlap(int &i, int &j, Index &tl)
-	{
-		// return true;
-		double *shape [5];
-		double *grid [5];
-		double gridRaw [10];
-		auto corners = getCorners(tl);
-		shape[0] = get<0>(corners);
-		shape[1] = get<1>(corners);
-		shape[2] = get<3>(corners);
-		shape[3] = get<2>(corners);
-		shape[4] = get<0>(corners);
-
-		gridRaw[0] = i*NODE_WIDTH + tlx; //tl
-		gridRaw[1] = j*NODE_HEIGHT + tly;
-
-		gridRaw[2] = (i+1)*NODE_WIDTH + tlx; //tr
-		gridRaw[3] = j*NODE_HEIGHT + tly;
-
-		gridRaw[4] = (i+1)*NODE_WIDTH + tlx; //br
-		gridRaw[5] = (j+1)*NODE_HEIGHT + tly;
-
-		gridRaw[6] = (i)*NODE_WIDTH + tlx; //bl
-		gridRaw[7] = (j+1)*NODE_HEIGHT + tly;
-
-		gridRaw[8] = i*NODE_WIDTH + tlx; //tl
-		gridRaw[9] = j*NODE_HEIGHT + tly;
-
-		grid[0] = gridRaw;
-		grid[1] = gridRaw+2;
-		grid[2] = gridRaw+4;
-		grid[3] = gridRaw+6;
-		grid[4] = gridRaw+8;
-		for (int k = 0; k < 4; k++)
-		{
-			if (winding_algorithm(shape,grid[k])  ||  winding_algorithm(grid,shape[k]))
-			{
-				return true;	
-			}
-		}
-		for (int k=0; k < 4; k++)
-		{
-			for (int l = 0; l < 4; l++)
-			{
-				if (lineIntersects(shape[k],shape[k+1],grid[l],grid[l+1]))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
 
 
 	void constructGrid( double& x1,  double& y1,  double& x2,  double& y2,  int &node_count)
@@ -255,23 +233,25 @@ private:
 
 	}
 
+
 	class Node
 	{
+	private:
 	public:
-		std::vector<Index> node_data;
-		void addData(double *tl, ShapeGrid* outer)
+		std::vector<Datum> node_data;
+		void addData(double *topleft, double *topright, double* bottomleft, double* bottomright)
 		{
-			Index diff = tl - outer->rawData;
-			node_data.push_back(diff);
+			auto tmp = Datum(topleft,topright,bottomleft,bottomright);
+			node_data.push_back(tmp);
 		}
-		std::vector<Index> queryNode( double& ptx,  double& pty, double &radius, ShapeGrid * outer) 
+		std::vector<double*> queryNode( double& ptx,  double& pty, double &radius) 
 		{
-			std::vector<Index> ret;
+			std::vector<double*> ret;
 			for (size_t i = 0; i < node_data.size(); ++i)
 			{
-				if (outer->intersect(node_data[i],ptx,pty,radius))
+				if (intersect(node_data[i],ptx,pty,radius))
 				{
-					ret.push_back(node_data[i]);
+					ret.push_back(node_data[i].tl);
 				}
 			}
 			return ret;
@@ -288,25 +268,24 @@ private:
 	double tlx;
 	double tly;
 	unsigned int sz;
-	Index width;
-	Index height;
+	int width;
+	int height;
 	unordered_map<int,unordered_map<int,Node>> data;
 
 public:
-
 	ShapeGrid(double* xx,double* yy, int h, int w, int ndim, int node_count)
 	{
-		width = (Index) w;
-		height = (Index) h;
+		width = w;
+		height = h;
 		rawData = new double[w*h*2];
 		double minX = DBL_MAX;
 		double minY = DBL_MAX;
 		double maxX = DBL_MIN;
 		double maxY = DBL_MIN;
-		Index i = 0;
-		for (Index x = 0; x < width; ++x)
+		int i = 0;
+		for (int x = 0; x < w; ++x)
 		{
-			for (Index y = 0; y < height; ++y)
+			for (int y = 0; y < h; ++y)
 			{
 				i = contigIndex(x,y);
 				minX = min(minX,xx[i/2]);
@@ -318,19 +297,20 @@ public:
 			}
 		}
 		constructGrid(minX,minY,maxX,maxY,node_count);
-		for (Index x = 0; x < width-1; ++x)
+		for (int x = 0; x < w-1; ++x)
 		{
-			for (Index y = 0; y < height-1; ++y)
+			for (int y = 0; y < h-1; ++y)
 			{
-				auto cInd = contigIndex(x,y);
-				insert(cInd);
+				insert(rawData+contigIndex(x,y),rawData+contigIndex(x+1,y),rawData+contigIndex(x,y+1),rawData+contigIndex(x+1,y+1));
 			}
 		}
 		cout << "Size = " << sz << "\n";
-
 	}
 
-	ShapeGrid()=default;
+	ShapeGrid()
+	{
+		rawData = new double{10};
+	}
 
 	ShapeGrid(const ShapeGrid &other)
 	{
@@ -343,11 +323,8 @@ public:
 		width = other.width;
 		height = other.height;
 		data = other.data;
-		rawData = new double[width*height*2];
-		for (Index i = 0; i < width*height*2; ++i)
-		{
-			rawData[i] = other.rawData[i];
-		}
+		delete[] rawData;
+		rawData = other.rawData;
 	}
 
 	ShapeGrid &operator=(const ShapeGrid &other)
@@ -361,43 +338,39 @@ public:
 		width = other.width;
 		height = other.height;
 		data = other.data;
-		rawData = new double[width*height*2];
-		for (Index i = 0; i < width*height*2; ++i)
-		{
-			rawData[i] = other.rawData[i];
-		}
+		delete[] rawData;
+		rawData = other.rawData;
 		return *this;
 	}
 
 
 	vector<pair<int,int>> find_within( double &x,  double &y,  double &r)
 	{
-
-		unordered_set<Index> ret;
+		unordered_set<double*> ret;
 		int cx = round((x-tlx)/NODE_WIDTH);
 		int cy = round((y-tly)/NODE_HEIGHT);
-		Index rx = ceil(r/(NODE_WIDTH))+1;
-		Index ry = ceil(r/(NODE_HEIGHT))+1;
+		int rx = ceil(r/(NODE_WIDTH))+1;
+		int ry = ceil(r/(NODE_HEIGHT))+1;
 		int hypot2 = rx*rx+ry*ry;
-		vector<Index> tmp;
-		tmp = data[cx][cy].queryNode(x,y,r,this);
+		vector<double*> tmp;
+		tmp = data[cx][cy].queryNode(x,y,r);
 		ret.insert(tmp.begin(),tmp.end());
-		for (Index i=1; i <= rx; i++) {
-				tmp = data[cx+i][cy].queryNode(x,y,r,this);
+		for (size_t i=1; i <= rx; i++) {
+				tmp = data[cx+i][cy].queryNode(x,y,r);
 				ret.insert(tmp.begin(),tmp.end());
-				tmp = data[cx-i][cy].queryNode(x,y,r,this);
-				ret.insert(tmp.begin(),tmp.end());
-		}
-		for (Index i=1; i <= ry; i++) {
-				tmp = data[cx][cy+i].queryNode(x,y,r,this);
-				ret.insert(tmp.begin(),tmp.end());
-				tmp = data[cx][cy-i].queryNode(x,y,r,this);
+				tmp = data[cx-i][cy].queryNode(x,y,r);
 				ret.insert(tmp.begin(),tmp.end());
 		}
-		for (Index i = 1; i <= rx; ++i) // Possible indexing issue here?
+		for (size_t i=1; i <= ry; i++) {
+				tmp = data[cx][cy+i].queryNode(x,y,r);
+				ret.insert(tmp.begin(),tmp.end());
+				tmp = data[cx][cy-i].queryNode(x,y,r);
+				ret.insert(tmp.begin(),tmp.end());
+		}
+		for (size_t i = 1; i <= rx; ++i) // Possible indexing issue here?
 		{
-			Index ryLow = ceil(sqrt(hypot2 - i*i))+1;
-			for (Index j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
+			int ryLow = ceil(sqrt(hypot2 - i*i))+1;
+			for (size_t j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
 			{
 				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r)
 				{
@@ -406,14 +379,14 @@ public:
 							auto &node = data[i+cx][j+cy];
 							for (auto i:node.node_data)
 							{
-								ret.insert(i);
+								ret.insert(i.tl);
 							}
 						}
 						if (data.find(cx-i) != data.end() && data[cx-i].find(cy+j) != data[cx-i].end()) {
 							auto &node = data[cx-i][cy+j];
 							for (auto i:node.node_data)
 							{
-								ret.insert(i);
+								ret.insert(i.tl);
 							}
 
 						}
@@ -421,39 +394,46 @@ public:
 							auto &node = data[i+cx][cy-j];
 							for (auto i:node.node_data)
 							{
-								ret.insert(i);
+								ret.insert(i.tl);
 							}
 						}
 							if (data.find(cx-i) != data.end() && data[cx-i].find(cy-j) != data[cx-i].end()) {
 							auto &node = data[cx-i][cy-j];
 							for (auto i:node.node_data)
 							{
-								ret.insert(i);
+								ret.insert(i.tl);
 							}
 						}
 					}
 					else {
 						if (data.find(i+cx) != data.end() && data[i+cx].find(cy+j) != data[i+cx].end()) {
-							tmp = data[i+cx][j+cy].queryNode(x,y,r,this);
+							tmp = data[i+cx][j+cy].queryNode(x,y,r);
 							ret.insert(tmp.begin(),tmp.end());
 						}
 						if (data.find(cx-i) != data.end() && data[cx-i].find(cy+j) != data[cx-i].end()) {
-							tmp = data[cx-i][cy+j].queryNode(x,y,r,this);
+							tmp = data[cx-i][cy+j].queryNode(x,y,r);
 							ret.insert(tmp.begin(),tmp.end());
 						}
 							if (data.find(cx+i) != data.end() && data[cx+i].find(cy-j) != data[cx+i].end()) {
-							tmp = data[i+cx][cy-j].queryNode(x,y,r,this);
+							tmp = data[i+cx][cy-j].queryNode(x,y,r);
 							ret.insert(tmp.begin(),tmp.end());
 						}
 							if (data.find(cx-i) != data.end() && data[cx-i].find(cy-j) != data[cx-i].end()) {
-							tmp = data[cx-i][cy-j].queryNode(x,y,r,this);
+							tmp = data[cx-i][cy-j].queryNode(x,y,r);
 							ret.insert(tmp.begin(),tmp.end());
 						}
 					}
 				}
 			}
 		}
-
+		// for (auto i:data)
+		// {
+		// 	for (auto j:i.second)
+		// 	{
+		// 		auto tmp = j.second.queryNode(x,y,r);
+		// 		ret.insert(tmp.begin(),tmp.end());
+		// 	}
+		// }
 		vector<pair<int,int>> ret2;
 		for (auto pt:ret)
 		{
@@ -462,22 +442,19 @@ public:
 			ret2.push_back(pos);
 			
 		}
+		// for (int i = 0; i < ret.size(); ++i)
+		// {
+		// }
 		return ret2;
 	}
 
-
-	bool insert(Index &ind)
+	bool insert( double* tl, double *tr, double * bl, double * br)
 	{
+
 		int minX = INT_MAX;
 		int minY = INT_MAX;
 		int maxX = INT_MIN;
 		int maxY = INT_MIN;
-
-		tuple<double*,double*,double*,double*> corners = getCorners(ind);
-		double* tl = get<0>(corners);
-		double* tr = get<1>(corners);
-		double* bl = get<2>(corners);
-		double* br = get<3>(corners);
 		
 		auto indices = getIndices(tl,tl+1);
 		indices.first < minX ? minX = indices.first : minX = minX;
@@ -503,16 +480,14 @@ public:
 		indices.second < minY ? minY = indices.second : minY = minY;
 		indices.second > maxY ? maxY = indices.second : maxY = maxY;
 
-		Index tlInd = tl - rawData;
+		// cout << minX << "," << maxX << "\n";
 		for (int i = minX; i <= maxX;++i)
 		{
 			for (int j = minY; j <= maxY; ++j)
 			{
-				if (grid_overlap(i,j,tlInd))
-				{
-					data[i][j].addData(tl,this);
-					++sz;
-				}
+				data[i][j].addData(tl,tr,bl,br);
+				++sz;
+
 			}
 		}
 		return true;
@@ -521,7 +496,7 @@ public:
 
 	~ShapeGrid()
 	{
-		delete[] rawData;
+		cout << "deleted\n";
 	}
 
 	bool clear()

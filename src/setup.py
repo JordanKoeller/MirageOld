@@ -9,7 +9,7 @@ import numpy
 tree = Extension("Utility/SpatialTree_new", sources = ["Utility/SpatialTree_new.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries=["m"])
 grid = Extension("Utility/Grid", sources = ["Utility/Grid.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"])
 ptrgrid = Extension("Utility/PointerGrid", sources = ["Utility/PointerGrid.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"])
-shapegrid = Extension("Utility/ShapeGrid", sources = ["Utility/ShapeGrid.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"])
+shapegrid = Extension("Utility/ShapeGrid", sources = ["Utility/ShapeGrid.pyx"], language = "c++",    extra_compile_args=["-std=c++11", "-fopenmp"], extra_link_args=["-std=c++11", "-fopenmp"])
 engine = Extension("Calculator/Engine/Engine", sources = ["Calculator/Engine/Engine.pyx"], language = "c++",    extra_compile_args=["-std=c++11","-fopenmp"], extra_link_args=["-std=c++11", "-fopenmp"], libraries = ["m"])
 engine_grid = Extension("Calculator/Engine/Engine_Grid", sources = ["Calculator/Engine/Engine_Grid.pyx"], language = "c++",    extra_compile_args=["-std=c++11","-fopenmp"], extra_link_args=["-std=c++11","-Ofast"], libraries = ["m"])
 engine_ptrgrid = Extension("Calculator/Engine/Engine_PointerGrid", sources = ["Calculator/Engine/Engine_PointerGrid.pyx"], language = "c++",    extra_compile_args=["-std=c++11","-fopenmp"], extra_link_args=["-std=c++11","-Ofast"], libraries = ["m"])
