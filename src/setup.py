@@ -24,6 +24,6 @@ shapedrawer = Extension("Views/Drawer/ShapeDrawer", sources = ["Views/Drawer/Sha
 # curvedrawer = Extension("Views/Drawer/CurveDrawer", sources = ["Views/Drawer/CurveDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 # diagnosticdrawer = Extension("Views/Drawer/DiagnosticDrawer", sources = ["Views/Drawer/DiagnosticDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 setup(
-	ext_modules=cythonize([tree,engine,grid,ptrgrid,shapegrid,engine_grid,engine_ptrgrid,engine_shapegrid,engine_bruteforce, engine_kdtree,drawer_supers,lensedimgdrawer,datavisdrawer,shapedrawer], nthreads = 8),
+	ext_modules=cythonize([engine,grid,shapegrid,engine_grid,engine_shapegrid,engine_bruteforce,drawer_supers,lensedimgdrawer,datavisdrawer,shapedrawer]),
 	include_dirs = [numpy.get_include(),"Utility"],
 )
