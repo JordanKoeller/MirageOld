@@ -59,7 +59,7 @@ class Parameters(object):
 		self.numStars = numStars
 		self.__starMassTolerance = starMassTolerance
 		self.__starMassVariation = starMassVariation
-		self.dt = 2.6e9
+		self.dt = 2.6e7
 		self.time = 0
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
 

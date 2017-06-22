@@ -10,24 +10,34 @@ from Utility.PointerGrid cimport PointerGrid
 # from Utility.Grid cimport Pixel
 from Calculator.Engine.Engine cimport Engine
 
+cdef extern from "ShapeQuery.hpp":
+	vector[pair[int,int]] query_shape(double* x, double* y, int width, double qx, double qy, double qr)
 
 cdef class Engine_BruteForce(Engine):
+
+
 	cdef vector[pair[int,int]] query_data(self, double x, double y, double radius):
 		cdef np.ndarray[np.float64_t, ndim=2] xVals,yVals
 		xVals,yVals = self.ray_trace()
-		cdef double dx, dy, r2
+		# cdef double dx, dy, r2
 		cdef int sz = xVals.shape[0]
-		cdef int i = 0
-		cdef int j = 0
-		r2 = radius*radius
+		cdef double* xdat = <double*> xVals.data
+		cdef double* ydat = <double*> yVals.data
+		# cdef int i = 0
+		# cdef int j = 0
+		# r2 = radius*radius
 		cdef vector[pair[int,int]] ret
-		with nogil:
-			for i in range(0,sz):
-				for j in range(0,sz):
-					dx = xVals[i,j] - x
-					dy = yVals[i,j] - y 
-					if dx*dx+dy*dy <= r2:
-						ret.push_back(pair[int,int](i,j))
+		# with nogil:
+		ret = query_shape(xdat,ydat,sz,x,y,radius)
+		print("made ret")
+			# for i in range(0,sz):
+			# 	for j in range(0,sz):
+			# 		dx = xVals[i,j] - x
+			# 		dy = yVals[i,j] - y 
+			# 		if dx*dx+dy*dy <= r2:
+			# 			ret.push_back(pair[int,int](i,j))
+		xVals.shape
+		yVals.shape
 		return ret
 
 

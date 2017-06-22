@@ -97,7 +97,7 @@ class ParametersController(GUIController):
             if extrasBuilder:
                 extrasBuilder(self.view,params)
             return params
-        except AttributeError:
+        except:
             self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
             return None
         

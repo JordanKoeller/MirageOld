@@ -161,7 +161,7 @@
             <item row="4" column="1">
              <widget class="QLineEdit" name="qVelocity">
               <property name="text">
-               <string>(1,0.0)</string>
+               <string>(1e6,0.0)</string>
               </property>
              </widget>
             </item>
@@ -1284,22 +1284,8 @@ newParams = copy.deepcopy(oldParams)</string>
      <property name="title">
       <string>File</string>
      </property>
-     <widget class="QMenu" name="menuLoad">
-      <property name="title">
-       <string>Load</string>
-      </property>
-      <addaction name="load_setup"/>
-      <addaction name="load_run"/>
-     </widget>
-     <widget class="QMenu" name="menuSave">
-      <property name="title">
-       <string>Save</string>
-      </property>
-      <addaction name="save_setup"/>
-      <addaction name="save_run"/>
-     </widget>
-     <addaction name="menuLoad"/>
-     <addaction name="menuSave"/>
+     <addaction name="load_setup"/>
+     <addaction name="save_setup"/>
      <addaction name="separator"/>
      <addaction name="record_button"/>
      <addaction name="separator"/>
@@ -1316,6 +1302,7 @@ newParams = copy.deepcopy(oldParams)</string>
      </property>
      <addaction name="visualizerViewSelector"/>
      <addaction name="queueViewSelector"/>
+     <addaction name="separator"/>
      <addaction name="playPauseAction"/>
      <addaction name="resetAction"/>
     </widget>
@@ -1333,7 +1320,7 @@ newParams = copy.deepcopy(oldParams)</string>
    </action>
    <action name="load_setup">
     <property name="text">
-     <string>Setup</string>
+     <string>Load Parameters</string>
     </property>
     <property name="shortcut">
      <string>Ctrl+O</string>
@@ -1346,7 +1333,7 @@ newParams = copy.deepcopy(oldParams)</string>
    </action>
    <action name="save_setup">
     <property name="text">
-     <string>Setup</string>
+     <string>Save Parameters</string>
     </property>
     <property name="shortcut">
      <string>Ctrl+S</string>
