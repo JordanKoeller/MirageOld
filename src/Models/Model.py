@@ -7,9 +7,9 @@ Created on Jun 1, 2017
 
 
 # from Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Pointer
-# from Calculator.Engine.Engine_Grid import Engine_Grid as Engine_Grid
 from Calculator.Engine.Engine_ShapeGrid import Engine_ShapeGrid as Engine_Grid
 from Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brute
+# from Calculator.Engine.Engine_Grid import Engine_Grid as Engine_Grid
 
 
 class __Model(object):

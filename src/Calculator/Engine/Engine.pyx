@@ -240,14 +240,23 @@ cdef class Engine:
 		########################## I STILL WANT TO SEE IF CAN MAKE MAGMAP FROM THE SOURCEPLANE RAY TRACE LOCATIONS, BUT IN THE MEANTIME
 		########################## I'M DOING IT THE OLD-FASHIONED WAY #################################################################
 		cdef double stepDown = height/resolution
-		retArr = np.ndarray((resolution,resolution), dtype=np.float64)
+		cdef np.ndarray[np.int32_t, ndim=2] retArr = np.ndarray((resolution,resolution), dtype=np.int32)
+		cdef double stepX = width / resolution
+		cdef double stepY = height / resolution
 		cdef int i = 0
+		cdef int j = 0
+		cdef double x0 = topLeft.x
+		cdef double y0 = topLeft.y
+		cdef double radius = self.__parameters.queryQuasarRadius
+		cdef double trueLuminosity = self.trueLuminosity
+		cdef int aptLuminosity = 0
 		signalMax.emit(resolution)
-		for i in range(0,resolution):
-			signal.emit(i)
-			s = topLeft - Vector2D(0,stepDown*i,topLeft.unit)
-			f = topLeft + Vector2D(width,-stepDown*i,topLeft.unit)
-			retArr[i] = self.makeLightCurve(s,f,resolution)
+		# signal.emit(i)
+		for i in prange(0,resolution,1,nogil=True,schedule='static'):
+			with gil:
+				signal.emit(i)
+			for j in range(0,resolution):
+				retArr[i,j] = self.query_data_length(x0+stepX*i,y0+stepY*j,radius)
 		return retArr
 		
 
