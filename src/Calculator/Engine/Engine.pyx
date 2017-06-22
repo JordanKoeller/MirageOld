@@ -236,27 +236,31 @@ cdef class Engine:
 		return self.makeLightCurve_helper(mmin,mmax,resolution)
 	
 	
-	cpdef makeMagMap(self, object topLeft, double height, double width, int resolution, object signal, object signalMax): #######Possibly slow implementation. Temporary
+	cpdef makeMagMap(self, object topLeft, object dims, int resolution, object signal, object signalMax): #######Possibly slow implementation. Temporary
 		########################## I STILL WANT TO SEE IF CAN MAKE MAGMAP FROM THE SOURCEPLANE RAY TRACE LOCATIONS, BUT IN THE MEANTIME
 		########################## I'M DOING IT THE OLD-FASHIONED WAY #################################################################
-		cdef double stepDown = height/resolution
-		cdef np.ndarray[np.int32_t, ndim=2] retArr = np.ndarray((resolution,resolution), dtype=np.int32)
-		cdef double stepX = width / resolution
-		cdef double stepY = height / resolution
+		cdef np.ndarray[np.float64_t, ndim=2] retArr = np.ndarray((resolution,resolution), dtype=np.float64)
+		cdef double stepX = dims.to('rad').x / resolution
+		cdef double stepY = dims.to('rad').y / resolution
 		cdef int i = 0
 		cdef int j = 0
-		cdef double x0 = topLeft.x
-		cdef double y0 = topLeft.y
+		cdef double x,y
+		cdef double x0 = topLeft.to('rad').x
+		cdef double y0 = topLeft.to('rad').y
+		x = x0
+		y = y0
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
 		cdef int aptLuminosity = 0
 		signalMax.emit(resolution)
-		# signal.emit(i)
-		for i in prange(0,resolution,1,nogil=True,schedule='static'):
-			with gil:
-				signal.emit(i)
-			for j in range(0,resolution):
-				retArr[i,j] = self.query_data_length(x0+stepX*i,y0+stepY*j,radius)
+		with nogil:
+			for i in range(0,resolution):
+				y = y0
+				for j in range(0,resolution):
+					aptLuminosity = self.query_data_length(x,y,radius)
+					retArr[i,j] = (<double> aptLuminosity)/trueLuminosity
+					y += stepY
+				x += stepX
 		return retArr
 		
 

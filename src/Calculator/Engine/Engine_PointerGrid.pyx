@@ -52,19 +52,9 @@ cdef class Engine_PointerGrid(Engine):
 			pixel where it intersects the source plane after lensing effects have been accounted for."""
 		cdef int w = xArray.shape[0]
 		cdef int h = xArray.shape[1]
-# 		cdef double *contiguous = <double *>malloc(w*h*2*sizeof(double)) 
-# 		cdef int i = 0
-# 		cdef int j = 0
 		cdef int nd = 2
 		cdef double* x = <double*> xArray.data 
-		cdef double* y = <double*> yArray.data 
-# 		with nogil:
-# 			for i in range(0,w):
-# 				for j in range(0,h):
-# 					contiguous[2*(i*w + j)] = xArray[i,j]
-# 					contiguous[2*(i*w+j)+1] = yArray[i,j]
-# # 					gridData[i,j,0] = xArray[i,j]
-# # 					gridData[i,j,1] = yArray[i,j]
+		cdef double* y = <double*> yArray.data
 		with nogil:
 			self.__grid = PointerGrid(x,y,h,w,nd,binsize)
 

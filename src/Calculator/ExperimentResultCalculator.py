@@ -62,12 +62,13 @@ class ExperimentResultCalculator(object):
         start,finish = (Model.parameters.extras.pathStart,Model.parameters.extras.pathEnd)
         res = Model.parameters.extras.resolution
         return Model.engine.makeLightCurve(start,finish,res)
+        
     def __MAGMAP(self):
         start,finish = (Model.parameters.extras.pathStart,Model.parameters.extras.pathEnd)
-        midpt = (start+finish)/2
-        border = (finish-midpt).magnitude()*math.sqrt(2)
-        topleft = midpt + Vector2D(-border,border,start.unit)
-        return Model.engine.makeMagMap(topleft,border*2,border*2,int(Model.parameters.extras.resolution*2*math.sqrt(2)),self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
+        dims = finish - start 
+        print("Starts at " + str(start))
+        print("Size of "+ str(dims))
+        return Model.engine.makeMagMap(start,dims,int(Model.parameters.extras.resolution),self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
     def __STARFIELD(self):
         stars = Model.parameters.galaxy.stars 
