@@ -244,23 +244,17 @@ cdef class Engine:
 		cdef double stepY = dims.to('rad').y / resolution
 		cdef int i = 0
 		cdef int j = 0
-		cdef double x,y
+		cdef double x = 0
+		cdef double y = 0
 		cdef double x0 = topLeft.to('rad').x
 		cdef double y0 = topLeft.to('rad').y
-		x = x0
-		y = y0
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
 		cdef int aptLuminosity = 0
 		signalMax.emit(resolution)
-		with nogil:
-			for i in range(0,resolution):
-				y = y0
-				for j in range(0,resolution):
-					aptLuminosity = self.query_data_length(x,y,radius)
-					retArr[i,j] = (<double> aptLuminosity)/trueLuminosity
-					y += stepY
-				x += stepX
+		for i in prange(0,resolution,nogil=True):
+			for j in range(0,resolution):
+				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0+stepY*j,radius))/trueLuminosity
 		return retArr
 		
 
