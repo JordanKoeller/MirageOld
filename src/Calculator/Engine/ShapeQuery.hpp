@@ -142,19 +142,19 @@ bool intersect(const double* x, const double* y, const int tl, const int &width,
 	// return false;
 
 	//Check if circle is within the polygon using the Winding Number Algorithm
-	if (winding_algorithm(x,y,V, P))
-	{
-		return true;
-	}
+	// if (winding_algorithm(x,y,V, P))
+	// {
+	// 	return true;
+	// }
 
-	// Check if circle intersects an edge of the shape
-	if (project(x,y,V[1],V[0],qx,qy,r2) ||
-		project(x,y,V[3],V[1],qx,qy,r2) ||
-		project(x,y,V[2],V[3],qx,qy,r2) ||
-		project(x,y,V[0],V[2],qx,qy,r2))
-	{
-		return true;
-	}
+	// // Check if circle intersects an edge of the shape
+	// if (project(x,y,V[1],V[0],qx,qy,r2) ||
+	// 	project(x,y,V[3],V[1],qx,qy,r2) ||
+	// 	project(x,y,V[2],V[3],qx,qy,r2) ||
+	// 	project(x,y,V[0],V[2],qx,qy,r2))
+	// {
+	// 	return true;
+	// }
 	return false;
 }
 
@@ -170,15 +170,15 @@ inline double isLeft(const double* x,const double* y,const int &p0,const int &p1
 
 
 
-vector<pair<int,int>> query_shape(const double* xx,const double* yy,const int width,const double qx,const double qy,const double r)
+vector<pair<int,int>> query_shape(const double* x,const double* y,const int width,const double qx,const double qy,const double r)
 {
-	double* x {new double[width*width]};
-	double* y {new double[width*width]};
-	for (int k = 0; k < width*width; ++k)
-	{
-		x[k] = xx[k];
-		y[k] = yy[k];
-	}
+	// double* x {new double[width*width]};
+	// double* y {new double[width*width]};
+	// for (int k = 0; k < width*width; ++k)
+	// {
+	// 	x[k] = xx[k];
+	// 	y[k] = yy[k];
+	// }
 
 	vector<pair<int,int>> ret;
 	#pragma omp parallel
@@ -200,7 +200,7 @@ vector<pair<int,int>> query_shape(const double* xx,const double* yy,const int wi
 		ret.insert(ret.end(), private_ret.begin(), private_ret.end());
 	}
 
-	delete [] x;
-	delete [] y;
+	// delete [] x;
+	// delete [] y;
 	return ret;
 }

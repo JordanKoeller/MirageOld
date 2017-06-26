@@ -162,7 +162,7 @@ public:
 		return *this;
 	}
 
-	pair<vector<pair<int,int>>,double> find_within( double &x,  double &y,  double &r)
+	vector<pair<int,int>> find_within( double &x,  double &y,  double &r)
 	{
 		double r2 = r*r;
 		int cx = round((x-tlx)/NODE_WIDTH);
@@ -248,8 +248,8 @@ public:
 			pos = pos_from_index(ret[i]);
 			ret2.push_back(pos);
 		}
-		double ret3 = ret2.size();
-		return make_pair(ret2,ret3);
+
+		return ret2;
 	}
 
 	bool insert( double* x)

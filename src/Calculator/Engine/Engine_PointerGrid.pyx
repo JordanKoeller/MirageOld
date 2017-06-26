@@ -60,7 +60,7 @@ cdef class Engine_PointerGrid(Engine):
 
 	cdef vector[pair[int,int]] query_data(self, double x, double y, double radius) nogil:
 		"""Returns all rays that intersect the source plane within a specified radius of a location on the source plane."""
-		cdef vector[pair[int,int]] ret = self.__grid.find_within(x, y, radius).first
+		cdef vector[pair[int,int]] ret = self.__grid.find_within(x, y, radius)
 		return ret
 	
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil:
@@ -99,7 +99,7 @@ cdef class Engine_PointerGrid(Engine):
 				fret[i,0] = <int> ret[i].first
 				fret[i,1] = <int> ret[i].second
 		print(1/(time.clock()-begin))
-		return (fret,retf)
+		return fret
 
 	def gridTest(self,binsizes,queryPerTest,curveSignal,barSignal):
 		"""

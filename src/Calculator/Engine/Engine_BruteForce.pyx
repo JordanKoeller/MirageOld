@@ -11,7 +11,7 @@ from Utility.PointerGrid cimport PointerGrid
 from Calculator.Engine.Engine cimport Engine
 
 cdef extern from "ShapeQuery.hpp":
-	vector[pair[int,int]] query_shape(double* x, double* y, int width, double qx, double qy, double qr)
+	vector[pair[int,int]] query_shape(double* x, double* y, int width, double qx, double qy, double qr) nogil
 
 cdef class Engine_BruteForce(Engine):
 
@@ -27,15 +27,8 @@ cdef class Engine_BruteForce(Engine):
 		# cdef int j = 0
 		# r2 = radius*radius
 		cdef vector[pair[int,int]] ret
-		# with nogil:
-		ret = query_shape(xdat,ydat,sz,x,y,radius)
-		print("made ret")
-			# for i in range(0,sz):
-			# 	for j in range(0,sz):
-			# 		dx = xVals[i,j] - x
-			# 		dy = yVals[i,j] - y 
-			# 		if dx*dx+dy*dy <= r2:
-			# 			ret.push_back(pair[int,int](i,j))
+		with nogil:
+			ret = query_shape(xdat,ydat,sz,x,y,radius)
 		xVals.shape
 		yVals.shape
 		return ret
