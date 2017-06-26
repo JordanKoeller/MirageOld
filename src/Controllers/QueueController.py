@@ -11,29 +11,37 @@ Created on Jun 1, 2017
 
 from PyQt5 import QtCore
 
+from Calculator.ExperimentResultCalculator import varyTrial
 from Controllers import GUIController
 from Controllers.FileManagers import QueueFileManager
 from Controllers.Threads.QueueThread import QueueThread
 from Models.ExperimentQueue.ExperimentQueueTable import ExperimentQueueTable
 from Models.Parameters.ExperimentParams import ExperimentParams, ResultTypes
-from Calculator.ExperimentResultCalculator import varyTrial
+from Models.Parameters.MagMapParameters import MagMapParameters
+from Models.Parameters.LightCurveParameters import LightCurveParameters
 
 def _queueExtrasBuilder(view,parameters):
     name = view.experimentNameEntry.text()
     desc = view.experimentDescEntry.toPlainText()
     numTrials = view.trialSpinBox.value()
-    resolution = view.dataPointSpinBox.value()
     varianceStr = view.varianceTextArea.toPlainText()
     datasets = []
-    if view.lightCurveCheckBox.isChecked():
-        datasets.append(ResultTypes.LIGHT_CURVE)
-    if view.magMapCheckBox.isChecked():
-        datasets.append(ResultTypes.MAGMAP)
-    if view.starFieldCheckBox.isChecked():
-        datasets.append(ResultTypes.STARFIELD)
-    pstart =view.vectorFromQString(view.quasarPathStart.text(),False,False,'arcsec')
-    pend = view.vectorFromQString(view.quasarPathEnd.text(),False,False,'arcsec')
-    extras = ExperimentParams(name=name,description=desc,numTrials=numTrials,trialVariance=varianceStr,pathStart = pstart,pathEnd = pend, resolution = resolution,desiredResults=datasets)
+    if view.enableLightCurve.isChecked():
+        
+        resolution = view.dataPointSpinBox.value()
+        pstart =view.vectorFromQString(view.quasarPathStart.text(),unit='arcsec')
+        pend = view.vectorFromQString(view.quasarPathEnd.text(),unit='arcsec')
+        lcparams = LightCurveParameters(pstart,pend,resolution)
+        datasets.append(lcparams)
+    if view.enableMagMap.isChecked():
+        magmapcenter = view.vectorFromQString(view.magMapCenterEntry.text(),unit='arcsec')
+        magmapdims = view.vectorFromQString(view.magMapDimEntry.text(),unit='arcsec')
+        magmapres = view.vectorFromQString(view.magMapResolutionEntry.text(),None)
+        magmapparams = MagMapParameters(magmapcenter,magmapdims,magmapres)
+        datasets.append(magmapparams)
+#     if view.starFieldCheckBox.isChecked():
+#         datasets.append(ResultTypes.STARFIELD)
+    extras = ExperimentParams(name=name,description=desc,numTrials=numTrials,trialVariance=varianceStr,resultParams=datasets)
     parameters.extras = extras
     try:
         varyTrial(parameters,0)
@@ -66,6 +74,10 @@ class QueueController(GUIController):
         self.view.addSignals(editExpt = self.editExpt_signal)
         self.view.signals['editExpt'].connect(self.editParams)
         self.view.addToQueueButton.clicked.connect(self.addToQueue)
+        self.view.enableLightCurve.clicked.connect(self.toggleLightCurveEntry)
+        self.view.enableMagMap.clicked.connect(self.toggleMagMapEntry)
+        self.toggleLightCurveEntry()
+        self.toggleMagMapEntry()
         self.editing = -1
         self.__initTable()
 #         self.__initConsole()
@@ -109,7 +121,25 @@ class QueueController(GUIController):
         self.view.addToQueueButton.setText("Add to Queue")
         self.editing = -1
         
-        
+    def toggleLightCurveEntry(self):
+        if self.view.enableLightCurve.isChecked():
+            self.view.quasarPathStart.setEnabled(True)
+            self.view.quasarPathEnd.setEnabled(True)
+            self.view.dataPointSpinBox.setEnabled(True)
+        else:
+            self.view.quasarPathEnd.setEnabled(False)
+            self.view.quasarPathStart.setEnabled(False)
+            self.view.dataPointSpinBox.setEnabled(False)
+    
+    def toggleMagMapEntry(self):
+        if self.view.enableMagMap.isChecked():
+            self.view.magMapCenterEntry.setEnabled(True)
+            self.view.magMapDimEntry.setEnabled(True)
+            self.view.magMapResolutionEntry.setEnabled(True)
+        else:
+            self.view.magMapCenterEntry.setEnabled(False)
+            self.view.magMapDimEntry.setEnabled(False)
+            self.view.magMapResolutionEntry.setEnabled(False)
         
     def runExperiments(self):
         fileRunner = QueueFileManager(self.view.signals)

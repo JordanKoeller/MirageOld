@@ -236,24 +236,29 @@ cdef class Engine:
 		return self.makeLightCurve_helper(mmin,mmax,resolution)
 	
 	
-	cpdef makeMagMap(self, object topLeft, object dims, int resolution, object signal, object signalMax): #######Possibly slow implementation. Temporary
+	cpdef makeMagMap(self, object center, object dims, object resolution, object signal, object signalMax): #######Possibly slow implementation. Temporary
 		########################## I STILL WANT TO SEE IF CAN MAKE MAGMAP FROM THE SOURCEPLANE RAY TRACE LOCATIONS, BUT IN THE MEANTIME
 		########################## I'M DOING IT THE OLD-FASHIONED WAY #################################################################
-		cdef np.ndarray[np.float64_t, ndim=2] retArr = np.ndarray((resolution,resolution), dtype=np.float64)
-		cdef double stepX = dims.to('rad').x / resolution
-		cdef double stepY = dims.to('rad').y / resolution
+		cdef int resx = <int> resolution.x
+		cdef int resy = <int> resolution.y
+		cdef np.ndarray[np.float64_t, ndim=2] retArr = np.ndarray((resx,resy), dtype=np.float64)
+		cdef double stepX = dims.to('rad').x / resolution.x
+		cdef double stepY = dims.to('rad').y / resolution.y
 		cdef int i = 0
 		cdef int j = 0
 		cdef double x = 0
 		cdef double y = 0
-		cdef double x0 = topLeft.to('rad').x
-		cdef double y0 = topLeft.to('rad').y
+		start = center - dims/2
+		cdef double x0 = start.to('rad').x
+		cdef double y0 = start.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
 		cdef int aptLuminosity = 0
 		signalMax.emit(resolution)
-		for i in prange(0,resolution,nogil=True):
-			for j in range(0,resolution):
+		for i in prange(0,resx,nogil=True):
+			with gil:
+				signal.emit(i)
+			for j in range(0,resy):
 				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0+stepY*j,radius))/trueLuminosity
 		return retArr
 		

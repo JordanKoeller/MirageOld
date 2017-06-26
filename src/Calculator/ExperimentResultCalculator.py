@@ -10,6 +10,8 @@ from Models.Parameters.ExperimentParams import ResultTypes
 from Utility import Vector2D
 import numpy as np
 from Utility.NullSignal import NullSignal
+from Models.Parameters.MagMapParameters import MagMapParameters
+from Models.Parameters.LightCurveParameters import LightCurveParameters
 # from Controllers.QueueController import defaultVariance
 def defaultVariance(params,trialNo):
     print("Defaulting")
@@ -39,38 +41,36 @@ class ExperimentResultCalculator(object):
         #Parse expTypes to functions to run.
         self.experimentRunners = []
         for exp in expTypes:
-            if exp is ResultTypes.LIGHT_CURVE:
+            if isinstance(exp, LightCurveParameters):
                 self.experimentRunners.append(self.__LIGHT_CURVE)
-            if exp is ResultTypes.MAGMAP:
+            if isinstance(exp,MagMapParameters):
                 self.experimentRunners.append(self.__MAGMAP)
-            if exp is ResultTypes.STARFIELD:
-                self.experimentRunners.append(self.__STARFIELD)
+#             if exp is ResultTypes.STARFIELD:
+#                 self.experimentRunners.append(self.__STARFIELD)
 #             if exp is ResultTypes.VIDEO:
 #                 self.experimentRunners.append(self.__VIDEO)
         
         
     def runExperiment(self):
         ret = []
-        for exp in self.experimentRunners:
-            ret.append(exp())
+        for exp in range(0,len(self.experimentRunners)):
+            ret.append(self.experimentRunners[exp](exp))
         return ret
 
             
 
     
-    def __LIGHT_CURVE(self):
-        start,finish = (Model.parameters.extras.pathStart,Model.parameters.extras.pathEnd)
-        res = Model.parameters.extras.resolution
+    def __LIGHT_CURVE(self,index):
+        special = Model.parameters.extras.desiredResults[index]
+        start,finish = (special.pathStart,special.pathEnd)
+        res = special.resolution
         return Model.engine.makeLightCurve(start,finish,res)
         
-    def __MAGMAP(self):
-        start,finish = (Model.parameters.extras.pathStart,Model.parameters.extras.pathEnd)
-        dims = finish - start 
-        print("Starts at " + str(start))
-        print("Size of "+ str(dims))
-        return Model.engine.makeMagMap(start,dims,int(Model.parameters.extras.resolution),self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
+    def __MAGMAP(self,index):
+        special = Model.parameters.extras.desiredResults[index]
+        return Model.engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
-    def __STARFIELD(self):
+    def __STARFIELD(self,index):
         stars = Model.parameters.galaxy.stars 
         retArr = np.ndarray((len(stars),3),np.float64)
         for i in range(0,len(stars)):

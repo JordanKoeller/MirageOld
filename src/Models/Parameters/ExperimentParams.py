@@ -20,19 +20,15 @@ class ExperimentParams(object):
     '''
 
 
-    def __init__(self,name, description = None, numTrials = 1, trialVariance = 1, resolution=200,pathStart = None,pathEnd = None,desiredResults = [ResultTypes.LIGHT_CURVE]):
+    def __init__(self,name = None, description = None, numTrials = 1, trialVariance = 1,resultParams = []):
         '''
         Constructor
         '''
-        self.pathStart = pathStart
-        self.pathEnd = pathEnd
-        self.resolution = resolution
         self.name = name
         self.description = description
         self.numTrials = numTrials
         self.trialVarianceFunction = trialVariance
-        self.resolution = resolution
-        self.desiredResults = desiredResults
+        self.desiredResults = resultParams
         
         
     def generatePath(self,params):

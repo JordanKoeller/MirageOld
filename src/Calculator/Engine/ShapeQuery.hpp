@@ -162,7 +162,10 @@ inline double isLeft(const double* x,const double* y,const int &p0,const int &p1
 {
 	return ((x[p1] - x[p0])*(p2[1]-y[p0])-(p2[0]-x[p0])*(y[p1]-y[p0]));
 }
-
+// bool intersect(const double* x, const double* y, const double px, const double py, const int &width, const double &qx, const double &qy, const double &qr)
+// {
+// 	if (hypot2(x[V[0]],y[V[0]],qx,qy) <= r2)
+// }
 
 
 
@@ -181,6 +184,7 @@ vector<pair<int,int>> query_shape(const double* x,const double* y,const int widt
 	// }
 
 	vector<pair<int,int>> ret;
+	double r2 = r*r;
 	#pragma omp parallel
 	{
 		vector<pair<int,int>> private_ret;
@@ -189,7 +193,7 @@ vector<pair<int,int>> query_shape(const double* x,const double* y,const int widt
 		{
 			for (int j = 0; j < width-1; ++j)
 			{
-				if (intersect(x,y,i*width+j,width,qx,qy,r))
+				if (hypot2(x[i*width+j],y[i*width+j+1],qx,qy) <= r2)
 				{
 
 					private_ret.push_back(make_pair(i,j));

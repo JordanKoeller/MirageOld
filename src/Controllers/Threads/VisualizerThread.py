@@ -91,7 +91,7 @@ class VisualizerThread(QtCore.QThread):
         self.progress_label_update.emit("Restarted.")
         self.__calculating = False
         Model.parameters.setTime(0)
-        pixels = Model.engine.getFrame()[0]
+        pixels = Model.engine.getFrame()
         mag = Model.engine.getMagnification(len(pixels))
         self.__drawer.draw([Model.parameters,pixels],[mag])
         self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
