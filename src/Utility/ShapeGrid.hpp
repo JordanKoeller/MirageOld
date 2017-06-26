@@ -29,7 +29,7 @@ private:
 		PqComp()=default;
 		bool operator() (const double* a, const double* b)
 		{
-		return atan2(b[1],b[0]) > atan2(a[1],a[0]);
+			return atan2(b[1],b[0]) > atan2(a[1],a[0]);
 
 		}
 	};
@@ -206,7 +206,7 @@ private:
 			area2 -= intersection[1]*p2[0];
 			area2 -= p2[1]*p3[0];
 
-			return 0.5*(abs(area1) + abs(area2));
+			return -0.5*(abs(area1) + abs(area2));
 
 		}
 		else if (getIntersection(p1,p4,p2,p3, intersection))
@@ -228,7 +228,7 @@ private:
 			area2 -= p2[1]*intersection[0];
 			area2 -= intersection[1]*p4[0];
 			area2 -= p4[1]*p2[0];
-			return 0.5*(abs(area1) + abs(area2));
+			return -0.5*(abs(area1) + abs(area2));
 		}
 		else
 		{
@@ -741,10 +741,29 @@ public:
 			ret2.push_back(pos);
 			double* corners[4];
 			getCorners(pt,corners);
-			ret3 += polyCircleOverlap(corners[0],corners[1],corners[2],hk,r)*shapeAreas[pt/2];
-			ret3 += polyCircleOverlap(corners[2],corners[1],corners[3],hk,r)*shapeAreas[pt/2];	
+			if (shapeAreas[pt/2] < 0)
+			{
+				double intersection[2];
+				if (getIntersection(corners[0],corners[1],corners[3],corners[2], intersection))
+				{
+					//Shape goes p1 ->  intersection -> p4 -> p1, p3 -> intersection -> p2 ->p3
+					ret3 -= polyCircleOverlap(corners[0],intersection,corners[3],hk,r)/shapeAreas[pt/2];
+					ret3 -= polyCircleOverlap(corners[2],intersection,corners[1],hk,r)/shapeAreas[pt/2];
+					
+				}
+				else 
+				{
+					getIntersection(corners[0],corners[2],corners[1],corners[3],intersection);
+					ret3 -= polyCircleOverlap(corners[0],corners[2],intersection,hk,r)/shapeAreas[pt/2];
+					ret3 -= polyCircleOverlap(corners[1],intersection,corners[3],hk,r)/shapeAreas[pt/2];
+					//goes p1 -> p3 -> intersection -> p1
+					//goes p2 -> intersection -> p4 -> p2
+				}
+			}
+			ret3 += polyCircleOverlap(corners[0],corners[1],corners[2],hk,r)/shapeAreas[pt/2];
+			ret3 += polyCircleOverlap(corners[2],corners[1],corners[3],hk,r)/shapeAreas[pt/2];	
 		}
-		return make_pair(ret2,ret3/(M_PI*r*r));
+		return make_pair(ret2,ret3/ret2.size()*(M_PI*r*r));
 	}
 
 

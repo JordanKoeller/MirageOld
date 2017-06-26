@@ -52,7 +52,6 @@ private:
 		int rootNodes = (int) sqrt(node_count);
 		NODE_HEIGHT = (y2 - y1)/ (double) rootNodes;
 		NODE_WIDTH = (x2 - x1)/(double) rootNodes;
-		NODE_HEIGHT > NODE_WIDTH ? LARGE_AXIS = NODE_HEIGHT : LARGE_AXIS = NODE_WIDTH;
 
 	}
 	struct Node
@@ -80,7 +79,6 @@ private:
 	};
 	double NODE_WIDTH;
 	double NODE_HEIGHT;
-	double LARGE_AXIS;
 	double tlx;
 	double tly;
 	unsigned int sz;
@@ -133,7 +131,6 @@ public:
 	{
 		NODE_WIDTH = other.NODE_WIDTH;
 		NODE_HEIGHT = other.NODE_HEIGHT;
-		LARGE_AXIS = other.LARGE_AXIS;
 		tlx = other.tlx;
 		tly = other.tly;
 		sz = other.sz;
@@ -141,7 +138,7 @@ public:
 		height = other.height;
 		data = other.data;
 		rawData = new double[width*height*2];
-		for (Index i = 0; i < width*height*2; ++i)
+		for (int i = 0; i < width*height*2; ++i)
 		{
 			rawData[i] = other.rawData[i];
 		}
@@ -151,7 +148,6 @@ public:
 	{
 		NODE_WIDTH = other.NODE_WIDTH;
 		NODE_HEIGHT = other.NODE_HEIGHT;
-		LARGE_AXIS = other.LARGE_AXIS;
 		tlx = other.tlx;
 		tly = other.tly;
 		sz = other.sz;
@@ -175,7 +171,6 @@ public:
 		int ry = ceil(r/(NODE_HEIGHT))+1;
 		int hypot2 = rx*rx+ry*ry;
 		vector<Index> ret;
-		vector<Index> tmp;
 
 		if (data.find(cx) != data.end() && data[cx].find(cy) != data[cx].end())  {
 			data[cx][cy].queryNode(x,y,r2,this,ret);
@@ -201,8 +196,8 @@ public:
 			int ryLow = ceil(sqrt(hypot2 - i*i))+1;
 			for (int j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
 			{
-				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r2)
-				{
+				// if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r2)
+				// {
 					if ((i+2)*NODE_WIDTH*(i+2)*NODE_WIDTH + (j+2)*NODE_HEIGHT*(j+2)*NODE_HEIGHT < r2) {
 						if (data.find(i+cx) != data.end() && data[i+cx].find(cy+j) != data[i+cx].end())  {
 							auto &node = data[i+cx][j+cy];
@@ -236,7 +231,7 @@ public:
 						}
 					}
 				}
-			}
+			// }
 		}
 
 		// for (auto i:data)

@@ -70,7 +70,7 @@ cdef class Engine_PointerGrid(Engine):
 		begin = time.clock()
 		self.__preCalculating = True
 		finalData = self.ray_trace(use_GPU=True)
-		self.build_data(finalData[0], finalData[1],int(finalData[0].shape[0]**2/2))
+		self.build_data(finalData[0], finalData[1],int(2*finalData[0].shape[0]**2))
 		del(finalData)
 		self.__preCalculating = False
 		print("Time calculating = " + str(time.clock() - begin) + " seconds.")

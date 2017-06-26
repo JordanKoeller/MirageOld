@@ -73,9 +73,10 @@ class VisualizerThread(QtCore.QThread):
             counter += 1
             timer = time.clock()
             pixels,mag = Model.engine.getFrame()
-            mag = mag# /Model.parameters.dTheta.to('rad').value**2
+            # mag = mag * Model.parameters.dTheta.value**2
+            # mag = mag# /Model.parameters.dTheta.to('rad').value**2
             # mag = mag / (math.pi*Model.parameters.quasar.radius.to('rad').value**2)
-            # mag = Model.engine.getMagnification(mag)
+            mag = Model.engine.getMagnification(mag)
             self.__drawer.draw([Model.parameters,pixels],[mag])
             self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
             Model.parameters.incrementTime(Model.parameters.dt)
