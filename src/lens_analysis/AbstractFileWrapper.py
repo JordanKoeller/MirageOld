@@ -37,7 +37,6 @@ class AbstractFileWrapper(object):
         self._exptTypes = {}
         for i in range(0,len(self._params.extras.desiredResults)):
             self._exptTypes[self._params.extras.desiredResults[i]] = i
-#         self._exptTypes = self._params.extras.desiredResults
 
 
     def _getDataSet(self,trialNo,tableNo):

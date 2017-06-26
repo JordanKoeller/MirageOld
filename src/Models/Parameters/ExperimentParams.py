@@ -41,4 +41,7 @@ class ExperimentParams(object):
         return self.description
         
     def __str__(self):
-        return "Name = "+self.name+"\nDescription = "+self.desc+"\nNumber of Trials = "+str(self.numTrials)+"\n"
+        string =  "Name = "+self.name+"\nDescription = "+self.desc+"\nNumber of Trials = "+str(self.numTrials)+"\n"
+        for i in self.desiredResults:
+            string += str(i)
+        return string

@@ -36,7 +36,7 @@ class QueueThread(QtCore.QThread):
             exptRunner = ExperimentResultCalculator(params,self.signals)
             tc = 0
             for expt in range(0,numTrials):
-                self.signals['progressLabel'].emit("Processing trial "+str(tc+1) +" of " + str(numTrials+1) + ".")
+                self.signals['progressLabel'].emit("Processing trial "+str(tc+1) +" of " + str(numTrials) + ".")
                 tc += 1
                 oldP = copy.deepcopy(Model.parameters)
                 newP = varyTrial(params,tc) #NEED TO IMPLIMENT
