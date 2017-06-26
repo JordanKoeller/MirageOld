@@ -12,64 +12,35 @@ using namespace std;
 class PointerGrid
 {
 private:
-
+	typedef  unsigned int Index;
+	// friend class PointerGrid::Node;
 	double* rawData;
 
-	inline static double hypot( double& x1,  double& y1,  double& x2,  double& y2) 
-	{
-		double dx = x2 - x1;
-		double dy = y2-y1;
-		return sqrt(dx*dx+dy*dy);
-	}
 
 	inline static double hypot2( double& x1,  double& y1,  double& x2,  double& y2)
 	{
 		double dx = x2 - x1;
-		double dy = y2-y1;
+		double dy = y2 - y1;
 		return dx*dx+dy*dy;
 	}
-	inline static bool within( double &ptx,  double &pty,  double &radius,  int dats, PointerGrid * prnt)
+	inline static bool within( double &ptx,  double &pty,  double &r2,  Index dats, PointerGrid * prnt)
 	{
-		if (hypot2(ptx,pty,*(prnt->rawData+dats),*(prnt->rawData+dats+1)) <= radius*radius)
-		{
-			return true;
-		}
-		else {
-			return false;
-		}
+		return hypot2(ptx,pty,*(prnt->rawData+dats),*(prnt->rawData+dats+1)) <= r2;
 	}
 
-	inline bool overlap( double &objx,  double& objy,  double &radius,  int &i,  int &j) 
+	inline pair<int,int> pos_from_index(Index &ind)
 	{
-		double tnx = tlx + i*NODE_WIDTH;
-		double tny = tly + j*NODE_HEIGHT;
-		double bnx = tlx + (i+1)*NODE_WIDTH;
-		double bny = tly + (j+1)*NODE_HEIGHT;
-		// bool flag1 = 
-		return objx - radius <= bnx && objx + radius > tnx && objy - radius <= bny && objy + radius > tny; //BIG possible bug spot.
-	}
-
-	inline pair<int,int> pos_from_pointer(double* pos)
-	{
-//		cout << pos-rawData << "\n";
-		int diff = (pos-rawData)/2;
+		int diff = ind/2;
 		int y = diff % width;
 		int x = diff / width;
 		return make_pair(x,y);
 	}
 
-	inline pair<int,int> pos_from_integer(int pos)
-	{
-		int diff = pos/2;
-		int y = diff % width;
-		int x = diff / width;
-		return make_pair(x,y);
-	}
 
-	inline pair<double,double> getIndices( double *x, double *y)
+	inline pair<Index,Index> getIndices( double *x, double *y)
 	{
-		double xx  = ((*x) - tlx)/NODE_WIDTH;
-		double yy  = ((*y) - tly)/NODE_HEIGHT;
+		Index xx  = round((((*x) - tlx)/NODE_WIDTH));
+		Index yy  = round((((*y) - tly)/NODE_HEIGHT));
 		return make_pair(xx,yy);				
 	}
 
@@ -84,26 +55,22 @@ private:
 		NODE_HEIGHT > NODE_WIDTH ? LARGE_AXIS = NODE_HEIGHT : LARGE_AXIS = NODE_WIDTH;
 
 	}
-	class Node
+	struct Node
 	{
-	private:
-	public:
-		std::vector<int> node_data;
-		void addData(int x)
+		std::vector<Index> node_data;
+		void addData(Index x)
 		{
 			node_data.push_back(x);
 		}
-		std::vector<int> queryNode( double& ptx,  double& pty, double &radius, PointerGrid* prnt) 
+		void queryNode( double& ptx,  double& pty, double &r2, PointerGrid* prnt, vector<Index> & ret) 
 		{
-			std::vector<int> ret;
-			for (size_t i = 0; i < node_data.size(); ++i)
+			for (Index i = 0; i < node_data.size(); ++i)
 			{
-				if (within(ptx,pty,radius,node_data[i],prnt))
+				if (within(ptx,pty,r2,node_data[i],prnt))
 				{
 					ret.push_back(node_data[i]);						
 				}
 			}
-			return ret;
 		}
 
 		Node()=default;
@@ -174,7 +141,7 @@ public:
 		height = other.height;
 		data = other.data;
 		rawData = new double[width*height*2];
-		for (int i = 0; i < width*height*2; ++i)
+		for (Index i = 0; i < width*height*2; ++i)
 		{
 			rawData[i] = other.rawData[i];
 		}
@@ -196,43 +163,37 @@ public:
 		{
 			rawData[i] = other.rawData[i];
 		}
+		return *this;
 	}
 
-	vector<pair<int,int>> find_within( double &x,  double &y,  double &r)
+	pair<vector<pair<int,int>>,double> find_within( double &x,  double &y,  double &r)
 	{
-		// cout << "querying\n";
-		// cout << rawData[(width-1)*(width-1)] << "\n";
-		// cout << sz << endl;
+		double r2 = r*r;
 		int cx = round((x-tlx)/NODE_WIDTH);
 		int cy = round((y-tly)/NODE_HEIGHT);
 		int rx = ceil(r/(NODE_WIDTH))+1;
 		int ry = ceil(r/(NODE_HEIGHT))+1;
 		int hypot2 = rx*rx+ry*ry;
-		vector<int> ret;
-		vector<int> tmp;
+		vector<Index> ret;
+		vector<Index> tmp;
 
 		if (data.find(cx) != data.end() && data[cx].find(cy) != data[cx].end())  {
-			tmp = data[cx][cy].queryNode(x,y,r,this);
-			ret.insert(ret.end(),tmp.begin(),tmp.end());
+			data[cx][cy].queryNode(x,y,r2,this,ret);
 		}
 		for (int i=1; i <= rx; i++) {
 			if (data.find(cx+i) != data.end() && data[cx+i].find(cy) != data[cx+i].end())  {
-				tmp = data[cx+i][cy].queryNode(x,y,r,this);
-				ret.insert(ret.end(),tmp.begin(),tmp.end());
+				data[cx+i][cy].queryNode(x,y,r2,this,ret);
 			}
 			if (data.find(cx-i) != data.end() && data[cx-i].find(cy) != data[cx-i].end())  {
-				tmp = data[cx-i][cy].queryNode(x,y,r,this);
-				ret.insert(ret.end(),tmp.begin(),tmp.end());
+				data[cx-i][cy].queryNode(x,y,r2,this,ret);
 			}
 		}
 		for (int i=1; i <= ry; i++) {
 			if (data.find(cx) != data.end() && data[cx].find(cy+i) != data[cx].end())  {
-				tmp = data[cx][cy+i].queryNode(x,y,r,this);
-				ret.insert(ret.end(),tmp.begin(),tmp.end());
+				data[cx][cy+i].queryNode(x,y,r2,this,ret);
 			}
 			if (data.find(cx) != data.end() && data[cx].find(cy-i) != data[cx].end())  {
-				tmp = data[cx][cy-i].queryNode(x,y,r,this);
-				ret.insert(ret.end(),tmp.begin(),tmp.end());
+				data[cx][cy-i].queryNode(x,y,r2,this,ret);
 			}
 		}
 		for (int i = 1; i <= rx; ++i) // Possible indexing issue here?
@@ -240,9 +201,9 @@ public:
 			int ryLow = ceil(sqrt(hypot2 - i*i))+1;
 			for (int j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
 			{
-				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r*r)
+				if ((i*NODE_WIDTH)*(i*NODE_WIDTH)+(j*NODE_HEIGHT)*(j*NODE_HEIGHT) <= r2)
 				{
-					if ((i+2)*NODE_WIDTH*(i+2)*NODE_WIDTH + (j+2)*NODE_HEIGHT*(j+2)*NODE_HEIGHT < r*r) {
+					if ((i+2)*NODE_WIDTH*(i+2)*NODE_WIDTH + (j+2)*NODE_HEIGHT*(j+2)*NODE_HEIGHT < r2) {
 						if (data.find(i+cx) != data.end() && data[i+cx].find(cy+j) != data[i+cx].end())  {
 							auto &node = data[i+cx][j+cy];
 							ret.insert(ret.end(),node.node_data.begin(), node.node_data.end());
@@ -262,41 +223,46 @@ public:
 					}
 					else {
 						if (data.find(i+cx) != data.end() && data[i+cx].find(cy+j) != data[i+cx].end()) {
-							tmp = data[i+cx][j+cy].queryNode(x,y,r,this);
-							ret.insert(ret.end(),tmp.begin(),tmp.end());
+							data[i+cx][j+cy].queryNode(x,y,r2,this,ret);
 						}
 						if (data.find(cx-i) != data.end() && data[cx-i].find(cy+j) != data[cx-i].end()) {
-							tmp = data[cx-i][cy+j].queryNode(x,y,r,this);
-							ret.insert(ret.end(),tmp.begin(),tmp.end());
+							data[cx-i][cy+j].queryNode(x,y,r2,this,ret);
 						}
 							if (data.find(cx+i) != data.end() && data[cx+i].find(cy-j) != data[cx+i].end()) {
-							tmp = data[i+cx][cy-j].queryNode(x,y,r,this);
-							ret.insert(ret.end(),tmp.begin(),tmp.end());
+							data[i+cx][cy-j].queryNode(x,y,r2,this,ret);
 						}
 							if (data.find(cx-i) != data.end() && data[cx-i].find(cy-j) != data[cx-i].end()) {
-							tmp = data[cx-i][cy-j].queryNode(x,y,r,this);
-							ret.insert(ret.end(),tmp.begin(),tmp.end());
+							data[cx-i][cy-j].queryNode(x,y,r2,this,ret);
 						}
 					}
 				}
 			}
 		}
+
+		// for (auto i:data)
+		// {
+		// 	for (auto j:i.second)
+		// 	{
+		// 		j.second.queryNode(x,y,r2,this,ret);
+		// 	}
+		// }
 		vector<pair<int,int>> ret2;
 		for (size_t i = 0; i < ret.size(); ++i)
 		{
 			pair<int,int> pos;
-			pos = pos_from_integer(ret[i]);
+			pos = pos_from_index(ret[i]);
 			ret2.push_back(pos);
 		}
-		return ret2;
+		double ret3 = ret2.size();
+		return make_pair(ret2,ret3);
 	}
 
 	bool insert( double* x)
 	{
 		double * yy = x + 1;
 		auto indices = getIndices(x,yy);
-		int i = get<0>(indices);
-		int j = get<1>(indices);
+		Index i = get<0>(indices);
+		Index j = get<1>(indices);
 		data[i][j].addData(x-rawData);
 		++sz;
 		return true;

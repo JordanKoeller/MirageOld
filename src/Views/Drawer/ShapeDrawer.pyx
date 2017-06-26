@@ -63,6 +63,15 @@ cpdef void drawSolidCircle(int x0, int y0, int r, np.ndarray[np.uint8_t, ndim=2]
 					canvas[x0-x,y0+y] = color 
 				if x0-x > 0 and y0-y > 0 and x0-x < canvasDim and y0-y < canvasDim:
 					canvas[x0-x,y0-y] = color 
+
+cdef void drawSquare(int x0, int y0, int dim, np.ndarray[np.uint8_t, ndim=2] canvas, int color):
+	cdef int dim2 = <int> dim/2
+	cdef int canvasDim = canvas.shape[0]
+	cdef int x,y 
+	for x in range(x0-dim2,x0+dim2):
+		for y in range(y0-dim2,y0+dim2):
+			if x >= 0 and x < canvasDim and y >= 0 and y < canvasDim:
+				canvas[x,y] = color
 					
 					
 cpdef void drawPointLensers(np.ndarray[np.float64_t, ndim=2] stars, np.ndarray[np.uint8_t, ndim=2] canvas, object parameters):
@@ -77,4 +86,4 @@ cpdef void drawPointLensers(np.ndarray[np.float64_t, ndim=2] stars, np.ndarray[n
 		m = stars[s,2]
 		r = math.sqrt(m+2.0)
 # 		print(r)
-		drawSolidCircle(<int>x,<int>y,<int>r,canvas,2)
+		drawSquare(<int>x,<int> y, <int> r*2,canvas,2)

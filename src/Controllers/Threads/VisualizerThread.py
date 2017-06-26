@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
+import math
 
 from PyQt5 import QtCore
 
@@ -71,8 +72,10 @@ class VisualizerThread(QtCore.QThread):
         while self.__calculating:
             counter += 1
             timer = time.clock()
-            pixels = Model.engine.getFrame()
-            mag = Model.engine.getMagnification(len(pixels))
+            pixels,mag = Model.engine.getFrame()
+            mag = mag# /Model.parameters.dTheta.to('rad').value**2
+            # mag = mag / (math.pi*Model.parameters.quasar.radius.to('rad').value**2)
+            # mag = Model.engine.getMagnification(mag)
             self.__drawer.draw([Model.parameters,pixels],[mag])
             self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
             Model.parameters.incrementTime(Model.parameters.dt)
@@ -90,7 +93,7 @@ class VisualizerThread(QtCore.QThread):
         self.progress_label_update.emit("Restarted.")
         self.__calculating = False
         Model.parameters.setTime(0)
-        pixels = Model.engine.getFrame()
+        pixels = Model.engine.getFrame()[0]
         mag = Model.engine.getMagnification(len(pixels))
         self.__drawer.draw([Model.parameters,pixels],[mag])
         self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
@@ -106,14 +109,3 @@ class VisualizerThread(QtCore.QThread):
         self.progress_label_update.emit("Done.")
         return pixels
 
-#     def bin_test(self):
-#         binszs = np.arange(7000,65000,100)
-#         reps = 200
-#         self.progress_label_update.emit("Calculating Various Bin Sizes.")
-#         self.progress_bar_max_update.emit(len(binszs))
-#         def runner():
-#             Model.engine.gridTest(binszs, reps,self.curve_canvas_update,self.progress_bar_update)
-#             # self.__calculating = False
-#         self.run = runner
-#         self.start()
-#         # print("Asynchronous")

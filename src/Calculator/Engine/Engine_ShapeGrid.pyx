@@ -60,13 +60,14 @@ cdef class Engine_ShapeGrid(Engine):
 
 	cdef vector[pair[int,int]] query_data(self, double x, double y, double radius) nogil:
 		"""Returns all rays that intersect the source plane within a specified radius of a location on the source plane."""
-		cdef vector[pair[int,int]] ret = self.__grid.find_within(x, y, radius)
+		cdef vector[pair[int,int]] ret = self.__grid.find_within(x, y, radius).first
 		return ret
 	
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil:
 		return self.query_data(x,y,radius).size()
 
 	def reconfigure(self):
+		# self.__grid = ShapeGrid()
 		begin = time.clock()
 		self.__preCalculating = True
 		finalData = self.ray_trace(use_GPU=True)
@@ -77,27 +78,29 @@ cdef class Engine_ShapeGrid(Engine):
 # 		time.sleep(3)
 
 
-	@cython.boundscheck(False)  # turn off bounds-checking for entire function
+	@cython.boundscheck(False)  #turn off bounds-checking for entire function
 	@cython.wraparound(False)
 	cpdef getFrame(self):
 		"""
 		Returns a 2D numpy array, containing the coordinates of pixels illuminated by the source specified in the system's parameters.
 		"""
+		begin = time.clock()
 		while self.__preCalculating:
 			print("waiting")
 			time.sleep(0.1)
 		cdef double qx = self.__parameters.queryQuasarX
 		cdef double qy = self.__parameters.queryQuasarY
 		cdef double qr = self.__parameters.queryQuasarRadius
-		cdef vector[pair[int,int]] ret = self.query_data(qx,qy,qr)
-		cdef int retf = ret.size()
+		cdef pair[vector[pair[int,int]],double] ret = self.__grid.find_within(qx,qy,qr)
+		cdef int retf = ret.first.size()
 		cdef int i = 0
-		cdef np.ndarray[np.int32_t, ndim = 2] fret = np.ndarray((ret.size(), 2), dtype=np.int32)
+		cdef np.ndarray[np.int32_t, ndim = 2] fret = np.ndarray((ret.first.size(), 2), dtype=np.int32)
 		with nogil:
 			for i in range(0, retf):
-				fret[i,0] = <int> ret[i].first
-				fret[i,1] = <int> ret[i].second
-		return fret
+				fret[i,0] = <int> ret.first[i].first
+				fret[i,1] = <int> ret.first[i].second
+		print(1/(time.clock()-begin))
+		return (fret,ret.second)
 
 	def gridTest(self,binsizes,queryPerTest,curveSignal,barSignal):
 		"""

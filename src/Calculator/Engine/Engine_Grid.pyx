@@ -80,6 +80,7 @@ cdef class Engine_Grid(Engine):
 		"""
 		Returns a 2D numpy array, containing the coordinates of pixels illuminated by the source specified in the system's parameters.
 		"""
+		begin = time.clock()
 		while self.__preCalculating:
 			print("waiting")
 			time.sleep(0.1)
@@ -94,7 +95,8 @@ cdef class Engine_Grid(Engine):
 			for i in range(0, retf):
 				fret[i,0] = <int> ret[i].pixelX
 				fret[i,1] = <int> ret[i].pixelY
-		return fret
+		print(1/(time.clock()-begin))
+		return (fret,retf)
 
 
 	def gridTest(self,binsizes,queryPerTest,curveSignal,barSignal):

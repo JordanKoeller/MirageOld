@@ -15,7 +15,7 @@ typedef unsigned int Index;
 
 
 inline double isLeft(const double* x,const double* y,const int &p0,const int &p1,const double* p2);
-double project(const double* x,const double* y,const int &vStart,const int &vEnd, double &cx, double &cy, double &r2);
+bool project(const double* x,const double* y,const int &vStart,const int &vEnd, double &cx, double &cy, double &r2);
 inline double hypot2(const double& x1,const double& y1,const double& x2,const double& y2);
 inline tuple<int,int,int,int> getCorners(const int &tl,const int &width);
 bool winding_algorithm(const double * x,const double * y,const int * V,const double* P);
@@ -33,7 +33,7 @@ double sourcePlaneArea(double *x, double* y, const int &width)
 
 
 
-double project(const double* x,const double* y,const int &vStart,const int &vEnd, const double &cx, const double &cy,const double &r2)
+bool project(const double* x,const double* y,const int &vStart,const int &vEnd, const double &cx, const double &cy,const double &r2)
 {
 	double C[2];
 	double A[2];
@@ -162,6 +162,13 @@ inline double isLeft(const double* x,const double* y,const int &p0,const int &p1
 {
 	return ((x[p1] - x[p0])*(p2[1]-y[p0])-(p2[0]-x[p0])*(y[p1]-y[p0]));
 }
+
+
+
+
+
+
+
 
 vector<pair<int,int>> query_shape(const double* xx,const double* yy,const int width,const double qx,const double qy,const double r)
 {

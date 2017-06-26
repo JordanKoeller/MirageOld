@@ -32,9 +32,9 @@ cdef class LensedImageDrawer(ImageDrawer):
 			parameters.quasar.draw(canvas,parameters)
 		cdef int pixel = 0
 		cdef int end = pixels.shape[0]
-		cdef np.ndarray[np.uint8_t, ndim=1] colors = self.getColorCode(pixels,parameters)
+		# cdef np.ndarray[np.uint8_t, ndim=1] colors = self.getColorCode(pixels,parameters)
 		for i in range(0,len(pixels)):
-			canvas[pixels[i,0],pixels[i,1]] = colors[i]
+			canvas[pixels[i,0],pixels[i,1]] = 1#colors[i]
 		return self.drawImage(canvas,None)
 
 	cdef getColorCode(self, np.ndarray[np.int32_t,ndim=2] pixels, object parameters):
