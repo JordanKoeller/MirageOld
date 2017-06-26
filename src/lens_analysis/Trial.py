@@ -18,7 +18,8 @@ from lens_analysis.AbstractFileWrapper import AbstractFileWrapper
 import numpy as np
 from Controllers.FileManagers.ParametersFileManager import ParametersFileManager
 from Calculator.ExperimentResultCalculator import varyTrial
-
+from Models.Parameters.MagMapParameters import MagMapParameters
+from Models.Parameters.LightCurveParameters import LightCurveParameters
 
 class Trial(AbstractFileWrapper):
     def __init__(self,filepath,trialno,fileobject=None,params=None,lookuptable=[]):
@@ -28,16 +29,17 @@ class Trial(AbstractFileWrapper):
     def requiresDtype(dtype):
         def decorator(fn):
             def decorated(self,*args,**kwargs):
-                if dtype in self._exptTypes:
-                    index = self._exptTypes[dtype]
-                    return fn(self,index,*args,**kwargs)
+                for k,v in self._exptTypes.items():
+                    if isinstance(k, dtype):
+                        index = v
+                        return fn(self,index,*args,**kwargs)
                 raise AttributeError("Trial does not contain "+str(dtype) +" data.")
             return decorated
         return decorator
     
     
     
-    @requiresDtype(ResultTypes.LIGHT_CURVE)
+    @requiresDtype(LightCurveParameters)
     def getLightCurve(self,ind,xUnit = 'arcsec'): #Automatically passed in parameter 'ind' supplies information of what column that data type is located in
         lc = self._getDataSet(ind)
         x = np.arange(0,len(lc))
@@ -47,7 +49,7 @@ class Trial(AbstractFileWrapper):
         return (x,lc)
     
     
-    @requiresDtype(ResultTypes.MAGMAP)
+    @requiresDtype(MagMapParameters)
     def getFitsFile(self,ind,filename = None):
         arr = self._getDataSet(ind)
         if filename:
