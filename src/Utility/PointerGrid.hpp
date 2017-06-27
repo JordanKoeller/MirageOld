@@ -135,6 +135,8 @@ public:
 	PointerGrid()
 	{
 		rawData = new double{10};
+		width = 5.0;
+		height = 1.0;
 	}
 
 	PointerGrid(const PointerGrid &other)
