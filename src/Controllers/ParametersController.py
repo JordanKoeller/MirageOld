@@ -55,8 +55,8 @@ class ParametersController(GUIController):
         If the user inputs invalid arguments, will handle the error by returning None and sending a message
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
-#         try:
-        if True:
+        try:
+#         if True:
             gRedshift = float(self.view.gRedshift.text())
             qRedshift = float(self.view.qRedshift.text())
             qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')
@@ -98,9 +98,9 @@ class ParametersController(GUIController):
                 if extrasBuilder:
                     extrasBuilder(self.view,params,inputUnit)
                 return params
-#         except:
-#             self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
-#             return None
+        except:
+            self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
+            return None
         
     def updateUnitLabels(self,unitString):
         self.view.unitLabel_1.setText(unitString)
