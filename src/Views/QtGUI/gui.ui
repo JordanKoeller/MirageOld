@@ -47,7 +47,15 @@
        <addaction name="playPauseAction"/>
        <addaction name="resetAction"/>
       </widget>
+      <widget class="QMenu" name="menuPerspective">
+       <property name="title">
+        <string>Perspective</string>
+       </property>
+       <addaction name="saveTableAction"/>
+       <addaction name="loadTableAction"/>
+      </widget>
       <addaction name="menuFile"/>
+      <addaction name="menuPerspective"/>
       <addaction name="menuView"/>
      </widget>
     </item>
@@ -100,7 +108,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-90</y>
+          <y>0</y>
           <width>584</width>
           <height>1081</height>
          </rect>
@@ -163,7 +171,7 @@
               <item row="3" column="2">
                <widget class="QLabel" name="unitLabel_1">
                 <property name="text">
-                 <string>Arcseconds </string>
+                 <string>arcsec</string>
                 </property>
                </widget>
               </item>
@@ -196,7 +204,7 @@
                </widget>
               </item>
               <item row="4" column="2">
-               <widget class="QLabel" name="unitLabel_2">
+               <widget class="QLabel" name="label_8">
                 <property name="text">
                  <string>km/sec</string>
                 </property>
@@ -260,7 +268,7 @@
                 </item>
                 <item>
                  <property name="text">
-                  <string>R_g</string>
+                  <string>r_g</string>
                  </property>
                 </item>
                 <item>
@@ -543,7 +551,7 @@
               <item row="2" column="2">
                <widget class="QLabel" name="label_24">
                 <property name="text">
-                 <string>Arcseconds</string>
+                 <string>arcsec</string>
                 </property>
                </widget>
               </item>
@@ -558,22 +566,22 @@
                <widget class="QComboBox" name="scaleUnitOption">
                 <item>
                  <property name="text">
-                  <string>Arcsec</string>
+                  <string>arcsec</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>μArcsec</string>
+                  <string>uas</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>RG</string>
+                  <string>r_g</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string notr="true">θE</string>
+                  <string notr="true">theta_E</string>
                  </property>
                 </item>
                </widget>
@@ -833,7 +841,7 @@ newParams = copy.deepcopy(oldParams)</string>
                   <item row="1" column="3">
                    <widget class="QLabel" name="unitLabel_4">
                     <property name="text">
-                     <string>Arcsec </string>
+                     <string>arcsec</string>
                     </property>
                    </widget>
                   </item>
@@ -854,7 +862,7 @@ newParams = copy.deepcopy(oldParams)</string>
                   <item row="0" column="3">
                    <widget class="QLabel" name="unitLabel_3">
                     <property name="text">
-                     <string>Arcsec </string>
+                     <string>arcsec</string>
                     </property>
                    </widget>
                   </item>
@@ -961,9 +969,9 @@ newParams = copy.deepcopy(oldParams)</string>
                    </widget>
                   </item>
                   <item row="0" column="2">
-                   <widget class="QLabel" name="label_23">
+                   <widget class="QLabel" name="unitLabel_5">
                     <property name="text">
-                     <string>Arcseconds</string>
+                     <string>arcsec</string>
                     </property>
                    </widget>
                   </item>
@@ -982,9 +990,9 @@ newParams = copy.deepcopy(oldParams)</string>
                    </widget>
                   </item>
                   <item row="1" column="2">
-                   <widget class="QLabel" name="label_38">
+                   <widget class="QLabel" name="unitLabel_6">
                     <property name="text">
-                     <string>Arcseconds</string>
+                     <string>arcsec </string>
                     </property>
                    </widget>
                   </item>
@@ -1267,13 +1275,6 @@ newParams = copy.deepcopy(oldParams)</string>
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QPushButton" name="saveExperimentsButton">
-                <property name="text">
-                 <string>Save Table</string>
-                </property>
-               </widget>
-              </item>
              </layout>
             </widget>
            </item>
@@ -1491,6 +1492,22 @@ newParams = copy.deepcopy(oldParams)</string>
    </property>
    <property name="shortcut">
     <string>R</string>
+   </property>
+  </action>
+  <action name="saveTableAction">
+   <property name="text">
+    <string>Save Table</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="loadTableAction">
+   <property name="text">
+    <string>Load Table</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+O</string>
    </property>
   </action>
  </widget>

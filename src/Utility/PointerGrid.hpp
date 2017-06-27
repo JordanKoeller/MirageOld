@@ -181,8 +181,8 @@ public:
 		double r2 = r*r;
 		Index cx = round((x-tlx)/NODE_WIDTH);
 		Index cy = round((y-tly)/NODE_HEIGHT);
-		Index rx = ceil(r/(NODE_WIDTH));
-		Index ry = ceil(r/(NODE_HEIGHT));
+		Index rx = ceil(r/(NODE_WIDTH))+1;
+		Index ry = ceil(r/(NODE_HEIGHT))+1;
 		int hypot2 = rx*rx+ry*ry;
 		vector<pair<int,int>> ret;
 
@@ -207,7 +207,7 @@ public:
 		}
 		for (Index i = 1; i <= rx; ++i) // Possible indexing issue here?
 		{
-			Index ryLow = ceil(sqrt(hypot2 - i*i));
+			Index ryLow = ceil(sqrt(hypot2 - i*i))+1;
 			for (Index j = 1; j <= ryLow;++j) //Improvement by using symmetry possible
 			{
 				if ((i+1)*NODE_WIDTH*(i+1)*NODE_WIDTH + (j+1)*NODE_HEIGHT*(j+1)*NODE_HEIGHT < r2) {

@@ -51,8 +51,9 @@ class FileManager(object):
     def fileChooser(self):
         return QtWidgets.QFileDialog.getOpenFileName(filter=self.fileextension)[0]
     
-    def read(self):
-        filename = self.fileChooser()
+    def read(self, filename=None):
+        if not filename:
+            filename = self.fileChooser()
         if filename:
             prettyString = self.getPretty(filename)
             with open(filename, "r"+self.filetype) as file:

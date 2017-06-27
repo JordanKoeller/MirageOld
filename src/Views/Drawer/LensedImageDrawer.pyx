@@ -32,9 +32,9 @@ cdef class LensedImageDrawer(ImageDrawer):
 			parameters.quasar.draw(canvas,parameters)
 		cdef int pixel = 0
 		cdef int end = pixels.shape[0]
-		# cdef np.ndarray[np.uint8_t, ndim=1] colors = self.getColorCode(pixels,parameters)
+		cdef np.ndarray[np.uint8_t, ndim=1] colors = self.getColorCode(pixels,parameters)
 		for i in range(0,len(pixels)):
-			canvas[pixels[i,0],pixels[i,1]] = 1#colors[i]
+			canvas[pixels[i,0],pixels[i,1]] = colors[i]
 		return self.drawImage(canvas,None)
 
 	cdef getColorCode(self, np.ndarray[np.int32_t,ndim=2] pixels, object parameters):
@@ -42,10 +42,10 @@ cdef class LensedImageDrawer(ImageDrawer):
 		cdef y = np.array(pixels[:,1],dtype=np.float64) 
 		x = x - parameters.canvasDim /2
 		y = y - parameters.canvasDim/2
-		x = x*parameters.dTheta.to('arcsec').value
-		y = y*parameters.dTheta.to('arcsec').value
-		cdef double b = 4 * math.pi * (parameters.galaxy.velocityDispersion**2).to('km2/s2').value*(const.c** -2).to('s2/km2').value*parameters.dLS/parameters.quasar.angDiamDist
-		b = u.Quantity(b,'rad').to('arcsec').value
+		x = x*parameters.dTheta.to('rad').value
+		y = y*parameters.dTheta.to('rad').value
+		cdef double b = 4 * math.pi * (parameters.galaxy.velocityDispersion**2).to('km2/s2').value*(const.c** -2).to('s2/km2').value*parameters.dLS.to('m')/parameters.quasar.angDiamDist.to('m')
+		b = u.Quantity(b,'rad').to('rad').value
 		cdef double ptConst = (parameters.dLS/parameters.quasar.angDiamDist/parameters.galaxy.angDiamDist*4*const.G*const.c**-2).to('1/solMass').value
 		cdef double gamSin = parameters.galaxy.shearMag*math.sin(2*(parameters.galaxy.shearAngle.to('rad').value - math.pi/2))
 		cdef double gamCos = parameters.galaxy.shearMag*math.cos(2*(parameters.galaxy.shearAngle.to('rad').value - math.pi/2))

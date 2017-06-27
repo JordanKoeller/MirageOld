@@ -22,7 +22,6 @@ class QueueThread(QtCore.QThread):
         Constructor
         '''
         QtCore.QThread.__init__(self)
-        filemanager.getDirectory()
         self.experimentQueue = experimentQueue
         self.filemanager = filemanager
         self.signals = signals

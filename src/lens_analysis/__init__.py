@@ -7,6 +7,10 @@ from lens_analysis.Trial import Trial
 from Views.GUI.GUIManager import GUIManager
 from Models import Parameters
 from Models.Parameters.ExperimentParams import ResultTypes
+from Controllers.FileManagers.TableFileManager import TableFileManager
+from Controllers.Threads.QueueThread import QueueThread
+from Controllers.FileManagers import QueueFileManager
+from Utility.NullSignal import NullSignal
 
 
 def load(filename):
@@ -24,7 +28,14 @@ def describe(filename):
             filename.describe
     else:
         raise ValueError("argument must be a filename or AbstractFileWrapper subtype.")
-        
+
+def runTable(filename):
+    loader = TableFileManager()
+    table = loader.read(filename)
+    exptRunner = QueueFileManager(NullSignal)
+    runner = QueueThread(NullSignal,table,exptRunner)
+    runner.run()
+
 def explore(expt):
     gui = GUIManager()
     paramsetter = gui.parametersController

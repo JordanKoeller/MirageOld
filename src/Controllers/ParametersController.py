@@ -17,7 +17,7 @@ from Models import Parameters
 from Models import Quasar
 import astropy.units as u
 from astropy import constants as const
-
+from Calculator import UnitConverter
 
 class ParametersController(GUIController):
     '''
@@ -55,61 +55,63 @@ class ParametersController(GUIController):
         If the user inputs invalid arguments, will handle the error by returning None and sending a message
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
-        try:
-            inputUnit = 'arcsec'
-            if self.view.scaleUnitOption.currentIndex() == 1:
-                inputUnit = 'uas'
-            qVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit='km/s')
-            qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit=inputUnit).to('rad')
+#         try:
+        if True:
+            gRedshift = float(self.view.gRedshift.text())
             qRedshift = float(self.view.qRedshift.text())
             qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')
-            qRadius = u.Quantity(float(self.view.qRadius.text()), 'uas')
-
-            gRedshift = float(self.view.gRedshift.text())
-            gVelDispersion = u.Quantity(float(self.view.gVelDispersion.text()), 'km/s')
-            gNumStars = int(self.view.gNumStars.text())
-            gShearMag = float(self.view.gShearMag.text())
-            gShearAngle = u.Quantity(float(self.view.gShearAngle.text()), 'degree')
-            gStarStdDev = float(self.view.gStarStdDev.text())
-            gStarMean = gVelDispersion
-            gStarParams = None
-            if gNumStars == 0 or gStarStdDev == 0:
+            specials = UnitConverter.generateSpecialUnits(qBHMass,qRedshift,gRedshift)
+            with u.add_enabled_units(specials):
+                inputUnit = self.view.unitLabel_1.text()
+                qVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit='km/s')
+                qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit=inputUnit).to('rad')
+                qRadius = u.Quantity(float(self.view.qRadius.text()), 'uas')
+    
+                gVelDispersion = u.Quantity(float(self.view.gVelDispersion.text()), 'km/s')
+                gNumStars = int(self.view.gNumStars.text())
+                gShearMag = float(self.view.gShearMag.text())
+                gShearAngle = u.Quantity(float(self.view.gShearAngle.text()), 'degree')
+                gStarStdDev = float(self.view.gStarStdDev.text())
+                gStarMean = gVelDispersion
                 gStarParams = None
-            else:
-                gStarParams = (gStarMean,gStarStdDev)
-            displayCenter = self.view.vectorFromQString(self.view.gCenter.text(), unit=inputUnit).to('rad')
-            dTheta = u.Quantity(float(self.view.scaleInput.text()), inputUnit).to('rad')
-            canvasDim = int(self.view.dimensionInput.text())
-            displayQuasar = self.view.displayQuasar.isChecked()
-            displayGalaxy = self.view.displayGalaxy.isChecked()
-
-            quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity, mass = qBHMass)
-            galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams)
-            params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
-            if self.view.qRadiusUnitOption.currentIndex() == 1:
-                absRg = (params.quasar.mass*const.G/const.c/const.c).to('m')
-                angle = absRg/params.quasar.angDiamDist.to('m')
-                params.quasar.update(radius = u.Quantity(angle.value*qRadius.value,'rad'))
-            self.view.pixelAngleLabel_angle.setText(str(self.__round_to_n(params.pixelScale_angle.value,4)))
-            self.view.pixelAngleLabel_thetaE.setText(str(self.__round_to_n(params.pixelScale_thetaE,4)))
-            self.view.pixelAngleLabel_Rg.setText(str(self.__round_to_n(params.pixelScale_Rg,4)))
-            self.view.quasarRadiusRGEntry.setText(str(self.__round_to_n(params.quasarRadius_rg, 4)))
-            if extrasBuilder:
-                extrasBuilder(self.view,params)
-            return params
-        except:
-            self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
-            return None
+                if gNumStars == 0 or gStarStdDev == 0:
+                    gStarParams = None
+                else:
+                    gStarParams = (gStarMean,gStarStdDev)
+                displayCenter = self.view.vectorFromQString(self.view.gCenter.text(), unit=inputUnit).to('rad')
+                dTheta = u.Quantity(float(self.view.scaleInput.text()), inputUnit).to('rad')
+                canvasDim = int(self.view.dimensionInput.text())
+                displayQuasar = self.view.displayQuasar.isChecked()
+                displayGalaxy = self.view.displayGalaxy.isChecked()
+    
+                quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity, mass = qBHMass)
+                galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams)
+                params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
+                if self.view.qRadiusUnitOption.currentIndex() == 1:
+                    absRg = (params.quasar.mass*const.G/const.c/const.c).to('m')
+                    angle = absRg/params.quasar.angDiamDist.to('m')
+                    params.quasar.update(radius = u.Quantity(angle.value*qRadius.value,'rad'))
+                self.view.pixelAngleLabel_angle.setText(str(self.__round_to_n(params.pixelScale_angle.value,4)))
+                self.view.pixelAngleLabel_thetaE.setText(str(self.__round_to_n(params.pixelScale_thetaE,4)))
+                self.view.pixelAngleLabel_Rg.setText(str(self.__round_to_n(params.pixelScale_Rg,4)))
+                self.view.quasarRadiusRGEntry.setText(str(self.__round_to_n(params.quasarRadius_rg, 4)))
+                if extrasBuilder:
+                    extrasBuilder(self.view,params,inputUnit)
+                return params
+#         except:
+#             self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
+#             return None
         
     def updateUnitLabels(self,unitString):
         self.view.unitLabel_1.setText(unitString)
-        self.view.unitLabel_2.setText(unitString+'/sec')
         self.view.unitLabel_3.setText(unitString)
         self.view.unitLabel_4.setText(unitString)
+        self.view.unitLabel_5.setText(unitString)
+        self.view.unitLabel_6.setText(unitString)
 
     def bindFields(self, parameters,bindExtras = None):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""
-        qV = parameters.quasar.velocity.to('rad').unitless()*parameters.quasar.angDiamDist.to('m').value;
+        qV = parameters.quasar.velocity.to('rad').unitless()*parameters.quasar.angDiamDist.to('km').value;
         qP = parameters.quasar.position.to('arcsec').unitless()
         gP = parameters.galaxy.position.to('arcsec').unitless()
         self.view.qVelocity.setText("(" + str(qV.y) + "," + str(qV.x) + ")")

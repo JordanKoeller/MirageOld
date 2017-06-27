@@ -1,0 +1,3 @@
+run experiments from command line
+parameters interface
+	coloring minima versus saddle points

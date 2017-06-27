@@ -63,6 +63,21 @@ class Parameters(object):
 		self.time = 0
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
 
+	def update(self,galaxy=None,quasar=None,dTheta=None,canvasDim=None,extras=None,dt=None):
+		if galaxy:
+			self.__galaxy = galaxy
+		if quasar:
+			self.__quasar = quasar
+		if canvasDim:
+			self.__dTheta = self.__dTheta*self.__canvasDim/canvasDim
+			self.__canvasDim = canvasDim
+		if dTheta:
+			self.__dTheta = dTheta/self.__canvasDim
+		if extras:
+			self.extras = extras
+		if dt:
+			self.dt = dt
+
 	def regenerateStars(self):
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
 		generator = Kroupa_2001()

@@ -32,6 +32,7 @@ class QueueFileManager(FileManager,QtCore.QThread):
         self.dataSizeLoc = None
         self.trialCount = 0
         self.experimentCount = 0 #Specifies which row in the table to be written next
+        self.getDirectory()
         
     @property
     def fileextension(self):
@@ -99,6 +100,13 @@ class QueueFileManager(FileManager,QtCore.QThread):
     @property
     def name(self):
         return self.__name
+    
+    @property
+    def madeDirectory(self):
+        if self.directory:
+            return True
+        else:
+            return False
         
     def run(self,data):
         '''
