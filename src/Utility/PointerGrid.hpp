@@ -147,6 +147,7 @@ public:
 		width = other.width;
 		height = other.height;
 		data = other.data;
+		delete[] rawData;
 		rawData = new double[width*height*2];
 		for (int i = 0; i < width*height*2; ++i)
 		{
@@ -164,6 +165,7 @@ public:
 		width = other.width;
 		height = other.height;
 		data = other.data;
+		delete[] rawData;
 		rawData = new double[width*height*2];
 		for (int i = 0; i < width*height*2; ++i)
 		{

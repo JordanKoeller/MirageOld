@@ -67,6 +67,7 @@ cdef class Engine_PointerGrid(Engine):
 		return self.query_data(x,y,radius).size()
 
 	def reconfigure(self):
+		self.__grid = PointerGrid()
 		begin = time.clock()
 		self.__preCalculating = True
 		finalData = self.ray_trace(use_GPU=True)

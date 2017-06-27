@@ -109,7 +109,7 @@ class ParametersController(GUIController):
 
     def bindFields(self, parameters,bindExtras = None):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""
-        qV = parameters.quasar.velocity.to('rad').unitless()*parameters.quasar.angDiamDist.to('m').value();
+        qV = parameters.quasar.velocity.to('rad').unitless()*parameters.quasar.angDiamDist.to('m').value;
         qP = parameters.quasar.position.to('arcsec').unitless()
         gP = parameters.galaxy.position.to('arcsec').unitless()
         self.view.qVelocity.setText("(" + str(qV.y) + "," + str(qV.x) + ")")
