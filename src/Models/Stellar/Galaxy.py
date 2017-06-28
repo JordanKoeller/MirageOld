@@ -80,18 +80,14 @@ class Galaxy(Drawable, Cosmic):
 		if other == None:
 			return False
 		if self.redshift != other.redshift:
-			print("failed gredshift")
+			return False
 		if self.percentStars != other.percentStars:
-			print('failed percent')
 			return False
 		if self.shear != other.shear:
-			print('failed shear')
 			return False
 		if self.center.to('arcsec') != other.center.to('arcsec'):
-			print('failed gcenter')
 			return False
 		if self.velocityDispersion != other.velocityDispersion:
-			print('failed vd')
 			return False
 		return True
 

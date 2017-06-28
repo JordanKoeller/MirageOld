@@ -8,6 +8,7 @@ from astropy.cosmology import WMAP7 as cosmo
 from scipy.stats import norm
 import numpy as np 
 import random as rand 
+from Calculator import UnitConverter
 
 
 from Calculator import Kroupa_2001
@@ -59,6 +60,9 @@ class Parameters(object):
 		self.numStars = numStars
 		self.__starMassTolerance = starMassTolerance
 		self.__starMassVariation = starMassVariation
+		conversions = UnitConverter.generateSpecialUnits(quasar.mass,quasar.redshift,galaxy.redshift)
+		self.__halfMassEinRad = conversions[0]
+		self.__gravRadius = conversions[1]
 		self.dt = 2.6e7
 		self.time = 0
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
@@ -139,7 +143,18 @@ class Parameters(object):
 	@property
 	def einsteinRadius(self):
 		return 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.dLS/self.quasar.angDiamDist /((const.c**2).to('km2/s2'))
-
+	@property
+	def einsteinRadiusUnit(self):
+		return u.def_unit('einstein_rad',self.einsteinRadius.value*u.rad)
+	@property
+	def gravitationalRadius(self):
+		return self.__gravRadius
+	@property
+	def specialUnits(self):
+		return [self.einsteinRadiusUnit,self.gravitationalRadius]
+	@property
+	def halfMassEinsteinRadius(self):
+		return self.__halfMassEinRad
 	@property
 	def displayQuasar(self):
 		return self.showQuasar
@@ -189,6 +204,7 @@ class Parameters(object):
 		absRg = (self.__quasar.mass*const.G/const.c/const.c).to('m')
 		angle = absRg/self.quasar.angDiamDist.to('m')
 		return self.quasar.radius.to('rad').value/angle.value
+	
 
 	def setStars(self,stars):
 		self.__galaxy.update(stars = stars)
@@ -217,19 +233,14 @@ class Parameters(object):
 
 	def isSimilar(self,other):
 		if self.dTheta != other.dTheta:
-			print('failed dtheta')
 			return False
 		if self.canvasDim != other.canvasDim:
-			print('failed canvasdim')
 			return False
 		if self.starMassVariation != other.starMassVariation:
-			print('faield starmassvariation')
 			return False
 		if not self.galaxy.isSimilar(other.galaxy):
-			print('failed galaxy')
 			return False
 		if self.quasar.redshift != other.quasar.redshift:
-			print('faield qredshift')
 			return False
 		return True
 
