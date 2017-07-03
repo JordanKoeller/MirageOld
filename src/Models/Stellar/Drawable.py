@@ -1,5 +1,5 @@
 from Utility import zeroVector
-
+from Models.ParametersError import ParametersError
 
 class Drawable(object):
 	__position = zeroVector
@@ -22,7 +22,7 @@ class Drawable(object):
 				if value != None:
 					setattr(self,"_Drawable__"+key,value)
 			except AttributeError as e:
-				print("failed to update "+key+ " in Drawable")
+				raise ParametersError("failed to update "+key+ " in Drawable")
 
 
 	def setPos(self,position):

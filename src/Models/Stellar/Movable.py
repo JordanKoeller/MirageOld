@@ -3,7 +3,7 @@ Created on Jun 2, 2017
 
 @author: jkoeller
 '''
-from Models import Drawable
+from Models.Stellar.Drawable import Drawable
 from Utility import Vector2D
 from Utility import zeroVector
 

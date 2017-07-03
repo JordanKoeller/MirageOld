@@ -1,11 +1,11 @@
 
-from Models import Cosmic
-from Models import Movable
+from Models.Stellar.Cosmic import Cosmic
+from Models.Stellar.Movable import Movable
 from Utility import Vector2D
 from Utility import zeroVector
 import astropy.units as u
 from Views.Drawer.ShapeDrawer import drawSolidCircle
-
+from Models.ParametersError import ParametersError
 
 class Quasar(Movable,Cosmic):
 	__radius = 0
@@ -22,11 +22,17 @@ class Quasar(Movable,Cosmic):
 		self.__mass = mass
 
 	def update(self, redshift = None, position = None, radius = None, velocity = None):
-		self.updateCosmic(redshift = redshift)
-		self.updateDrawable(position = position)
-		self.updateMovable(position,velocity)
-		if radius != None:
-			self.__radius = radius
+		try:
+			self.updateCosmic(redshift = redshift)
+			self.updateDrawable(position = position)
+			self.updateMovable(position,velocity)
+			if radius != None:
+				try:
+					self.__radius = radius.to('rad')
+				except:
+					raise ParametersError("Quasar radius must be an astropy.units.Quantity of angle units.")
+		except ParametersError as e:
+			raise e
 
 
 	def draw(self, img, parameters):

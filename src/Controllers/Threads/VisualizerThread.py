@@ -4,7 +4,7 @@ import math
 
 from PyQt5 import QtCore
 
-from Models import Model
+from Models.Model import Model
 from Views.Drawer import DataVisualizerDrawer
 from Views.Drawer.CompositeDrawerFactory import LensedImageLightCurveComposite
 from Utility.NullSignal import NullSignal

@@ -38,32 +38,32 @@ cdef class LensedImageDrawer(ImageDrawer):
 		return self.drawImage(canvas,None)
 
 	cdef getColorCode(self, np.ndarray[np.int32_t,ndim=2] pixels, object parameters):
-		cdef x = np.array(pixels[:,0],dtype=np.float64) 
-		cdef y = np.array(pixels[:,1],dtype=np.float64) 
-		x = x - parameters.canvasDim /2
+		cdef x = np.ascontiguousarray(pixels[:,0],dtype=np.float64) 
+		cdef y = np.ascontiguousarray(pixels[:,1],dtype=np.float64)
+		x = x - parameters.canvasDim/2
 		y = y - parameters.canvasDim/2
-		x = x*parameters.dTheta.to('rad').value
-		y = y*parameters.dTheta.to('rad').value
-		cdef double b = 4 * math.pi * (parameters.galaxy.velocityDispersion**2).to('km2/s2').value*(const.c** -2).to('s2/km2').value*parameters.dLS.to('m')/parameters.quasar.angDiamDist.to('m')
-		b = u.Quantity(b,'rad').to('rad').value
-		cdef double ptConst = (parameters.dLS/parameters.quasar.angDiamDist/parameters.galaxy.angDiamDist*4*const.G*const.c**-2).to('1/solMass').value
-		cdef double gamSin = parameters.galaxy.shearMag*math.sin(2*(parameters.galaxy.shearAngle.to('rad').value - math.pi/2))
-		cdef double gamCos = parameters.galaxy.shearMag*math.cos(2*(parameters.galaxy.shearAngle.to('rad').value - math.pi/2))
-		sigma = np.zeros_like(x,np.float64)
+		x = x*parameters.dTheta.to('rad').value - parameters.galaxy.center.to('rad').x
+		y = y*parameters.dTheta.to('rad').value - parameters.galaxy.center.to('rad').y
+		cdef double b = 4 * math.pi * (parameters.galaxy.velocityDispersion**2).to('km2/s2')*(const.c** -2).to('s2/km2')*parameters.dLS.to('m')/parameters.quasar.angDiamDist.to('m')
+		cdef double ptConst = (parameters.dLS.to('m')/parameters.quasar.angDiamDist.to('m')/parameters.galaxy.angDiamDist.to('m')*4*const.G*const.c**-2).to('1/solMass').value
+		cdef double gamSin = parameters.galaxy.shearMag*math.sin(2*(math.pi/2 - parameters.galaxy.shearAngle.to('rad').value))
+		cdef double gamCos = parameters.galaxy.shearMag*math.cos(2*(math.pi/2 - parameters.galaxy.shearAngle.to('rad').value))
+		cdef x2 =  b*y*y*((x*x+y*y)**(-1.5)) + gamCos
+		cdef y2 =  b*x*x*((x*x+y*y)**(-1.5)) - gamCos
+		cdef xy = -b*x*y*((x*x+y*y)**(-1.5)) + gamSin
 		if parameters.galaxy.percentStars:
 			starstuff = parameters.galaxy.stars
 			for i in starstuff:
-				dy = (y - i[1])**2
-				dx = (x - i[0])**2
-				sigma += (dy - dx)*i[2]/(dx + dy)**2
-		cdef  x2 = b*y*y*(x*x+y*y)**(-3/2) + gamCos + ptConst*sigma
-		cdef  y2 = b*x*x*(x*x+y*y)**(-3/2) - gamCos - ptConst*sigma
-		cdef  xy = -b*x*y*(x*x+y*y)**(-3/2) + gamSin - 2*ptConst*sigma
+				dy = (y - i[1] + parameters.galaxy.center.to('rad').y)
+				dx = (x - i[0] + parameters.galaxy.center.to('rad').x)
+				x2 -= ptConst*(dy*dy - dx*dx)*i[2]/((dx*dx + dy*dy)**2)
+				y2 -= ptConst*(dx*dx - dy*dy)*i[2]/((dx*dx + dy*dy)**2)
+				xy += 2*ptConst*(dy * dx)*i[2]/((dx*dx + dy*dy)**2)
 		cdef  det = (1-x2)*(1-y2)-(xy)*(xy)
 		cdef  trace = (1-x2)+(1-y2)
 		cdef ret = np.ndarray((len(x2)),dtype=np.uint8)
 		for i in range(0,len(x2)):
-			if det[i] > 0.0 and trace[i] > 0:
+			if det[i] > 0.0 and trace[i] > 0.0:
 				ret[i] = 1
 			else:
 				ret[i] = 5

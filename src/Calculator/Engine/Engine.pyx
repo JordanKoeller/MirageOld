@@ -59,7 +59,7 @@ cdef class Engine:
 	cdef ray_trace_gpu(self):
 		begin = time.clock()
 		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
-		os.environ['PYOPENCL_CTX'] = '2'
+		os.environ['PYOPENCL_CTX'] = '3'
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
 		cdef double dTheta = self.__parameters.dTheta.value
@@ -254,10 +254,7 @@ cdef class Engine:
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
 		cdef int aptLuminosity = 0
-		signalMax.emit(resolution)
 		for i in prange(0,resx,nogil=True):
-			with gil:
-				signal.emit(i)
 			for j in range(0,resy):
 				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0+stepY*j,radius))/trueLuminosity
 		return retArr

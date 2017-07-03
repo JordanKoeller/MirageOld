@@ -27,9 +27,9 @@ private:
 	{
 	public:
 		PqComp()=default;
-		bool operator() (const double* a, const double* b)
+		bool operator() (const pair<double,double> &a, const pair<double,double> &b)
 		{
-			return atan2(b[1],b[0]) > atan2(a[1],a[0]);
+			return atan2(b.second,b.first) > atan2(a.second,a.first);
 
 		}
 	};
@@ -42,32 +42,40 @@ private:
 	}
 
 
-	static bool lineCircleIntersection(double & r, double * hk, double * line, double* ret1, double* ret2)
+	static bool lineCircleIntersection(double & r, double * line, double* ret1, double* ret2)
 	{
 		double A = line[1]*line[1]+line[0]*line[0];
-		double B = 2*line[1]*(hk[0]-line[2])-2*hk[1]*line[0]*line[0];
-		double C = line[0]*line[0]*hk[0]*hk[0]+(line[2]-hk[0])*(line[2]-hk[0])-r*r*line[0]*line[0];
-		bool flag1 = false;
-		bool flag2 = false;
-		try
-		{		
-			ret1[1] = (-B+sqrt(B*B-4*A*C))/(2*A);
-			ret1[0] = (line[2] - line[1]*ret1[1])/line[0];
-		}
-		catch (...)
+		double B = -2*line[0]*line[2];
+		double C = line[2]*line[2]-r*r*line[1]*line[1];
+		double d = B*B-4*A*C;
+		if (d >= 0.0)
 		{
-			flag1 = false;
+			if (line[1] == 0)
+			{
+				ret1[0] = line[2]/line[0];
+				ret1[0] = line[2]/line[0];
+				ret2[1] = sqrt(r*r-ret2[0]*ret2[0]);
+				ret1[1] = -sqrt(r*r-ret1[0]*ret1[0]);
+				return true;
+			}
+			if (line[0] == 0)
+			{
+				ret2[1] = line[2]/line[1];
+				ret1[1] = line[2]/line[1];
+				ret2[0] = sqrt(r*r-ret2[1]*ret2[1]);
+				ret1[0] = -sqrt(r*r-ret1[1]*ret1[1]);
+				return true;
+			}
+			ret1[0] = (-B+sqrt(d))/(2*A);
+			ret1[1] = (line[2] - line[0]*ret1[0])/line[1];
+			ret2[0] = (-B-sqrt(d))/(2*A);
+			ret2[1] = (line[2] - line[0]*ret2[0])/line[1];
+			return true;
 		}
-		try
+		else
 		{
-			ret2[1] = (-B-sqrt(B*B-4*A*C))/(2*A);
-			ret2[0] = (line[2] - line[1]*ret2[1])/line[0];
+			return false;
 		}
-		catch (...)
-		{
-			flag2 = false;
-		}
-		return flag1 || flag2;
 	}
 
 	inline static bool intersectSegment(double* v1, double* v2, double* pt)
@@ -91,42 +99,41 @@ private:
 
 	static double polyCircleOverlap(double *v1, double* v2, double*v3, double * hk, double & r)
 	{ //VERTICES IS 3 LONG
-		double*vertices[3] {v1,v2,v3};
-		priority_queue<double*,vector<double*>,PqComp> pq;
-		double line[3];
+		double vertRaw[6] {v1[0]-hk[0],v1[1]-hk[1],v2[0]-hk[0],v2[1]-hk[1],v3[0]-hk[0],v3[1]-hk[1]};
+		double*vertices[3] {vertRaw,vertRaw+2,vertRaw+4};
+		priority_queue<pair<double,double>,vector<pair<double,double>>,PqComp> pq;
+		double line[3] {0,0,0};
 		double intersect1[2] {0.0,0.0};
 		double intersect2[2] {0.0,0.0};
 		for (int i = 0; i < 3; ++i)
 		{
-			if (hypot2(vertices[i][0],vertices[i][1],hk[0],hk[1]) <= r*r)
+			// cout << "loopy\n";
+			if (vertices[i][0]*vertices[i][0]+vertices[i][1]*vertices[i][1] <= r*r)
 			{
-				double pushable[2] {vertices[i][0] - hk[0], vertices[i][1] - hk[1]};
-				pq.push(pushable);
+				// cout << "inside\n";
+				pq.push(make_pair(vertices[i][0], vertices[i][1]));
 			}
 			getLine(vertices[i],vertices[(i+1)%3],line);
-			if (lineCircleIntersection(r, hk, line,intersect1,intersect2))
+			if (lineCircleIntersection(r, line,intersect1,intersect2))
 			{
-				if(intersectSegment(vertices[i],vertices[i+1],intersect1))
+				if(intersectSegment(vertices[i],vertices[(i+1)%3],intersect1))
 				{
-					intersect1[0] -= hk[0];
-					intersect1[1] -= hk[1];
-					pq.push(intersect1);
+					// cout << "Adding " << intersect1[0] << endl;
+					auto insertion = make_pair(intersect1[0],intersect1[1]);
+					pq.push(insertion);
 				}
-				if (intersectSegment(vertices[i],vertices[i+1],intersect2))
+				if(intersectSegment(vertices[i],vertices[(i+1)%3],intersect2))
 				{
-					intersect2[0] -= hk[0];
-					intersect2[1] -= hk[1];
-					pq.push(intersect2);
+					// cout << "Adding " << intersect2[0] << endl;
+					auto insertion2 = make_pair(intersect2[0],intersect2[1]);
+					pq.push(insertion2);
 				}
 			}
 		}
-
-		if (pq.size() == 3)
-		{
-			return areaOfTriangle(vertices[0],vertices[1],vertices[2]);
-			//return area of polygon
-		}
-		else if (pq.size() == 0)
+		// cout << "Done for looping\n";
+		// printQueue(pq);
+		// cout << "Done printing\n";
+		if (pq.size() == 0)
 		{
 			return M_PI*r*r;
 			//return area of circle
@@ -134,37 +141,48 @@ private:
 		else if (pq.size() == 2)
 		{
 			double chord[3];
-			auto tmp1 = pq.top();
+			double tmp1[2] {pq.top().first,pq.top().second};
 			pq.pop();
-			auto tmp2 = pq.top();
+			double tmp2[2] {pq.top().first,pq.top().second};
 			getLine(tmp1,tmp2,chord);
 			for (int i = 0; i < 3; ++i)
 			{
-				if (vertices[i] != tmp1 && vertices[i] != tmp2)
+				if (vertices[i] != tmp1 && vertices[i] != tmp2 && isLeft(tmp1,tmp2,vertices[i]) != 0)
 				{
 					double ctrSide = isLeft(tmp1,tmp2,hk);
 					double otherSide = isLeft(tmp1,tmp2,vertices[i]);
 					double theta = atan2(tmp2[1],tmp2[0])-atan2(tmp1[1],tmp1[0]);
-					double area = r*r*(theta-abs(sin(theta)))/2;
+					double area = r*r*abs(theta-abs(sin(theta)))/2;
 					if (ctrSide*otherSide >= 0)
 					{
 						//Same side, so subtract area of hemisphere
-						return M_PI*r*r - area;
+						return area;
 					}
 					else
 					{
-						return M_PI*r*r + area;
+						return M_PI*r*r - area;
 						//add area of hemisphere
 					}
 				}
 			}
+			// cout << "Shouldnt get here\n";
 			return 0.0;
 		}
 		else {
-			vector<double*> pts;
+			vector<pair<double,double>> pts;
+			// printQueue(pq);
+
 			while (!pq.empty())
 			{
-				pts.push_back(pq.top());
+				auto iter = pts.begin();
+				while (iter != pts.end() && *iter != pq.top())
+				{
+					++iter;
+				}
+				if (iter == pts.end())
+				{
+					pts.push_back(pq.top());
+				}
 				pq.pop();
 			}
 			return areaOfPolygon(pts);
@@ -172,15 +190,13 @@ private:
 		}
 	}
 
-
-	static double areaOfPolygon(vector<double*> &pts)
+	static double areaOfPolygon(vector<pair<double,double>> &pts)
 	{
 		double area = 0.0;
 		for (int i = 0; i < pts.size(); ++i)
 		{
 			int j = (i+1)%pts.size();
-			area += pts[i][0]*pts[j][1] - pts[j][0]*pts[i][1];
-			/* code */
+			area += pts[i].first*pts[j].second - pts[j].first*pts[i].second;
 		}
 		return 0.5*abs(area);
 	}
@@ -246,13 +262,12 @@ private:
 
 	}
 
-	static void getLine(double * p1, double * p2, double* ret)
+	static inline void getLine(double * p1, double * p2, double* ret)
 	{
 		ret[0] = p2[1] - p1[1];
 		ret[1] = p1[0]-p2[0];
-		ret[2] = ret[0]*p1[0]+ret[1]*ret[1];
+		ret[2] = ret[0]*p1[0]+ret[1]*p1[1];
 	}
-
 	static bool lineIntersects(double * a1, double * a2, double * b1, double * b2)
 	{
 		double lineA [3];

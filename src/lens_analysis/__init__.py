@@ -5,7 +5,7 @@ from lens_analysis.DirectoryMap import DirectoryMap
 from lens_analysis.Experiment import Experiment
 from lens_analysis.Trial import Trial
 from Views.GUI.GUIManager import GUIManager
-from Models import Parameters
+from Models.Parameters.Parameters import Parameters
 from Models.Parameters.ExperimentParams import ResultTypes
 from Controllers.FileManagers.TableFileManager import TableFileManager
 from Controllers.Threads.QueueThread import QueueThread

@@ -12,12 +12,14 @@ from PyQt5 import QtCore
 
 from Controllers import GUIController
 from Controllers.FileManagers import ParametersFileManager
-from Models import Galaxy
-from Models import Parameters
-from Models import Quasar
+from Models.Stellar.Galaxy import Galaxy
+from Models.Parameters.Parameters import Parameters
+from Models.Stellar.Quasar import Quasar
+from Models.ParametersError import ParametersError
 import astropy.units as u
 from astropy import constants as const
 from Calculator import UnitConverter
+from Views.GUI.HelpDialog import HelpDialog
 
 class ParametersController(GUIController):
     '''
@@ -36,8 +38,13 @@ class ParametersController(GUIController):
         self.view.load_setup.triggered.connect(self.loadParams)
         self.view.save_setup.triggered.connect(self.saveParams)
         self.view.scaleUnitOption.currentTextChanged.connect(self.updateUnitLabels)
+        self.view.parametersEntryHelpAction.triggered.connect(self.displayHelpMessage)
         self.view.signals['paramSetter'].connect(self.bindFields)
         self.fileManager = ParametersFileManager(self.view.signals)
+
+    def displayHelpMessage(self):
+        dialog = HelpDialog(self.view)
+        dialog.show()
         
     def hide(self):
         self.view.mainSplitter.setSizes([0,100,100])
@@ -55,8 +62,8 @@ class ParametersController(GUIController):
         If the user inputs invalid arguments, will handle the error by returning None and sending a message
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
-#         try:
-        if True:
+        try:
+        # if True:
             gRedshift = float(self.view.gRedshift.text())
             qRedshift = float(self.view.qRedshift.text())
             qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')
@@ -98,9 +105,15 @@ class ParametersController(GUIController):
                 if extrasBuilder:
                     extrasBuilder(self.view,params,inputUnit)
                 return params
-#         except:
-#             self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
-#             return None
+        except (AttributeError, ValueError) as e:
+            self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
+            return None
+        except ParametersError as e:
+            self.view.signals['progressLabel'].emit(e.value)
+            return None
+        except SyntaxError as e:
+            self.view.signals['progressLabel'].emit("Syntax error found in trial variance code block.")
+            return None
         
     def updateUnitLabels(self,unitString):
         self.view.unitLabel_1.setText(unitString)

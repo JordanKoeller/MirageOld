@@ -19,6 +19,7 @@ from Models.ExperimentQueue.ExperimentQueueTable import ExperimentQueueTable
 from Models.Parameters.ExperimentParams import ExperimentParams, ResultTypes
 from Models.Parameters.MagMapParameters import MagMapParameters
 from Models.Parameters.LightCurveParameters import LightCurveParameters
+from Models.ParametersError import ParametersError
 from Controllers.FileManagers.TableFileManager import TableFileManager
 
 def _queueExtrasBuilder(view,parameters,inputUnit):
@@ -45,8 +46,10 @@ def _queueExtrasBuilder(view,parameters,inputUnit):
     parameters.extras = extras
     try:
         varyTrial(parameters,0)
+    except ParametersError as e:
+        raise ParametersError(e.value)
     except:
-        raise AttributeError
+        raise SyntaxError("Syntax error found in trial variance code block.")
 
 def _queueExtrasBinder(view,obj):
     if obj.extras:
@@ -93,6 +96,7 @@ class QueueController(GUIController):
         self.toggleLightCurveEntry(False)
         self.toggleMagMapEntry(False)
         self.editing = -1
+        self.runner = QueueThread(self.view.signals)
         self.__initTable()
         
     
@@ -169,8 +173,8 @@ class QueueController(GUIController):
         fileRunner = QueueFileManager(self.view.signals)
         if fileRunner.madeDirectory:
             experiments = self.table.experiments
-            runner = QueueThread(self.view.signals,experiments,fileRunner)
-            runner.run()
+            self.runner.bindExperiments(experiments,fileRunner)
+            self.runner.start()
         
 
     def hide(self):

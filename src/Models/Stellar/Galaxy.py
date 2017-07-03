@@ -1,10 +1,11 @@
 import astropy.units as u
 from Utility import Vector2D
 from Utility import zeroVector
-from Models import ShearLenser
-from Models import Drawable
-from Models import Cosmic
+from Models.Stellar.ShearLenser import ShearLenser
+from Models.Stellar.Drawable import Drawable
+from Models.Stellar.Cosmic import Cosmic
 from Views.Drawer.ShapeDrawer import drawPointLensers
+from Models.ParametersError import ParametersError
 
 class Galaxy(Drawable, Cosmic):
 	__velocityDispersion = u.Quantity(0, 'km/s')
@@ -56,15 +57,18 @@ class Galaxy(Drawable, Cosmic):
 			i[0] = i[0] + i[3]*dt
 			i[1] = i[1] + i[4]*dt
 			
-	def update(self, redshift=None, velocityDispersion=None, shearMag=None, shearAngle=None, center=None, percentStars=None, stars=None):
-		self.__velocityDispersion = velocityDispersion or self.__velocityDispersion
-		self.__shear.update(shearMag, shearAngle)
-		if percentStars != None:
-			self.__pcntStar = percentStars
-		if stars != None:
-			self.__stars = stars
-		self.updateDrawable(position=center)
-		self.updateCosmic(redshift=redshift)
+	def update(self, redshift=None, velocityDispersion=None, shearMag=None, shearAngle=None, center=None, percentStars=None, stars=[]):
+		try:
+			self.__velocityDispersion = velocityDispersion or self.__velocityDispersion
+			self.__shear.update(shearMag, shearAngle)
+			if percentStars != None:
+				self.__pcntStar = percentStars
+			if stars != []:
+				self.__stars = stars
+			self.updateDrawable(position=center)
+			self.updateCosmic(redshift=redshift)
+		except ParametersError as e:
+			raise e
 
 	def __str__(self):
 		return "GALAXY:\n" + self.drawableString() + "\n" + self.cosmicString() + "\n" + self.shear.shearString() + "\nvelocity Dispersion = " + str(self.velocityDispersion) + "\nnumStars = " + str(self.numStars) + "\n\n"

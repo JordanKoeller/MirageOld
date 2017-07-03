@@ -54,9 +54,16 @@
        <addaction name="saveTableAction"/>
        <addaction name="loadTableAction"/>
       </widget>
+      <widget class="QMenu" name="menuHelp">
+       <property name="title">
+        <string>Help</string>
+       </property>
+       <addaction name="parametersEntryHelpAction"/>
+      </widget>
       <addaction name="menuFile"/>
       <addaction name="menuPerspective"/>
       <addaction name="menuView"/>
+      <addaction name="menuHelp"/>
      </widget>
     </item>
     <item row="1" column="0">
@@ -109,8 +116,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>584</width>
-          <height>1081</height>
+          <width>582</width>
+          <height>1213</height>
          </rect>
         </property>
         <property name="maximumSize">
@@ -164,7 +171,7 @@
               <item row="3" column="1">
                <widget class="QLineEdit" name="qPosition">
                 <property name="text">
-                 <string>(0,10.0)</string>
+                 <string>(0,0.0)</string>
                 </property>
                </widget>
               </item>
@@ -199,7 +206,7 @@
               <item row="4" column="1">
                <widget class="QLineEdit" name="qVelocity">
                 <property name="text">
-                 <string>(1e6,0.0)</string>
+                 <string>(1e9,0.0)</string>
                 </property>
                </widget>
               </item>
@@ -292,7 +299,7 @@
               <item>
                <widget class="QLabel" name="quasarRadiusRGEntry">
                 <property name="text">
-                 <string>TextLabel</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -593,7 +600,7 @@
               <item>
                <widget class="QLabel" name="pixelAngleLabel_angle">
                 <property name="text">
-                 <string>TextLabel</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -640,7 +647,7 @@
               <item>
                <widget class="QLabel" name="pixelAngleLabel_thetaE">
                 <property name="text">
-                 <string>TextLabel</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -687,7 +694,7 @@
               <item>
                <widget class="QLabel" name="pixelAngleLabel_Rg">
                 <property name="text">
-                 <string>TextLabel</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -1340,7 +1347,7 @@ newParams = copy.deepcopy(oldParams)</string>
                  <x>0</x>
                  <y>0</y>
                  <width>514</width>
-                 <height>72</height>
+                 <height>89</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -1508,6 +1515,11 @@ newParams = copy.deepcopy(oldParams)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
+   </property>
+  </action>
+  <action name="parametersEntryHelpAction">
+   <property name="text">
+    <string>Parameters Variance</string>
    </property>
   </action>
  </widget>

@@ -1,6 +1,6 @@
 import math
 
-from Models import Movable
+from Models.Stellar.Movable import Movable
 from Utility import Vector2D
 from Utility import zeroVector
 from Views.Drawer.ShapeDrawer import drawSolidCircle

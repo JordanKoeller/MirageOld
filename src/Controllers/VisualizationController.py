@@ -10,7 +10,7 @@ from Controllers import GUIController
 from Controllers import VisualizerThread
 from Controllers.FileManagers.FITSFileManager import FITSFileManager
 from Controllers.FileManagers.VisualizationFileManager import VisualizationFileManager
-from Models import Model
+from Models.Model import Model
 
 
 class VisualizationController(GUIController):

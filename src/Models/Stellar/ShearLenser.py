@@ -1,3 +1,5 @@
+from Models.ParametersError import ParametersError
+
 class ShearLenser(object):
 	__mag = 0
 	__angle = 0
@@ -8,9 +10,15 @@ class ShearLenser(object):
 
 	def update(self,mag = None, angle = None):
 		if mag != None:
-			self.__mag = mag
+			if isinstance(mag,float) or isinstance(mag,int):
+				self.__mag = mag
+			else:
+				raise ParametersError("Shear Magnification must be a numeric type")
 		if angle != None:
-			self.__angle = angle
+			try:
+				self.__angle = angle.to('rad')
+			except:
+				raise ParametersError("Shear angle must be an instance of a astropy.units.Quantity, measuring angle.")
 
 	def __eq__(self,other):
 		if other == None:

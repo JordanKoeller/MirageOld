@@ -16,9 +16,9 @@ import cython
 import pyopencl.tools
 from scipy import interpolate
 
-# from Models import Galaxy
-# from Models import Parameters
-# from Models import Quasar
+# from Models.Stellar.Galaxy import Galaxy
+# from Models.Parameters.Parameters import Parameters
+# from Models.Stellar.Quasar import Quasar
 from Utility import Vector2D
 # from Utility import WrappedTree
 from Utility import zeroVector

@@ -1,4 +1,5 @@
 from astropy.cosmology import WMAP7 as cosmo
+from Models.ParametersError import ParametersError
 
 class Cosmic(object):
 	__redshift = 0.0
@@ -21,7 +22,7 @@ class Cosmic(object):
 				if value != None:
 					setattr(self,"_Cosmic__"+key,value)
 			except AttributeError as e:
-				print("failed to update "+key+ " in Cosmic")
+				raise ParametersError("failed to update "+key+ " in Cosmic")
 
 	def cosmicString(self):
 		return "redshift = " + str(self.redshift) + "\nAngDiamDist = " + str(self.angDiamDist)

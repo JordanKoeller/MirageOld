@@ -7,7 +7,7 @@ import math
 
 from astropy import units as u
 
-from Models import Parameters
+from Models.Parameters.Parameters import Parameters
 from Models.Stellar import Quasar, Galaxy
 
 

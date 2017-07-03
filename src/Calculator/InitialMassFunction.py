@@ -589,6 +589,58 @@ class Weidner_Kroupa_2004(IMF_broken_powerlaw):
         IMF_broken_powerlaw.__init__(self, massLimits, powers,
                                      multiplicity=multiplicity)
 
+class Distribution_Wrapper(object):
+    def __init__(self,distro,conversions):
+        """Conversions is a dict, where the key is the lower limit of the star mass, value is what those masses get converted to."""
+        self.IMF = distro
+        self.__conversions = []
+        for k,v in conversions.items():
+            self.__conversions.append((k,v))
+
+    def generate_cluster(self, totalMass):
+        """
+        Generate a cluster of stellar systems with the specified IMF.
+        
+        Randomly sample from an IMF with specified mass
+        limits until the desired total mass is reached. The maximum
+        stellar mass is not allowed to exceed the total cluster mass.
+        The simulated total mass will not be exactly equivalent to the
+        desired total mass; but we will take one star above or below
+        (whichever brings us closer to the desired total) the desired
+        total cluster mass break point.
+        Primary stars are sampled from the IMF, companions are generated
+        based on the multiplicity properties provided.
+        Parameters
+        ----------
+        totalMass : float
+            The total mass of the cluster (including companions) in solar masses.
+        Return
+        ------
+        masses : numpy float array
+            List of primary star masses.
+        isMultiple : numpy boolean array
+            List of booleans with True for each primary star that is in a multiple
+            system and False for each single star.
+        companionMasses : numpy float array
+            List of 
+        
+        """
+        retArr = []
+        massCounter = 0.0
+        tolerance = 0.2
+        while (totalMass - massCounter > tolerance):
+            rawMasses = self.IMF.generate_cluster(totalMass-massCounter)[0]
+            for mass in rawMasses:
+                index = 0
+                if mass < self.__conversions[0][0]:
+                    retArr.append(mass)
+                else:
+                    while (index < len(self.__conversions) and self.__conversions[index][0] < mass):
+                        index += 1
+                    retArr.append(self.__conversions[max(index-1,0)][1])
+        return np.array(retArr)
+
+
 ##################################################
 # 
 # Generic functions -- see if we can move these up.

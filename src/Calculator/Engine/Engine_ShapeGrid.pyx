@@ -24,9 +24,9 @@ import pyopencl as cl
 from matplotlib.mlab import griddata
 
 
-# from Models import Galaxy
-# from Models import Parameters
-# from Models import Quasar
+# from Models.Stellar.Galaxy import Galaxy
+# from Models.Parameters.Parameters import Parameters
+# from Models.Stellar.Quasar import Quasar
 # from Utility import WrappedTree
 cimport numpy as np
 from libcpp.vector cimport vector

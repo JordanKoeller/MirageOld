@@ -5,13 +5,14 @@ Created on Jun 6, 2017
 '''
 import math
 
-from Models import Model
+from Models.Model import Model
 from Models.Parameters.ExperimentParams import ResultTypes
 from Utility import Vector2D
 import numpy as np
 from Utility.NullSignal import NullSignal
 from Models.Parameters.MagMapParameters import MagMapParameters
 from Models.Parameters.LightCurveParameters import LightCurveParameters
+from Models.ParametersError import ParametersError
 # from Controllers.QueueController import defaultVariance
 def defaultVariance(params,trialNo):
     print("Defaulting")
@@ -23,7 +24,13 @@ def varyTrial(params,trialNo):
     varianceStr = params.extras.trialVarianceFunction
     oldParams = params
     nspace = {}
-    exec(varianceStr,{'oldParams':oldParams,'trialNumber':trialNo,'u':u,'np':np,'copy':copy},nspace)
+    try:
+        exec(varianceStr,{'oldParams':oldParams,'trialNumber':trialNo,'u':u,'np':np,'copy':copy},nspace)
+    except ParametersError as e:
+        raise e
+    except:
+        print("What happened")
+        raise SyntaxError
     return nspace['newParams']
 
 class ExperimentResultCalculator(object):

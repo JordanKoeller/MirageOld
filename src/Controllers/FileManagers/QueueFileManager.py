@@ -95,12 +95,25 @@ class QueueFileManager(FileManager,QtCore.QThread):
         return ret
     
     def sendTrial(self, data):
-        self.run(data)
+        for i in range(0,len(data)):
+            self.dataSizeArray[self.trialCount,i] = self.exptFile.tell()
+            np.save(self.exptFile,data[i])
+        self.trialCount += 1
+        self.signals['progressBar'].emit(self.trialCount)
+
+    def getPretty(self,filename):
+            prettyString = filename
+            while prettyString.partition('/')[2] != "":
+                prettyString = prettyString.partition('/')[2]
+            return prettyString
         
     @property
     def name(self):
         return self.__name
     
+    @property
+    def prettyName(self):
+        return self.getPretty(self.name)
     @property
     def madeDirectory(self):
         if self.directory:
@@ -112,12 +125,7 @@ class QueueFileManager(FileManager,QtCore.QThread):
         '''
             Data is a tuple, containing references to numpy arrays. Index of tuple directly correlates to the index of the dataSizeArray to insert it into.
         '''
-        for i in range(0,len(data)):
-            self.dataSizeArray[self.trialCount,i] = self.exptFile.tell()
-            np.save(self.exptFile,data[i])
-        self.trialCount += 1
-        self.signals['progressBar'].emit(self.trialCount)
-        
+        pass
     def __del__(self):
         if self.exptFile:
             self.exptFile.flush()

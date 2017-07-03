@@ -14,7 +14,7 @@ from Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brut
 
 class __Model(object):
     def __init__(self):
-        self.__Engine = Engine_Brute()
+        self.__Engine = Engine_Grid()
         print("Brute Forcing")
     
     def updateParameters(self, params):
