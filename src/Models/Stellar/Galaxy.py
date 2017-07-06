@@ -6,6 +6,7 @@ from Models.Stellar.Drawable import Drawable
 from Models.Stellar.Cosmic import Cosmic
 from Views.Drawer.ShapeDrawer import drawPointLensers
 from Models.ParametersError import ParametersError
+from Models.Model import Model
 
 class Galaxy(Drawable, Cosmic):
 	__velocityDispersion = u.Quantity(0, 'km/s')
@@ -13,7 +14,7 @@ class Galaxy(Drawable, Cosmic):
 	__shear = None
 	__stars = []
 
-	def __init__(self, redshift=0.0, velocityDispersion=u.Quantity(0, 'km/s'), shearMag=0, shearAngle=0, percentStars=0, center=zeroVector, starVelocityParams = None):
+	def __init__(self, redshift=0.0, velocityDispersion=u.Quantity(0, 'km/s'), shearMag=0, shearAngle=0, percentStars=0, center=zeroVector, starVelocityParams = None, skyCoords= None, velocity=None):
 		Drawable.__init__(self)
 		Cosmic.__init__(self)
 		self.__velocityDispersion = velocityDispersion
@@ -22,6 +23,8 @@ class Galaxy(Drawable, Cosmic):
 		self.updateDrawable(position=center, colorKey=4)
 		self.updateCosmic(redshift=redshift)
 		self.__starVelocityParams = starVelocityParams
+		self.skyCoords = skyCoords
+		self.velocity = velocity
 
 	def drawStars(self, img, parameters):
 		if len(self.__stars) != 0:
@@ -125,6 +128,16 @@ class Galaxy(Drawable, Cosmic):
 	@property
 	def stars(self):
 		return self.__stars
+
+	@property
+	def apparentVelocity(self):
+		relVel = self.velocity - Model.earthVelocity	
+		rCart = relVel.to_cartesian()
+		l,b = (self.skyCoords.galactic.l, self.skyCoords.galactic.b.to('rad'))
+		theta, phi = (math.pi/2 - b, l)
+		capTheta = rCart.x*math.cos(theta)*math.cos(phi)+rCart.y*math.cos(theta)*math.sin(phi) - rCart.z*math.sin(theta)
+		capPhi = rCart.y*math.cos(phi)-rCart.x*math.sin(phi)
+		return Vector2D(capTheta,capPhi,'km/s')
 
 
 defaultGalaxy = Galaxy(redshift=0.0073,

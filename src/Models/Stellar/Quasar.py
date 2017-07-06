@@ -39,7 +39,7 @@ class Quasar(Movable,Cosmic):
 		center = (self.observedPosition + parameters.galaxy.position)/parameters.dTheta.value
 		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
 		radius = int(self.radius.value/parameters.dTheta.value)
-		drawSolidCircle(int(center.x),int(center.y),radius,img,3)
+		drawSolidCircle(int(center.x),int(center.y),radius,img,self.colorKey)
 
 
 	def pixelRadius(self,dTheta):

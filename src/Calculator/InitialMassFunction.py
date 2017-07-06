@@ -589,8 +589,8 @@ class Weidner_Kroupa_2004(IMF_broken_powerlaw):
         IMF_broken_powerlaw.__init__(self, massLimits, powers,
                                      multiplicity=multiplicity)
 
-class Distribution_Wrapper(object):
-    def __init__(self,distro,conversions):
+class Evolved_IMF(object):
+    def __init__(self,distro = Kroupa_2001(),conversions={0.8:0.6,8:1.4,30:10}):
         """Conversions is a dict, where the key is the lower limit of the star mass, value is what those masses get converted to."""
         self.IMF = distro
         self.__conversions = []
@@ -618,27 +618,29 @@ class Distribution_Wrapper(object):
         ------
         masses : numpy float array
             List of primary star masses.
-        isMultiple : numpy boolean array
-            List of booleans with True for each primary star that is in a multiple
-            system and False for each single star.
-        companionMasses : numpy float array
-            List of 
+        format : string so return type matches other generators as a tuple.
         
         """
         retArr = []
         massCounter = 0.0
-        tolerance = 0.2
+        tolerance = 2.0
         while (totalMass - massCounter > tolerance):
+            # print("Looping")
+            # print("Generating on " + str(totalMass-massCounter))
             rawMasses = self.IMF.generate_cluster(totalMass-massCounter)[0]
             for mass in rawMasses:
-                index = 0
                 if mass < self.__conversions[0][0]:
                     retArr.append(mass)
+                    massCounter += mass
                 else:
+                    index = 0
                     while (index < len(self.__conversions) and self.__conversions[index][0] < mass):
                         index += 1
                     retArr.append(self.__conversions[max(index-1,0)][1])
-        return np.array(retArr)
+                    massCounter += self.__conversions[max(index-1,0)][1]
+        ret = np.ascontiguousarray(retArr)
+        print("Done Making masses")
+        return (ret,'formatting')
 
 
 ##################################################

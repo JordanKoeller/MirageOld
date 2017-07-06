@@ -20,6 +20,9 @@ import astropy.units as u
 from astropy import constants as const
 from Calculator import UnitConverter
 from Views.GUI.HelpDialog import HelpDialog
+from astropy.coordinates import SkyCoord
+import random
+from Utility import Vector2D
 
 class ParametersController(GUIController):
     '''
@@ -39,6 +42,7 @@ class ParametersController(GUIController):
         self.view.save_setup.triggered.connect(self.saveParams)
         self.view.scaleUnitOption.currentTextChanged.connect(self.updateUnitLabels)
         self.view.parametersEntryHelpAction.triggered.connect(self.displayHelpMessage)
+        self.view.qVelRandomizer.clicked.connect(self.randomizeGVelocity)
         self.view.signals['paramSetter'].connect(self.bindFields)
         self.fileManager = ParametersFileManager(self.view.signals)
 
@@ -62,18 +66,29 @@ class ParametersController(GUIController):
         If the user inputs invalid arguments, will handle the error by returning None and sending a message
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
-        try:
-        # if True:
+        # try:
+        if True:
             gRedshift = float(self.view.gRedshift.text())
             qRedshift = float(self.view.qRedshift.text())
             qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')
             specials = UnitConverter.generateSpecialUnits(qBHMass,qRedshift,gRedshift)
             with u.add_enabled_units(specials):
+                #Setting units
                 inputUnit = self.view.unitLabel_1.text()
-                qVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit='km/s')
+
+                #Determination of relative motion
+                gVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit='km/s')
+
+
+                gPositionRaDec = self.view.gPositionEntry.text()
+                ra,dec = gPositionRaDec.strip('()').split(',')
+                gPositionRaDec = SkyCoord(ra,dec, unit = (u.hourangle,u.deg))
+
+                #Quasar properties
                 qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit=inputUnit).to('rad')
                 qRadius = u.Quantity(float(self.view.qRadius.text()), 'uas')
-    
+                
+                #Galaxy properties
                 gVelDispersion = u.Quantity(float(self.view.gVelDispersion.text()), 'km/s')
                 gNumStars = int(self.view.gNumStars.text())
                 gShearMag = float(self.view.gShearMag.text())
@@ -91,8 +106,8 @@ class ParametersController(GUIController):
                 displayQuasar = self.view.displayQuasar.isChecked()
                 displayGalaxy = self.view.displayGalaxy.isChecked()
     
-                quasar = Quasar(qRedshift, qRadius, qPosition, qVelocity, mass = qBHMass)
-                galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams)
+                galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity)
+                quasar = Quasar(qRedshift, qRadius, qPosition, gVelocity, mass = qBHMass)
                 params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
                 if self.view.qRadiusUnitOption.currentIndex() == 1:
                     absRg = (params.quasar.mass*const.G/const.c/const.c).to('m')
@@ -105,15 +120,15 @@ class ParametersController(GUIController):
                 if extrasBuilder:
                     extrasBuilder(self.view,params,inputUnit)
                 return params
-        except (AttributeError, ValueError) as e:
-            self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
-            return None
-        except ParametersError as e:
-            self.view.signals['progressLabel'].emit(e.value)
-            return None
-        except SyntaxError as e:
-            self.view.signals['progressLabel'].emit("Syntax error found in trial variance code block.")
-            return None
+        # except (AttributeError, ValueError) as e:
+        #     self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
+        #     return None
+        # except ParametersError as e:
+        #     self.view.signals['progressLabel'].emit(e.value)
+        #     return None
+        # except SyntaxError as e:
+        #     self.view.signals['progressLabel'].emit("Syntax error found in trial variance code block.")
+        #     return None
         
     def updateUnitLabels(self,unitString):
         self.view.unitLabel_1.setText(unitString)
@@ -121,6 +136,16 @@ class ParametersController(GUIController):
         self.view.unitLabel_4.setText(unitString)
         self.view.unitLabel_5.setText(unitString)
         self.view.unitLabel_6.setText(unitString)
+
+    def randomizeGVelocity(self):
+        x,y,z = ((random.random() - 0.5)*2,(random.random() - 0.5)*2,(random.random()-0.5)*2)
+        res = (x*x+y*y+z*z)**(0.5)
+        x /= res
+        y /= res
+        z /= res
+        vel = np.array([x,y,z])
+        vel = vel*(random.random()*1e9)
+        self.view.qVelocity.setText('(' + str(int(vel[0])) + ","+ str(int(vel[1])) + "," + str(int(vel[2]))+")")
 
     def bindFields(self, parameters,bindExtras = None):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""

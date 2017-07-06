@@ -748,6 +748,7 @@ public:
 
 		vector<pair<int,int>> ret2;
 		double ret3 = 0.0;
+		double ret4 = 0.0;
 		double hk[2] {x,y};
 		for (auto pt:ret)
 		{
@@ -762,23 +763,23 @@ public:
 				if (getIntersection(corners[0],corners[1],corners[3],corners[2], intersection))
 				{
 					//Shape goes p1 ->  intersection -> p4 -> p1, p3 -> intersection -> p2 ->p3
-					ret3 -= polyCircleOverlap(corners[0],intersection,corners[3],hk,r)/shapeAreas[pt/2];
-					ret3 -= polyCircleOverlap(corners[2],intersection,corners[1],hk,r)/shapeAreas[pt/2];
+					ret3 += polyCircleOverlap(corners[0],intersection,corners[3],hk,r)*shapeAreas[pt/2];
+					ret3 += polyCircleOverlap(corners[2],intersection,corners[1],hk,r)*shapeAreas[pt/2];
 					
 				}
 				else 
 				{
 					getIntersection(corners[0],corners[2],corners[1],corners[3],intersection);
-					ret3 -= polyCircleOverlap(corners[0],corners[2],intersection,hk,r)/shapeAreas[pt/2];
-					ret3 -= polyCircleOverlap(corners[1],intersection,corners[3],hk,r)/shapeAreas[pt/2];
+					ret3 += polyCircleOverlap(corners[0],corners[2],intersection,hk,r)*shapeAreas[pt/2];
+					ret3 += polyCircleOverlap(corners[1],intersection,corners[3],hk,r)*shapeAreas[pt/2];
 					//goes p1 -> p3 -> intersection -> p1
 					//goes p2 -> intersection -> p4 -> p2
 				}
 			}
-			ret3 += polyCircleOverlap(corners[0],corners[1],corners[2],hk,r)/shapeAreas[pt/2];
-			ret3 += polyCircleOverlap(corners[2],corners[1],corners[3],hk,r)/shapeAreas[pt/2];	
+			ret3 += polyCircleOverlap(corners[0],corners[1],corners[2],hk,r)*shapeAreas[pt/2];
+			ret3 += polyCircleOverlap(corners[2],corners[1],corners[3],hk,r)*shapeAreas[pt/2];	
 		}
-		return make_pair(ret2,ret3/ret2.size()*(M_PI*r*r));
+		return make_pair(ret2,ret3/(M_PI*r*r));
 	}
 
 

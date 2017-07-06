@@ -12,6 +12,7 @@ from Calculator import UnitConverter
 
 
 from Calculator import Kroupa_2001
+from Calculator.InitialMassFunction import Evolved_IMF
 from Utility import Vector2D
 from Models import ParametersError
 
@@ -167,12 +168,12 @@ class Quasar:<br>
 
 	def regenerateStars(self):
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
-		generator = Kroupa_2001()
+		generator = Evolved_IMF()
 		m_stars = m_stars.value
 		if m_stars < 1.0:
 			print("NOT ENOUGH MASS FOR STAR FIELD. GENERATION TERMINATED")
 			return
-		starMasses = generator.generate_cluster(m_stars)[0]
+		starMasses = generator.generate_cluster(float(m_stars))[0]
 		if self.galaxy.starVelocityParams != None:
 			velocityMag = norm.rvs(loc = self.galaxy.starVelocityParams[0],
 							scale = self.galaxy.starVelocityParams[1],
@@ -200,6 +201,7 @@ class Quasar:<br>
 				y = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
 				starArray[i] = [x,y, starMasses[i]]
 			self.__galaxy.update(stars=starArray)
+
 		
 	@property
 	def galaxy(self):
@@ -248,7 +250,6 @@ class Quasar:<br>
 	@property
 	def displayGalaxy(self):
 		return self.showGalaxy
-	
 
 	@property
 	def displayStars(self):

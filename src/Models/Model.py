@@ -11,6 +11,9 @@ from Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Gr
 from Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brute
 # from Calculator.Engine.Engine_Grid import Engine_Grid as Engine_Grid
 
+from astropy import units as u
+from astropy.coordinates import SphericalRepresentation as SR
+
 
 class __Model(object):
     def __init__(self):
@@ -41,6 +44,10 @@ class __Model(object):
         if self.parameters.galaxy.starVelocityParams != None:
             self.parameters.galaxy.moveStars(self.parameters.dt)
             self.__Engine.reconfigure()
+
+    @property
+    def earthVelocity(self):
+        return SR(u.Quantity(265,'degree'),u.Quantity(48,'degree'),365)
             
 Model = __Model()
 

@@ -100,7 +100,7 @@ cdef class Engine_ShapeGrid(Engine):
 				fret[i,0] = <int> ret.first[i].first
 				fret[i,1] = <int> ret.first[i].second
 		print(1/(time.clock()-begin))
-		return (fret,ret.second*self.__parameters.dTheta.to('rad').value)
+		return (fret,ret.second/(self.__parameters.dTheta.to('rad').value**2))
 
 	def gridTest(self,binsizes,queryPerTest,curveSignal,barSignal):
 		"""

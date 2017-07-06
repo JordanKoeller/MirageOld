@@ -117,7 +117,7 @@
           <x>0</x>
           <y>0</y>
           <width>582</width>
-          <height>1213</height>
+          <height>1249</height>
          </rect>
         </property>
         <property name="maximumSize">
@@ -159,7 +159,7 @@
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>264</height>
+             <height>16777215</height>
             </size>
            </property>
            <property name="title">
@@ -196,27 +196,6 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="0">
-               <widget class="QLabel" name="label_6">
-                <property name="text">
-                 <string>  Velocity</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1">
-               <widget class="QLineEdit" name="qVelocity">
-                <property name="text">
-                 <string>(1e9,0.0)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="2">
-               <widget class="QLabel" name="label_8">
-                <property name="text">
-                 <string>km/sec</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="0">
                <widget class="QLabel" name="label_9">
                 <property name="text">
@@ -248,7 +227,7 @@
               <item row="1" column="0">
                <widget class="QLabel" name="label_17">
                 <property name="text">
-                 <string>BH Mass</string>
+                 <string> BH Mass</string>
                 </property>
                </widget>
               </item>
@@ -292,7 +271,7 @@
               <item>
                <widget class="QLabel" name="label_39">
                 <property name="text">
-                 <string>Quasar Radius = </string>
+                 <string> Quasar Radius = </string>
                 </property>
                </widget>
               </item>
@@ -332,7 +311,7 @@
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>263</height>
+             <height>16777215</height>
             </size>
            </property>
            <property name="title">
@@ -348,10 +327,17 @@
             </item>
             <item row="0" column="1" rowspan="2">
              <layout class="QGridLayout" name="gridLayout_3">
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_23">
+                <property name="text">
+                 <string> Position</string>
+                </property>
+               </widget>
+              </item>
               <item row="1" column="0">
                <widget class="QLabel" name="label_11">
                 <property name="text">
-                 <string>Velocity Dispersion</string>
+                 <string> Velocity Dispersion</string>
                 </property>
                </widget>
               </item>
@@ -365,7 +351,7 @@
               <item row="0" column="0">
                <widget class="QLabel" name="label_14">
                 <property name="text">
-                 <string>Redshift</string>
+                 <string> Redshift</string>
                 </property>
                </widget>
               </item>
@@ -386,14 +372,14 @@
               <item row="3" column="0">
                <widget class="QLabel" name="label_12">
                 <property name="text">
-                 <string>Shear Magnitude</string>
+                 <string> Shear Magnitude</string>
                 </property>
                </widget>
               </item>
               <item row="2" column="0">
                <widget class="QLabel" name="label_3">
                 <property name="text">
-                 <string>Shear Angle</string>
+                 <string> Shear Angle</string>
                 </property>
                </widget>
               </item>
@@ -422,6 +408,52 @@
                <widget class="QLineEdit" name="gShearMag">
                 <property name="text">
                  <string>0.306</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QLineEdit" name="gPositionEntry">
+                <property name="text">
+                 <string>(00h42m30s,+41d12m00s)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="2">
+               <widget class="QLabel" name="label_38">
+                <property name="text">
+                 <string>(Ra,Dec)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <item>
+                 <widget class="QLineEdit" name="qVelocity">
+                  <property name="text">
+                   <string>(1e9,0.0)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="qVelRandomizer">
+                  <property name="text">
+                   <string>Randomize</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>  Velocity</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="2">
+               <widget class="QLabel" name="label_8">
+                <property name="text">
+                 <string>km/sec</string>
                 </property>
                </widget>
               </item>
@@ -520,14 +552,14 @@
               <item row="0" column="0">
                <widget class="QLabel" name="label_21">
                 <property name="text">
-                 <string>Scale</string>
+                 <string> Scale</string>
                 </property>
                </widget>
               </item>
               <item row="1" column="0">
                <widget class="QLabel" name="label_20">
                 <property name="text">
-                 <string>Resolution</string>
+                 <string> Resolution</string>
                 </property>
                </widget>
               </item>
@@ -544,14 +576,14 @@
               <item row="1" column="2">
                <widget class="QLabel" name="label_26">
                 <property name="text">
-                 <string>Pixels Wide</string>
+                 <string>Pixels Wide </string>
                 </property>
                </widget>
               </item>
               <item row="2" column="0">
                <widget class="QLabel" name="label_18">
                 <property name="text">
-                 <string>Image Center</string>
+                 <string> Image Center</string>
                 </property>
                </widget>
               </item>
@@ -701,7 +733,7 @@
               <item>
                <widget class="QLabel" name="label_34">
                 <property name="text">
-                 <string>R_g/Pixel</string>
+                 <string>R_g/Pixel </string>
                 </property>
                </widget>
               </item>
@@ -848,14 +880,14 @@ newParams = copy.deepcopy(oldParams)</string>
                   <item row="1" column="3">
                    <widget class="QLabel" name="unitLabel_4">
                     <property name="text">
-                     <string>arcsec</string>
+                     <string>arcsec </string>
                     </property>
                    </widget>
                   </item>
                   <item row="1" column="0">
                    <widget class="QLabel" name="label_32">
                     <property name="text">
-                     <string>Quasar Path Finish</string>
+                     <string> Quasar Path Finish</string>
                     </property>
                    </widget>
                   </item>
@@ -869,7 +901,7 @@ newParams = copy.deepcopy(oldParams)</string>
                   <item row="0" column="3">
                    <widget class="QLabel" name="unitLabel_3">
                     <property name="text">
-                     <string>arcsec</string>
+                     <string>arcsec </string>
                     </property>
                    </widget>
                   </item>
@@ -883,14 +915,14 @@ newParams = copy.deepcopy(oldParams)</string>
                   <item row="0" column="0">
                    <widget class="QLabel" name="label_31">
                     <property name="text">
-                     <string>Quasar Path Start</string>
+                     <string> Quasar Path Start</string>
                     </property>
                    </widget>
                   </item>
                   <item row="2" column="0">
                    <widget class="QLabel" name="label_33">
                     <property name="text">
-                     <string>Number of Data Points</string>
+                     <string> Number of Data Points</string>
                     </property>
                    </widget>
                   </item>
@@ -964,21 +996,21 @@ newParams = copy.deepcopy(oldParams)</string>
                   <item row="0" column="0">
                    <widget class="QLabel" name="label_10">
                     <property name="text">
-                     <string>Magnification Map Center</string>
+                     <string> Magnification Map Center</string>
                     </property>
                    </widget>
                   </item>
                   <item row="1" column="0">
                    <widget class="QLabel" name="label_19">
                     <property name="text">
-                     <string>(Width,Height)</string>
+                     <string> (Width,Height)</string>
                     </property>
                    </widget>
                   </item>
                   <item row="0" column="2">
                    <widget class="QLabel" name="unitLabel_5">
                     <property name="text">
-                     <string>arcsec</string>
+                     <string>arcsec </string>
                     </property>
                    </widget>
                   </item>
@@ -999,14 +1031,14 @@ newParams = copy.deepcopy(oldParams)</string>
                   <item row="1" column="2">
                    <widget class="QLabel" name="unitLabel_6">
                     <property name="text">
-                     <string>arcsec </string>
+                     <string>arcsec  </string>
                     </property>
                    </widget>
                   </item>
                   <item row="2" column="0">
                    <widget class="QLabel" name="label_40">
                     <property name="text">
-                     <string>Resolution</string>
+                     <string> Resolution</string>
                     </property>
                    </widget>
                   </item>
@@ -1163,7 +1195,7 @@ newParams = copy.deepcopy(oldParams)</string>
                <item>
                 <widget class="QLabel" name="label_27">
                  <property name="text">
-                  <string>Current Source Position:</string>
+                  <string> Current Source Position:</string>
                  </property>
                 </widget>
                </item>
