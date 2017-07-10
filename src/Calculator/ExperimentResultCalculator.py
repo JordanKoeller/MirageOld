@@ -13,6 +13,8 @@ from Utility.NullSignal import NullSignal
 from Models.Parameters.MagMapParameters import MagMapParameters
 from Models.Parameters.LightCurveParameters import LightCurveParameters
 from Models.ParametersError import ParametersError
+from Models.Parameters.StarFieldData import StarFieldData
+
 # from Controllers.QueueController import defaultVariance
 def defaultVariance(params,trialNo):
     print("Defaulting")
@@ -52,6 +54,8 @@ class ExperimentResultCalculator(object):
                 self.experimentRunners.append(self.__LIGHT_CURVE)
             if isinstance(exp,MagMapParameters):
                 self.experimentRunners.append(self.__MAGMAP)
+            if isinstance(exp,StarFieldData):
+                self.experimentRunners.append(self.__STARFIELD)
 #             if exp is ResultTypes.STARFIELD:
 #                 self.experimentRunners.append(self.__STARFIELD)
 #             if exp is ResultTypes.VIDEO:
@@ -62,6 +66,7 @@ class ExperimentResultCalculator(object):
         ret = []
         for exp in range(0,len(self.experimentRunners)):
             ret.append(self.experimentRunners[exp](exp))
+        print("Experiment Finished")
         return ret
 
             
@@ -75,16 +80,13 @@ class ExperimentResultCalculator(object):
         
     def __MAGMAP(self,index):
         special = Model.parameters.extras.desiredResults[index]
+        Model.parameters.extras.desiredResults[index].center = Model.engine.getCenterCoords()
         return Model.engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
+
     def __STARFIELD(self,index):
-        stars = Model.parameters.galaxy.stars 
-        retArr = np.ndarray((len(stars),3),np.float64)
-        for i in range(0,len(stars)):
-            x,y = stars[i].position.asTuple
-            mass = stars[i].mass
-            retArr[i] = stars[i] = (x,y,mass)
-        return retArr
+        return Model.parameters.galaxy.stars 
+
     def __VIDEO(self):
         pass################################### MAY IMPLIMENT LATER
             

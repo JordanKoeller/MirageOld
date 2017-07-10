@@ -47,8 +47,8 @@ __kernel void ray_trace(
 		//For Loop for  all the stars
 		for (int i=0; i < numStars; i++)
 		{
-			deltaR_x = (stars_x[i] - incident_angle_x);
-			deltaR_y = (stars_y[i] - incident_angle_y);
+			deltaR_x = (incident_angle_x - stars_x[i]);
+			deltaR_y = (incident_angle_y - stars_y[i]);
 			r = deltaR_x*deltaR_x + deltaR_y*deltaR_y;
 			result_buf_x[index] += deltaR_x*stars_mass[i]*POINT_CONSTANT/r;
 			result_buf_y[index] += deltaR_y*stars_mass[i]*POINT_CONSTANT/r;

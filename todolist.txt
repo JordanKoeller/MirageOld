@@ -1,0 +1,8 @@
+guarantee magmap is at the center of the calculated canvas.					DONE
+Stop system from reconfiguring engine twice							DONE
+relative velocity input
+look up how Pooley generated magmaps previously and emulate that here
+DOCUMENTATION
+debug shape-based query
+bind parameters to new fields
+report average mass of starfield, use for determining theta_e

@@ -65,9 +65,9 @@ cdef class Engine:
 		cdef double dTheta = self.__parameters.dTheta.value
 		cdef np.ndarray result_nparray_x = np.zeros((width, height), dtype=np.float64)
 		cdef np.ndarray result_nparray_y = np.zeros((width, height), dtype=np.float64)
-		cdef double dS = self.__parameters.quasar.angDiamDist.value
-		cdef double dL = self.__parameters.galaxy.angDiamDist.value
-		cdef double dLS = self.__parameters.dLS.value
+		cdef double dS = self.__parameters.quasar.angDiamDist.to('lyr').value
+		cdef double dL = self.__parameters.galaxy.angDiamDist.to('lyr').value
+		cdef double dLS = self.__parameters.dLS.to('lyr').value
 		stars_nparray_mass, stars_nparray_x, stars_nparray_y = self.__parameters.galaxy.starArray
 
 		# create a context and a job queue
@@ -95,7 +95,7 @@ cdef class Engine:
 			stars_buffer_x,
 			stars_buffer_y,
 			np.int32(len(stars_nparray_x)),
-			np.float64((4 * const.G / (const.c * const.c)).to("lyr/solMass").value * dLS / dS / dL),
+			np.float64((4 * const.G / const.c / const.c).to("lyr/solMass").value * dLS / dS / dL),
 			np.float64(4 * math.pi * self.__parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS),
 			np.float64(self.__parameters.galaxy.shear.magnitude),
 			np.float64(self.__parameters.galaxy.shear.angle.value),
@@ -165,8 +165,54 @@ cdef class Engine:
 		return (result_nparray_x,result_nparray_y)
 	
 
+	def getCenterCoords(self):
+
+		#Pulling parameters out of parameters class
+		height = self.__parameters.canvasDim
+		width = self.__parameters.canvasDim
+		dTheta = self.__parameters.dTheta.value
+		dS = self.__parameters.quasar.angDiamDist.value
+		dL = self.__parameters.galaxy.angDiamDist.value
+		dLS = self.__parameters.dLS.value
+		shearMag = self.__parameters.galaxy.shear.magnitude
+		shearAngle = self.__parameters.galaxy.shear.angle.value
+		centerX = self.__parameters.galaxy.position.to('rad').x
+		centerY = self.__parameters.galaxy.position.to('rad').y
+		sis_constant = 	np.float64(4 * math.pi * self.__parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
+		point_constant = (4 * const.G / (const.c * const.c)).to("lyr/solMass").value * dLS / dS / dL
+		pi2 = math.pi/2
+
+		#Calculation variables
+		resx = 0
+		resy = 0
+
+		#Calculation is Below
+		incident_angle_x = 0.0
+		incident_angle_y = 0.0
 		
-	
+		try:
+			#SIS
+			deltaR_x = incident_angle_x - centerX
+			deltaR_y = incident_angle_y - centerY
+			r = sqrt(deltaR_x*deltaR_x+deltaR_y*deltaR_y)
+			if r == 0.0:
+				resx += deltaR_x 
+				resy += deltaR_y
+			else:
+				resx += deltaR_x*sis_constant/r 
+				resy += deltaR_y*sis_constant/r 
+			
+			#Shear
+			phi = 2*(pi2 - shearAngle)-CMATH.atan2(deltaR_y,deltaR_x)
+			resx += shearMag*r*CMATH.cos(phi)
+			resy += shearMag*r*CMATH.sin(phi)
+			resx = deltaR_x - resx
+			resy = deltaR_y - resy
+		except ZeroDivisionError:
+			resx = 0.0
+			resy = 0.0
+		return Vector2D(resx,resy,'rad')
+
 	def calTheta(self):
 		k = (4 * math.pi * (const.c ** -2).to('s2/km2').value * self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value * self.__parameters.galaxy.velocityDispersion.value * self.__parameters.galaxy.velocityDispersion.value) + (self.__parameters.quasar.position - self.__parameters.galaxy.position).magnitude()
 		theta = (k / (1 - (self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value) * self.__parameters.galaxy.shearMag))
@@ -234,6 +280,8 @@ cdef class Engine:
 	
 	def makeLightCurve(self,mmin, mmax, resolution):
 		return self.makeLightCurve_helper(mmin,mmax,resolution)
+
+		
 	
 	
 	cpdef makeMagMap(self, object center, object dims, object resolution, object signal, object signalMax): #######Possibly slow implementation. Temporary
@@ -248,6 +296,7 @@ cdef class Engine:
 		cdef int j = 0
 		cdef double x = 0
 		cdef double y = 0
+		print("Centered around "+str(center))
 		start = center - dims/2
 		cdef double x0 = start.to('rad').x
 		cdef double y0 = start.to('rad').y
@@ -287,7 +336,7 @@ cdef class Engine:
 
 
 
-	def updateParameters(self, parameters):
+	def updateParameters(self, parameters,autoRecalculate = True):
 		"""Provides an interface for updating the parameters describing the lensed system to be modeled.
 
 		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
@@ -295,12 +344,18 @@ cdef class Engine:
 			self.__parameters = parameters
 			if self.__parameters.galaxy.percentStars > 0:
 				self.__parameters.regenerateStars()
-			self.reconfigure()
+			if autoRecalculate:
+				self.reconfigure()
+			else:
+				self.needsReconfiguring = True
 		elif not self.__parameters.isSimilar(parameters):
 			self.__parameters = parameters
 			if self.__parameters.galaxy.percentStars > 0:
 				self.__parameters.regenerateStars()
-			self.reconfigure()
+			if autoRecalculate:
+				self.reconfigure()
+			else:
+				self.needsReconfiguring = True
 		else:
 			parameters.setStars(self.__parameters.stars)
 			self.__parameters = parameters

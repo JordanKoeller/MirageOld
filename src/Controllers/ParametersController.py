@@ -74,8 +74,8 @@ class ParametersController(GUIController):
             specials = UnitConverter.generateSpecialUnits(qBHMass,qRedshift,gRedshift)
             with u.add_enabled_units(specials):
                 #Setting units
-                inputUnit = self.view.unitLabel_1.text()
-
+                inputUnit = self.view.scaleUnitOption.currentText()
+                print("Input unit = "+inputUnit)
                 #Determination of relative motion
                 gVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit='km/s')
 
@@ -85,7 +85,7 @@ class ParametersController(GUIController):
                 gPositionRaDec = SkyCoord(ra,dec, unit = (u.hourangle,u.deg))
 
                 #Quasar properties
-                qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit=inputUnit).to('rad')
+                qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit='arcsec').to('rad')
                 qRadius = u.Quantity(float(self.view.qRadius.text()), 'uas')
                 
                 #Galaxy properties
@@ -100,8 +100,9 @@ class ParametersController(GUIController):
                     gStarParams = None
                 else:
                     gStarParams = (gStarMean,gStarStdDev)
-                displayCenter = self.view.vectorFromQString(self.view.gCenter.text(), unit=inputUnit).to('rad')
-                dTheta = u.Quantity(float(self.view.scaleInput.text()), inputUnit).to('rad')
+                displayCenter = self.view.vectorFromQString(self.view.gCenter.text(), unit='arcsec').to('rad')
+                dTheta = u.Quantity(float(self.view.scaleInput.text()), inputUnit).to('rad').value
+                print("dTheta = "+str(dTheta))
                 canvasDim = int(self.view.dimensionInput.text())
                 displayQuasar = self.view.displayQuasar.isChecked()
                 displayGalaxy = self.view.displayGalaxy.isChecked()
@@ -109,6 +110,7 @@ class ParametersController(GUIController):
                 galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity)
                 quasar = Quasar(qRedshift, qRadius, qPosition, gVelocity, mass = qBHMass)
                 params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
+                
                 if self.view.qRadiusUnitOption.currentIndex() == 1:
                     absRg = (params.quasar.mass*const.G/const.c/const.c).to('m')
                     angle = absRg/params.quasar.angDiamDist.to('m')
@@ -131,10 +133,9 @@ class ParametersController(GUIController):
         #     return None
         
     def updateUnitLabels(self,unitString):
-        self.view.unitLabel_1.setText(unitString)
+#         self.view.unitLabel_1.setText(unitString)
         self.view.unitLabel_3.setText(unitString)
         self.view.unitLabel_4.setText(unitString)
-        self.view.unitLabel_5.setText(unitString)
         self.view.unitLabel_6.setText(unitString)
 
     def randomizeGVelocity(self):
@@ -149,26 +150,27 @@ class ParametersController(GUIController):
 
     def bindFields(self, parameters,bindExtras = None):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""
-        qV = parameters.quasar.velocity.to('rad').unitless()*parameters.quasar.angDiamDist.to('km').value;
-        qP = parameters.quasar.position.to('arcsec').unitless()
-        gP = parameters.galaxy.position.to('arcsec').unitless()
-        self.view.qVelocity.setText("(" + str(qV.y) + "," + str(qV.x) + ")")
-        self.view.qPosition.setText("(" + str(qP.y) + "," + str(qP.x) + ")")
-        self.view.gCenter.setText("(" + str(gP.y) + "," + str(gP.x) + ")")
-        self.view.qRadius.setText(str(parameters.quasar.radius.to('arcsec').value))
-        self.view.qRedshift.setText(str(parameters.quasar.redshift))
-        self.view.gRedshift.setText(str(parameters.galaxy.redshift))
-        self.view.gVelDispersion.setText(str(parameters.galaxy.velocityDispersion.value))
-        self.view.gNumStars.setText(str(parameters.galaxy.numStars))
-        self.view.gShearMag.setText(str(parameters.galaxy.shearMag))
-        self.view.gShearAngle.setText(str(parameters.galaxy.shearAngle.to('degree').value))
-        self.view.scaleInput.setText(str(parameters.dTheta.to('arcsec').value * parameters.canvasDim))
-        self.view.dimensionInput.setText(str(parameters.canvasDim))
-        self.view.displayQuasar.setChecked(parameters.showQuasar)
-        self.view.displayGalaxy.setChecked(parameters.showGalaxy)
-        self.view.quasarBHMassEntry.setText(str(parameters.quasar.mass.to('solMass').value))
-        if bindExtras:
-            bindExtras(self.view,parameters)
+        with u.add_enabled_units(parameters.specialUnits):
+            qV = parameters.quasar.velocity.to('rad').unitless()*parameters.quasar.angDiamDist.to('km').value;
+            qP = parameters.quasar.position.to(self.view.qPositionLabel.text()).unitless()
+            gP = parameters.galaxy.position.to('arcsec').unitless()
+            self.view.qVelocity.setText("(" + str(qV.y) + "," + str(qV.x) + ")")
+            self.view.qPosition.setText("(" + str(qP.y) + "," + str(qP.x) + ")")
+            self.view.gCenter.setText("(" + str(gP.y) + "," + str(gP.x) + ")")
+            self.view.qRadius.setText(str(parameters.quasar.radius.to(self.view.qRadiusUnitOption.currentText()).value))
+            self.view.qRedshift.setText(str(parameters.quasar.redshift))
+            self.view.gRedshift.setText(str(parameters.galaxy.redshift))
+            self.view.gVelDispersion.setText(str(parameters.galaxy.velocityDispersion.value))
+            self.view.gNumStars.setText(str(int(parameters.galaxy.percentStars*100)))
+            self.view.gShearMag.setText(str(parameters.galaxy.shearMag))
+            self.view.gShearAngle.setText(str(parameters.galaxy.shearAngle.to('degree').value))
+            self.view.scaleInput.setText(str(parameters.dTheta.to(self.view.scaleUnitOption.currentText()).value * parameters.canvasDim))
+            self.view.dimensionInput.setText(str(parameters.canvasDim))
+            self.view.displayQuasar.setChecked(parameters.showQuasar)
+            self.view.displayGalaxy.setChecked(parameters.showGalaxy)
+            self.view.quasarBHMassEntry.setText(str(parameters.quasar.mass.to('solMass').value))
+            if bindExtras:
+                bindExtras(self.view,parameters)
         
     def __round_to_n(self, x,n = 6):
         if x == 0.0:

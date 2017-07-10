@@ -23,6 +23,7 @@ class Galaxy(Drawable, Cosmic):
 		self.updateDrawable(position=center, colorKey=4)
 		self.updateCosmic(redshift=redshift)
 		self.__starVelocityParams = starVelocityParams
+		self.__avgStarMass = 0.5
 		self.skyCoords = skyCoords
 		self.velocity = velocity
 
@@ -47,18 +48,20 @@ class Galaxy(Drawable, Cosmic):
 			return (massArr, xArr, yArr)	
 		else:
 			return ([],[],[])
+			
 	@property
 	def starVelocityParams(self):
 		return self.__starVelocityParams
 		
 	def clearStars(self):
 		self.__stars = []
+		self.__avgStarMass = 0.5
 			
 			
 	def moveStars(self, dt):
-		for i in self.__stars:
-			i[0] = i[0] + i[3]*dt
-			i[1] = i[1] + i[4]*dt
+		self.__stars[:,0] = self.__stars[:,0] + self.__stars[:,3]*dt
+		self.__stars[:,1] = self.__stars[:,1] + self.__stars[:,4]*dt
+
 			
 	def update(self, redshift=None, velocityDispersion=None, shearMag=None, shearAngle=None, center=None, percentStars=None, stars=[]):
 		try:
@@ -68,6 +71,7 @@ class Galaxy(Drawable, Cosmic):
 				self.__pcntStar = percentStars
 			if stars != []:
 				self.__stars = stars
+				self.__avgStarMass = sum(stars[:,2])/len(stars)
 			self.updateDrawable(position=center)
 			self.updateCosmic(redshift=redshift)
 		except ParametersError as e:
@@ -128,6 +132,10 @@ class Galaxy(Drawable, Cosmic):
 	@property
 	def stars(self):
 		return self.__stars
+	
+	@property
+	def averageStarMass(self):
+		return self.__avgStarMass
 
 	@property
 	def apparentVelocity(self):

@@ -44,8 +44,8 @@ class QueueThread(QtCore.QThread):
                 oldP = copy.deepcopy(Model.parameters)
                 newP = varyTrial(params,tc) #NEED TO IMPLIMENT
                 Model.updateParameters(newP)
-                if oldP  and oldP.isSimilar(newP) == False:
-                    Model.engine.reconfigure()
+                # if oldP  and oldP.isSimilar(newP) == False:
+                #     Model.engine.reconfigure()
                 data = exptRunner.runExperiment() #NEED TO IMPLIMENT
                 self.filemanager.sendTrial(data)
             self.filemanager.closeExperiment()

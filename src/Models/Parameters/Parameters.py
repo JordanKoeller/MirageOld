@@ -31,7 +31,7 @@ class Parameters:<br>
 		einsteinRadius - Einstein radius of the system, in units of angle<br>
 		gravitationalRadius - gravitational radius of the quasar, dependent on its mass. Measured in units of angle<br>
 		specialUnits - astropy.units.Quantity definition for units of angle to einstein radius, or gravitational radius<br>
-		halfMassEinsteinRadius - einstein radius of a 1/2 solar mass point mass, measured in units of angle<br>
+		avgMassEinsteinRadius - einstein radius of a 1/2 solar mass point mass, measured in units of angle<br>
 		stars - numpy array of masses, positions, and velocities of stars modeled by the galaxy<br>
 		relativeShearAngle - angle between the trajectory of the quasar and external shear<br>
 		dLS - angular diameter distance between the galaxy and source objects, measured in linear distance units<br>
@@ -132,9 +132,6 @@ class Quasar:<br>
 		self.numStars = numStars
 		self.__starMassTolerance = starMassTolerance
 		self.__starMassVariation = starMassVariation
-		conversions = UnitConverter.generateSpecialUnits(quasar.mass,quasar.redshift,galaxy.redshift)
-		self.__halfMassEinRad = conversions[0]
-		self.__gravRadius = conversions[1]
 		self.dt = 2.6e7
 		self.time = 0
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
@@ -167,6 +164,7 @@ class Quasar:<br>
 			self.dt = dt
 
 	def regenerateStars(self):
+		print("Regenerating stars now.")
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
 		generator = Evolved_IMF()
 		m_stars = m_stars.value
@@ -236,13 +234,24 @@ class Quasar:<br>
 		return u.def_unit('einstein_rad',self.einsteinRadius.value*u.rad)
 	@property
 	def gravitationalRadius(self):
-		return self.__gravRadius
+		linearRg = (self.quasar.mass.to('kg')*const.G/const.c/const.c).to('m')
+		angleRg = linearRg/self.quasar.angDiamDist.to('m')
+		rgUnit = u.def_unit('r_g',angleRg.value*u.rad)
+		return rgUnit
+
 	@property
 	def specialUnits(self):
-		return [self.einsteinRadiusUnit,self.gravitationalRadius]
+		return [self.avgMassEinsteinRadius,self.gravitationalRadius]
+
 	@property
-	def halfMassEinsteinRadius(self):
-		return self.__halfMassEinRad
+	def avgMassEinsteinRadius(self):
+		avgMass = 0.5#self.galaxy.averageStarMass
+		gR = self.galaxy.redshift
+		qR = self.quasar.redshift
+		thetaE = 4*const.G*u.Quantity(avgMass,'solMass').to('kg')*self.dLS.to('m')/self.quasar.angDiamDist.to('m')/self.galaxy.angDiamDist.to('m')/const.c/const.c
+		thetaEUnit = u.def_unit('theta_E',math.sqrt(thetaE.value)*u.rad)
+		return thetaEUnit
+
 	@property
 	def displayQuasar(self):
 		return self.showQuasar
@@ -282,6 +291,7 @@ class Quasar:<br>
 		l = (self.dTheta*self.canvasDim).to('rad').value*self.__galaxy.angDiamDist.to('m')
 		r_in = self.__galaxy.position.to('rad').magnitude()*self.__galaxy.angDiamDist.to('m')
 		ret = ((self.__galaxy.velocityDispersion**2)*l*l/2/const.G/r_in).to('solMass')
+		print("Mass = "+str(ret))
 		return ret
 	
 	@property
@@ -290,16 +300,13 @@ class Quasar:<br>
 	
 	@property
 	def pixelScale_Rg(self): #Depends on mass, distance, pixel scale
-		absRg = (self.__quasar.mass*const.G/const.c/const.c).to('m')
-		angle = absRg/self.quasar.angDiamDist.to('m')
-		pixAngle = self.pixelScale_angle.to('rad').value
-		return pixAngle/angle
+		pixAngle = self.pixelScale_angle.to('rad').to(self.gravitationalRadius).value
+		return pixAngle
 	
 	@property
 	def pixelScale_thetaE(self): #Depends on distances, pixel scale
-		pixAngle = self.pixelScale_angle.to('rad').value
-		thetaE = 4*const.G*u.Quantity(0.5,'solMass')*self.dLS/const.c/const.c/self.galaxy.angDiamDist/self.quasar.angDiamDist
-		return pixAngle/math.sqrt(thetaE)
+		pixAngle = self.pixelScale_angle.to('rad')
+		return pixAngle.to(self.avgMassEinsteinRadius).value
 	
 	@property
 	def quasarRadius_rg(self): #Depends on distances

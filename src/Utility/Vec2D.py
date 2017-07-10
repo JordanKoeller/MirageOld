@@ -92,7 +92,11 @@ class Vector2D(object):
         
     def __truediv__(self, that):
         "Returns the dot product of two vectors."
-        return Vector2D(self.x/that,self.y/that,self.unit)
+        if isinstance(that,Vector2D):
+            tmp = self._vals/that._vals
+            return Vector2D(tmp[0],tmp[1],tmp.unit)
+        else:
+            return Vector2D(self.x/that,self.y/that,self.unit)
         
     def __neg__(self):
         "Returns a new vector in the opposite direction of self."

@@ -28,8 +28,9 @@ class __Model(object):
             self.__Engine = Engine_Grid()
             print("Grid Structure")
         if self.parameters:
-            params.setTime(self.parameters.time)
-            params.quasar.setPos(self.parameters.quasar.observedPosition)
+            if params.time != 0.0:
+                params.setTime(self.parameters.time)
+                params.quasar.setPos(self.parameters.quasar.observedPosition)
         self.__Engine.updateParameters(params)
         
     @property

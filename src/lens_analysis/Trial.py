@@ -5,6 +5,7 @@ Created on Jun 7, 2017
 '''
 
 import copy
+import math
 
 from astropy.io import fits
 from astropy import units as u
@@ -20,6 +21,7 @@ from Controllers.FileManagers.ParametersFileManager import ParametersFileManager
 from Calculator.ExperimentResultCalculator import varyTrial
 from Models.Parameters.MagMapParameters import MagMapParameters
 from Models.Parameters.LightCurveParameters import LightCurveParameters
+from Models.Parameters.StarFieldData import StarFieldData
 
 class Trial(AbstractFileWrapper):
     def __init__(self,filepath,trialno,fileobject=None,params=None,lookuptable=[]):
@@ -58,28 +60,50 @@ class Trial(AbstractFileWrapper):
             saver = FITSFileManager(NullSignal)
             saver.write(arr)
         print("Magnification Map saved")
+
+    @requiresDtype(StarFieldData)
+    def getStars(self,ind):
+            return self._getDataSet(ind)
+
+    @requiresDtype(StarFieldData)
+    @requiresDtype(MagMapParameters)
+    def superimpose_stars(self,magIndex,starsIndex,magmapimg=None,destination=None,color = (255,255,0,255)):
+        parameters = self.regenerateParameters()
+        from PIL import Image
+        img = Image.open(magmapimg)
+        pix = img.load()
+        stars = parameters.galaxy.stars
+        dTheta = parameters.extras.desiredResults[magIndex].dimensions.to('rad')/parameters.extras.desiredResults[magIndex].resolution
+        starCoords = stars[:,0:2]
+        starMass = stars[:,2]
+        starCoords[:,0] = starCoords[:,0]/dTheta.x + parameters.extras.desiredResults[magIndex].resolution.x/2
+        starCoords[:,1] = starCoords[:,1]/dTheta.y + parameters.extras.desiredResults[magIndex].resolution.y/2
+        # starCoords[:,0] = starCoords[:,0]*dTheta.x/parameters.dTheta.to('rad').value
+        # starCoords[:,1] = starCoords[:,1]*dTheta.y/parameters.dTheta.to('rad').value
+        starCoords = np.ascontiguousarray(starCoords,dtype=np.int32)
+        for row in range(0,starCoords.shape[0]):
+            x,y = (starCoords[row,0],starCoords[row,1])
+            mass = starMass[row]
+            r = int(math.sqrt(mass+2))
+            for i in range(x-r,x+r):
+                for j in range(y-r,y+r):
+                    if i >= 0 and i < parameters.extras.desiredResults[magIndex].resolution.x and j >= 0 and j < parameters.extras.desiredResults[magIndex].resolution.y:
+                        pix[j,i] = color
+        img.save(destination)
+        print("Superimposed image saved as "+destination)
+
         
-    @requiresDtype(ResultTypes.STARFIELD)
+    @requiresDtype(StarFieldData)
     def regenerateParameters(self,ind,filename=None):
         params = copy.deepcopy(self._params)
-        stars = self._getDataSet(ind)
-        starlist = []
-        for i in range(stars.shape[0]):
-            x,y,m = stars[i]
-            starlist.append(PointLenser(Vector2D(x,y,'rad'),u.Quantity(m,'solMass')))
-        params.setStars(starlist)
+        stars = self.getStars()
+        params.setStars(stars)
         if filename:
             saver = ParametersFileManager(NullSignal)
             saver.write(params)
             print("Parameters Saved")
         else:
             return params
-    
-    @requiresDtype(ResultTypes.STARFIELD) #Should be the second argument????
-    @requiresDtype(ResultTypes.MAGMAP)
-    def testFails(self,ind1,ind2):
-        print(ind1)
-        print(ind2)
         
     @property
     def trialNumber(self):

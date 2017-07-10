@@ -19,8 +19,10 @@ from Models.ExperimentQueue.ExperimentQueueTable import ExperimentQueueTable
 from Models.Parameters.ExperimentParams import ExperimentParams, ResultTypes
 from Models.Parameters.MagMapParameters import MagMapParameters
 from Models.Parameters.LightCurveParameters import LightCurveParameters
+from Models.Parameters.StarFieldData import StarFieldData
 from Models.ParametersError import ParametersError
 from Controllers.FileManagers.TableFileManager import TableFileManager
+from Utility import Vector2D
 
 def _queueExtrasBuilder(view,parameters,inputUnit):
     name = view.experimentNameEntry.text()
@@ -35,13 +37,12 @@ def _queueExtrasBuilder(view,parameters,inputUnit):
         lcparams = LightCurveParameters(pstart,pend,resolution)
         datasets.append(lcparams)
     if view.enableMagMap.isChecked():
-        magmapcenter = view.vectorFromQString(view.magMapCenterEntry.text(),unit=inputUnit)
         magmapdims = view.vectorFromQString(view.magMapDimEntry.text(),unit=inputUnit)
         magmapres = view.vectorFromQString(view.magMapResolutionEntry.text(),None)
-        magmapparams = MagMapParameters(magmapcenter,magmapdims,magmapres)
+        magmapparams = MagMapParameters(Vector2D(0,0,'rad'),magmapdims,magmapres)
         datasets.append(magmapparams)
-#     if view.starFieldCheckBox.isChecked():
-#         datasets.append(ResultTypes.STARFIELD)
+    if view.queueSaveStarfield.isChecked():
+        datasets.append(StarFieldData())
     extras = ExperimentParams(name=name,description=desc,numTrials=numTrials,trialVariance=varianceStr,resultParams=datasets)
     parameters.extras = extras
     try:
@@ -59,9 +60,8 @@ def _queueExtrasBinder(view,obj):
                 view.enableMagMap.setChecked(False)
                 if isinstance(i , MagMapParameters):
                     view.enableMagMap.setChecked(True)
-                    view.magMapCenterEntry.setText("("+str(i.center.to('arcsec'))+","+str(i.center.to('arcsec'))+",")
                     view.magMapResolutionEntry.setText("("+str(i.resolution.x)+","+str(i.resolution.y)+",")
-                    view.magMapDimEntry.setText("("+str(i.dimensions.to('arcsec'))+","+str(i.dimensions.to('arcsec'))+",")
+                    view.magMapDimEntry.setText("("+str(i.dimensions.to('arcsec').x)+","+str(i.dimensions.to('arcsec').y)+",")
                 elif isinstance(i , LightCurveParameters):
                     view.enableLightCurve.setChecked(True)
                     start = i.pathStart.to('arcsec')
@@ -161,11 +161,9 @@ class QueueController(GUIController):
     
     def toggleMagMapEntry(self,on):
         if on:
-            self.view.magMapCenterEntry.setEnabled(True)
             self.view.magMapDimEntry.setEnabled(True)
             self.view.magMapResolutionEntry.setEnabled(True)
         else:
-            self.view.magMapCenterEntry.setEnabled(False)
             self.view.magMapDimEntry.setEnabled(False)
             self.view.magMapResolutionEntry.setEnabled(False)
         

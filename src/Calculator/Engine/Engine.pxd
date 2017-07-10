@@ -31,6 +31,7 @@ cdef class Engine:
 		bool __preCalculating
 		public double time
 		__trueLuminosity
+		bool needsReconfiguring
 
 	cdef ray_trace_gpu(self)
 	cpdef getMagnification(self, pixelCount)

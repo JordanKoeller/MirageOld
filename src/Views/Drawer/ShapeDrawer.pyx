@@ -85,5 +85,4 @@ cpdef void drawPointLensers(np.ndarray[np.float64_t, ndim=2] stars, np.ndarray[n
 		y = stars[s,1]/dTheta + w2
 		m = stars[s,2]
 		r = math.sqrt(m+2.0)
-# 		print(r)
 		drawSquare(<int>x,<int> y, <int> r*2,canvas,2)
