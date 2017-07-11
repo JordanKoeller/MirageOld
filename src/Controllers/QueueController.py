@@ -55,24 +55,30 @@ def _queueExtrasBuilder(view,parameters,inputUnit):
 def _queueExtrasBinder(view,obj):
     if obj.extras:
         if isinstance(obj.extras,ExperimentParams):
+            view.enableLightCurve.setChecked(False)
+            view.enableMagMap.setChecked(False)
+            view.queueSaveStarfield.setChecked(False)
             for i in obj.extras.desiredResults:
-                view.enableLightCurve.setChecked(False)
-                view.enableMagMap.setChecked(False)
                 if isinstance(i , MagMapParameters):
                     view.enableMagMap.setChecked(True)
-                    view.magMapResolutionEntry.setText("("+str(i.resolution.x)+","+str(i.resolution.y)+",")
-                    view.magMapDimEntry.setText("("+str(i.dimensions.to('arcsec').x)+","+str(i.dimensions.to('arcsec').y)+",")
+                    view.magMapResolutionEntry.setText("("+str(i.resolution.x)+","+str(i.resolution.y)+")")
+                    dims = i.dimensions.to(view.unitLabel_6.text())
+                    view.magMapDimEntry.setText("("+str(dims.x)+","+str(dims.y)+")")
                 elif isinstance(i , LightCurveParameters):
                     view.enableLightCurve.setChecked(True)
-                    start = i.pathStart.to('arcsec')
-                    end = i.pathEnd.to('arcsec')
+                    unit = view.unitLabel_3.text()
+                    start = i.pathStart.to(unit)
+                    end = i.pathEnd.to(unit)
                     view.quasarPathStart.setText("(" + str(start.y) + "," + str(start.x) + ")")
                     view.quasarPathEnd.setText("(" + str(end.y) + "," + str(end.x) + ")")
                     view.dataPointSpinBox.setValue(int(i.resolution))
+                elif isinstance(i, StarFieldData):
+                    view.queueSaveStarfield.setChecked(True)
             view.experimentNameEntry.setText(obj.extras.name)
             view.experimentDescEntry.setPlainText(obj.extras.description)
             view.trialSpinBox.setValue(obj.extras.numTrials)
             view.varianceTextArea.document().setPlainText(obj.extras.trialVarianceFunction)
+
 class QueueController(GUIController):
     '''
     classdocs

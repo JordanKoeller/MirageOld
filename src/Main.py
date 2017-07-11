@@ -8,31 +8,53 @@ import sys
 from PyQt5 import QtWidgets
 
 from Views import GUIManager
+from Controllers.FileManagers import ParametersFileManager
+from Models.Model import Model
+from Controllers.FileManagers import QueueFileManager
+from Controllers.Threads.QueueThread import QueueThread
+from Controllers.FileManagers.TableFileManager import TableFileManager
+
+import argparse
 
 
 if __name__ == "__main__":
     print('____________________________\n\n\n'+"Process ID = " + str(os.getpid())+'\n\n\n____________________________')
-    args = sys.argv
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--load",nargs='?', type=str, help='Follow with a .param file to load in as parameters.')
+    parser.add_argument("--run",nargs='+', type=str, help='Follow with a .params infile and outdirectory to save data to.')
+    # parser.add_argument("--nogui",action='store_true',help='When specified, disables all things Qt so program can run without an event loop.')
+    parser.add_argument("-v","--visualize",action='store_true',help='Launch program in visualization perspective.')
+    parser.add_argument("-q","--queue",action='store_true',help='Launch program in experiment queue perspective.')
+    args = parser.parse_args()
+    
     app = QtWidgets.QApplication(sys.argv)
-    if len(args) == 1:
-        ui = GUIManager()
-        ui.switchToVisualizing()
-        ui.show()
-    elif len(args) == 2:
-        arg = args[1]
-        if arg == "Visualize" or arg == "visualize" or arg == "Vis" or arg == "vis":
-            ui = GUIManager()
-            ui.switchToVisualizing()
-            ui.show()
-        elif arg == "Queue" or arg == "queue" or arg == "q" or arg == "Q":
-            ui = GUIManager()
-            ui.switchToQueue()
-            ui.show()
-        else:
-            print("Error. Invalid Command Line Argument.")
-            sys.exit(0)
+
+    if args.run:
+        infile = args.run[0]
+        outfile = args.run[1]
+        queueThread = QueueThread()
+        fileLoader = TableFileManager()
+        table = fileLoader.read(infile)
+        fileWriter = QueueFileManager(directory=outfile)
+        queueThread.bindExperiments(table,fileWriter)
+        queueThread.run()
+        sys.exit()
     else:
-        print("Error. Invalid Command Line Argument.")
-        sys.exit(0)
+        ui = GUIManager()
+        if args.queue:
+            ui.switchToQueue()
+        else:
+            ui.switchToVisualizing()
+
+        ui.show()
+
+        if args.load:
+            paramLoader = ParametersFileManager()
+            params = paramLoader.read(args.load)
+            ui.switchToVisualizing()
+            ui.bindFields(params)
+            # Model.updateParameters(params)
+
     sys.exit(app.exec_())
         

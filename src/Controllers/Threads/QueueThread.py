@@ -9,6 +9,7 @@ from PyQt5 import QtCore
 
 from Calculator.ExperimentResultCalculator import ExperimentResultCalculator, varyTrial
 from Models.Model import Model
+from Utility.NullSignal import NullSignal
 
 
 class QueueThread(QtCore.QThread):
@@ -17,7 +18,7 @@ class QueueThread(QtCore.QThread):
     '''
 
 
-    def __init__(self, signals):
+    def __init__(self, signals = NullSignal):
         '''
         Constructor
         '''

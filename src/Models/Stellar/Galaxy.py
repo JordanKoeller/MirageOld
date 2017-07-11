@@ -14,7 +14,7 @@ class Galaxy(Drawable, Cosmic):
 	__shear = None
 	__stars = []
 
-	def __init__(self, redshift=0.0, velocityDispersion=u.Quantity(0, 'km/s'), shearMag=0, shearAngle=0, percentStars=0, center=zeroVector, starVelocityParams = None, skyCoords= None, velocity=None):
+	def __init__(self, redshift=0.0, velocityDispersion=u.Quantity(0, 'km/s'), shearMag=0, shearAngle=0, percentStars=0, center=zeroVector, starVelocityParams = None, skyCoords= None, velocity=None,stars = []):
 		Drawable.__init__(self)
 		Cosmic.__init__(self)
 		self.__velocityDispersion = velocityDispersion
@@ -26,6 +26,7 @@ class Galaxy(Drawable, Cosmic):
 		self.__avgStarMass = 0.5
 		self.skyCoords = skyCoords
 		self.velocity = velocity
+		self.__stars = stars
 
 	def drawStars(self, img, parameters):
 		if len(self.__stars) != 0:

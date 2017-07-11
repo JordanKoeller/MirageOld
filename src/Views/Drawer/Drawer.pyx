@@ -94,7 +94,7 @@ cdef class CompositeDrawer:
 
 	cpdef draw(self, object imgArgs, object plotArgs):
 		self.imgDrawer.draw(imgArgs)
-		self.plotDrawer.draw(plotArgs)
+		# self.plotDrawer.draw(plotArgs)
 
 	cpdef reset(self):
 		self.plotDrawer.reset()

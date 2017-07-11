@@ -115,7 +115,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
+          <y>-290</y>
           <width>582</width>
           <height>1280</height>
          </rect>
@@ -751,7 +751,7 @@
             <item>
              <widget class="QTabWidget" name="tabWidget_2">
               <property name="currentIndex">
-               <number>2</number>
+               <number>0</number>
               </property>
               <property name="documentMode">
                <bool>true</bool>

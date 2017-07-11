@@ -38,8 +38,8 @@ cdef class Engine:
 		graphics processing unit when hardware permits.
 	"""
 
-	def __init__(self, parameter=None):
-		self.__parameters = parameter
+	def __init__(self, parameters=None):
+		self.__parameters = parameters
 		self.__preCalculating = False
 
 	@property
@@ -342,7 +342,7 @@ cdef class Engine:
 		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
 		if self.__parameters is None:
 			self.__parameters = parameters
-			if self.__parameters.galaxy.percentStars > 0:
+			if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars is []:
 				self.__parameters.regenerateStars()
 			if autoRecalculate:
 				self.reconfigure()

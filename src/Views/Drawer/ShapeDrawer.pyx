@@ -72,8 +72,19 @@ cdef void drawSquare(int x0, int y0, int dim, np.ndarray[np.uint8_t, ndim=2] can
 		for y in range(y0-dim2,y0+dim2):
 			if x >= 0 and x < canvasDim and y >= 0 and y < canvasDim:
 				canvas[x,y] = color
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef void drawSquare_optimized(int x0, int y0, int dim, np.uint8_t[:,:] canvas, int color, int canvasDim) nogil:
+	cdef int dim2 = dim/2
+	cdef int x,y 
+	for x in range(x0-dim2,x0+dim2):
+		for y in range(y0-dim2,y0+dim2):
+			if x >= 0 and x < canvasDim and y >= 0 and y < canvasDim:
+				canvas[x,y] = color
+
 					
-					
+@cython.boundscheck(False)
+@cython.wraparound(False)					
 cpdef void drawPointLensers(np.ndarray[np.float64_t, ndim=2] stars, np.ndarray[np.uint8_t, ndim=2] canvas, object parameters):
 	cdef int s
 	cdef double x, y, r, m 
@@ -85,4 +96,4 @@ cpdef void drawPointLensers(np.ndarray[np.float64_t, ndim=2] stars, np.ndarray[n
 		y = stars[s,1]/dTheta + w2
 		m = stars[s,2]
 		r = math.sqrt(m+2.0)
-		drawSquare(<int>x,<int> y, <int> r*2,canvas,2)
+		drawSquare_optimized(<int>x,<int> y, <int> (r*2),canvas,2, <int> (w2*2))

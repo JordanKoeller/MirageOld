@@ -18,7 +18,7 @@ class QueueFileManager(FileManager,QtCore.QThread):
     '''
 
 
-    def __init__(self, signals = NullSignal):
+    def __init__(self, signals = NullSignal,directory=None):
         '''
         Constructor
         '''
@@ -32,7 +32,10 @@ class QueueFileManager(FileManager,QtCore.QThread):
         self.dataSizeLoc = None
         self.trialCount = 0
         self.experimentCount = 0 #Specifies which row in the table to be written next
-        self.getDirectory()
+        if not directory:
+            directory = self.getDirectory()
+        self.directory = directory
+        self.__name = directory
         
     @property
     def fileextension(self):
@@ -43,9 +46,8 @@ class QueueFileManager(FileManager,QtCore.QThread):
         return "b+"
 
     def getDirectory(self):
-        self.directory = QtWidgets.QFileDialog.getExistingDirectory()
-        self.__name = self.directory
-        return self.directory
+        directory = QtWidgets.QFileDialog.getExistingDirectory()
+        return directory
     
     def newExperiment(self,params):
         name = params.extras.name

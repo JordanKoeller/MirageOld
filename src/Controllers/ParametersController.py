@@ -16,6 +16,7 @@ from Models.Stellar.Galaxy import Galaxy
 from Models.Parameters.Parameters import Parameters
 from Models.Stellar.Quasar import Quasar
 from Models.ParametersError import ParametersError
+from Models.Model import Model
 import astropy.units as u
 from astropy import constants as const
 from Calculator import UnitConverter
@@ -45,7 +46,7 @@ class ParametersController(GUIController):
         self.view.qVelRandomizer.clicked.connect(self.randomizeGVelocity)
         self.view.signals['paramSetter'].connect(self.bindFields)
         self.fileManager = ParametersFileManager(self.view.signals)
-
+        self._tmpStars = []
     def displayHelpMessage(self):
         dialog = HelpDialog(self.view)
         dialog.show()
@@ -107,10 +108,10 @@ class ParametersController(GUIController):
                 displayQuasar = self.view.displayQuasar.isChecked()
                 displayGalaxy = self.view.displayGalaxy.isChecked()
     
-                galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity)
+                galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity,stars = self._tmpStars)
                 quasar = Quasar(qRedshift, qRadius, qPosition, gVelocity, mass = qBHMass)
                 params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
-                
+                self._tmpStars = []
                 if self.view.qRadiusUnitOption.currentIndex() == 1:
                     absRg = (params.quasar.mass*const.G/const.c/const.c).to('m')
                     angle = absRg/params.quasar.angDiamDist.to('m')
@@ -150,6 +151,10 @@ class ParametersController(GUIController):
 
     def bindFields(self, parameters,bindExtras = None):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""
+        if parameters.stars != []:
+            self._tmpStars = parameters.galaxy.stars
+        else:
+            self._tmpStars = []
         with u.add_enabled_units(parameters.specialUnits):
             qV = parameters.quasar.velocity.to('rad').unitless()*parameters.quasar.angDiamDist.to('km').value;
             qP = parameters.quasar.position.to(self.view.qPositionLabel.text()).unitless()
@@ -181,7 +186,7 @@ class ParametersController(GUIController):
     def saveParams(self):
         """Prompts the user for a file name, then saves the lensing system's parameters to be loaded in at a later session."""
         print("Firing")
-        self.fileManager.write(self.buildParameters())
+        self.fileManager.write(Model.parameters or self.buildParameters())
 
     def loadParams(self):
         """Prompts the user to select a previously saved lensing system configuration, then when selected loads the system to model"""
