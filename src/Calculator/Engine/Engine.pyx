@@ -342,7 +342,7 @@ cdef class Engine:
 		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
 		if self.__parameters is None:
 			self.__parameters = parameters
-			if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars is []:
+			if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
 				self.__parameters.regenerateStars()
 			if autoRecalculate:
 				self.reconfigure()

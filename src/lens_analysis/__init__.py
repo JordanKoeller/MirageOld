@@ -29,25 +29,24 @@ def describe(filename):
     else:
         raise ValueError("argument must be a filename or AbstractFileWrapper subtype.")
 
-def runTable(filename):
-    loader = TableFileManager()
-    table = loader.read(filename)
-    exptRunner = QueueFileManager(NullSignal)
-    runner = QueueThread(NullSignal,table,exptRunner)
-    runner.run()
 
 def explore(expt):
-    gui = GUIManager()
-    paramsetter = gui.parametersController
+    params = None
     if isinstance(expt,AbstractFileWrapper):
-        paramsetter.bindFields(expt.parameters)
+        params = expt.parameters
     elif isinstance(expt, Parameters):
-        paramsetter.bindFields(expt)
+        params = expt
     else:
         raise ValueError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
         return
+    if not params:
+        returneError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
+        return
     try:
-        gui.switchToVisualizing()
-        gui.show()
+        ui = GUIManager()
+        ui.switchToVisualizing()
+        ui.bindFields(params)
+        ui.switchToVisualizing()
+        ui.show()
     except:
         raise EnvironmentError("Must have a Qt event loop running. If you are in ipython, execute the command '%gui qt5' then try again.")
