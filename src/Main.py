@@ -7,12 +7,12 @@ import os
 import sys
 from PyQt5 import QtWidgets
 
-from Views import GUIManager
-from Controllers.FileManagers import ParametersFileManager
-from Models.Model import Model
-from Controllers.FileManagers import QueueFileManager
-from Controllers.Threads.QueueThread import QueueThread
-from Controllers.FileManagers.TableFileManager import TableFileManager
+from app.Views.GUI.GUIManager import GUIManager
+from app.Controllers.FileManagers import ParametersFileManager
+from app.Models.Model import Model
+from app.Controllers.FileManagers import QueueFileManager
+from app.Controllers.Threads.QueueThread import QueueThread
+from app.Controllers.FileManagers.TableFileManager import TableFileManager
 
 import argparse
 
