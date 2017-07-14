@@ -31,12 +31,12 @@ cdef class LensedImageDrawer_pyqtgraph(ImageDrawer):
         cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]
         cdef np.ndarray[np.uint8_t, ndim=3] canvas = np.zeros((parameters.canvasDim,parameters.canvasDim,3), dtype=np.uint8)
         cdef np.ndarray[np.uint8_t, ndim=2] lookup = Model.colorMap_arr
-        if parameters.displayGalaxy:
-            parameters.galaxy.drawGalaxy(canvas,parameters)
-        if parameters.displayStars:
-            parameters.galaxy.drawStars(canvas,parameters)
-        if parameters.displayQuasar:
-            parameters.quasar.draw(canvas,parameters)
+#         if parameters.displayGalaxy:
+#             parameters.galaxy.drawGalaxy(canvas,parameters)
+#         if parameters.displayStars:
+#             parameters.galaxy.drawStars(canvas,parameters)
+#         if parameters.displayQuasar:
+#             parameters.quasar.draw(canvas,parameters)
         cdef int pixel = 0
         cdef int end = pixels.shape[0]
         cdef np.ndarray[np.uint8_t, ndim=1] colors = self.getColorCode(pixels,parameters)

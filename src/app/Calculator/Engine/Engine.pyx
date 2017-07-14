@@ -165,20 +165,21 @@ cdef class Engine:
 		return (result_nparray_x,result_nparray_y)
 	
 
-	def getCenterCoords(self):
+	def getCenterCoords(self,params = None):
 
 		#Pulling parameters out of parameters class
-		height = self.__parameters.canvasDim
-		width = self.__parameters.canvasDim
-		dTheta = self.__parameters.dTheta.value
-		dS = self.__parameters.quasar.angDiamDist.value
-		dL = self.__parameters.galaxy.angDiamDist.value
-		dLS = self.__parameters.dLS.value
-		shearMag = self.__parameters.galaxy.shear.magnitude
-		shearAngle = self.__parameters.galaxy.shear.angle.value
-		centerX = self.__parameters.galaxy.position.to('rad').x
-		centerY = self.__parameters.galaxy.position.to('rad').y
-		sis_constant = 	np.float64(4 * math.pi * self.__parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
+		parameters = params or self.__parameters
+		height = parameters.canvasDim
+		width = parameters.canvasDim
+		dTheta = parameters.dTheta.value
+		dS = parameters.quasar.angDiamDist.value
+		dL = parameters.galaxy.angDiamDist.value
+		dLS = parameters.dLS.value
+		shearMag = parameters.galaxy.shear.magnitude
+		shearAngle = parameters.galaxy.shear.angle.value
+		centerX = parameters.galaxy.position.to('rad').x
+		centerY = parameters.galaxy.position.to('rad').y
+		sis_constant = 	np.float64(4 * math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
 		point_constant = (4 * const.G / (const.c * const.c)).to("lyr/solMass").value * dLS / dS / dL
 		pi2 = math.pi/2
 
@@ -297,6 +298,7 @@ cdef class Engine:
 		cdef double x = 0
 		cdef double y = 0
 		print("Centered around "+str(center))
+		self.__parameters.galaxy.update(center=center)
 		start = center - dims/2
 		cdef double x0 = start.to('rad').x
 		cdef double y0 = start.to('rad').y

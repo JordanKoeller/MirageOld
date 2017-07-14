@@ -80,7 +80,7 @@ class ExperimentResultCalculator(object):
         
     def __MAGMAP(self,index):
         special = Model.parameters.extras.desiredResults[index]
-        Model.parameters.extras.desiredResults[index].center = Model.engine.getCenterCoords()
+#         Model.parameters.extras.desiredResults[index].center = Model.engine.getCenterCoords()
         return Model.engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
 

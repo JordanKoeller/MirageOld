@@ -9,6 +9,9 @@ class MagMapParameters(object):
         self.resolution = resolution
         
     def pixelToAngle(self,pixel):
+        print("Pixel to angle")
+        print(self.center.to('rad'))
+        print("Pixel to angle done")
         dTheta = self.dimensions.to('rad')/self.resolution
         if isinstance(pixel,np.ndarray):
             pixel[:,0] = (pixel[:,0] - self.resolution.x/2)*dTheta.x + self.center.to('rad').x 

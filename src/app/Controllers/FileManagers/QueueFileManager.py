@@ -116,6 +116,7 @@ class QueueFileManager(FileManager,QtCore.QThread):
     @property
     def prettyName(self):
         return self.getPretty(self.name)
+    
     @property
     def madeDirectory(self):
         if self.directory:
@@ -128,6 +129,7 @@ class QueueFileManager(FileManager,QtCore.QThread):
             Data is a tuple, containing references to numpy arrays. Index of tuple directly correlates to the index of the dataSizeArray to insert it into.
         '''
         pass
+    
     def __del__(self):
         if self.exptFile:
             self.exptFile.flush()

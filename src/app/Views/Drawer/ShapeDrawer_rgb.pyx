@@ -72,7 +72,7 @@ cdef void drawSquare(int x0, int y0, int dim, np.ndarray[np.uint8_t, ndim=3] can
     cdef int dim2 = <int> dim/2
     cdef int canvasDim = canvas.shape[0]
     cdef int x,y
-    cdef np.ndarray[np.uint8_t,ndim=2] color_rgb = Model.colorMap_arr[color]
+    cdef np.ndarray[np.uint8_t,ndim=1] color_rgb = Model.colorMap_arr[color]
     for x in range(x0-dim2,x0+dim2):
         for y in range(y0-dim2,y0+dim2):
             if x >= 0 and x < canvasDim and y >= 0 and y < canvasDim:
@@ -82,7 +82,7 @@ cdef void drawSquare(int x0, int y0, int dim, np.ndarray[np.uint8_t, ndim=3] can
 cdef void drawSquare_optimized(int x0, int y0, int dim, np.uint8_t[:,:,:] canvas, int color, int canvasDim):
     cdef int dim2 = dim/2
     cdef int x,y 
-    cdef np.ndarray[np.uint8_t,ndim=2] color_rgb = Model.colorMap_arr[color]
+    cdef np.ndarray[np.uint8_t,ndim=1] color_rgb = Model.colorMap_arr[color]
     for x in range(x0-dim2,x0+dim2):
         for y in range(y0-dim2,y0+dim2):
             if x >= 0 and x < canvasDim and y >= 0 and y < canvasDim:

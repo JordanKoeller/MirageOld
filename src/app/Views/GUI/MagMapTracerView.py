@@ -66,7 +66,7 @@ class MagMapTracerView(QtCore.QObject):
         print(self._magMapDataCoords.shape)
         for i in range(img.shape[0]):
             for j in range(img.shape[1]):
-                self._magMapDataCoords[i,j] = [i,j]
+                self._magMapDataCoords[i,j] = [img.shape[1]-j,img.shape[0]-i]
         self._setROI([50,50])
 
     def _setROI(self,begin):

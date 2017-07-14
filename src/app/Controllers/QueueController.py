@@ -21,6 +21,7 @@ from ..Models.Parameters.MagMapParameters import MagMapParameters
 from ..Models.Parameters.LightCurveParameters import LightCurveParameters
 from ..Models.Parameters.StarFieldData import StarFieldData
 from ..Models.ParametersError import ParametersError
+from ..Models.Model import Model
 from ..Controllers.FileManagers.TableFileManager import TableFileManager
 from ..Utility import Vector2D
 
@@ -39,7 +40,8 @@ def _queueExtrasBuilder(view,parameters,inputUnit):
     if view.enableMagMap.isChecked():
         magmapdims = view.vectorFromQString(view.magMapDimEntry.text(),unit=inputUnit)
         magmapres = view.vectorFromQString(view.magMapResolutionEntry.text(),None)
-        magmapparams = MagMapParameters(Vector2D(0,0,'rad'),magmapdims,magmapres)
+        magmapcenter = Model.engine.getCenterCoords(parameters)
+        magmapparams = MagMapParameters(magmapcenter,magmapdims,magmapres)
         datasets.append(magmapparams)
     if view.queueSaveStarfield.isChecked():
         datasets.append(StarFieldData())

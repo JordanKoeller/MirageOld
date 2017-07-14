@@ -48,8 +48,8 @@ class MagMapTracerThread(QtCore.QThread):
         self.progress_label_update.emit("Animating.")
         r = Model.parameters.quasar.radius.to('rad').value
         while self.__calculating and self.__counter < len(self.pixels):
-            y = -self.angles[self.__counter,0]
-            x = self.angles[self.__counter,1]
+            y = self.angles[self.__counter,1]
+            x = -self.angles[self.__counter,0]
             pos = Vector2D(x,y,'rad')
             Model.parameters.quasar.setPos(pos)
 #             pos = Model.parameters.extras.getParams('magmap').angleToPixel(pos)/1024
