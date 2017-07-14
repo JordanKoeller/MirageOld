@@ -98,7 +98,7 @@ class GUIManager(QtWidgets.QMainWindow):
             self.__signals.pop(i)
             
             
-    def vectorFromQString(self, string, reverse_y=False, transpose=True,unit = None):
+    def vectorFromQString(self, string,unit = None):
         """
         Converts an ordered pair string of the form (x,y) into a Vector2D of x and y.
 
@@ -111,17 +111,9 @@ class GUIManager(QtWidgets.QMainWindow):
                 Specify whether or not to flip x and y coordinates. In other words, return a Vector2D of (y,x) rather than (x,y). Default True
         """
         x, y = (string.strip('()')).split(',')
-
-        if transpose:
-            if reverse_y:
-                return Vector2D(-float(y), float(x),unit)
-            else:
-                return Vector2D(float(y), float(x),unit)
-        else:
-            if reverse_y:
-                return Vector2D(float(x), -float(y),unit)
-            else:
-                return Vector2D(float(x), float(y),unit)
+        if ' ' in y:
+            y = y.split(' ')[0]
+        return Vector2D(float(x), float(y),unit)
             
     @property
     def signals(self):

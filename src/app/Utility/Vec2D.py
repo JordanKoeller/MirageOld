@@ -127,6 +127,10 @@ class Vector2D(object):
         tmp = tmp.to(unit)
         return Vector2D(tmp[0].value,tmp[1].value,tmp[0].unit)
 
+    @property
+    def asString(self):
+        return "("+str(self.x)+","+str(self.y)+")"
+
     def __str__(self):
         "Pretty print"
         if self.unit != None:

@@ -63,16 +63,16 @@ def _queueExtrasBinder(view,obj):
             for i in obj.extras.desiredResults:
                 if isinstance(i , MagMapParameters):
                     view.enableMagMap.setChecked(True)
-                    view.magMapResolutionEntry.setText("("+str(i.resolution.x)+","+str(i.resolution.y)+")")
+                    view.magMapResolutionEntry.setText(i.resolution.asString)
                     dims = i.dimensions.to(view.unitLabel_6.text())
-                    view.magMapDimEntry.setText("("+str(dims.x)+","+str(dims.y)+")")
+                    view.magMapDimEntry.setText(dims.asString)
                 elif isinstance(i , LightCurveParameters):
                     view.enableLightCurve.setChecked(True)
                     unit = view.unitLabel_3.text()
                     start = i.pathStart.to(unit)
                     end = i.pathEnd.to(unit)
-                    view.quasarPathStart.setText("(" + str(start.y) + "," + str(start.x) + ")")
-                    view.quasarPathEnd.setText("(" + str(end.y) + "," + str(end.x) + ")")
+                    view.quasarPathStart.setText(start.asString)
+                    view.quasarPathEnd.setText(end.asString)
                     view.dataPointSpinBox.setValue(int(i.resolution))
                 elif isinstance(i, StarFieldData):
                     view.queueSaveStarfield.setChecked(True)

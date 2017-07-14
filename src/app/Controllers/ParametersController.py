@@ -160,9 +160,9 @@ class ParametersController(GUIController):
             qV = parameters.quasar.velocity.to('rad').unitless()*parameters.quasar.angDiamDist.to('km').value;
             qP = parameters.quasar.position.to(self.view.qPositionLabel.text()).unitless()
             gP = parameters.galaxy.position.to('arcsec').unitless()
-            self.view.qVelocity.setText("(" + str(qV.y) + "," + str(qV.x) + ")")
-            self.view.qPosition.setText("(" + str(qP.y) + "," + str(qP.x) + ")")
-            self.view.gCenter.setText("(" + str(gP.y) + "," + str(gP.x) + ")")
+            self.view.qVelocity.setText(qV.asString)
+            self.view.qPosition.setText(qP.asString)
+            self.view.gCenter.setText(gP.asString)
             self.view.qRadius.setText(str(parameters.quasar.radius.to(self.view.qRadiusUnitOption.currentText()).value))
             self.view.qRedshift.setText(str(parameters.quasar.redshift))
             self.view.gRedshift.setText(str(parameters.galaxy.redshift))
