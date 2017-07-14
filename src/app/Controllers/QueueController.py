@@ -110,7 +110,7 @@ class QueueController(GUIController):
     def __initTable(self):
         tableSignal = self.view.signals['editExpt']
         self.table = ExperimentQueueTable(tableSignal,self.view.groupBox_5,editable = False)
-        self.view.verticalLayout_8.insertWidget(1,self.table)
+        self.view.verticalLayout_8.insertWidget(0,self.table)
         self.view.queueStartButton.clicked.connect(self.runExperiments)
         self.view.queueEditCancelButton.clicked.connect(self.cancelEdit)
         self.view.queueEditCancelButton.setEnabled(False)

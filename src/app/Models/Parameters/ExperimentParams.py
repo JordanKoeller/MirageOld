@@ -34,6 +34,12 @@ class ExperimentParams(object):
     def generatePath(self,params):
         pass #Need to impliment
     
+    def getParams(self,name):
+        for i in self.desiredResults:
+            if name == i.keyword:
+                return i
+        return None
+    
 
     
     @property

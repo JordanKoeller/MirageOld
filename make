@@ -1,5 +1,5 @@
 #!/bin/sh
-cd src
+cd src/app
 python setup.py build_ext --inplace
-cd ..
+cd ../..
 echo "\n\n\nBuild Done"

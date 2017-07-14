@@ -13,6 +13,7 @@ from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Br
 from PyQt5 import QtGui
 from astropy import units as u
 from astropy.coordinates import SphericalRepresentation as SR
+import numpy as np
 
 
 class __Model(object):
@@ -20,6 +21,7 @@ class __Model(object):
         self.__Engine = Engine_Grid()
         print("Brute Forcing")
         self.__colormap = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66), QtGui.qRgb(53,252,92)]
+        self.__colorMapArr = np.array([[0,0,0],[255,255,0],[255,255,255],[50,101,255],[244,191,66],[53,252,92]],dtype=np.uint8)
         #Index 0: Black
         #Index 1: Yellow
         #Index 2: White
@@ -60,5 +62,9 @@ class __Model(object):
     @property
     def colorMap(self):
         return self.__colormap
+    
+    @property
+    def colorMap_arr(self):
+        return self.__colorMapArr
 Model = __Model()
 

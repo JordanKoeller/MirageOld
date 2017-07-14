@@ -80,17 +80,25 @@ cdef class Engine_ShapeGrid(Engine):
 
 	@cython.boundscheck(False)  #turn off bounds-checking for entire function
 	@cython.wraparound(False)
-	cpdef getFrame(self):
+	cpdef getFrame(self,object x=None,object y=None,object r=None):
 		"""
 		Returns a 2D numpy array, containing the coordinates of pixels illuminated by the source specified in the system's parameters.
 		"""
-		begin = time.clock()
 		while self.__preCalculating:
 			print("waiting")
 			time.sleep(0.1)
-		cdef double qx = self.__parameters.queryQuasarX
-		cdef double qy = self.__parameters.queryQuasarY
-		cdef double qr = self.__parameters.queryQuasarRadius
+		begin = time.clock()
+		cdef double qx = 0
+		cdef double qy = 0
+		cdef double qr = 0
+		if x == None:
+			qx = self.__parameters.queryQuasarX
+			qy = self.__parameters.queryQuasarY
+			qr = self.__parameters.queryQuasarRadius
+		else:
+			qx = x
+			qy = y
+			qr = r
 		cdef pair[vector[pair[int,int]],double] ret = self.__grid.find_within(qx,qy,qr)
 		cdef int retf = ret.first.size()
 		cdef int i = 0

@@ -95,7 +95,7 @@ class Trial(AbstractFileWrapper):
         
     @requiresDtype(StarFieldData)
     def regenerateParameters(self,ind,filename=None):
-        params = copy.deepcopy(self._params)
+        params = copy.deepcopy(self.parameters)
         stars = self.getStars()
         params.setStars(stars)
         if filename:
@@ -104,6 +104,14 @@ class Trial(AbstractFileWrapper):
             print("Parameters Saved")
         else:
             return params
+        
+    def saveParameters(self,filename=None):
+        saver = ParametersFileManager(NullSignal)
+        if filename:
+            saver.write(copy.deepcopy(self.parameters),filename)
+        else:
+            saver.write(copy.deepcopy(self.parameters))
+        print("parameters Saved")
         
     @property
     def trialNumber(self):

@@ -43,6 +43,7 @@
        </property>
        <addaction name="visualizerViewSelector"/>
        <addaction name="queueViewSelector"/>
+       <addaction name="magMapTracerSelector"/>
        <addaction name="separator"/>
        <addaction name="playPauseAction"/>
        <addaction name="resetAction"/>
@@ -1394,7 +1395,7 @@ newParams = copy.deepcopy(oldParams)</string>
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>514</width>
+                 <width>341</width>
                  <height>89</height>
                 </rect>
                </property>
@@ -1459,9 +1460,18 @@ newParams = copy.deepcopy(oldParams)</string>
           </layout>
          </widget>
         </item>
+        <item>
+         <widget class="QGroupBox" name="tracerFrame">
+          <property name="title">
+           <string/>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout"/>
+         </widget>
+        </item>
        </layout>
        <zorder>visualizationFrame</zorder>
        <zorder>queueFrame</zorder>
+       <zorder>tracerFrame</zorder>
       </widget>
      </widget>
     </item>
@@ -1568,6 +1578,11 @@ newParams = copy.deepcopy(oldParams)</string>
   <action name="parametersEntryHelpAction">
    <property name="text">
     <string>Parameters Variance</string>
+   </property>
+  </action>
+  <action name="magMapTracerSelector">
+   <property name="text">
+    <string>Magnification Map Tracer</string>
    </property>
   </action>
  </widget>

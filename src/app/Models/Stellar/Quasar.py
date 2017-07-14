@@ -4,7 +4,7 @@ from .Movable import Movable
 from ...Utility import Vector2D
 from ...Utility import zeroVector
 import astropy.units as u
-from ...Views.Drawer.ShapeDrawer import drawSolidCircle
+from ...Views.Drawer.ShapeDrawer_rgb import drawSolidCircle
 from ..ParametersError import ParametersError
 
 class Quasar(Movable,Cosmic):

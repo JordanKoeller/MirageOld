@@ -11,6 +11,7 @@ from PyQt5 import QtWidgets, uic, QtCore
 from ...Controllers.ParametersController import ParametersController
 from ...Controllers.VisualizationController import VisualizationController
 from ...Controllers.QueueController import QueueController
+from ...Controllers.MagMapTracerController import MagMapTracerController
 from ...Utility import Vector2D
 
 
@@ -44,12 +45,14 @@ class GUIManager(QtWidgets.QMainWindow):
         self.parametersController = ParametersController(self)
         self.visualPerspective = VisualizationController(self)
         self.queuePerspective = QueueController(self)
+        self.magTracingPerspective = None
         self.perspective = None
         self.switchToVisualizing()
         self.progressBar.setValue(0)
         self.shutdown.triggered.connect(sys.exit)
         self.visualizerViewSelector.triggered.connect(self.switchToVisualizing)
         self.queueViewSelector.triggered.connect(self.switchToQueue)
+        self.magMapTracerSelector.triggered.connect(self.switchToTracing)
     
     def __switchToPerspective(self,perspective):
         if self.perspective:
@@ -68,6 +71,12 @@ class GUIManager(QtWidgets.QMainWindow):
             self.__switchToPerspective(self.queuePerspective)
         else:
             self.__switchToPerspective(QueueController(self))
+    
+    def switchToTracing(self):
+        if self.magTracingPerspective:
+            self.__switchToPerspective(self.magTracingPerspective)
+        else:
+            self.__switchToPerspective(MagMapTracerController(self))
             
     def hideParameters(self):
         self.parametersController.hide()

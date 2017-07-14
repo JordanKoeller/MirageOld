@@ -19,11 +19,13 @@ engine_quadtree = Extension("Calculator/Engine/Engine_Quadtree", sources = ["Cal
 engine_kdtree = Extension("Calculator/Engine/Engine_KDTree", sources = ["Calculator/Engine/Engine_KDTree.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11","-fopenmp"], libraries = ["m"])
 drawer_supers = Extension("Views/Drawer/Drawer", sources = ["Views/Drawer/Drawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 lensedimgdrawer = Extension("Views/Drawer/LensedImageDrawer", sources = ["Views/Drawer/LensedImageDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+lensedimgdrawer_pyqtgraph = Extension("Views/Drawer/LensedImageDrawer_pyqtgraph", sources = ["Views/Drawer/LensedImageDrawer_pyqtgraph.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 datavisdrawer = Extension("Views/Drawer/DataVisualizerDrawer", sources = ["Views/Drawer/DataVisualizerDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 shapedrawer = Extension("Views/Drawer/ShapeDrawer", sources = ["Views/Drawer/ShapeDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+shapedrawer_rgb = Extension("Views/Drawer/ShapeDrawer_rgb", sources = ["Views/Drawer/ShapeDrawer_rgb.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 # curvedrawer = Extension("Views/Drawer/CurveDrawer", sources = ["Views/Drawer/CurveDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 # diagnosticdrawer = Extension("Views/Drawer/DiagnosticDrawer", sources = ["Views/Drawer/DiagnosticDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 setup(
-	ext_modules=cythonize([tree,engine,grid,ptrgrid,shapegrid,engine_ptrgrid,engine_shapegrid,engine_bruteforce,drawer_supers,lensedimgdrawer,datavisdrawer,shapedrawer]),
+	ext_modules=cythonize([tree,engine,grid,ptrgrid,shapegrid,engine_ptrgrid,engine_shapegrid,engine_bruteforce,drawer_supers,lensedimgdrawer,lensedimgdrawer_pyqtgraph,datavisdrawer,shapedrawer,shapedrawer_rgb]),
 	include_dirs = [numpy.get_include(),"Utility"],
 )

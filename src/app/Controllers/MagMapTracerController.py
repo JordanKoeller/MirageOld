@@ -1,35 +1,34 @@
-'''
-Created on May 31, 2017
-
-@author: jkoeller
-'''
-
 from PyQt5 import QtCore, QtGui
 
 from .GUIController import GUIController
-from .Threads.VisualizerThread import VisualizerThread
+from .Threads.MagMapTracerThread import MagMapTracerThread
 from .FileManagers.FITSFileManager import FITSFileManager
 from .FileManagers.VisualizationFileManager import VisualizationFileManager
+from .FileManagers.ParametersFileManager import ParametersFileManager
+from .FileManagers.MediaFileManager import MediaFileManager
 from ..Models.Model import Model
+from ..Views.GUI.MagMapTracerView import MagMapTracerView
+from ..Utility.NullSignal import NullSignal
+
+import numpy as np
 
 
-class VisualizationController(GUIController):
+class MagMapTracerController(GUIController):
     '''
     classdocs
     '''
-    imageCanvas_signal = QtCore.pyqtSignal(object)
-    curveCanvas_signal = QtCore.pyqtSignal(object, object)
-
+    tracer_signal = QtCore.pyqtSignal(object)
+    update_view_signal = QtCore.pyqtSignal(object,object,object)
 
     def __init__(self, view):
         '''
         Constructor
         '''
-        GUIController.__init__(self,view,None,None)
-        view.addSignals(imageCanvas = self.imageCanvas_signal, curveCanvas = self.curveCanvas_signal)
+        GUIController.__init__(self, view, None, None)
+        view.addSignals(tracerUpdate=self.tracer_signal,tracerView=self.update_view_signal)
         self.playToggle = False
-        self.enabled = False
-        self.thread = VisualizerThread(self.view.signals)
+        self.thread = None
+        self.enabled = True
         self.view.pauseButton.clicked.connect(self.pause)
         self.view.resetButton.clicked.connect(self.restart)
         self.view.playButton.clicked.connect(self.simImage)
@@ -38,19 +37,18 @@ class VisualizationController(GUIController):
         self.view.displayQuasar.clicked.connect(self.drawQuasarHelper)
         self.view.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
         self.view.record_button.triggered.connect(self.record)
-        self.view.visualizeDataButton.clicked.connect(self.visualizeData)
-        self.view.developerExportButton.clicked.connect(self.saveVisualization)
-        self.view.regenerateStars.clicked.connect(self.regenerateStarsHelper)
-        filler_img = QtGui.QImage(2000, 2000, QtGui.QImage.Format_Indexed8)
-        filler_img.setColorTable([QtGui.qRgb(0, 0, 0)])
-        filler_img.fill(0)
-        self.view.main_canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
-        self.view.signals["imageCanvas"].connect(self.main_canvas_slot)
-        self.view.signals["curveCanvas"].connect(self.curve_canvas_slot)
         self.view.signals['paramLabel'].connect(self.qPoslabel_slot)
         self.parametersController = self.view.parametersController
-        self.fileManager = VisualizationFileManager(self.view.signals)
+        self.fileManager = MediaFileManager(self.view.signals)
+        self.__initView()
 
+    def __initView(self):
+        self.tracerView = MagMapTracerView(None, self.view.signals['imageCanvas'], self.view.signals['curveCanvas'], self.tracer_signal,self.update_view_signal)
+        self.view.verticalLayout.insertWidget(0, self.tracerView.view)
+        self.tracerView.hasUpdated.connect(self.fileManager.sendFrame)
+        self.initialize()
+        
+        
     def togglePlaying(self):
         if self.playToggle:
             self.playToggle = False
@@ -61,13 +59,15 @@ class VisualizationController(GUIController):
         
 
     def show(self):
-        self.view.visualizationFrame.setHidden(False)
+        self.view.tracerFrame.setHidden(False)
+        self.view.regenerateStars.setEnabled(False)
         self.view.visualizationBox.setHidden(False)
         self.enabled = True
         
     def hide(self):
+        self.view.tracerFrame.setHidden(True)
+        self.view.regenerateStars.setEnabled(True)
         self.view.visualizationBox.setHidden(True)
-        self.view.visualizationFrame.setHidden(True)
         self.enabled = False
         
     def drawQuasarHelper(self):
@@ -80,9 +80,6 @@ class VisualizationController(GUIController):
         """
         Model.parameters.showGalaxy = self.view.displayGalaxy.isChecked()
         
-    def regenerateStarsHelper(self):
-        Model.parameters.regenerateStars()
-        Model.engine.reconfigure()
 
     def simImage(self):
         """
@@ -93,10 +90,8 @@ class VisualizationController(GUIController):
         """
         if self.enabled:
             self.playToggle = True
-            parameters = self.parametersController.buildParameters()
-            if parameters is None:
-                return
-            Model.updateParameters(parameters)
+            pixels = self.tracerView.getROI()
+            self.thread = MagMapTracerThread(self.view.signals, pixels)
             self.thread.start()
 
     def record(self):
@@ -118,30 +113,15 @@ class VisualizationController(GUIController):
             self.thread.restart()
             self.fileManager.write()
         
-        
-    def visualizeData(self):
-        params = self.parametersController.buildParameters()
-        return self.thread.visualize(params)
+    def initialize(self):
+        paramsLoader = ParametersFileManager(self.view.signals)
+        params = paramsLoader.read()
+        magmap = self.fileManager.read()
+        array = np.asarray(magmap)
+        self.tracerView.setMagMap(array)
+        Model.updateParameters(params)
 
-    def saveVisualization(self):
-        """Calculates and saves a point-source magnification map as a FITS file"""
-        fitsFileManager = FITSFileManager(self.view.signals)
-        data = self.visualizeData()
-        fitsFileManager.write(data)
-        # self.fileManager.save_still(self.main_canvas)
-
-        
-    def main_canvas_slot(self, img):
-        img = QtGui.QImage(img.tobytes(),img.shape[0],img.shape[1],QtGui.QImage.Format_Indexed8)
-        img.setColorTable(Model.colorMap)
-        self.view.main_canvas.pixmap().convertFromImage(img)
-        self.view.main_canvas.update()
-        self.fileManager.giveFrame(img)
-
-    def curve_canvas_slot(self, x, y):
-        self.view.curve_canvas.plot(x, y, clear=True)
     
-    def qPoslabel_slot(self,pos):
+    def qPoslabel_slot(self, pos):
         self.view.sourcePosLabel.setText(pos)
-        
 # 

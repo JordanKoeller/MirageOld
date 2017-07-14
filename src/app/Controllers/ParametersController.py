@@ -47,6 +47,7 @@ class ParametersController(GUIController):
         self.view.signals['paramSetter'].connect(self.bindFields)
         self.fileManager = ParametersFileManager(self.view.signals)
         self._tmpStars = []
+        
     def displayHelpMessage(self):
         dialog = HelpDialog(self.view)
         dialog.show()

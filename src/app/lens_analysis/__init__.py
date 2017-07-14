@@ -1,9 +1,9 @@
 # %gui qt5
 
-from lens_analysis.AbstractFileWrapper import AbstractFileWrapper
-from lens_analysis.DirectoryMap import DirectoryMap
-from lens_analysis.Experiment import Experiment
-from lens_analysis.Trial import Trial
+from .AbstractFileWrapper import AbstractFileWrapper
+from .DirectoryMap import DirectoryMap
+from .Experiment import Experiment
+from .Trial import Trial
 from ..Views.GUI.GUIManager import GUIManager
 from ..Models.Parameters.Parameters import Parameters
 from ..Models.Parameters.ExperimentParams import ResultTypes

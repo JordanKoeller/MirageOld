@@ -1,23 +1,20 @@
-'''
-Created on Jun 4, 2017
-
-@author: jkoeller
-'''
+from PIL import Image
 from PyQt5 import QtCore
 import imageio
 
-from .FileManager import FileManager
 import numpy as np
+
 from ...Utility.NullSignal import NullSignal
+from .FileManager import FileManager
 
 
-class VisualizationFileManager(FileManager,QtCore.QThread):
+class MediaFileManager(FileManager,QtCore.QThread):
     '''
     classdocs
     '''
 
 
-    def __init__(self, signals=NullSignal):
+    def __init__(self, signals = NullSignal):
         '''
         Constructor
         '''
@@ -27,21 +24,17 @@ class VisualizationFileManager(FileManager,QtCore.QThread):
         self.recording = False
         
     def fileReader(self, file):
-        return None
+        return Image.open(file.name)
     
-    def giveFrame(self,frame):
+    def sendFrame(self,frame):
+        #Frame is of type pixmap
+        print("Sent frame")
         if self.recording:
+            print("Saved")
             self.__frames.append(frame.copy())
-            
-    @property
-    def fileextension(self):
-        return "Movie (*.mp4)"
-
-    @property
-    def filetype(self):
-        return ""
-
+        
     def __asNPArray(self,im):
+        im = im.toImage()
         im = im.convertToFormat(4)
         width = im.width()
         height = im.height()
@@ -49,7 +42,7 @@ class VisualizationFileManager(FileManager,QtCore.QThread):
         ptr.setsize(im.byteCount())
         arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
         return arr
-
+        
     def fileWriter(self,file,data = None):
         self.signals['progressBar'].emit("Rendering. Please Wait.")
         self.signals['progressBarMax'].emit(len(self.__frames))
@@ -74,6 +67,10 @@ class VisualizationFileManager(FileManager,QtCore.QThread):
     def cancelRecording(self):
         self.recording = False
         self.__frames = []
-            
+        
     def run(self):
         self.writeHelper(None)
+        
+    @property
+    def fileextension(self):
+        return ""

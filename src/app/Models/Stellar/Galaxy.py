@@ -4,7 +4,7 @@ from ...Utility import zeroVector
 from .ShearLenser import ShearLenser
 from .Drawable import Drawable
 from .Cosmic import Cosmic
-from ...Views.Drawer.ShapeDrawer import drawPointLensers
+from ...Views.Drawer.ShapeDrawer_rgb import drawPointLensers
 from ..ParametersError import ParametersError
 from ..Model import Model
 

@@ -325,6 +325,21 @@ class Quasar:<br>
 		self.time = time
 		self.__quasar.setTime(time)
 		
+	def pixelToAngle(self,pixel): 
+		x,y = pixel.asTuple
+		x = x-self.canvasDim/2
+		y = y-self.canvasDim/2
+		x = self.dTheta.to('rad')*x 
+		y = self.dTheta.to('rad')*y 
+		delta = Vector2D(x.value,y.value,'rad')
+		return delta + self.galaxy.center.to('rad')
+	
+	def angleToPixel(self,angle):
+		delta = angle - self.galaxy.center.to('rad')
+		x,y = delta.asTuple 
+		x = x/self.dTheta.to('rad').value 
+		y = y/self.dTheta.to('rad').value 
+		return (int(x+self.canvasDim/2),int(y+self.canvasDim/2))
 
 	@property
 	def queryQuasarX(self):

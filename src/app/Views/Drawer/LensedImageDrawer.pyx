@@ -1,17 +1,23 @@
 import math
-import numpy as np
-from ...Utility.NullSignal import NullSignal
-cimport numpy as np
-import pyqtgraph as pg 
-from pyqtgraph import QtCore, QtGui
-from ...Calculator import ImageFinder
-from ...Utility import Vector2D
+import math
+
+from astropy import constants as const
 from astropy import units as u
+from pyqtgraph import QtCore, QtGui
+from scipy.cluster.vq import vq, kmeans, whiten
+
+import numpy as np
+import pyqtgraph as pg 
+
+from ...Calculator import ImageFinder
+from ...Models.Model import Model
+from ...Utility import Vector2D
+from ...Utility.NullSignal import NullSignal
+
+
+cimport numpy as np
 from .Drawer cimport ImageDrawer
 from .ShapeDrawer cimport drawCircle, drawLine
-import math
-from astropy import constants as const
-from scipy.cluster.vq import vq, kmeans, whiten
 
 
 cdef class LensedImageDrawer(ImageDrawer):

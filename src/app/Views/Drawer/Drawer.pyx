@@ -47,7 +47,9 @@ cdef class PlotDrawer(Drawer):
 				replaceY[i] = self.yAxis[i]
 			self.yAxis = replaceY
 			self.xAxis = replaceX
-		self.signal.emit(np.asarray(self.xAxis),np.asarray(self.yAxis))
+		tmpx,tmpy = np.asarray(self.xAxis),np.asarray(self.yAxis)
+		self.signal.emit(tmpx,tmpy)
+		return (tmpx,tmpy)
 
 	cdef plotAxes(self, np.ndarray[np.float64_t, ndim=1] x, np.ndarray[np.float64_t, ndim=1] y):
 		self.xAxis = x
@@ -58,17 +60,18 @@ cdef class PlotDrawer(Drawer):
 		if self.index == 0:
 			self.index = x.shape[0] -1
 		self.signal.emit(x,y)
+		return (x,y)
 
 	cpdef draw(self, object args):
 		if len(args) == 1:
-			self.append(args[0])
+			return self.append(args[0])
 		else:
 			x = args[0]
 			y = args[1]
 			if isinstance(y,float): ######Foreign to me, may be a bug source######
-				self.append(y,x)
+				return self.append(y,x)
 			else:
-				self.plotAxes(x,y)
+				return self.plotAxes(x,y)
 
 	def reset(self):
 		self.xAxis = np.arange(0,1000,dtype=np.float64)
@@ -84,8 +87,8 @@ cdef class CompositeDrawer:
 		self.plotDrawer = plotDrawer
 
 	cpdef draw(self, object imgArgs, object plotArgs):
-		self.imgDrawer.draw(imgArgs)
-		self.plotDrawer.draw(plotArgs)
-
+		img = self.imgDrawer.draw(imgArgs)
+		plot = self.plotDrawer.draw(plotArgs)
+		return (img,plot)
 	cpdef reset(self):
 		self.plotDrawer.reset()

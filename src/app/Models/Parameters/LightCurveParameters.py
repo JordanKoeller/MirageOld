@@ -5,5 +5,9 @@ class LightCurveParameters(object):
         self.pathEnd = endPos
         self.resolution = numDataPoints
         
+    @property
+    def keyword(self):
+        return "lightcurve"
+        
     def __str__(self):
         return "LIGHTCURVE:\n\n Start = "+str(self.pathStart.to('arcsec'))+"\nEnd = "+str(self.pathEnd.to('arcsec'))+"\nResolution = "+str(self.resolution)+" pixels"
