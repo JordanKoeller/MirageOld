@@ -21,17 +21,14 @@ class MediaFileManager(FileManager,QtCore.QThread):
         FileManager.__init__(self,signals)
         QtCore.QThread.__init__(self)
         self.__frames = []
-        self.recording = False
+        self.framerate = 25
         
     def fileReader(self, file):
         return Image.open(file.name)
     
     def sendFrame(self,frame):
         #Frame is of type pixmap
-        print("Sent frame")
-        if self.recording:
-            print("Saved")
-            self.__frames.append(frame.copy())
+        self.__frames.append(frame.copy())
         
     def __asNPArray(self,im):
         im = im.toImage()
@@ -48,7 +45,7 @@ class MediaFileManager(FileManager,QtCore.QThread):
         self.signals['progressBarMax'].emit(len(self.__frames))
         filename = file.name
         file.close()
-        writer = imageio.get_writer(filename,fps=60)
+        writer = imageio.get_writer(filename,fps=self.framerate)
         counter = 0
         for frame in self.__frames:
             img = self.__asNPArray(frame)
@@ -60,12 +57,9 @@ class MediaFileManager(FileManager,QtCore.QThread):
         self.signals['progressBar'].emit(0)
         
     def write(self, data = None):
-        if self.recording:
-            self.run()
-            self.recording = False
+        self.run()
             
     def cancelRecording(self):
-        self.recording = False
         self.__frames = []
         
     def run(self):

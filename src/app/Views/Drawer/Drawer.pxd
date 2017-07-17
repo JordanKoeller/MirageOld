@@ -18,7 +18,7 @@ cdef class PlotDrawer(Drawer):
 	cdef plotAxes(self, np.ndarray[np.float64_t, ndim=1] x, np.ndarray[np.float64_t, ndim=1] y)
 
 cdef class CompositeDrawer:
-	cdef ImageDrawer imgDrawer 
-	cdef PlotDrawer plotDrawer 
+	cdef object imgDrawer 
+	cdef object plotDrawer 
 	cpdef draw(self, object imgArgs, object plotArgs)
 	cpdef reset(self)

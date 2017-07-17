@@ -244,7 +244,7 @@ class Quasar:<br>
 
 	@property
 	def avgMassEinsteinRadius(self):
-		avgMass = 0.5#self.galaxy.averageStarMass
+		avgMass = 0.20358470458734301 #Average mass, in solMass of a generated star cluster of 10 million stars
 		gR = self.galaxy.redshift
 		qR = self.quasar.redshift
 		thetaE = 4*const.G*u.Quantity(avgMass,'solMass').to('kg')*self.dLS.to('m')/self.quasar.angDiamDist.to('m')/self.galaxy.angDiamDist.to('m')/const.c/const.c

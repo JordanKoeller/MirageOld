@@ -4,9 +4,11 @@ from ...Utility import zeroVector
 from .ShearLenser import ShearLenser
 from .Drawable import Drawable
 from .Cosmic import Cosmic
-from ...Views.Drawer.ShapeDrawer_rgb import drawPointLensers
+from ...Views.Drawer.ShapeDrawer import drawPointLensers, drawSquare
+from ...Views.Drawer.ShapeDrawer_rgb import drawPointLensers_rgb, drawSquare_rgb
 from ..ParametersError import ParametersError
 from ..Model import Model
+from ...Calculator import Conversions
 
 class Galaxy(Drawable, Cosmic):
 	__velocityDispersion = u.Quantity(0, 'km/s')
@@ -30,14 +32,17 @@ class Galaxy(Drawable, Cosmic):
 
 	def drawStars(self, img, parameters):
 		if len(self.__stars) != 0:
-			drawPointLensers(self.__stars, img, parameters)
+			if img.ndim == 3:
+				drawPointLensers_rgb(self.__stars, img, parameters)
+			else:
+				drawPointLensers(self.__stars, img, parameters)
 
 	def drawGalaxy(self, img, parameters):
-		center = Vector2D(self.position.x / parameters.dTheta.value + (parameters.canvasDim / 2), self.position.y / parameters.dTheta.value + (parameters.canvasDim / 2))
-		for i in range(-2, 3, 1):
-			for j in range(-2, 3, 1):
-				if center.x + i > 0 and center.y + j > 0 and center.x + i < parameters.canvasDim and center.y + j < parameters.canvasDim:
-					img[int(center.x + i), int(center.y + j)] = self.colorKey
+		center = Conversions.angleToPixel(self.position,parameters)
+		if img.ndim == 3:
+			drawSquare_rgb(int(center.x),int(center.y),5,img,self.colorKey)
+		else:
+			drawSquare(int(center.x),int(center.y),5,img,self.colorKey)
 
 
 	@property

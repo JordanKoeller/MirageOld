@@ -116,7 +116,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-290</y>
+          <y>0</y>
           <width>582</width>
           <height>1280</height>
          </rect>
@@ -1154,7 +1154,7 @@ newParams = copy.deepcopy(oldParams)</string>
                   <string>Display Galaxy</string>
                  </property>
                  <property name="checked">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -1167,7 +1167,7 @@ newParams = copy.deepcopy(oldParams)</string>
                   <string>Display Quasar</string>
                  </property>
                  <property name="checked">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -1461,7 +1461,31 @@ newParams = copy.deepcopy(oldParams)</string>
          </widget>
         </item>
         <item>
+         <widget class="QFrame" name="magTracerFrame">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_12">
+           <item>
+            <widget class="QSplitter" name="splitter_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <widget class="PlotWidget" name="tracerPlot"/>
+             <widget class="GraphicsLayoutWidget" name="tracerImgArea"/>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <widget class="QGroupBox" name="tracerFrame">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
           <property name="title">
            <string/>
           </property>
@@ -1472,6 +1496,7 @@ newParams = copy.deepcopy(oldParams)</string>
        <zorder>visualizationFrame</zorder>
        <zorder>queueFrame</zorder>
        <zorder>tracerFrame</zorder>
+       <zorder>magTracerFrame</zorder>
       </widget>
      </widget>
     </item>
@@ -1592,6 +1617,11 @@ newParams = copy.deepcopy(oldParams)</string>
    <class>PlotWidget</class>
    <extends>QGraphicsView</extends>
    <header location="global">pyqtgraph.h</header>
+  </customwidget>
+  <customwidget>
+   <class>GraphicsLayoutWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

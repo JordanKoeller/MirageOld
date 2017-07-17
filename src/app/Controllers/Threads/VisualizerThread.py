@@ -59,7 +59,7 @@ class VisualizerThread(QtCore.QThread):
         self.progress_bar_max_update = signals['progressBarMax']
         self.sourcePos_label_update = signals['paramLabel']
         self.__calculating = False
-        self.__frameRate = 60
+        self.__frameRate = 30
         self.__drawer = LensedImageLightCurveComposite(self.image_canvas_update,self.curve_canvas_update)
         self.circularPath = False
 
@@ -75,7 +75,7 @@ class VisualizerThread(QtCore.QThread):
             pixels = Model.engine.getFrame()
             mag = Model.engine.getMagnification(pixels.shape[0])
             self.__drawer.draw([Model.parameters,pixels],[mag])
-            self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
+            self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.to('arcsec')))
             Model.parameters.incrementTime(Model.parameters.dt)
             Model.moveStars()
             deltaT = time.clock() - timer
@@ -94,7 +94,7 @@ class VisualizerThread(QtCore.QThread):
         pixels = Model.engine.getFrame()
         mag = Model.engine.getMagnification(len(pixels))
         self.__drawer.draw([Model.parameters,pixels],[mag])
-        self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
+        self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.to('arcsec')))
         self.__drawer.reset()
 
     def visualize(self,params):

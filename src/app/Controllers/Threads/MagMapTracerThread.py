@@ -12,20 +12,16 @@ import math
 
 
 class MagMapTracerThread(QtCore.QThread):
-    def __init__(self,signals=NullSignal,pixels = [],numFrames = -1):
+    def __init__(self,signals=NullSignal,pixels = [],numFrames = -1,recording=False):
         QtCore.QThread.__init__(self)
         self.signals = signals
         self.pixels = pixels.copy()
         if numFrames != -1:
             pixels = self._interpolate(pixels,numFrames)
             self.angles = pixels.copy()
-#             self.angles[:,1] = pixels[:,0]
-#             self.angles[:,0] = pixels[:,1]
         else:
             pixels = Model.parameters.extras.getParams('magmap').pixelToAngle(pixels)
             self.angles = pixels.copy()
-#             self.angles[:,1] = pixels[:,0]
-#             self.angles[:,0] = pixels[:,1]
         self.progress_bar_update  = signals['progressBar']
         self.progress_label_update = signals['progressLabel']
         self.image_canvas_update = signals['imageCanvas']
@@ -35,35 +31,41 @@ class MagMapTracerThread(QtCore.QThread):
         self.tracer_signal_update = signals['tracerUpdate']
         self._updater = signals['tracerView']
         self.__calculating = False
-        self.__frameRate = 60
-#         self.__drawer = LensedImageLightCurveComposite(self.image_canvas_update,self.curve_canvas_update)
+        self.__frameRate = 25
         self.__drawer = MagTracerComposite(NullSignal,NullSignal)
         self.circularPath = False
         self.__counter = 0
+        self.recording=recording
 
     def run(self):
         self.progress_label_update.emit("Ray-Tracing. Please Wait.")
         self.__calculating = True
         interval = 1/self.__frameRate
-        self.progress_label_update.emit("Animating.")
+        self.progress_label_update.emit("Tracing.")
+        self.progress_bar_max_update.emit(len(self.pixels))
         r = Model.parameters.quasar.radius.to('rad').value
         while self.__calculating and self.__counter < len(self.pixels):
+            self.progress_bar_update.emit(self.__counter)
+            x = self.angles[self.__counter,0]
             y = self.angles[self.__counter,1]
-            x = -self.angles[self.__counter,0]
             pos = Vector2D(x,y,'rad')
             Model.parameters.quasar.setPos(pos)
-#             pos = Model.parameters.extras.getParams('magmap').angleToPixel(pos)/1024
             timer = time.clock()
+            if self.recording:
+                self.signals['tracerUpdated'].emit('Done')
             pixels = Model.engine.getFrame()
             mag = Model.engine.getMagnification(pixels.shape[0])
             img,curve = self.__drawer.draw([Model.parameters,pixels],[mag])
             self._updater.emit(img,curve,self.pixels[self.__counter])
-#             self.tracer_signal_update.emit(self.pixels[self.__counter])
-            self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
-            deltaT = time.clock() - timer
-            if deltaT < interval:
-                time.sleep(interval-deltaT)
+            self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.to('arcsec')))
+            if not self.recording:
+                deltaT = time.clock() - timer
+                if deltaT < interval:
+                    time.sleep(interval-deltaT)
             self.__counter += 1
+        self.progress_label_update.emit("Done")
+        if self.recording:
+            self.signals['tracerDone'].emit('Finished')
         
     def _interpolate(self,pixels,numFrames):
         start = pixels[0]
@@ -87,7 +89,7 @@ class MagMapTracerThread(QtCore.QThread):
         mag = Model.engine.getMagnification(len(pixels))
         self.__drawer.draw([Model.parameters,pixels],[mag])
         self.tracer_signal_update.emit(self.pixels[0])
-        self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.orthogonal.setUnit('rad').to('arcsec')))
+        self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.to('arcsec')))
         self.__counter = 0
         self.__drawer.reset()
 

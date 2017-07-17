@@ -34,7 +34,7 @@ __kernel void ray_trace(
 		double incident_angle_x;
 		double incident_angle_y;
 		incident_angle_x = ((double) (gid1 - width / 2)) * dTheta;
-		incident_angle_y = ((double) (gid2 - height / 2)) * dTheta;
+		incident_angle_y = ((double) (height / 2 - gid2)) * dTheta;
 		double deltaR_x;
 		double deltaR_y;
 		double r;

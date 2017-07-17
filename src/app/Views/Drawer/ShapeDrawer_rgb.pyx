@@ -7,7 +7,7 @@ from ...Models.Model import Model
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)
-cpdef void drawCircle(int x0, int y0, int r, np.ndarray[np.uint8_t, ndim=3] canvas, int color):
+cpdef void drawCircle_rgb(int x0, int y0, int r, np.ndarray[np.uint8_t, ndim=3] canvas, int color):
     cdef int x = <int> fabs(r)
     cdef int y = 0
     cdef int err = 0
@@ -37,7 +37,7 @@ cpdef void drawCircle(int x0, int y0, int r, np.ndarray[np.uint8_t, ndim=3] canv
         if err > 0:
             x -= 1
             err -= 2*x + 1
-cpdef void drawLine(int yIntercept, double slope, int yAx, np.ndarray[np.uint8_t, ndim=3] canvas, int color):
+cpdef void drawLine_rgb(int yIntercept, double slope, int yAx, np.ndarray[np.uint8_t, ndim=3] canvas, int color):
     cdef int width = canvas.shape[0]
     cdef int height = canvas.shape[1]
     cdef int x = yAx
@@ -51,7 +51,7 @@ cpdef void drawLine(int yIntercept, double slope, int yAx, np.ndarray[np.uint8_t
             canvas[height - 1 - y,i] = color_rgb
                 
                 
-cpdef void drawSolidCircle(int x0, int y0, int r, np.ndarray[np.uint8_t, ndim=3] canvas, int color):
+cpdef void drawSolidCircle_rgb(int x0, int y0, int r, np.ndarray[np.uint8_t, ndim=3] canvas, int color):
     cdef int rSquared = r * r
     cdef int x, y
     cdef int canvasDim = canvas.shape[0]
@@ -68,7 +68,7 @@ cpdef void drawSolidCircle(int x0, int y0, int r, np.ndarray[np.uint8_t, ndim=3]
                 if x0-x > 0 and y0-y > 0 and x0-x < canvasDim and y0-y < canvasDim:
                     canvas[x0-x,y0-y] = color_rgb
 
-cdef void drawSquare(int x0, int y0, int dim, np.ndarray[np.uint8_t, ndim=3] canvas, int color):
+cpdef void drawSquare_rgb(int x0, int y0, int dim, np.ndarray[np.uint8_t, ndim=3] canvas, int color):
     cdef int dim2 = <int> dim/2
     cdef int canvasDim = canvas.shape[0]
     cdef int x,y
@@ -79,7 +79,7 @@ cdef void drawSquare(int x0, int y0, int dim, np.ndarray[np.uint8_t, ndim=3] can
                 canvas[x,y] = color_rgb
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef void drawSquare_optimized(int x0, int y0, int dim, np.uint8_t[:,:,:] canvas, int color, int canvasDim):
+cdef void drawSquare_optimized_rgb(int x0, int y0, int dim, np.ndarray[np.uint8_t, ndim=3] canvas, int color, int canvasDim):
     cdef int dim2 = dim/2
     cdef int x,y 
     cdef np.ndarray[np.uint8_t,ndim=1] color_rgb = Model.colorMap_arr[color]
@@ -91,7 +91,7 @@ cdef void drawSquare_optimized(int x0, int y0, int dim, np.uint8_t[:,:,:] canvas
                     
 @cython.boundscheck(False)
 @cython.wraparound(False)                    
-cpdef void drawPointLensers(np.ndarray[np.float64_t, ndim=2] stars, np.ndarray[np.uint8_t, ndim=3] canvas, object parameters):
+cpdef void drawPointLensers_rgb(np.ndarray[np.float64_t, ndim=2] stars, np.ndarray[np.uint8_t, ndim=3] canvas, object parameters):
     cdef int s
     cdef double x, y, r, m 
     cdef double w2 = parameters.canvasDim/2
@@ -99,7 +99,7 @@ cpdef void drawPointLensers(np.ndarray[np.float64_t, ndim=2] stars, np.ndarray[n
     cdef int numstars = stars.shape[0]
     for s in range(0,numstars):
         x = stars[s,0]/dTheta + w2
-        y = stars[s,1]/dTheta + w2
+        y = w2 - stars[s,1]/dTheta
         m = stars[s,2]
         r = math.sqrt(m+2.0)
-        drawSquare_optimized(<int>x,<int> y, <int> (r*2),canvas,2, <int> (w2*2))
+        drawSquare_optimized_rgb(<int>x,<int> y, <int> (r*2),canvas,2, <int> (w2*2))

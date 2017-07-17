@@ -19,13 +19,15 @@ class MagMapTracerController(GUIController):
     '''
     tracer_signal = QtCore.pyqtSignal(object)
     update_view_signal = QtCore.pyqtSignal(object,object,object)
+    tracer_updated = QtCore.pyqtSignal(str)
+    run_done = QtCore.pyqtSignal(str)
 
     def __init__(self, view):
         '''
         Constructor
         '''
         GUIController.__init__(self, view, None, None)
-        view.addSignals(tracerUpdate=self.tracer_signal,tracerView=self.update_view_signal)
+        view.addSignals(tracerUpdate=self.tracer_signal,tracerView=self.update_view_signal,tracerUpdated=self.tracer_updated,tracerDone = self.run_done)
         self.playToggle = False
         self.thread = None
         self.enabled = True
@@ -38,13 +40,14 @@ class MagMapTracerController(GUIController):
         self.view.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
         self.view.record_button.triggered.connect(self.record)
         self.view.signals['paramLabel'].connect(self.qPoslabel_slot)
+        self.view.signals['tracerUpdated'].connect(self.sendOffFrame)
+        self.view.signals['tracerDone'].connect(self.writeMov)
         self.parametersController = self.view.parametersController
         self.fileManager = MediaFileManager(self.view.signals)
         self.__initView()
 
     def __initView(self):
-        self.tracerView = MagMapTracerView(None, self.view.signals['imageCanvas'], self.view.signals['curveCanvas'], self.tracer_signal,self.update_view_signal)
-        self.view.verticalLayout.insertWidget(0, self.tracerView.view)
+        self.tracerView = MagMapTracerView(self.view,self.update_view_signal)
         self.tracerView.hasUpdated.connect(self.fileManager.sendFrame)
         self.initialize()
         
@@ -59,13 +62,15 @@ class MagMapTracerController(GUIController):
         
 
     def show(self):
-        self.view.tracerFrame.setHidden(False)
+        # self.view.tracerFrame.setHidden(False)
+        self.view.magTracerFrame.setHidden(False)
         self.view.regenerateStars.setEnabled(False)
         self.view.visualizationBox.setHidden(False)
         self.enabled = True
         
     def hide(self):
-        self.view.tracerFrame.setHidden(True)
+        # self.view.tracerFrame.setHidden(True)
+        self.view.magTracerFrame.setHidden(True)
         self.view.regenerateStars.setEnabled(True)
         self.view.visualizationBox.setHidden(True)
         self.enabled = False
@@ -81,7 +86,7 @@ class MagMapTracerController(GUIController):
         Model.parameters.showGalaxy = self.view.displayGalaxy.isChecked()
         
 
-    def simImage(self):
+    def simImage(self,recording=False):
         """
         Reads user input, updates the engine, and instructs the engine to begin
         calculating what the user desired.
@@ -89,16 +94,20 @@ class MagMapTracerController(GUIController):
         Called by default when the "Play" button is presssed.
         """
         if self.enabled:
+            if recording:
+                self.tracerView.setUpdatesEnabled(False)
+            else:
+                self.tracerView.setUpdatesEnabled(True)
+            # self.tracerView.setUpdatesEnabled(not recording)
             self.playToggle = True
             pixels = self.tracerView.getROI()
-            self.thread = MagMapTracerThread(self.view.signals, pixels)
+            self.thread = MagMapTracerThread(self.view.signals, pixels,recording=recording)
             self.thread.start()
 
     def record(self):
         """Calling this method will configure the system to save each frame of an animation, for compiling to a video that can be saved."""
         if self.enabled:
-            self.fileManager.recording = True
-            self.simImage()
+            self.simImage(recording=True)
 
     def pause(self):
         if self.enabled:
@@ -111,13 +120,24 @@ class MagMapTracerController(GUIController):
         if self.enabled:
             self.playToggle = False
             self.thread.restart()
-            self.fileManager.write()
+            self.fileManager.cancelRecording()
+            
+    def writeMov(self):
+        self.tracerView.setUpdatesEnabled(True)
+        self.fileManager.write()
+            
+    def sendOffFrame(self,filler):
+        frame = self.tracerView.getFrame()
+        self.fileManager.sendFrame(frame)
         
     def initialize(self):
         paramsLoader = ParametersFileManager(self.view.signals)
         params = paramsLoader.read()
         magmap = self.fileManager.read()
-        array = np.asarray(magmap)
+        if not params or not magmap:
+            return False
+        self.view.bindFields(params)
+        array = np.asarray(magmap)[:,:,0:3]
         self.tracerView.setMagMap(array)
         Model.updateParameters(params)
 

@@ -4,8 +4,10 @@ from .Movable import Movable
 from ...Utility import Vector2D
 from ...Utility import zeroVector
 import astropy.units as u
-from ...Views.Drawer.ShapeDrawer_rgb import drawSolidCircle
+from ...Views.Drawer.ShapeDrawer import drawSolidCircle
+from ...Views.Drawer.ShapeDrawer_rgb import drawSolidCircle_rgb
 from ..ParametersError import ParametersError
+from ...Calculator import Conversions
 
 class Quasar(Movable,Cosmic):
 	__radius = 0
@@ -36,10 +38,12 @@ class Quasar(Movable,Cosmic):
 
 
 	def draw(self, img, parameters):
-		center = (self.observedPosition + parameters.galaxy.position)/parameters.dTheta.value
-		center = Vector2D(int(center.x+parameters.canvasDim/2),int(center.y+parameters.canvasDim/2))
+		center = Conversions.angleToPixel(self.observedPosition,parameters)
 		radius = int(self.radius.value/parameters.dTheta.value)
-		drawSolidCircle(int(center.x),int(center.y),radius,img,self.colorKey)
+		if img.ndim == 3:
+			drawSolidCircle_rgb(int(center.x),int(center.y),radius,img,self.colorKey)
+		else:
+			drawSolidCircle(int(center.x),int(center.y),radius,img,self.colorKey)
 
 
 	def pixelRadius(self,dTheta):

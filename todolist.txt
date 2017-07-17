@@ -7,10 +7,9 @@ bind parameters to new fields												DONE
 report average mass of starfield, use for determining theta_e				DONE
 
 
-Relative velocities
+Relative velocities															DONE
 Track image through magmap - transparent data for lightcurve 
     multipane animation
-determine and use avg mass of stardist as theta_e mass
 licensing info, etc
 scale coloring of magmap relative to magnification without point lenses
 Remote plotting to fix race condition?

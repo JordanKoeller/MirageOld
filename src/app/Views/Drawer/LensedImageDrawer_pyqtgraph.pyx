@@ -17,7 +17,7 @@ from ...Utility.NullSignal import NullSignal
 
 cimport numpy as np
 from .Drawer cimport ImageDrawer
-from .ShapeDrawer_rgb cimport drawCircle, drawLine
+from .ShapeDrawer_rgb cimport drawCircle_rgb, drawLine_rgb
 
 
 cdef class LensedImageDrawer_pyqtgraph(ImageDrawer):
@@ -31,20 +31,20 @@ cdef class LensedImageDrawer_pyqtgraph(ImageDrawer):
         cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]
         cdef np.ndarray[np.uint8_t, ndim=3] canvas = np.zeros((parameters.canvasDim,parameters.canvasDim,3), dtype=np.uint8)
         cdef np.ndarray[np.uint8_t, ndim=2] lookup = Model.colorMap_arr
-#         if parameters.displayGalaxy:
-#             parameters.galaxy.drawGalaxy(canvas,parameters)
-#         if parameters.displayStars:
-#             parameters.galaxy.drawStars(canvas,parameters)
-#         if parameters.displayQuasar:
-#             parameters.quasar.draw(canvas,parameters)
+        if parameters.displayGalaxy:
+            parameters.galaxy.drawGalaxy(canvas,parameters)
+        if parameters.displayStars:
+            parameters.galaxy.drawStars(canvas,parameters)
+        if parameters.displayQuasar:
+            parameters.quasar.draw(canvas,parameters)
         cdef int pixel = 0
         cdef int end = pixels.shape[0]
         cdef np.ndarray[np.uint8_t, ndim=1] colors = self.getColorCode(pixels,parameters)
         for i in range(0,len(pixels)):
             canvas[pixels[i,0],pixels[i,1]] = lookup[colors[i]]
-        for i in range(-3,3):
-            for j in range(-3,3):
-                canvas[500+i,500+j] = [244,191,66]
+#         for i in range(-3,3):
+#             for j in range(-3,3):
+#                 canvas[500+i,1000+j] = [244,191,66]
         self.signal.emit(canvas)
         return canvas
 #         return self.drawImage(canvas,None)
@@ -53,7 +53,7 @@ cdef class LensedImageDrawer_pyqtgraph(ImageDrawer):
         cdef x = np.ascontiguousarray(pixels[:,0],dtype=np.float64) 
         cdef y = np.ascontiguousarray(pixels[:,1],dtype=np.float64)
         x = x - parameters.canvasDim/2
-        y = y - parameters.canvasDim/2
+        y = parameters.canvasDim/2 - y
         x = x*parameters.dTheta.to('rad').value - parameters.galaxy.center.to('rad').x
         y = y*parameters.dTheta.to('rad').value - parameters.galaxy.center.to('rad').y
         cdef double b = 4 * math.pi * (parameters.galaxy.velocityDispersion**2).to('km2/s2')*(const.c** -2).to('s2/km2')*parameters.dLS.to('m')/parameters.quasar.angDiamDist.to('m')
@@ -97,7 +97,7 @@ cdef class LensedImageDrawer_pyqtgraph(ImageDrawer):
         beta = parameters.quasar.position.magnitude()
         r = (b - beta)/(1+parameters.galaxy.shearMag*math.cos(nu))
         r /= parameters.dTheta.value
-        drawCircle(int(parameters.canvasDim/2),int(parameters.canvasDim/2),r,canvas,3)
+        drawCircle_rgb(int(parameters.canvasDim/2),int(parameters.canvasDim/2),r,canvas,3)
 
     def drawCritLines(self,pixels,parameters,canvas):
         pixels = whiten(pixels)
@@ -107,7 +107,7 @@ cdef class LensedImageDrawer_pyqtgraph(ImageDrawer):
         cdef np.ndarray[np.uint8_t, ndim=2] lookup = Model.colorMap_arr
         for i in imgs[0]:
             m = -i[0]/i[1]
-            drawLine(int(parameters.canvasDim),m,0,canvas,3)
+            drawLine_rgb(int(parameters.canvasDim),m,0,canvas,3)
 
 
 
@@ -115,4 +115,4 @@ cdef class LensedImageDrawer_pyqtgraph(ImageDrawer):
         cdef int x0 = parameters.galaxy.center.x + parameters.canvasDim/2
         cdef int y0 = parameters.galaxy.center.y + parameters.canvasDim/2
         cdef int radius = parameters.einsteinRadius/parameters.dTheta.value
-        drawCircle(x0,y0,radius, canvas,3)
+        drawCircle_rgb(x0,y0,radius, canvas,3)

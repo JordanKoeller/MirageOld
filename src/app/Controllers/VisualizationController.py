@@ -132,7 +132,7 @@ class VisualizationController(GUIController):
 
         
     def main_canvas_slot(self, img):
-        img = QtGui.QImage(img.tobytes(),img.shape[0],img.shape[1],QtGui.QImage.Format_Indexed8)
+        img = QtGui.QImage(img.T.tobytes(),img.shape[0],img.shape[1],QtGui.QImage.Format_Indexed8)
         img.setColorTable(Model.colorMap)
         self.view.main_canvas.pixmap().convertFromImage(img)
         self.view.main_canvas.update()

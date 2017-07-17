@@ -15,23 +15,23 @@ class MagMapParameters(object):
         dTheta = self.dimensions.to('rad')/self.resolution
         if isinstance(pixel,np.ndarray):
             pixel[:,0] = (pixel[:,0] - self.resolution.x/2)*dTheta.x + self.center.to('rad').x 
-            pixel[:,1] = (pixel[:,1] - self.resolution.y/2)*dTheta.y + self.center.to('rad').y
+            pixel[:,1] = ( self.resolution.y/2 - pixel[:,1])*dTheta.y + self.center.to('rad').y
             return pixel
         else:
-            pixel = pixel - self.resolution/2
+            pixel = Vector2D(pixel.x - self.resolution.x/2,self.resolution.y/2 - pixel.y)
             delta = pixel*dTheta
             return delta + self.center.to('rad')
     
     def angleToPixel(self,angle):
         if isinstance(angle, np.ndarray):
             angle[:,0] = (angle[:,0] - self.center.to('rad').x)/dTheta.x + self.resolution.x/2
-            angle[:,1] = (angle[:,1] - self.center.to('rad').y)/dTheta.y + self.resolution.y/2
+            angle[:,1] = self.resolution.y/2 - (angle[:,1] - self.center.to('rad').y)/dTheta.y
             return np.array(angle,dtype=np.int)
         else:
             delta = angle - self.center.to('rad')
             dTheta = self.dimensions.to('rad')/self.resolution
             pixel = (delta/dTheta).unitless()
-            return Vector2D(int(pixel.x + self.resolution.x/2),int(pixel.y + self.resolution.y/2))
+            return Vector2D(int(pixel.x + self.resolution.x/2),int(self.resolution.y/2 - pixel.y))
     
     @property
     def keyword(self):

@@ -120,3 +120,7 @@ class GUIManager(QtWidgets.QMainWindow):
         return self.__signals
     
 
+    def startProgressDialog(self,minimum,maximum,message):
+        
+
+

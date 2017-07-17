@@ -297,17 +297,16 @@ cdef class Engine:
 		cdef int j = 0
 		cdef double x = 0
 		cdef double y = 0
-		print("Centered around "+str(center))
 		self.__parameters.galaxy.update(center=center)
 		start = center - dims/2
 		cdef double x0 = start.to('rad').x
-		cdef double y0 = start.to('rad').y
+		cdef double y0 = start.to('rad').y+dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
 		cdef int aptLuminosity = 0
 		for i in prange(0,resx,nogil=True):
 			for j in range(0,resy):
-				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0+stepY*j,radius))/trueLuminosity
+				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0-stepY*j,radius))/trueLuminosity
 		return retArr
 		
 

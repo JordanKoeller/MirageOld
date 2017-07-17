@@ -22,6 +22,7 @@ from astropy import constants as const
 from ..Calculator import UnitConverter
 from ..Views.GUI.HelpDialog import HelpDialog
 from astropy.coordinates import SkyCoord
+from astropy.coordinates import CartesianRepresentation
 import random
 from ..Utility import Vector2D
 
@@ -68,7 +69,7 @@ class ParametersController(GUIController):
         If the user inputs invalid arguments, will handle the error by returning None and sending a message
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
-#         try:
+        # try:
         if True:
             gRedshift = float(self.view.gRedshift.text())
             qRedshift = float(self.view.qRedshift.text())
@@ -77,14 +78,16 @@ class ParametersController(GUIController):
             with u.add_enabled_units(specials):
                 #Setting units
                 inputUnit = self.view.scaleUnitOption.currentText()
-                print("Input unit = "+inputUnit)
                 #Determination of relative motion
-                gVelocity = self.view.vectorFromQString(self.view.qVelocity.text(),unit='km/s')
+                gVelocity = self.view.qVelocity.text()
+                gComponents = gVelocity.strip('()').split(',')
+                gVelocity = CartesianRepresentation(gComponents[0],gComponents[1],gComponents[2],'')
 
 
                 gPositionRaDec = self.view.gPositionEntry.text()
                 ra,dec = gPositionRaDec.strip('()').split(',')
                 gPositionRaDec = SkyCoord(ra,dec, unit = (u.hourangle,u.deg))
+                apparentV = self.getApparentVelocity(gPositionRaDec,gVelocity)
 
                 #Quasar properties
                 qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit='arcsec').to('rad')
@@ -104,15 +107,16 @@ class ParametersController(GUIController):
                     gStarParams = (gStarMean,gStarStdDev)
                 displayCenter = self.view.vectorFromQString(self.view.gCenter.text(), unit='arcsec').to('rad')
                 dTheta = u.Quantity(float(self.view.scaleInput.text()), inputUnit).to('rad').value
-                print("dTheta = "+str(dTheta))
                 canvasDim = int(self.view.dimensionInput.text())
                 displayQuasar = self.view.displayQuasar.isChecked()
-                displayGalaxy = self.view.displayGalaxy.isChecked()
-    
-                galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity,stars = self._tmpStars)
-                quasar = Quasar(qRedshift, qRadius, qPosition, gVelocity, mass = qBHMass)
+                displayGalaxy = self.view.displayGalaxy.isChecked() 
+                if self._tmpStars and gNumStars == self._tmpStars[0]:
+                    galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity,stars = self._tmpStars)
+                else:
+                    galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity)
+                quasar = Quasar(qRedshift, qRadius, qPosition, apparentV, mass = qBHMass)
                 params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
-                self._tmpStars = []
+                self._tmpStars = None
                 if self.view.qRadiusUnitOption.currentIndex() == 1:
                     absRg = (params.quasar.mass*const.G/const.c/const.c).to('m')
                     angle = absRg/params.quasar.angDiamDist.to('m')
@@ -124,21 +128,33 @@ class ParametersController(GUIController):
                 if extrasBuilder:
                     extrasBuilder(self.view,params,inputUnit)
                 return params
-#         except (AttributeError, ValueError) as e:
-#             self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
-#             return None
-#         except ParametersError as e:
-#             self.view.signals['progressLabel'].emit(e.value)
-#             return None
-#         except SyntaxError as e:
-#             self.view.signals['progressLabel'].emit("Syntax error found in trial variance code block.")
-#             return None
+        # except (AttributeError, ValueError) as e:
+        #     self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
+        #     return None
+        # except ParametersError as e:
+        #     self.view.signals['progressLabel'].emit(e.value)
+        #     return None
+        # except SyntaxError as e:
+        #     self.view.signals['progressLabel'].emit("Syntax error found in trial variance code block.")
+        #     return None
         
     def updateUnitLabels(self,unitString):
 #         self.view.unitLabel_1.setText(unitString)
         self.view.unitLabel_3.setText(unitString)
         self.view.unitLabel_4.setText(unitString)
         self.view.unitLabel_6.setText(unitString)
+
+    def getApparentVelocity(self,pos,v):
+        ev = Model.earthVelocity
+        apparentV = ev.to_cartesian() - v
+        posInSky = pos.galactic
+        phi,theta = (posInSky.l.to('rad').value,math.pi/2 - posInSky.b.to('rad').value)
+        vx = apparentV.x*math.cos(theta)*math.cos(phi)+apparentV.y*math.cos(theta)*math.sin(phi)-apparentV.z*math.sin(theta)
+        vy = apparentV.y*math.cos(phi)-apparentV.x*math.sin(phi)
+        ret = Vector2D(vx.value,vy.value,'km/s')
+        print(ret)
+        return ret
+
 
     def randomizeGVelocity(self):
         x,y,z = ((random.random() - 0.5)*2,(random.random() - 0.5)*2,(random.random()-0.5)*2)
@@ -153,9 +169,9 @@ class ParametersController(GUIController):
     def bindFields(self, parameters,bindExtras = None):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""
         if parameters.stars != []:
-            self._tmpStars = parameters.galaxy.stars
+            self._tmpStars = (parameters.galaxy.percentStars,parameters.galaxy.stars)
         else:
-            self._tmpStars = []
+            self._tmpStars = None
         with u.add_enabled_units(parameters.specialUnits):
             qV = parameters.quasar.velocity.to('rad').unitless()*parameters.quasar.angDiamDist.to('km').value;
             qP = parameters.quasar.position.to(self.view.qPositionLabel.text()).unitless()
