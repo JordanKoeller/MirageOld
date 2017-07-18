@@ -360,7 +360,7 @@ cdef class Engine:
 		cdef double y0 = start.to('rad').y+dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
-		cdef int aptLuminosity = 0
+		print("Making mag map")
 		for i in prange(0,resx,nogil=True):
 			for j in range(0,resy):
 				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0-stepY*j,radius))/trueLuminosity

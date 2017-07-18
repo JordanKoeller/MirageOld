@@ -129,19 +129,18 @@ class MagMapTracerController(GUIController):
     def initialize(self,fileName = None,trialNum=0):
         if fileName:
             magmap,params = lens_analysis.load(fileName)[trialNum].traceQuasar()
-            magmap2 = np.ones_like(magmap)
-            for i in range(magmap.shape[0]):
-                for j in range(magmap.shape[1]):
-                    magmap2[magmap.shape[0]- 1 -i,magmap.shape[1] - 1 -j] = magmap[i,j]
             center = params.extras.getParams('magmap').center.to('rad')
             engine = Engine_BruteForce()
             engine.updateParameters(params)
             baseMag = engine.query_raw_size(center.x,center.y,params.quasar.radius.to('rad').value)
             baseMag = engine.getMagnification(baseMag)
-            baseMag = baseMag*255/magmap2.max()
-#             print("BaseMag = " +str(baseMag))
-            magmap = np.array(magmap2*255/magmap2.max(),dtype=np.uint8)
-            self.tracerView.setMagMap(magmap,baseMag)
+            baseMag = baseMag*255/magmap.max()
+            magmap = np.array(magmap*255/magmap.max(),dtype=np.uint8)
+            mag2 = magmap.copy()
+            mag2[:,0] = magmap.shape[0] - magmap[:,0]
+            mag2[:,1] = magmap[:,1]
+            print("Flipped axes")
+            self.tracerView.setMagMap(mag2,baseMag)
             Model.updateParameters(params)
         else:
             paramsLoader = ParametersFileManager(self.view.signals)

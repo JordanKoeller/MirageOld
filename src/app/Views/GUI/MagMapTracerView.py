@@ -1,5 +1,6 @@
 from PyQt5 import QtCore
 from pyqtgraph import LineSegmentROI
+import pyqtgraph
 from pyqtgraph.graphicsItems.ImageItem import ImageItem
 
 import numpy as np

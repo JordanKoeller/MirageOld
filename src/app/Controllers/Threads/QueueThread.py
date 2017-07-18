@@ -3,7 +3,6 @@ Created on Jun 1, 2017
 
 @author: jkoeller
 '''
-import copy
 
 from PyQt5 import QtCore
 
@@ -42,7 +41,6 @@ class QueueThread(QtCore.QThread):
                 tc += 1
                 self.signals['progressLabel'].emit("Processing trial "+str(tc) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
                 print("Processing trial "+str(tc) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
-                oldP = copy.deepcopy(Model.parameters)
                 newP = varyTrial(params,tc) #NEED TO IMPLIMENT
                 Model.updateParameters(newP)
                 # if oldP  and oldP.isSimilar(newP) == False:

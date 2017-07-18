@@ -16,14 +16,13 @@ from .GUIController import GUIController
 from .FileManagers.QueueFileManager import QueueFileManager
 from .Threads.QueueThread import QueueThread
 from ..Models.ExperimentQueue.ExperimentQueueTable import ExperimentQueueTable
-from ..Models.Parameters.ExperimentParams import ExperimentParams, ResultTypes
+from ..Models.Parameters.ExperimentParams import ExperimentParams
 from ..Models.Parameters.MagMapParameters import MagMapParameters
 from ..Models.Parameters.LightCurveParameters import LightCurveParameters
 from ..Models.Parameters.StarFieldData import StarFieldData
 from ..Models.ParametersError import ParametersError
 from ..Models.Model import Model
 from ..Controllers.FileManagers.TableFileManager import TableFileManager
-from ..Utility import Vector2D
 
 def _queueExtrasBuilder(view,parameters,inputUnit):
     name = view.experimentNameEntry.text()
