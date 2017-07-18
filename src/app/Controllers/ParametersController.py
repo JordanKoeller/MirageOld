@@ -15,7 +15,6 @@ from .FileManagers.ParametersFileManager import ParametersFileManager
 from ..Models.Stellar.Galaxy import Galaxy
 from ..Models.Parameters.Parameters import Parameters
 from ..Models.Stellar.Quasar import Quasar
-from ..Models.ParametersError import ParametersError
 from ..Models.Model import Model
 import astropy.units as u
 from astropy import constants as const

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import time
-import math
 
 from PyQt5 import QtCore
 

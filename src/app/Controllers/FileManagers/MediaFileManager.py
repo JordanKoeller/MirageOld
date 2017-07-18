@@ -42,7 +42,8 @@ class MediaFileManager(FileManager,QtCore.QThread):
         
     def fileWriter(self,file,data = None):
         self.signals['progressBar'].emit("Rendering. Please Wait.")
-        self.signals['progressBarMax'].emit(len(self.__frames))
+        if 'progressBarMax' in self.signals:
+            self.signals['progressBarMax'].emit(len(self.__frames))
         filename = file.name
         file.close()
         writer = imageio.get_writer(filename,fps=self.framerate)

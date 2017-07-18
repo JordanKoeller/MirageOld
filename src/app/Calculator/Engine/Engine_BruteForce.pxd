@@ -13,4 +13,5 @@ cdef class Engine_BruteForce(Engine):
 	cdef vector[pair[int,int]] query_data(self, double x, double y, double radius)
 	cpdef getFrame(self)
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil
+	cpdef query_raw_size(self,double x,double y,double r)
 

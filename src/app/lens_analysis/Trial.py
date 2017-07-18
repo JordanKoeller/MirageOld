@@ -8,20 +8,19 @@ import copy
 import math
 
 from astropy.io import fits
-from astropy import units as u
 
-from ..Controllers.FileManagers.FITSFileManager import FITSFileManager
-from ..Models.Parameters.ExperimentParams import ResultTypes
-from ..Models.Stellar import PointLenser
-from ..Utility.NullSignal import NullSignal
-from ..Utility.Vec2D import Vector2D
-from .AbstractFileWrapper import AbstractFileWrapper
+
 import numpy as np
-from ..Controllers.FileManagers.ParametersFileManager import ParametersFileManager
+
 from ..Calculator.ExperimentResultCalculator import varyTrial
-from ..Models.Parameters.MagMapParameters import MagMapParameters
+from ..Controllers.FileManagers.FITSFileManager import FITSFileManager
+from ..Controllers.FileManagers.ParametersFileManager import ParametersFileManager
 from ..Models.Parameters.LightCurveParameters import LightCurveParameters
+from ..Models.Parameters.MagMapParameters import MagMapParameters
 from ..Models.Parameters.StarFieldData import StarFieldData
+from ..Utility.NullSignal import NullSignal
+from .AbstractFileWrapper import AbstractFileWrapper
+
 
 class Trial(AbstractFileWrapper):
     def __init__(self,filepath,trialno,fileobject=None,params=None,lookuptable=[]):
@@ -104,6 +103,13 @@ class Trial(AbstractFileWrapper):
             print("Parameters Saved")
         else:
             return params
+        
+    @requiresDtype(StarFieldData)
+    @requiresDtype(MagMapParameters)
+    def traceQuasar(self,magIndex,starsIndex):
+        magnifications = self._getDataSet(magIndex)
+        params = self.regenerateParameters()
+        return (magnifications,params)
         
     def saveParameters(self,filename=None):
         saver = ParametersFileManager(NullSignal)

@@ -32,6 +32,23 @@ cdef class Engine_BruteForce(Engine):
 		xVals.shape
 		yVals.shape
 		return ret
+	
+	cpdef query_raw_size(self,double x,double y,double radius):
+		cdef np.ndarray[np.float64_t, ndim=2] xVals,yVals
+		xVals,yVals = self.ray_trace_gpu_raw()
+		# cdef double dx, dy, r2
+		cdef int sz = xVals.shape[0]
+		cdef double* xdat = <double*> xVals.data
+		cdef double* ydat = <double*> yVals.data
+		# cdef int i = 0
+		# cdef int j = 0
+		# r2 = radius*radius
+		cdef vector[pair[int,int]] ret
+		with nogil:
+			ret = query_shape(xdat,ydat,sz,x,y,radius)
+		xVals.shape
+		yVals.shape
+		return ret.size()
 
 
 	cpdef getFrame(self):

@@ -11,7 +11,8 @@ from ..Controllers.FileManagers.TableFileManager import TableFileManager
 from ..Controllers.Threads.QueueThread import QueueThread
 from ..Controllers.FileManagers import QueueFileManager
 from ..Utility.NullSignal import NullSignal
-
+from PyQt5 import QtWidgets
+import sys
 
 def load(filename):
     lngth = len(filename)
@@ -29,6 +30,16 @@ def describe(filename):
     else:
         raise ValueError("argument must be a filename or AbstractFileWrapper subtype.")
 
+def traceQuasar(expt,trialNum=0):
+    from ..Views.GUI.GUITracerWindow import GUITracerWindow
+    app = QtWidgets.QApplication(sys.argv)
+    if isinstance(expt,str):
+        ui = GUITracerWindow(expt,trialNum=trialNum)
+        ui.show()
+    else:
+        ui = GUITracerWindow(expt.file.name,expt.trialNumber)
+        ui.show()
+    app.exec_()
 
 def explore(expt):
     params = None
@@ -40,7 +51,7 @@ def explore(expt):
         raise ValueError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
         return
     if not params:
-        returneError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
+        return ValueError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
         return
     try:
         ui = GUIManager()

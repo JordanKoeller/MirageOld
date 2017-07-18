@@ -114,6 +114,63 @@ cdef class Engine:
 		del(result_buffer_y)
 		return (result_nparray_x, result_nparray_y)
 
+	cdef ray_trace_gpu_raw(self):
+		begin = time.clock()
+		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
+		os.environ['PYOPENCL_CTX'] = '3'
+		cdef int height = self.__parameters.canvasDim
+		cdef int width = self.__parameters.canvasDim
+		cdef double dTheta = self.__parameters.dTheta.value
+		cdef np.ndarray result_nparray_x = np.zeros((width, height), dtype=np.float64)
+		cdef np.ndarray result_nparray_y = np.zeros((width, height), dtype=np.float64)
+		cdef double dS = self.__parameters.quasar.angDiamDist.to('lyr').value
+		cdef double dL = self.__parameters.galaxy.angDiamDist.to('lyr').value
+		cdef double dLS = self.__parameters.dLS.to('lyr').value
+		stars_nparray_mass, stars_nparray_x, stars_nparray_y = self.__parameters.galaxy.starArray
+
+		# create a context and a job queue
+		context = cl.create_some_context()
+		queue = cl.CommandQueue(context)
+		
+		# create buffers to send to device
+		mf = cl.mem_flags	
+			
+		# input buffers
+		stars_buffer_mass = np.float64(0.0)
+		stars_buffer_x = np.float64(0.0)
+		stars_buffer_y = np.float64(0.0)
+		if len(stars_nparray_mass) > 0:
+			stars_buffer_mass = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_mass)
+			stars_buffer_x = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_x)
+			stars_buffer_y = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=stars_nparray_y)	
+
+		# output buffers
+		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
+		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
+		prg = cl.Program(context, open('app/Calculator/ray_tracer.cl').read()).build()
+		prg.ray_trace(queue, (width, height), None,
+			stars_buffer_mass,
+			stars_buffer_x,
+			stars_buffer_y,
+			np.int32(0),
+			np.float64((4 * const.G / const.c / const.c).to("lyr/solMass").value * dLS / dS / dL),
+			np.float64(4 * math.pi * self.__parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS),
+			np.float64(self.__parameters.galaxy.shear.magnitude),
+			np.float64(self.__parameters.galaxy.shear.angle.value),
+			np.int32(width),
+			np.int32(height),
+			np.float64(self.__parameters.dTheta.to('rad').value),
+			np.float64(self.__parameters.galaxy.position.to('rad').x),
+			np.float64(self.__parameters.galaxy.position.to('rad').y),
+			result_buffer_x,
+			result_buffer_y)
+
+
+		cl.enqueue_copy(queue, result_nparray_x, result_buffer_x)
+		cl.enqueue_copy(queue, result_nparray_y, result_buffer_y)
+		del(result_buffer_x)
+		del(result_buffer_y)
+		return (result_nparray_x, result_nparray_y)
 
 	@cython.boundscheck(False)
 	@cython.wraparound(False)

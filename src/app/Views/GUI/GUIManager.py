@@ -11,18 +11,19 @@ from PyQt5 import QtWidgets, uic, QtCore
 from ...Controllers.ParametersController import ParametersController
 from ...Controllers.VisualizationController import VisualizationController
 from ...Controllers.QueueController import QueueController
-from ...Controllers.MagMapTracerController import MagMapTracerController
 from ...Utility import Vector2D
+from PyQt5.QtWidgets import QProgressDialog
+from ...Utility.SignalRepo import SignalRepo
 
 
-class GUIManager(QtWidgets.QMainWindow):
+class GUIManager(QtWidgets.QMainWindow,SignalRepo):
     '''
     classdocs
     '''
     progressBar_signal = QtCore.pyqtSignal(int)
+    progressDialog_signal = QtCore.pyqtSignal(int,int,str)
     progressLabel_signal = QtCore.pyqtSignal(str)
     progressBarMax_signal = QtCore.pyqtSignal(int)
-    __signals = {}
     
 
     def __init__(self, parent=None):
@@ -33,11 +34,13 @@ class GUIManager(QtWidgets.QMainWindow):
         uic.loadUi('Resources/gui.ui', self)
         self.addSignals(progressBar = self.progressBar_signal,
                         progressLabel = self.progressLabel_signal,
-                        progressBarMax = self.progressBarMax_signal
+                        progressBarMax = self.progressBarMax_signal,
+                        progressDialog = self.progressDialog_signal
                         )
         self.signals['progressBar'].connect(self.progressBar.setValue)
         self.signals['progressLabel'].connect(self.progressLabel.setText)
         self.signals['progressBarMax'].connect(self.progressBar.setMaximum)
+        self.signals['progressDialog'].connect(self.startProgressDialog)
         self.visualizationFrame.setHidden(True)
         self.visualizationBox.setHidden(True)
         self.queueFrame.setHidden(True)
@@ -52,7 +55,6 @@ class GUIManager(QtWidgets.QMainWindow):
         self.shutdown.triggered.connect(sys.exit)
         self.visualizerViewSelector.triggered.connect(self.switchToVisualizing)
         self.queueViewSelector.triggered.connect(self.switchToQueue)
-        self.magMapTracerSelector.triggered.connect(self.switchToTracing)
     
     def __switchToPerspective(self,perspective):
         if self.perspective:
@@ -72,30 +74,18 @@ class GUIManager(QtWidgets.QMainWindow):
         else:
             self.__switchToPerspective(QueueController(self))
     
-    def switchToTracing(self):
-        if self.magTracingPerspective:
-            self.__switchToPerspective(self.magTracingPerspective)
-        else:
-            self.__switchToPerspective(MagMapTracerController(self))
-            
     def hideParameters(self):
         self.parametersController.hide()
             
     def showParameters(self):
         self.parametersController.show()
             
-    def addSignals(self,**kwargs):
-        self.__signals.update(kwargs)
-    
     def bindFields(self,parameters):
         self.parametersController.bindFields(parameters,self.perspective.extrasBinder)
         
     def buildParameters(self):
         return self.parametersController.buildParameters(self.perspective.extrasBuilder)
 
-    def removeSignals(self,args):
-        for i in args:
-            self.__signals.pop(i)
             
             
     def vectorFromQString(self, string,unit = None):
@@ -114,13 +104,9 @@ class GUIManager(QtWidgets.QMainWindow):
         if ' ' in y:
             y = y.split(' ')[0]
         return Vector2D(float(x), float(y),unit)
-            
-    @property
-    def signals(self):
-        return self.__signals
+
     
 
     def startProgressDialog(self,minimum,maximum,message):
-        
-
-
+        self.dialog = QProgressDialog(message,'Ok',minimum,maximum)
+        self.progressBar_signal.connect(self.dialog.setValue)

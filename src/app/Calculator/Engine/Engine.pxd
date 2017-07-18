@@ -34,6 +34,7 @@ cdef class Engine:
 		bool needsReconfiguring
 
 	cdef ray_trace_gpu(self)
+	cdef ray_trace_gpu_raw(self)
 	cpdef getMagnification(self, pixelCount)
 	cpdef visualize(self)
 	cdef makeLightCurve_helper(self, object mmin, object mmax, int resolution)

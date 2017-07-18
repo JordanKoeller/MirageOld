@@ -7,7 +7,6 @@ from ...Utility.Vec2D import Vector2D
 from ...Models.Model import Model
 import numpy as np
 import time
-import math
 
 
 
@@ -22,14 +21,6 @@ class MagMapTracerThread(QtCore.QThread):
         else:
             pixels = Model.parameters.extras.getParams('magmap').pixelToAngle(pixels)
             self.angles = pixels.copy()
-        self.progress_bar_update  = signals['progressBar']
-        self.progress_label_update = signals['progressLabel']
-        self.image_canvas_update = signals['imageCanvas']
-        self.curve_canvas_update = signals['curveCanvas']
-        self.progress_bar_max_update = signals['progressBarMax']
-        self.sourcePos_label_update = signals['paramLabel']
-        self.tracer_signal_update = signals['tracerUpdate']
-        self._updater = signals['tracerView']
         self.__calculating = False
         self.__frameRate = 25
         self.__drawer = MagTracerComposite(NullSignal,NullSignal)
@@ -38,14 +29,15 @@ class MagMapTracerThread(QtCore.QThread):
         self.recording=recording
 
     def run(self):
-        self.progress_label_update.emit("Ray-Tracing. Please Wait.")
+        self.signals['progressLabel'].emit("Ray-Tracing. Please Wait.")
         self.__calculating = True
         interval = 1/self.__frameRate
-        self.progress_label_update.emit("Tracing.")
-        self.progress_bar_max_update.emit(len(self.pixels))
-        r = Model.parameters.quasar.radius.to('rad').value
+        if self.recording:
+            self.signals['progressDialog'].emit(0,len(self.pixels)-1,'Tracing Quasar. Please Wait.')
+        self.signals['progressLabel'].emit("Tracing.")
+#         self.signals['progressDialog'].emit(0,len(self.angles),'Tracing Quasar. Please Wait.')
         while self.__calculating and self.__counter < len(self.pixels):
-            self.progress_bar_update.emit(self.__counter)
+#             self.progress_bar_update.emit(self.__counter)
             x = self.angles[self.__counter,0]
             y = self.angles[self.__counter,1]
             pos = Vector2D(x,y,'rad')
@@ -56,14 +48,14 @@ class MagMapTracerThread(QtCore.QThread):
             pixels = Model.engine.getFrame()
             mag = Model.engine.getMagnification(pixels.shape[0])
             img,curve = self.__drawer.draw([Model.parameters,pixels],[mag])
-            self._updater.emit(img,curve,self.pixels[self.__counter])
-            self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.to('arcsec')))
+            self.signals['tracerView'].emit(img,curve,self.pixels[self.__counter])
+            self.signals['progressBar'].emit(self.__counter)
             if not self.recording:
                 deltaT = time.clock() - timer
                 if deltaT < interval:
                     time.sleep(interval-deltaT)
             self.__counter += 1
-        self.progress_label_update.emit("Done")
+        self.signals['progressLabel'].emit("Done")
         if self.recording:
             self.signals['tracerDone'].emit('Finished')
         
@@ -79,17 +71,17 @@ class MagMapTracerThread(QtCore.QThread):
 
         
     def pause(self):
-        self.progress_label_update.emit("Paused.")
+        self.signals['progressLabel'].emit("Paused.")
         self.__calculating = False
 
     def restart(self):
-        self.progress_label_update.emit("Restarted.")
+        self.signals['progressLabel'].emit("Restarted.")
         self.__calculating = False
         pixels = Model.engine.getFrame(self.pixels[0,0],self.pixels[0,1],Model.parameters.quasar.radius.to('rad').value)
         mag = Model.engine.getMagnification(len(pixels))
         self.__drawer.draw([Model.parameters,pixels],[mag])
-        self.tracer_signal_update.emit(self.pixels[0])
-        self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.to('arcsec')))
+        self.signals['tracerUpdate'].emit(self.pixels[0])
+#         self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.to('arcsec')))
         self.__counter = 0
         self.__drawer.reset()
 

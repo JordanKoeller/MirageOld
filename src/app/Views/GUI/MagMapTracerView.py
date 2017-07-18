@@ -1,27 +1,27 @@
-import pyqtgraph
-from pyqtgraph.graphicsItems.ImageItem import ImageItem
 from PyQt5 import QtCore
-from ...Models.Model import Model
-import numpy as np
-from ...Utility.NullSignal import NullSignal
-from ...Views.Drawer.ShapeDrawer_rgb import drawSolidCircle_rgb
-
 from pyqtgraph import LineSegmentROI
-from pyqtgraph.graphicsItems.ROI import CircleROI
-from pyqtgraph.widgets.GraphicsLayoutWidget import GraphicsLayoutWidget
-from PIL import ImageDraw
+from pyqtgraph.graphicsItems.ImageItem import ImageItem
+
+import numpy as np
+
+from ...Utility.NullSignal import NullSignal
+from ...Views.Drawer.ShapeDrawer import drawSolidCircle
+
 
 class MagMapTracerView(QtCore.QObject):
     
     hasUpdated = QtCore.pyqtSignal(object)
 
-    def __init__(self,view,masterSignal = NullSignal):
+    def __init__(self,masterFrame,plotFrame,imgFrame,gradientFrame,masterSignal = NullSignal):
         #Signals are in order of imgSignal, magMapSignal, lightCurveSignal
         QtCore.QObject.__init__(self)
         # pyqtgraph.setConfigOptions(imageAxisOrder='row-major')
-        self.view = view
-        self._lcPane = self.view.tracerPlot #Plot for lightcurve
-        self._imgPane = self.view.tracerImgArea
+        self._gradientFrame = gradientFrame
+        self._gradientFrame.addTick(0.5)
+        self._gradientFrame.sigGradientChanged.connect(self._setColorMap)
+        self._lcPane = plotFrame
+        self._imgPane = imgFrame
+        self._masterPane = masterFrame
         self._imgPaneView = self._imgPane.addViewBox(lockAspect=True) #ViewBox for img of quasar, stars, etc
         self._magMapPane = self._imgPane.addViewBox(lockAspect=True) #ViewBox for magnification map
         self._magMapPane.invertY()
@@ -32,7 +32,8 @@ class MagMapTracerView(QtCore.QObject):
         self._tracer = None
         self._imgView = ImageItem() #ImageView for the starry picture
         self._imgPaneView.addItem(self._imgView)
-        masterSignal.connect(self.updateAll)
+        if masterSignal:
+            masterSignal.connect(self.updateAll)
     
     def updateAll(self,img,lc,tracerPos):
         self._updateImgPane(img)
@@ -40,9 +41,12 @@ class MagMapTracerView(QtCore.QObject):
         self._positionTracer(tracerPos)
 #         self.hasUpdated.emit(self.getFrame())
 
+    def _setColorMap(self):
+#         print(self._gradientFrame.getLookupTable(500,alpha=False))
+        self._magMapImg.setLookupTable(self._gradientFrame.getLookupTable(500,alpha=False), True)
+
     def setUpdatesEnabled(self,tf):
-        self.view.tracerPlot.setUpdatesEnabled(tf)
-        self.view.tracerImgArea.setUpdatesEnabled(tf)
+        self._masterPane.setHidden(tf)
         
 
     def _updateImgPane(self,img):
@@ -54,12 +58,18 @@ class MagMapTracerView(QtCore.QObject):
     def _updateLightCurve(self,xVals = [], yVals = []):
         if xVals != [] and yVals != []:
             self._lcPane.plot(xVals,yVals,clear=True)
+            
+    def _getCenteredGradient(self,center):
+        print(center/self._imgStatic.max())
+        default = {'ticks':[(0.0, (0, 255, 255, 255)), (1.0, (255, 255, 0, 255)), (center/self._imgStatic.max(), (0, 0, 0, 255)), (center/self._imgStatic.max()/2, (0, 0, 255, 255)), (self._imgStatic.max()/255/2, (255, 0, 0, 255))],'mode':'rgb'}
+        return default
         
-        
-    def setMagMap(self,img):
+    def setMagMap(self,img,baseMag):
         #img is a QImage instance
         self._imgStatic = img
         self._magMapImg.setImage(img)
+        self._gradientFrame.restoreState(self._getCenteredGradient(baseMag))
+        self._baseMag = int(baseMag)
         self._magMapDataCoords = np.ndarray((img.shape[0],img.shape[1],2))
         for i in range(img.shape[0]):
             for j in range(img.shape[1]):
@@ -76,7 +86,7 @@ class MagMapTracerView(QtCore.QObject):
         
     def _positionTracer(self,coords):
         img = self._imgStatic.copy()
-        drawSolidCircle_rgb(int(coords[0]),int(coords[1]),5,img,2)
+        drawSolidCircle(int(coords[0]),int(coords[1]),5,img,255)
         self._magMapImg.setImage(img,autoRange=False)
 
         
@@ -87,7 +97,8 @@ class MagMapTracerView(QtCore.QObject):
         return np.array(region)
     
     def getFrame(self):
-        return self.view.magTracerFrame.grab()
+        self._masterPane.repaint()
+        return self._masterPane.grab()
     
     
     

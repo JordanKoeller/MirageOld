@@ -43,7 +43,6 @@
        </property>
        <addaction name="visualizerViewSelector"/>
        <addaction name="queueViewSelector"/>
-       <addaction name="magMapTracerSelector"/>
        <addaction name="separator"/>
        <addaction name="playPauseAction"/>
        <addaction name="resetAction"/>
@@ -431,7 +430,7 @@
                 <item>
                  <widget class="QLineEdit" name="qVelocity">
                   <property name="text">
-                   <string>(1e9,0.0)</string>
+                   <string>(1e9,0.0,0.0)</string>
                   </property>
                  </widget>
                 </item>
@@ -1395,7 +1394,7 @@ newParams = copy.deepcopy(oldParams)</string>
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>341</width>
+                 <width>514</width>
                  <height>89</height>
                 </rect>
                </property>
@@ -1460,43 +1459,9 @@ newParams = copy.deepcopy(oldParams)</string>
           </layout>
          </widget>
         </item>
-        <item>
-         <widget class="QFrame" name="magTracerFrame">
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_12">
-           <item>
-            <widget class="QSplitter" name="splitter_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <widget class="PlotWidget" name="tracerPlot"/>
-             <widget class="GraphicsLayoutWidget" name="tracerImgArea"/>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="tracerFrame">
-          <property name="visible">
-           <bool>false</bool>
-          </property>
-          <property name="title">
-           <string/>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout"/>
-         </widget>
-        </item>
        </layout>
        <zorder>visualizationFrame</zorder>
        <zorder>queueFrame</zorder>
-       <zorder>tracerFrame</zorder>
-       <zorder>magTracerFrame</zorder>
       </widget>
      </widget>
     </item>
@@ -1615,11 +1580,6 @@ newParams = copy.deepcopy(oldParams)</string>
  <customwidgets>
   <customwidget>
    <class>PlotWidget</class>
-   <extends>QGraphicsView</extends>
-   <header location="global">pyqtgraph.h</header>
-  </customwidget>
-  <customwidget>
-   <class>GraphicsLayoutWidget</class>
    <extends>QGraphicsView</extends>
    <header>pyqtgraph.h</header>
   </customwidget>

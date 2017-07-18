@@ -9,7 +9,6 @@ from PyQt5 import QtWidgets
 
 from app.Views.GUI.GUIManager import GUIManager
 from app.Controllers.FileManagers import ParametersFileManager
-from app.Models.Model import Model
 from app.Controllers.FileManagers import QueueFileManager
 from app.Controllers.Threads.QueueThread import QueueThread
 from app.Controllers.FileManagers.TableFileManager import TableFileManager
