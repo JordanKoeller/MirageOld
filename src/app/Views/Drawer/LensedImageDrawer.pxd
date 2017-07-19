@@ -12,3 +12,4 @@ cdef class LensedImageDrawer(ImageDrawer):
 
 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters)
 	cdef getColorCode(self, np.ndarray[np.int32_t,ndim=2] pixels, object parameters)
+	cdef void drawBoundary(self, np.ndarray[np.uint8_t,ndim=2] canvas)

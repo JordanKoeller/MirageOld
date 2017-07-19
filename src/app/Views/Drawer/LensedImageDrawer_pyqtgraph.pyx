@@ -41,7 +41,8 @@ cdef class LensedImageDrawer_pyqtgraph(ImageDrawer):
         cdef int end = pixels.shape[0]
         cdef np.ndarray[np.uint8_t, ndim=1] colors = self.getColorCode(pixels,parameters)
         for i in range(0,len(pixels)):
-            canvas[pixels[i,0],pixels[i,1]] = lookup[colors[i]]
+            canvas[pixels[i,0],pixels[i,1]] = lookup[1]
+        self.drawBoundary(canvas)
 #         for i in range(-3,3):
 #             for j in range(-3,3):
 #                 canvas[500+i,1000+j] = [244,191,66]
@@ -116,3 +117,23 @@ cdef class LensedImageDrawer_pyqtgraph(ImageDrawer):
         cdef int y0 = parameters.galaxy.center.y + parameters.canvasDim/2
         cdef int radius = parameters.einsteinRadius/parameters.dTheta.value
         drawCircle_rgb(x0,y0,radius, canvas,3)
+
+
+    cdef void drawBoundary(self, np.ndarray[np.uint8_t,ndim=3] canvas):
+        cdef int x,y,xmax, ymax
+        ymax = canvas.shape[1]-1
+        cdef np.ndarray[np.uint8_t, ndim=2] lookup = Model.colorMap_arr
+        xmax = canvas.shape[0]-1
+        for x in range(0,xmax+1):
+            canvas[x,0] = lookup[2]
+            canvas[x,1] = lookup[2]
+            canvas[x,2] = lookup[2]
+            canvas[x,ymax] = lookup[2]
+            canvas[x,ymax-1] = lookup[2]
+            canvas[x,ymax-2] = lookup[2]
+            canvas[0,x] = lookup[2]
+            canvas[1,x] = lookup[2]
+            canvas[2,x] = lookup[2]
+            canvas[xmax,x] = lookup[2]
+            canvas[xmax-1,x] = lookup[2]
+            canvas[xmax-2,x] = lookup[2]

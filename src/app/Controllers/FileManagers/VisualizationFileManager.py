@@ -48,7 +48,10 @@ class VisualizationFileManager(FileManager,QtCore.QThread):
         ptr = im.bits()
         ptr.setsize(im.byteCount())
         arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
-        return arr
+        arr2 = arr.copy()
+        arr[:,0] = arr2[:,2]
+        arr[:,2] = arr2[:,0]
+        return arr 
 
     def fileWriter(self,file,data = None):
         self.signals['progressBar'].emit("Rendering. Please Wait.")

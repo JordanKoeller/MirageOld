@@ -41,13 +41,14 @@ cdef class LensedImageDrawer(ImageDrawer):
 		cdef np.ndarray[np.uint8_t, ndim=1] colors = self.getColorCode(pixels,parameters)
 		for i in range(0,len(pixels)):
 			canvas[pixels[i,0],pixels[i,1]] = colors[i]
+		self.drawBoundary(canvas)
 		return self.drawImage(canvas,None)
 
 	cdef getColorCode(self, np.ndarray[np.int32_t,ndim=2] pixels, object parameters):
 		cdef x = np.ascontiguousarray(pixels[:,0],dtype=np.float64) 
 		cdef y = np.ascontiguousarray(pixels[:,1],dtype=np.float64)
 		x = x - parameters.canvasDim/2
-		y = y - parameters.canvasDim/2
+		y = parameters.canvasDim/2 - y
 		x = x*parameters.dTheta.to('rad').value - parameters.galaxy.center.to('rad').x
 		y = y*parameters.dTheta.to('rad').value - parameters.galaxy.center.to('rad').y
 		cdef double b = 4 * math.pi * (parameters.galaxy.velocityDispersion**2).to('km2/s2')*(const.c** -2).to('s2/km2')*parameters.dLS.to('m')/parameters.quasar.angDiamDist.to('m')
@@ -101,6 +102,15 @@ cdef class LensedImageDrawer(ImageDrawer):
 			m = -i[0]/i[1]
 			drawLine(int(parameters.canvasDim),m,0,canvas,3)
 
+	cdef void drawBoundary(self, np.ndarray[np.uint8_t,ndim=2] canvas):
+		cdef int x,y,xmax,ymax
+		xmax = canvas.shape[0]-1
+		ymax = canvas.shape[1]-1
+		for x in range(xmax+1):
+			canvas[x,0] = 1
+			canvas[x,ymax] = 1
+			canvas[0,x] = 1
+			canvas[xmax,0] = 1
 
 
 	cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=2] canvas,object parameters): 

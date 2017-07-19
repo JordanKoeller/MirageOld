@@ -9,7 +9,7 @@ from PyQt5 import QtCore, QtGui
 from .GUIController import GUIController
 from .Threads.VisualizerThread import VisualizerThread
 from .FileManagers.FITSFileManager import FITSFileManager
-from .FileManagers.VisualizationFileManager import VisualizationFileManager
+from .FileManagers.MediaFileManager import MediaFileManager
 from ..Models.Model import Model
 
 
@@ -49,7 +49,8 @@ class VisualizationController(GUIController):
         self.view.signals["curveCanvas"].connect(self.curve_canvas_slot)
         self.view.signals['paramLabel'].connect(self.qPoslabel_slot)
         self.parametersController = self.view.parametersController
-        self.fileManager = VisualizationFileManager(self.view.signals)
+        self.fileManager = MediaFileManager(self.view.signals)
+        self.recording = False
 
     def togglePlaying(self):
         if self.playToggle:
@@ -102,7 +103,7 @@ class VisualizationController(GUIController):
     def record(self):
         """Calling this method will configure the system to save each frame of an animation, for compiling to a video that can be saved."""
         if self.enabled:
-            self.fileManager.recording = True
+            self.recording = True
             self.simImage()
 
     def pause(self):
@@ -116,7 +117,9 @@ class VisualizationController(GUIController):
         if self.enabled:
             self.playToggle = False
             self.thread.restart()
-            self.fileManager.write()
+            if self.recording:
+                self.fileManager.write()
+            self.recording = False
         
         
     def visualizeData(self):
@@ -132,14 +135,15 @@ class VisualizationController(GUIController):
 
         
     def main_canvas_slot(self, img):
+        if self.recording:
+            self.fileManager.sendFrame(self.view.visualizationFrame.grab())
         img = QtGui.QImage(img.T.tobytes(),img.shape[0],img.shape[1],QtGui.QImage.Format_Indexed8)
         img.setColorTable(Model.colorMap)
         self.view.main_canvas.pixmap().convertFromImage(img)
         self.view.main_canvas.update()
-        self.fileManager.giveFrame(img)
 
     def curve_canvas_slot(self, x, y):
-        self.view.curve_canvas.plot(x, y, clear=True)
+        self.view.curve_canvas.plot(x, y, clear=True,pen={'width':5})
     
     def qPoslabel_slot(self,pos):
         self.view.sourcePosLabel.setText(pos)

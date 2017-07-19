@@ -58,7 +58,7 @@ class MagMapTracerView(QtCore.QObject):
         
     def _updateLightCurve(self,xVals = [], yVals = []):
         if xVals != [] and yVals != []:
-            self._lcPane.plot(xVals,yVals,clear=True)
+            self._lcPane.plot(xVals,yVals,clear=True,pen={'width':5})
             
     def _getCenteredGradient(self,center):
         print(center/self._imgStatic.max())
@@ -80,14 +80,14 @@ class MagMapTracerView(QtCore.QObject):
     def _setROI(self,begin):
         if self._roi:
             self._magMapPane.removeItem(self._roi)
-        self._roi = LineSegmentROI(begin) #ROI for magnificationMap
+        self._roi = LineSegmentROI(begin,pen={'color':'#00FF00','width':3}) #ROI for magnificationMap
         self._roi.setZValue(10) #Ensure ROI is drawn above the magmap
         self._magMapPane.addItem(self._roi)
         
         
     def _positionTracer(self,coords):
         img = self._imgStatic.copy()
-        drawSolidCircle(int(coords[0]),int(coords[1]),5,img,255)
+        drawSolidCircle(int(coords[0]),int(coords[1]),10,img,255)
         self._magMapImg.setImage(img,autoRange=False)
 
         
