@@ -1,6 +1,6 @@
 guarantee magmap is at the center of the calculated canvas.					DONE
 Stop system from reconfiguring engine twice									DONE
-relative velocity input
+relative velocity input												DONE
 DOCUMENTATION
 debug shape-based query
 bind parameters to new fields												DONE
@@ -8,9 +8,9 @@ report average mass of starfield, use for determining theta_e				DONE
 
 
 Relative velocities															DONE
-Track image through magmap - transparent data for lightcurve 
-    multipane animation
+Track image through magmap - transparent data for lightcurve 										DONE
+    multipane animation															DONE
 licensing info, etc
-scale coloring of magmap relative to magnification without point lenses
-Remote plotting to fix race condition?
-Generate light curve from magmap pixel values
+scale coloring of magmap relative to magnification without point lenses				DONE
+Remote plotting to fix race condition?								FAILED
+Generate light curve from magmap pixel values							

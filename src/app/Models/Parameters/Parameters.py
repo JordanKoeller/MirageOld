@@ -8,10 +8,9 @@ from astropy.cosmology import WMAP7 as cosmo
 from scipy.stats import norm
 import numpy as np 
 import random as rand 
-from ...Calculator import UnitConverter
 
 
-from ...Calculator.InitialMassFunction import Evolved_IMF, Kroupa_2001
+from ...Calculator.InitialMassFunction import Evolved_IMF
 from ...Utility import Vector2D
 from .. import ParametersError
 
@@ -245,8 +244,6 @@ class Quasar:<br>
 	@property
 	def avgMassEinsteinRadius(self):
 		avgMass = 0.20358470458734301 #Average mass, in solMass of a generated star cluster of 10 million stars
-		gR = self.galaxy.redshift
-		qR = self.quasar.redshift
 		thetaE = 4*const.G*u.Quantity(avgMass,'solMass').to('kg')*self.dLS.to('m')/self.quasar.angDiamDist.to('m')/self.galaxy.angDiamDist.to('m')/const.c/const.c
 		thetaEUnit = u.def_unit('theta_E',math.sqrt(thetaE.value)*u.rad)
 		return thetaEUnit
@@ -339,7 +336,7 @@ class Quasar:<br>
 		x,y = delta.asTuple 
 		x = x/self.dTheta.to('rad').value 
 		y = y/self.dTheta.to('rad').value 
-		return (int(x+self.canvasDim/2),int(y+self.canvasDim/2))
+		return (int(x+self.canvasDim/2),int(self.canvasDim/2+y))
 
 	@property
 	def queryQuasarX(self):

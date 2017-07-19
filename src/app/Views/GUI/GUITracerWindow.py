@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QMainWindow, QProgressDialog
 from ...Utility.SignalRepo import SignalRepo
 from ...Controllers.MagMapTracerController import MagMapTracerController
 from ...Views.GUI.MagMapTracerView import MagMapTracerView
+from ... import tracerUIFile
 
 
 class GUITracerWindow(QMainWindow,SignalRepo):
@@ -24,7 +25,7 @@ class GUITracerWindow(QMainWindow,SignalRepo):
         Constructor
         '''
         super(GUITracerWindow,self).__init__()
-        uic.loadUi('Resources/TracerGUI/tracerwindow.ui',self)
+        uic.loadUi(tracerUIFile,self)
         self.addSignals(progressDialog = self.progressDialog_signal,
                         progressBar = self.progressBar_signal,
                         progressLabel = self.statusBar_signal)

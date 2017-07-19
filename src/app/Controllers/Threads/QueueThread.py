@@ -35,16 +35,12 @@ class QueueThread(QtCore.QThread):
             numTrials = params.extras.numTrials 
             self.filemanager.newExperiment(params) #NEED TO IMPLIMENT
             exptRunner = ExperimentResultCalculator(params,self.signals)
-            tc = 0
             for expt in range(0,numTrials):
-                self.signals['progressBar'].emit(tc)
-                tc += 1
-                self.signals['progressLabel'].emit("Processing trial "+str(tc) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
-                print("Processing trial "+str(tc) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
-                newP = varyTrial(params,tc) #NEED TO IMPLIMENT
+                self.signals['progressBar'].emit(expt+1)
+                self.signals['progressLabel'].emit("Processing trial "+str(expt+1) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
+#                 print("Processing trial "+str(expt+1) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
+                newP = varyTrial(params,expt+1) #NEED TO IMPLIMENT
                 Model.updateParameters(newP)
-                # if oldP  and oldP.isSimilar(newP) == False:
-                #     Model.engine.reconfigure()
                 data = exptRunner.runExperiment() #NEED TO IMPLIMENT
                 self.filemanager.sendTrial(data)
             self.filemanager.closeExperiment()

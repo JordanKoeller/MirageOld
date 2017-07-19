@@ -28,7 +28,7 @@ from libcpp.vector cimport vector
 from libc cimport math as CMATH
 from libcpp.pair cimport pair
 from libcpp cimport bool
-
+from .. import gpu_kernel
 
 cdef class Engine:
 	"""
@@ -147,7 +147,7 @@ cdef class Engine:
 		# output buffers
 		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
-		prg = cl.Program(context, open('app/Calculator/ray_tracer.cl').read()).build()
+		prg = cl.Program(context, gpu_kernel.read()).build()
 		prg.ray_trace(queue, (width, height), None,
 			stars_buffer_mass,
 			stars_buffer_x,
@@ -362,6 +362,9 @@ cdef class Engine:
 		cdef double trueLuminosity = self.trueLuminosity
 		print("Making mag map")
 		for i in prange(0,resx,nogil=True):
+			if i % 10 == 0:
+				with gil:
+					signal.emit(i)
 			for j in range(0,resy):
 				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0-stepY*j,radius))/trueLuminosity
 		return retArr

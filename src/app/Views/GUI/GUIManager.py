@@ -14,6 +14,7 @@ from ...Controllers.QueueController import QueueController
 from ...Utility import Vector2D
 from PyQt5.QtWidgets import QProgressDialog
 from ...Utility.SignalRepo import SignalRepo
+from ... import mainUIFile
 
 
 class GUIManager(QtWidgets.QMainWindow,SignalRepo):
@@ -31,7 +32,7 @@ class GUIManager(QtWidgets.QMainWindow,SignalRepo):
         Constructor
         '''
         super(GUIManager, self).__init__(parent)
-        uic.loadUi('Resources/gui.ui', self)
+        uic.loadUi(mainUIFile, self)
         self.addSignals(progressBar = self.progressBar_signal,
                         progressLabel = self.progressLabel_signal,
                         progressBarMax = self.progressBarMax_signal,

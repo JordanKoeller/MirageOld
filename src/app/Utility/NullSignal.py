@@ -8,7 +8,7 @@ class __NullSignal(object):
     '''
     classdocs
     '''
-
+    counter = 0
 
     def __init__(self):
         '''
@@ -18,7 +18,12 @@ class __NullSignal(object):
 
     
     def emit(self,*args,**kwargs):
-        pass
+        for i in args:
+            if isinstance(i, str):
+                print(i)
+            elif isinstance(i,int):
+                self.counter += 1
+                print("On step "  + str(self.counter))
     
     def connect(self,*args,**kwargs):
         pass
