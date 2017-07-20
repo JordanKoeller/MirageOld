@@ -67,7 +67,7 @@ __kernel void ray_trace(
 
 
 		// Lensing from shear
-		double phi = 2*(3*M_PI_2 - shear_angle) - atan2(deltaR_y,deltaR_x); // Old shear angle definition, of east being left of north
+		double phi = 2*(M_PI_2 - shear_angle) - atan2(deltaR_y,deltaR_x); // Old shear angle definition, of east being left of north
 // 		double phi = 2*(shear_angle) - atan2(deltaR_y,deltaR_x); //New shear angle definition, measured east of north.
 		result_buf_x[index] += shear_mag*r*cos(phi);
 		result_buf_y[index] += shear_mag*r*sin(phi);

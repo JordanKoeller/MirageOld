@@ -98,7 +98,7 @@ cdef class Engine:
 			np.float64((4 * const.G / const.c / const.c).to("lyr/solMass").value * dLS / dS / dL),
 			np.float64(4 * math.pi * self.__parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS),
 			np.float64(self.__parameters.galaxy.shear.magnitude),
-			np.float64(self.__parameters.galaxy.shear.angle.value),
+			np.float64(self.__parameters.galaxy.shear.angle.to('rad').value),
 			np.int32(width),
 			np.int32(height),
 			np.float64(self.__parameters.dTheta.to('rad').value),
