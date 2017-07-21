@@ -19,7 +19,7 @@ import numpy as np
 class __Model(object):
     def __init__(self):
         self.__Engine = Engine_Grid()
-        print("Brute Forcing")
+        print("Grid Engine")
         self.__colormap = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66), QtGui.qRgb(53,252,92)]
         self.__colorMapArr = np.array([[0,0,0],[255,255,0],[255,255,255],[50,101,255],[244,191,66],[53,252,92]],dtype=np.uint8)
         #Index 0: Black

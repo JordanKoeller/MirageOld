@@ -12,7 +12,7 @@ import random as rand
 
 from ...Calculator.InitialMassFunction import Evolved_IMF
 from ...Utility import Vector2D
-from .. import ParametersError
+from ..ParametersError import ParametersError
 
 
 class Parameters(object):

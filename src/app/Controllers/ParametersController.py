@@ -24,6 +24,8 @@ from astropy.coordinates import SkyCoord
 from astropy.coordinates import CartesianRepresentation
 import random
 from ..Utility import Vector2D
+from ..Models.ParametersError import ParametersError
+
 
 class ParametersController(GUIController):
     '''
@@ -79,7 +81,7 @@ class ParametersController(GUIController):
                 inputUnit = self.view.scaleUnitOption.currentText()
                 #Determination of relative motion
                 gVelocity = self.view.qVelocity.text()
-                gComponents = gVelocity.strip('()').split(',')
+                gComponents = (0,0,0)#gVelocity.strip('()').split(',')
                 gVelocity = CartesianRepresentation(gComponents[0],gComponents[1],gComponents[2],'')
 
 
@@ -109,8 +111,9 @@ class ParametersController(GUIController):
                 canvasDim = int(self.view.dimensionInput.text())
                 displayQuasar = self.view.displayQuasar.isChecked()
                 displayGalaxy = self.view.displayGalaxy.isChecked() 
-                if self._tmpStars and gNumStars == self._tmpStars[0]:
-                    galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity,stars = self._tmpStars)
+                if self._tmpStars:
+                    print("Binding stars")
+                    galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity,stars = self._tmpStars[1])
                 else:
                     galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity)
                 quasar = Quasar(qRedshift, qRadius, qPosition, apparentV, mass = qBHMass)
@@ -171,6 +174,7 @@ class ParametersController(GUIController):
     def bindFields(self, parameters,bindExtras = None):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""
         if parameters.stars != []:
+            print("Found stars")
             self._tmpStars = (parameters.galaxy.percentStars,parameters.galaxy.stars)
         else:
             self._tmpStars = None

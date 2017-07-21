@@ -29,6 +29,8 @@ class Galaxy(Drawable, Cosmic):
 		self.skyCoords = skyCoords
 		self.velocity = velocity
 		self.__stars = stars
+		if stars != []:
+			print("Came with stars")
 
 	def drawStars(self, img, parameters):
 		if len(self.__stars) != 0:

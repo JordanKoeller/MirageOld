@@ -403,16 +403,17 @@ cdef class Engine:
 		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
 		if self.__parameters is None:
 			self.__parameters = parameters
-			if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
-				self.__parameters.regenerateStars()
+			# if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
+			# 	self.__parameters.regenerateStars()
 			if autoRecalculate:
 				self.reconfigure()
 			else:
 				self.needsReconfiguring = True
 		elif not self.__parameters.isSimilar(parameters):
 			self.__parameters = parameters
-			if self.__parameters.galaxy.percentStars > 0:
-				self.__parameters.regenerateStars()
+			# if self.__parameters.galaxy.percentStars > 0:
+			# 	print("Not similar so regenerating stars")
+			# 	self.__parameters.regenerateStars()
 			if autoRecalculate:
 				self.reconfigure()
 			else:

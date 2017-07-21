@@ -29,7 +29,7 @@ cdef class CurveDrawer_Tracer(Drawer):
         self.index += 1
         ret1,ret2 = (np.asarray(self.xAxis),np.asarray(self.yAxis))
         self.signal.emit(ret1,ret2)
-        return (ret1,ret2)
+        return (ret1,-2.5*np.log(ret2))
 
     cdef plotAxes(self, np.ndarray[np.float64_t, ndim=1] x, np.ndarray[np.float64_t, ndim=1] y):
         self.xAxis = x
@@ -40,7 +40,7 @@ cdef class CurveDrawer_Tracer(Drawer):
         if self.index == 0:
             self.index = x.shape[0] -1
         self.signal.emit(x,y)
-        return (x,y)
+        return (x,-2.5*np.log(y))
 
     cpdef draw(self, object args):
         if len(args) == 1:
