@@ -27,7 +27,9 @@ a.out
 *.fits
 #Profiling files, stray results data files
 *.dat
-
+*.npy
+*.npz
+.GPUInfo
 
 # Distribution / packaging
 .Python

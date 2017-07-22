@@ -8,6 +8,7 @@ import math
 from ..Models.Model import Model
 from ..Models.Parameters.ExperimentParams import ResultTypes
 from ..Utility import Vector2D
+import time
 import numpy as np
 from ..Utility.NullSignal import NullSignal
 from ..Models.Parameters.MagMapParameters import MagMapParameters
@@ -56,17 +57,14 @@ class ExperimentResultCalculator(object):
                 self.experimentRunners.append(self.__MAGMAP)
             if isinstance(exp,StarFieldData):
                 self.experimentRunners.append(self.__STARFIELD)
-#             if exp is ResultTypes.STARFIELD:
-#                 self.experimentRunners.append(self.__STARFIELD)
-#             if exp is ResultTypes.VIDEO:
-#                 self.experimentRunners.append(self.__VIDEO)
         
         
     def runExperiment(self):
         ret = []
+        begin = time.clock()
         for exp in range(0,len(self.experimentRunners)):
             ret.append(self.experimentRunners[exp](exp))
-        print("Experiment Finished")
+        print("Experiment Finished in "+str(time.clock()-begin)+" seconds")
         return ret
 
             
@@ -80,7 +78,6 @@ class ExperimentResultCalculator(object):
         
     def __MAGMAP(self,index):
         special = Model.parameters.extras.desiredResults[index]
-#         Model.parameters.extras.desiredResults[index].center = Model.engine.getCenterCoords()
         return Model.engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
 

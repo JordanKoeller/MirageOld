@@ -13,21 +13,11 @@ from astropy import constants as const
 from astropy import units as u
 from astropy.cosmology import WMAP7 as cosmo
 import cython
-import pyopencl.tools
 from scipy import interpolate
 
 from ...Utility import Vector2D
 from ...Utility import zeroVector
-# from ...Views.Drawer.Drawer import PlotDrawer
 import numpy as np
-import pyopencl as cl
-from matplotlib.mlab import griddata
-
-
-# from Models.Stellar.Galaxy import Galaxy
-# from Models.Parameters.Parameters import Parameters
-# from Models.Stellar.Quasar import Quasar
-# from Utility import WrappedTree
 cimport numpy as np
 from libcpp.vector cimport vector
 from libc.math cimport sin, cos, atan2, sqrt
@@ -67,6 +57,7 @@ cdef class Engine_PointerGrid(Engine):
 		return self.query_data(x,y,radius).size()
 
 	def reconfigure(self):
+		print("Reconfiguring")
 		self.__grid = PointerGrid()
 		begin = time.clock()
 		self.__preCalculating = True

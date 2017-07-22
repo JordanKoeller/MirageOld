@@ -1,6 +1,7 @@
 from PyQt5 import QtCore
 
 import numpy as np
+import math
 
 from ..Models.Model import Model
 from .FileManagers.MediaFileManager import MediaFileManager
@@ -9,6 +10,8 @@ from .GUIController import GUIController
 from .Threads.MagMapTracerThread import MagMapTracerThread
 from .. import lens_analysis
 from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce
+from app.Calculator import Conversions
+from app.Utility.Vec2D import Vector2D
 
 
 class MagMapTracerController(GUIController):
@@ -19,13 +22,18 @@ class MagMapTracerController(GUIController):
     update_view_signal = QtCore.pyqtSignal(object,object,object)
     tracer_updated = QtCore.pyqtSignal(str)
     run_done = QtCore.pyqtSignal(str)
+    save_lightCurve = QtCore.pyqtSignal()
 
     def __init__(self, view,tracerView,trialName=None,trialNum=0):
         '''
         Constructor
         '''
         GUIController.__init__(self, view, None, None)
-        view.addSignals(tracerUpdate=self.tracer_signal,tracerView=self.update_view_signal,tracerUpdated=self.tracer_updated,tracerDone = self.run_done)
+        view.addSignals(tracerUpdate=self.tracer_signal,
+                        tracerView=self.update_view_signal,
+                        tracerUpdated=self.tracer_updated,
+                        tracerDone = self.run_done,
+                        saveLightCurve = self.save_lightCurve)
         self.tracerView = tracerView
         self.playToggle = False
         self.thread = None
@@ -33,6 +41,7 @@ class MagMapTracerController(GUIController):
         self.view.playPauseAction.triggered.connect(self.togglePlaying)
         self.view.resetAction.triggered.connect(self.restart)
         self.view.recordAction.triggered.connect(self.record)
+        self.view.actionLightCurve.triggered.connect(self.saveLightCurve)
         self.view.showQuasarAction.triggered.connect(self.drawQuasarHelper)
         self.view.showGalaxyAction.triggered.connect(self.drawGalaxyHelper)
         self.view.signals['tracerUpdated'].connect(self.sendOffFrame)
@@ -100,6 +109,20 @@ class MagMapTracerController(GUIController):
             pixels = self.tracerView.getROI()
             self.thread = MagMapTracerThread(self.view.signals, pixels,recording=recording)
             self.thread.start()
+            
+    def saveLightCurve(self):
+        fname = 'filler'
+        resolution = 1000
+        track = self.tracerView.getROI()
+        track = Model.parameters.extras.getParams('magmap').pixelToAngle(track)
+        start = Vector2D(track[0][0],track[0][1],'rad')
+        finish = Vector2D(track[len(track)-1][0],track[len(track)-1][1],'rad')
+        yAxis = Model.engine.makeLightCurve(start,finish,resolution)
+        diff = (finish-start).magnitude()
+        xAxis = np.arange(0,diff,diff/resolution)
+        sE = np.array([[start.x,start.y],[finish.x,finish.y]])
+        np.savez(fname,xAxis = xAxis, yAxis = yAxis,startEnd = sE)
+        
 
     def record(self):
         """Calling this method will configure the system to save each frame of an animation, for compiling to a video that can be saved."""
@@ -129,6 +152,7 @@ class MagMapTracerController(GUIController):
     def initialize(self,fileName = None,trialNum=0):
         if fileName:
             magmap,params = lens_analysis.load(fileName)[trialNum].traceQuasar()
+            magmap = magmap
             center = params.extras.getParams('magmap').center.to('rad')
             engine = Engine_BruteForce()
             engine.updateParameters(params)

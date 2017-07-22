@@ -44,7 +44,7 @@ class Trial(AbstractFileWrapper):
     def getLightCurve(self,ind,xUnit = 'arcsec'): #Automatically passed in parameter 'ind' supplies information of what column that data type is located in
         lc = self._getDataSet(ind)
         x = np.arange(0,len(lc))
-        distCovered = self.parameters.extras.pathEnd - self.parameters.extras.pathStart
+        distCovered = self.parameters.extras.desiredResults[ind].pathEnd - self.parameters.extras.desiredResults[ind].pathStart
         dist = distCovered.to(xUnit).magnitude()/len(lc)
         x = x * dist
         return (x,lc)

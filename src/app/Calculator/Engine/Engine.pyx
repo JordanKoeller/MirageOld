@@ -14,21 +14,19 @@ from astropy import units as u
 from astropy.cosmology import WMAP7 as cosmo
 import cython
 from cython.parallel import prange
-import pyopencl.tools
 from scipy import interpolate
 
 from ...Utility import Vector2D
 from ...Utility import zeroVector
 import numpy as np
-import pyopencl as cl
 
+from .. import gpu_kernel
 
 cimport numpy as np
 from libcpp.vector cimport vector
 from libc cimport math as CMATH
 from libcpp.pair cimport pair
 from libcpp cimport bool
-from .. import gpu_kernel
 
 cdef class Engine:
 	"""
@@ -54,9 +52,14 @@ cdef class Engine:
 
 			Performs calculations with OpenCL acceleration. If the computer's graphics processor supports 64-bit floating-point arithmetic,
 			the graphics processor may be used. Otherwise, will perform calculations on the CPU."""
-		return self.ray_trace_gpu()
+		# try:
+		# 	return self.ray_trace_gpu()
+		# except:
+		return self.ray_trace_cpu()
 
 	cdef ray_trace_gpu(self):
+		import pyopencl.tools
+		import pyopencl as cl
 		begin = time.clock()
 		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
 		os.environ['PYOPENCL_CTX'] = '3'
@@ -156,7 +159,7 @@ cdef class Engine:
 			np.float64((4 * const.G / const.c / const.c).to("lyr/solMass").value * dLS / dS / dL),
 			np.float64(4 * math.pi * self.__parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS),
 			np.float64(self.__parameters.galaxy.shear.magnitude),
-			np.float64(self.__parameters.galaxy.shear.angle.value),
+			np.float64(self.__parameters.galaxy.shear.angle.to('rad').value),
 			np.int32(width),
 			np.int32(height),
 			np.float64(self.__parameters.dTheta.to('rad').value),
@@ -178,42 +181,52 @@ cdef class Engine:
 		begin = time.clock()
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
+		height = height//2
+		width = width//2
 		cdef double dTheta = self.__parameters.dTheta.value
-		cdef np.ndarray[np.float64_t,ndim = 2] result_nparray_x = np.zeros((width, height), dtype=np.float64)
-		cdef np.ndarray[np.float64_t,ndim = 2] result_nparray_y = np.zeros((width, height), dtype=np.float64)
-		cdef double dS = self.__parameters.quasar.angDiamDist.value
-		cdef double dL = self.__parameters.galaxy.angDiamDist.value
-		cdef double dLS = self.__parameters.dLS.value
+		cdef np.ndarray[np.float64_t,ndim = 2] result_nparray_x = np.zeros((width*2, height*2), dtype=np.float64)
+		cdef np.ndarray[np.float64_t,ndim = 2] result_nparray_y = np.zeros((width*2, height*2), dtype=np.float64)
+		cdef double dS = self.__parameters.quasar.angDiamDist.to('lyr').value
+		cdef double dL = self.__parameters.galaxy.angDiamDist.to('lyr').value
+		cdef double dLS = self.__parameters.dLS.to('lyr').value
 		cdef np.ndarray[np.float64_t,ndim = 1] stars_mass, stars_x, stars_y
-		stars_mass, stars_x, stars_y = self.__parameters.galaxy.starArray
+		cdef int numStars = 0
+		if self.__parameters.galaxy.percentStars > 0.0:
+			stars_mass, stars_x, stars_y = self.__parameters.galaxy.starArray
+			numStars = len(stars_x)
+			print(stars_x)
 		cdef double shearMag = self.__parameters.galaxy.shear.magnitude
 		cdef double shearAngle = self.__parameters.galaxy.shear.angle.value
 		cdef double centerX = self.__parameters.galaxy.position.to('rad').x
 		cdef double centerY = self.__parameters.galaxy.position.to('rad').y
 		cdef double sis_constant = 	np.float64(4 * math.pi * self.__parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
-		cdef double point_constant = (4 * const.G / (const.c * const.c)).to("lyr/solMass").value * dLS / dS / dL
-		cdef int numStars = len(stars_x)
+		cdef double point_constant = (4 * const.G / const.c / const.c).to("lyr/solMass").value * dLS / dS / dL
 		cdef double pi2 = math.pi/2
 		cdef int x, y, i
 		cdef double incident_angle_x, incident_angle_y, r, deltaR_x, deltaR_y, phi
-		for x in prange(0,width,1,nogil=True,schedule='static',chunksize=int(width/4),num_threads=4):
-			for y in range(0,height):
-				incident_angle_x = (x - width/2)*dTheta
-				incident_angle_y = (y-height/2)*dTheta
+		for x in prange(0,width*2,1,nogil=True,schedule='static'):
+			for y in range(0,height*2):
+				incident_angle_x = (x - width)*dTheta
+				incident_angle_y = (height - y)*dTheta
+
+				for i in range(numStars):
+					deltaR_x = incident_angle_x - stars_x[i]
+					deltaR_y = incident_angle_y - stars_y[i]
+					r = deltaR_x*deltaR_x + deltaR_y*deltaR_y
+					if r != 0.0:
+						result_nparray_x[x,y] += deltaR_x*stars_mass[i]*point_constant/r;
+						result_nparray_y[x,y] += deltaR_y*stars_mass[i]*point_constant/r;				
 				
 				#SIS
 				deltaR_x = incident_angle_x - centerX
 				deltaR_y = incident_angle_y - centerY
 				r = sqrt(deltaR_x*deltaR_x+deltaR_y*deltaR_y)
-				if r == 0.0:
-					result_nparray_x[x,y] += deltaR_x 
-					result_nparray_y[x,y] += deltaR_y
-				else:
+				if r != 0.0:
 					result_nparray_x[x,y] += deltaR_x*sis_constant/r 
-					result_nparray_y[x,y] += deltaR_y*sis_constant/r 
-				
+					result_nparray_y[x,y] += deltaR_y*sis_constant/r
+
 				#Shear
-				phi = 2*(shearAngle+pi2)-CMATH.atan2(deltaR_y,deltaR_x)
+				phi = 2*(pi2 - shearAngle )-CMATH.atan2(deltaR_y,deltaR_x)
 				result_nparray_x[x,y] += shearMag*r*CMATH.cos(phi)
 				result_nparray_y[x,y] += shearMag*r*CMATH.sin(phi)
 				result_nparray_x[x,y] = deltaR_x - result_nparray_x[x,y]
@@ -354,14 +367,14 @@ cdef class Engine:
 		cdef int j = 0
 		cdef double x = 0
 		cdef double y = 0
-		self.__parameters.galaxy.update(center=center)
+		# self.__parameters.galaxy.update(center=center)
 		start = center - dims/2
 		cdef double x0 = start.to('rad').x
 		cdef double y0 = start.to('rad').y+dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
 		print("Making mag map")
-		for i in prange(0,resx,nogil=True):
+		for i in prange(0,resx,nogil=True,schedule='guided'):
 			if i % 10 == 0:
 				with gil:
 					signal.emit(i)
@@ -403,21 +416,29 @@ cdef class Engine:
 		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
 		if self.__parameters is None:
 			self.__parameters = parameters
-			# if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
-			# 	self.__parameters.regenerateStars()
+			print("Not similar")
+			if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
+				print("Found None, Making stars")
+				self.__parameters.regenerateStars()
 			if autoRecalculate:
 				self.reconfigure()
 			else:
 				self.needsReconfiguring = True
 		elif not self.__parameters.isSimilar(parameters):
-			self.__parameters = parameters
-			# if self.__parameters.galaxy.percentStars > 0:
-			# 	print("Not similar so regenerating stars")
-			# 	self.__parameters.regenerateStars()
+			print("Not similar")
+			self.__parameters.canvasDim = parameters.canvasDim
+			if self.__parameters.isSimilar(parameters):
+				self.__parameters = parameters
+				if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
+					print("Not similar so regenerating stars")
+					self.__parameters.regenerateStars()
+			else:
+				self.__parameters = parameters
 			if autoRecalculate:
 				self.reconfigure()
 			else:
 				self.needsReconfiguring = True
 		else:
+			print("No need to recalulate anything")
 			parameters.setStars(self.__parameters.stars)
 			self.__parameters = parameters

@@ -81,14 +81,18 @@ class ParametersController(GUIController):
                 inputUnit = self.view.scaleUnitOption.currentText()
                 #Determination of relative motion
                 gVelocity = self.view.qVelocity.text()
-                gComponents = (0,0,0)#gVelocity.strip('()').split(',')
-                gVelocity = CartesianRepresentation(gComponents[0],gComponents[1],gComponents[2],'')
-
-
+                gComponents = gVelocity.strip('()').split(',')
                 gPositionRaDec = self.view.gPositionEntry.text()
-                ra,dec = gPositionRaDec.strip('()').split(',')
-                gPositionRaDec = SkyCoord(ra,dec, unit = (u.hourangle,u.deg))
-                apparentV = self.getApparentVelocity(gPositionRaDec,gVelocity)
+                apparentV = None
+                if len(gComponents) == 2:
+                    apparentV = self.view.vectorFromQString(self.view.qVelocity.text())
+                else:
+                    gVelocity = CartesianRepresentation(gComponents[0],gComponents[1],gComponents[2],'')
+
+
+                    ra,dec = gPositionRaDec.strip('()').split(',')
+                    gPositionRaDec = SkyCoord(ra,dec, unit = (u.hourangle,u.deg))
+                    apparentV = self.getApparentVelocity(gPositionRaDec,gVelocity)
 
                 #Quasar properties
                 qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit='arcsec').to('rad')

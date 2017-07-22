@@ -42,6 +42,7 @@ class MagMapTracerThread(QtCore.QThread):
             y = self.angles[self.__counter,1]
             pos = Vector2D(x,y,'rad')
             Model.parameters.quasar.setPos(pos)
+            self.signals['qPosLabel'].emit(Model.parameters.quasar.position.to('arcsec'))
             timer = time.clock()
             if self.recording:
                 self.signals['tracerUpdated'].emit('Done')

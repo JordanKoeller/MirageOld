@@ -31,6 +31,7 @@ class QueueThread(QtCore.QThread):
     def run(self):
         ctr = 0
         for params in self.experimentQueue:
+            print(params.galaxy.stars)
             ctr += 1
             numTrials = params.extras.numTrials 
             self.filemanager.newExperiment(params) #NEED TO IMPLIMENT
@@ -38,7 +39,6 @@ class QueueThread(QtCore.QThread):
             for expt in range(0,numTrials):
                 self.signals['progressBar'].emit(expt+1)
                 self.signals['progressLabel'].emit("Processing trial "+str(expt+1) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
-#                 print("Processing trial "+str(expt+1) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
                 newP = varyTrial(params,expt+1) #NEED TO IMPLIMENT
                 Model.updateParameters(newP)
                 data = exptRunner.runExperiment() #NEED TO IMPLIMENT

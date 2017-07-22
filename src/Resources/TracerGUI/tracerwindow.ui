@@ -57,6 +57,8 @@
     <addaction name="actionLoad"/>
     <addaction name="recordAction"/>
     <addaction name="separator"/>
+    <addaction name="actionLightCurve"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -148,6 +150,14 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionLightCurve">
+   <property name="text">
+    <string>Export Light Curve</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
  </widget>
