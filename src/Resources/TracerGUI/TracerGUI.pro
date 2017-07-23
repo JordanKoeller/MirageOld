@@ -17,4 +17,6 @@ SOURCES += main.cpp\
 
 HEADERS  += tracerwindow.h
 
-FORMS    += tracerwindow.ui
+FORMS    += tracerwindow.ui \
+    preferencesdialog.ui
+FORMS    += preferencesWindow.ui

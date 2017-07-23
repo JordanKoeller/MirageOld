@@ -15,12 +15,13 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QGridLayout>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QSplitter>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "pyqtgraph.h"
 
@@ -29,64 +30,72 @@ QT_BEGIN_NAMESPACE
 class Ui_TracerWindow
 {
 public:
-    QAction *actionDisplay_Quasar;
-    QAction *actionShow_Galaxy;
+    QAction *showQuasarAction;
+    QAction *showGalaxyAction;
     QAction *actionLoad;
-    QAction *actionRecord;
-    QAction *actionPlay;
-    QAction *actionRestart;
+    QAction *recordAction;
+    QAction *playPauseAction;
+    QAction *resetAction;
     QAction *actionExit;
+    QAction *actionLightCurve;
+    QAction *actionPreferences;
     QWidget *centralWidget;
-    QHBoxLayout *horizontalLayout;
-    QFrame *frame;
+    QVBoxLayout *verticalLayout;
+    QFrame *tracerFrame;
     QGridLayout *gridLayout;
     QSplitter *splitter;
     PlotWidget *plotView;
     GraphicsLayoutWidget *imgView;
+    GradientWidget *gradientSelector;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QMenu *menuEdit;
     QMenu *menuView;
     QMenu *menuRun;
+    QStatusBar *statusBar;
 
     void setupUi(QMainWindow *TracerWindow)
     {
         if (TracerWindow->objectName().isEmpty())
             TracerWindow->setObjectName(QStringLiteral("TracerWindow"));
         TracerWindow->resize(489, 367);
-        actionDisplay_Quasar = new QAction(TracerWindow);
-        actionDisplay_Quasar->setObjectName(QStringLiteral("actionDisplay_Quasar"));
-        actionDisplay_Quasar->setCheckable(true);
-        actionDisplay_Quasar->setChecked(true);
-        actionShow_Galaxy = new QAction(TracerWindow);
-        actionShow_Galaxy->setObjectName(QStringLiteral("actionShow_Galaxy"));
-        actionShow_Galaxy->setCheckable(true);
-        actionShow_Galaxy->setChecked(true);
+        showQuasarAction = new QAction(TracerWindow);
+        showQuasarAction->setObjectName(QStringLiteral("showQuasarAction"));
+        showQuasarAction->setCheckable(true);
+        showQuasarAction->setChecked(true);
+        showGalaxyAction = new QAction(TracerWindow);
+        showGalaxyAction->setObjectName(QStringLiteral("showGalaxyAction"));
+        showGalaxyAction->setCheckable(true);
+        showGalaxyAction->setChecked(true);
         actionLoad = new QAction(TracerWindow);
         actionLoad->setObjectName(QStringLiteral("actionLoad"));
-        actionRecord = new QAction(TracerWindow);
-        actionRecord->setObjectName(QStringLiteral("actionRecord"));
-        actionPlay = new QAction(TracerWindow);
-        actionPlay->setObjectName(QStringLiteral("actionPlay"));
-        actionRestart = new QAction(TracerWindow);
-        actionRestart->setObjectName(QStringLiteral("actionRestart"));
+        recordAction = new QAction(TracerWindow);
+        recordAction->setObjectName(QStringLiteral("recordAction"));
+        playPauseAction = new QAction(TracerWindow);
+        playPauseAction->setObjectName(QStringLiteral("playPauseAction"));
+        resetAction = new QAction(TracerWindow);
+        resetAction->setObjectName(QStringLiteral("resetAction"));
         actionExit = new QAction(TracerWindow);
         actionExit->setObjectName(QStringLiteral("actionExit"));
+        actionLightCurve = new QAction(TracerWindow);
+        actionLightCurve->setObjectName(QStringLiteral("actionLightCurve"));
+        actionPreferences = new QAction(TracerWindow);
+        actionPreferences->setObjectName(QStringLiteral("actionPreferences"));
         centralWidget = new QWidget(TracerWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        horizontalLayout = new QHBoxLayout(centralWidget);
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setContentsMargins(11, 11, 11, 11);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        frame = new QFrame(centralWidget);
-        frame->setObjectName(QStringLiteral("frame"));
-        frame->setFrameShape(QFrame::NoFrame);
-        frame->setFrameShadow(QFrame::Plain);
-        gridLayout = new QGridLayout(frame);
+        verticalLayout = new QVBoxLayout(centralWidget);
+        verticalLayout->setSpacing(6);
+        verticalLayout->setContentsMargins(11, 11, 11, 11);
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        tracerFrame = new QFrame(centralWidget);
+        tracerFrame->setObjectName(QStringLiteral("tracerFrame"));
+        tracerFrame->setFrameShape(QFrame::NoFrame);
+        tracerFrame->setFrameShadow(QFrame::Plain);
+        gridLayout = new QGridLayout(tracerFrame);
         gridLayout->setSpacing(6);
         gridLayout->setContentsMargins(11, 11, 11, 11);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
-        splitter = new QSplitter(frame);
+        splitter = new QSplitter(tracerFrame);
         splitter->setObjectName(QStringLiteral("splitter"));
         splitter->setOrientation(Qt::Vertical);
         plotView = new PlotWidget(splitter);
@@ -96,10 +105,15 @@ public:
         imgView->setObjectName(QStringLiteral("imgView"));
         splitter->addWidget(imgView);
 
-        gridLayout->addWidget(splitter, 0, 0, 1, 1);
+        gridLayout->addWidget(splitter, 1, 0, 1, 1);
 
 
-        horizontalLayout->addWidget(frame);
+        verticalLayout->addWidget(tracerFrame);
+
+        gradientSelector = new GradientWidget(centralWidget);
+        gradientSelector->setObjectName(QStringLiteral("gradientSelector"));
+
+        verticalLayout->addWidget(gradientSelector);
 
         TracerWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(TracerWindow);
@@ -114,20 +128,27 @@ public:
         menuRun = new QMenu(menuBar);
         menuRun->setObjectName(QStringLiteral("menuRun"));
         TracerWindow->setMenuBar(menuBar);
+        statusBar = new QStatusBar(TracerWindow);
+        statusBar->setObjectName(QStringLiteral("statusBar"));
+        TracerWindow->setStatusBar(statusBar);
 
         menuBar->addAction(menuFile->menuAction());
         menuBar->addAction(menuEdit->menuAction());
         menuBar->addAction(menuRun->menuAction());
         menuBar->addAction(menuView->menuAction());
         menuFile->addAction(actionLoad);
-        menuFile->addAction(actionRecord);
+        menuFile->addAction(recordAction);
+        menuFile->addSeparator();
+        menuFile->addAction(actionLightCurve);
         menuFile->addSeparator();
         menuFile->addAction(actionExit);
-        menuView->addAction(actionDisplay_Quasar);
-        menuView->addAction(actionShow_Galaxy);
-        menuRun->addAction(actionPlay);
+        menuFile->addSeparator();
+        menuFile->addAction(actionPreferences);
+        menuView->addAction(showQuasarAction);
+        menuView->addAction(showGalaxyAction);
+        menuRun->addAction(playPauseAction);
         menuRun->addSeparator();
-        menuRun->addAction(actionRestart);
+        menuRun->addAction(resetAction);
 
         retranslateUi(TracerWindow);
 
@@ -137,19 +158,22 @@ public:
     void retranslateUi(QMainWindow *TracerWindow)
     {
         TracerWindow->setWindowTitle(QApplication::translate("TracerWindow", "TracerWindow", 0));
-        actionDisplay_Quasar->setText(QApplication::translate("TracerWindow", "Show Quasar", 0));
-        actionDisplay_Quasar->setShortcut(QApplication::translate("TracerWindow", "Q", 0));
-        actionShow_Galaxy->setText(QApplication::translate("TracerWindow", "Show Galaxy", 0));
-        actionShow_Galaxy->setShortcut(QApplication::translate("TracerWindow", "G", 0));
+        showQuasarAction->setText(QApplication::translate("TracerWindow", "Show Quasar", 0));
+        showQuasarAction->setShortcut(QApplication::translate("TracerWindow", "Q", 0));
+        showGalaxyAction->setText(QApplication::translate("TracerWindow", "Show Galaxy", 0));
+        showGalaxyAction->setShortcut(QApplication::translate("TracerWindow", "G", 0));
         actionLoad->setText(QApplication::translate("TracerWindow", "Load", 0));
         actionLoad->setShortcut(QApplication::translate("TracerWindow", "Ctrl+O", 0));
-        actionRecord->setText(QApplication::translate("TracerWindow", "Record", 0));
-        actionRecord->setShortcut(QApplication::translate("TracerWindow", "Ctrl+R", 0));
-        actionPlay->setText(QApplication::translate("TracerWindow", "Play", 0));
-        actionPlay->setShortcut(QApplication::translate("TracerWindow", "Space", 0));
-        actionRestart->setText(QApplication::translate("TracerWindow", "Restart", 0));
-        actionRestart->setShortcut(QApplication::translate("TracerWindow", "R", 0));
+        recordAction->setText(QApplication::translate("TracerWindow", "Record", 0));
+        recordAction->setShortcut(QApplication::translate("TracerWindow", "Ctrl+R", 0));
+        playPauseAction->setText(QApplication::translate("TracerWindow", "Play", 0));
+        playPauseAction->setShortcut(QApplication::translate("TracerWindow", "Space", 0));
+        resetAction->setText(QApplication::translate("TracerWindow", "Restart", 0));
+        resetAction->setShortcut(QApplication::translate("TracerWindow", "R", 0));
         actionExit->setText(QApplication::translate("TracerWindow", "Exit", 0));
+        actionLightCurve->setText(QApplication::translate("TracerWindow", "Export Light Curve", 0));
+        actionLightCurve->setShortcut(QApplication::translate("TracerWindow", "Ctrl+L", 0));
+        actionPreferences->setText(QApplication::translate("TracerWindow", "Preferences", 0));
         menuFile->setTitle(QApplication::translate("TracerWindow", "File", 0));
         menuEdit->setTitle(QApplication::translate("TracerWindow", "Edit", 0));
         menuView->setTitle(QApplication::translate("TracerWindow", "View", 0));

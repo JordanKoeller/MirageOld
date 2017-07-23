@@ -14,7 +14,7 @@ from ..Utility.NullSignal import NullSignal
 from PyQt5 import QtWidgets
 import sys
 
-def load(filename):
+def load(filename='Untitled.dat'):
     lngth = len(filename)
     if filename[lngth-4::] == '.dat':
         return Experiment(filename)

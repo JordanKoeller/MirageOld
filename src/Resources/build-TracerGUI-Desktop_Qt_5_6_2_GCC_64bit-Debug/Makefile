@@ -198,7 +198,7 @@ TARGET        = TracerGUI
 first: all
 ####### Build rules
 
-$(TARGET): ui_tracerwindow.h $(OBJECTS)  
+$(TARGET): ui_tracerwindow.h ui_preferencesdialog.h ui_preferencesWindow.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: ../TracerGUI/TracerGUI.pro /home/jkoeller/Programming/Qt/5.6/gcc_64/mkspecs/linux-g++/qmake.conf /home/jkoeller/Programming/Qt/5.6/gcc_64/mkspecs/features/spec_pre.prf \
@@ -496,7 +496,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../TracerGUI/tracerwindow.h $(DISTDIR)/
 	$(COPY_FILE) --parents ../TracerGUI/main.cpp ../TracerGUI/tracerwindow.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../TracerGUI/tracerwindow.ui $(DISTDIR)/
+	$(COPY_FILE) --parents ../TracerGUI/tracerwindow.ui ../TracerGUI/preferencesdialog.ui preferencesWindow.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -636,11 +636,17 @@ moc_tracerwindow.cpp: /home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_tracerwindow.h
+compiler_uic_make_all: ui_tracerwindow.h ui_preferencesdialog.h ui_preferencesWindow.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_tracerwindow.h
+	-$(DEL_FILE) ui_tracerwindow.h ui_preferencesdialog.h ui_preferencesWindow.h
 ui_tracerwindow.h: ../TracerGUI/tracerwindow.ui
 	/home/jkoeller/Programming/Qt/5.6/gcc_64/bin/uic ../TracerGUI/tracerwindow.ui -o ui_tracerwindow.h
+
+ui_preferencesdialog.h: ../TracerGUI/preferencesdialog.ui
+	/home/jkoeller/Programming/Qt/5.6/gcc_64/bin/uic ../TracerGUI/preferencesdialog.ui -o ui_preferencesdialog.h
+
+ui_preferencesWindow.h: preferencesWindow.ui
+	/home/jkoeller/Programming/Qt/5.6/gcc_64/bin/uic preferencesWindow.ui -o ui_preferencesWindow.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -877,7 +883,53 @@ tracerwindow.o: ../TracerGUI/tracerwindow.cpp ../TracerGUI/tracerwindow.h \
 		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtGui/qtouchdevice.h \
 		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qtabwidget.h \
 		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtGui/qicon.h \
-		ui_tracerwindow.h
+		ui_tracerwindow.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtCore/QVariant \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QAction \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qaction.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qactiongroup.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QApplication \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qapplication.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtCore/qcoreapplication.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtCore/qeventloop.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtGui/qguiapplication.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtGui/qinputmethod.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QButtonGroup \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qbuttongroup.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QFrame \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qframe.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QGridLayout \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qgridlayout.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qlayout.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qlayoutitem.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qboxlayout.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QHeaderView \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qheaderview.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtCore/qabstractitemmodel.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtCore/qitemselectionmodel.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qstyleoption.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtGui/qvalidator.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtCore/qregularexpression.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qslider.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qabstractslider.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qstyle.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qtabbar.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qrubberband.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QMenu \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qmenu.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QMenuBar \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qmenubar.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QSplitter \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qsplitter.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QStatusBar \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/qstatusbar.h \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QVBoxLayout \
+		/home/jkoeller/Programming/Qt/5.6/gcc_64/include/QtWidgets/QWidget
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tracerwindow.o ../TracerGUI/tracerwindow.cpp
 
 moc_tracerwindow.o: moc_tracerwindow.cpp 

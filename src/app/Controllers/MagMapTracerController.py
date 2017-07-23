@@ -51,7 +51,7 @@ class MagMapTracerController(GUIController):
         self._showingGalaxy = True
         self.__initView()
         self.initialize(trialName,trialNum)
-            
+        self.animating = False
 
     def __initView(self):
         self.update_view_signal.connect(self.tracerView.updateAll)
@@ -104,11 +104,21 @@ class MagMapTracerController(GUIController):
 #                 self.tracerView.setUpdatesEnabled(False)
 #             else:
 #                 self.tracerView.setUpdatesEnabled(True)
-            self.tracerView.setUpdatesEnabled(recording)
-            self.playToggle = True
-            pixels = self.tracerView.getROI()
-            self.thread = MagMapTracerThread(self.view.signals, pixels,recording=recording)
-            self.thread.start()
+            if self.animating:
+                self.tracerView.setUpdatesEnabled(recording)
+                self.playToggle = True
+                pixels = self.tracerView.getROI()
+                self.thread = MagMapTracerThread(self.view.signals, pixels,recording=recording)
+                self.thread.start()
+            else:
+                pixels = self.tracerView.getROI()
+                pixels = np.array(pixels,dtype=np.int)
+                y = []
+                for i in pixels:
+                    y.append(self.magmapRaw[i[0],i[1]])
+                y = np.array(y)
+                y = -2.5*np.log10(y)
+                self.tracerView._updateLightCurve(np.arange(0,len(y)),y)
             
     def saveLightCurve(self):
         fname = 'filler'
@@ -152,7 +162,7 @@ class MagMapTracerController(GUIController):
     def initialize(self,fileName = None,trialNum=0):
         if fileName:
             magmap,params = lens_analysis.load(fileName)[trialNum].traceQuasar()
-            magmap = magmap
+            self.magmapRaw = magmap.copy()
             center = params.extras.getParams('magmap').center.to('rad')
             engine = Engine_BruteForce()
             engine.updateParameters(params)
@@ -163,9 +173,8 @@ class MagMapTracerController(GUIController):
             mag2 = magmap.copy()
             mag2[:,0] = magmap.shape[0] - magmap[:,0]
             mag2[:,1] = magmap[:,1]
-            print("Flipped axes")
             self.tracerView.setMagMap(mag2,baseMag)
-            Model.updateParameters(params)
+#             Model.updateParameters(params)
         else:
             paramsLoader = ParametersFileManager(self.view.signals)
             params = paramsLoader.read()

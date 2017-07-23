@@ -119,6 +119,8 @@ cdef class Engine:
 
 	cdef ray_trace_gpu_raw(self):
 		begin = time.clock()
+		import pyopencl.tools
+		import pyopencl as cl
 		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
 		os.environ['PYOPENCL_CTX'] = '3'
 		cdef int height = self.__parameters.canvasDim

@@ -6,10 +6,11 @@ Created on Jul 17, 2017
 from PyQt5 import QtCore, uic
 from PyQt5.QtWidgets import QMainWindow, QProgressDialog, QLabel
 
-from ... import tracerUIFile
 from ...Controllers.MagMapTracerController import MagMapTracerController
+from .MagMapTracerView import MagMapTracerView
+from .TracerPreferences import PreferencesDialog
+
 from ...Utility.SignalRepo import SignalRepo
-from ...Views.GUI.MagMapTracerView import MagMapTracerView
 
 
 class GUITracerWindow(QMainWindow,SignalRepo):
@@ -28,6 +29,7 @@ class GUITracerWindow(QMainWindow,SignalRepo):
         '''
         super(GUITracerWindow,self).__init__()
         uic.loadUi('Resources/TracerGUI/tracerwindow.ui',self)
+        prefs = PreferencesDialog('Resources/TracerGUI/preferencesdialog.ui',self)
         self.addSignals(progressDialog = self.progressDialog_signal,
                         progressBar = self.progressBar_signal,
                         progressLabel = self.statusBar_signal,
@@ -41,6 +43,7 @@ class GUITracerWindow(QMainWindow,SignalRepo):
         self._counter = 0
         tracerView = MagMapTracerView(self.tracerFrame,self.plotView,self.imgView,self.gradientSelector)
         self.tracerController = MagMapTracerController(self,tracerView,filename,trialNum)
+#         print(prefs.exec())
         
     def showMessage(self,msg,timeout = 5000):
         self.statusBar.showMessage(msg,timeout)

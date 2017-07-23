@@ -54,7 +54,7 @@ cdef class Engine_PointerGrid(Engine):
 		return ret
 	
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil:
-		return self.query_data(x,y,radius).size()
+		return self.__grid.find_within_count(x, y, radius)
 
 	def reconfigure(self):
 		print("Reconfiguring")
