@@ -1,0 +1,12 @@
+{
+	"ray_trace_on_load":true,
+
+	"precise_light_curve":false,
+
+	"fast_generate_light_curve":false,
+
+	"display_quasar_icon":true,
+
+	"light_curve_export_resolution":200
+
+}

@@ -38,7 +38,7 @@ class MagMapTracerView(QtCore.QObject):
     def updateAll(self,img,lc,tracerPos):
         # self._updateImgPane(img)
         self._updateLightCurve(lc[0],lc[1])
-        # self._positionTracer(tracerPos)
+        self._positionTracer(tracerPos)
 #         self.hasUpdated.emit(self.getFrame())
 
     def _setColorMap(self):

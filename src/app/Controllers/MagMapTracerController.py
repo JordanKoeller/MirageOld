@@ -1,16 +1,14 @@
 from PyQt5 import QtCore
 
 import numpy as np
-import math
 
 from ..Models.Model import Model
 from .FileManagers.MediaFileManager import MediaFileManager
 from .FileManagers.ParametersFileManager import ParametersFileManager
 from .GUIController import GUIController
 from .Threads.MagMapTracerThread import MagMapTracerThread
-from .. import lens_analysis
+
 from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce
-from app.Calculator import Conversions
 from app.Utility.Vec2D import Vector2D
 
 
@@ -51,7 +49,7 @@ class MagMapTracerController(GUIController):
         self._showingGalaxy = True
         self.__initView()
         self.initialize(trialName,trialNum)
-        self.animating = False
+        self.animating = True
 
     def __initView(self):
         self.update_view_signal.connect(self.tracerView.updateAll)
@@ -160,6 +158,7 @@ class MagMapTracerController(GUIController):
         self.fileManager.sendFrame(frame)
         
     def initialize(self,fileName = None,trialNum=0):
+        from .. import lens_analysis
         if fileName:
             magmap,params = lens_analysis.load(fileName)[trialNum].traceQuasar()
             self.magmapRaw = magmap.copy()
@@ -174,7 +173,7 @@ class MagMapTracerController(GUIController):
             mag2[:,0] = magmap.shape[0] - magmap[:,0]
             mag2[:,1] = magmap[:,1]
             self.tracerView.setMagMap(mag2,baseMag)
-#             Model.updateParameters(params)
+            Model.updateParameters(params)
         else:
             paramsLoader = ParametersFileManager(self.view.signals)
             params = paramsLoader.read()

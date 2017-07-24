@@ -31,7 +31,6 @@ class VisualizationController(GUIController):
         self.enabled = False
         self.thread = VisualizerThread(self.view.signals)
         self.view.pauseButton.clicked.connect(self.pause)
-        self.view.resetButton.clicked.connect(self.restart)
         self.view.playButton.clicked.connect(self.simImage)
         self.view.playPauseAction.triggered.connect(self.togglePlaying)
         self.view.resetAction.triggered.connect(self.restart)

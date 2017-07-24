@@ -1,0 +1,71 @@
+def async(fn):
+    def ret(*args,**kwargs):
+        th = threading.Thread(target=fn,args=args,kwargs=kwargs)
+        return th.start()
+    return ret
+
+
+The GUIManager (may change to Main) sets perspectives, along with their accompanying controllers/threads/etc
+
+	4 Primary Controllers:
+
+		ParametersController
+			In charge of parsing/building Parameters class instances
+			Updates Model instance of Parameters accordingly
+			DELEGATES/PARAMETERS:
+				for secondary perspective, an 'extras' attribute where can bind other stuff, similar to current.
+				takes a view as an argument. Should I make a view thing that sends off basically a JSON object?
+
+
+		VisualizationController
+			In charge of animation interraction - play/pause/record/reset
+			In charge of drawing settngs - colorscheme, options, etc
+			DELEGATES/PARAMETERS:
+				Takes in signals of where to push images to
+				Takes in a constructed CompositeDrawer
+					-CompositeDrawer gets color from color_scheme
+					-Quasar/Galaxy class has delegated drawer instance
+
+				FrameRate bound at initialization of controller
+
+
+
+		TracerController
+			In charge of animation interraction for tracer  - play/pause/record/reset
+				- moving quasar line
+				- deterimining lc values
+				- calling Engine for image
+			Exports files
+
+		TableController
+			Accepts parameters to add to the model
+			binds experimentRunners to parameters for execution by TableEngine
+			user interraction - update/remove/etc
+
+
+	View:
+		CanvasView
+			Specified with a drawer of what is being pushed to the screen. With interpolation of how the lightcurve 
+			should be calculated - magnification or magnitude?
+			View specifies if tracing or image prduction, etc.
+				Controller specifies most of tracer_preferences
+					- to animate, or fast
+					- to ray trace or not
+					- light curve export resolution
+
+
+	Model:
+		Preferences:
+			-memory threshold
+
+		Model:
+			-Parameters instance
+			-MagMap instance (if applicable)
+			-LightCurve instance (if applicable)
+			-Table of trials (if applicable)
+			-Delegated filemanagers
+
+		Engine:
+			cl_device, use_gpu, core_count, query type all part of constructing Engine
+
+
