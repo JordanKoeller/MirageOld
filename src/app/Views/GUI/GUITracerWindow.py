@@ -29,7 +29,7 @@ class GUITracerWindow(QMainWindow,SignalRepo):
         '''
         super(GUITracerWindow,self).__init__()
         uic.loadUi('Resources/TracerGUI/tracerwindow.ui',self)
-        prefs = PreferencesDialog('Resources/TracerGUI/preferencesdialog.ui',self)
+#         prefs = PreferencesDialog('Resources/TracerGUI/preferencesdialog.ui',self)
         self.addSignals(progressDialog = self.progressDialog_signal,
                         progressBar = self.progressBar_signal,
                         progressLabel = self.statusBar_signal,

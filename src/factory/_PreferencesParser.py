@@ -1,25 +1,26 @@
 '''
 Created on Jul 23, 2017
- 
+
 @author: jkoeller
 '''
 
 import json
- 
-class _Preferences(object):
+
+class _PreferencesParser(object):
     '''
     classdocs
     '''
     fileLoc = ''
     _prefMap = {}
     
-    def __init__(self):
+    def __init__(self,filename):
         '''
         Constructor
         '''
-        file = open(self.fileLoc,encoding='utf-8')
-        data = json.load(file.read())
-        self._prefMap = data
+        self.fileLoc = filename
+        with open(self.fileLoc,encoding='utf-8') as file:
+            data = json.load(file)
+            self._prefMap = data
         
     def __getitem__(self,key):
         if isinstance(key, str):
@@ -34,3 +35,6 @@ class _Preferences(object):
         self._prefMap.update(kv)
         json.dump(self._prefMap, open(self.fileLoc,'w+'))
         
+
+globalPreferences = _PreferencesParser('Resources/.default_global_preferences.json')
+tracerPreferences = _PreferencesParser('Resources/.default_tracer_preferences.json')

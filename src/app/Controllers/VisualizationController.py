@@ -31,7 +31,6 @@ class VisualizationController(GUIController):
         self.enabled = False
         self.thread = VisualizerThread(self.view.signals)
         self.view.pauseButton.clicked.connect(self.pause)
-        self.view.resetButton.clicked.connect(self.restart)
         self.view.playButton.clicked.connect(self.simImage)
         self.view.playPauseAction.triggered.connect(self.togglePlaying)
         self.view.resetAction.triggered.connect(self.restart)
@@ -41,10 +40,13 @@ class VisualizationController(GUIController):
         self.view.visualizeDataButton.clicked.connect(self.visualizeData)
         self.view.developerExportButton.clicked.connect(self.saveVisualization)
         self.view.regenerateStars.clicked.connect(self.regenerateStarsHelper)
-        filler_img = QtGui.QImage(2000, 2000, QtGui.QImage.Format_Indexed8)
-        filler_img.setColorTable([QtGui.qRgb(0, 0, 0)])
-        filler_img.fill(0)
-        self.view.main_canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
+        # filler_img = QtGui.QImage(2000, 2000, QtGui.QImage.Format_Indexed8)
+        # filler_img.setColorTable([QtGui.qRgb(0, 0, 0)])
+        # filler_img.fill(0)
+        # self.view.main_canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
+        self.initVisCanvas()
+        filler = np.zeros((1000,1000,3),dtype=np.uint8)
+        self.main_canvas_slot(filler)
         self.view.signals["imageCanvas"].connect(self.main_canvas_slot)
         self.view.signals["curveCanvas"].connect(self.curve_canvas_slot)
         self.view.signals['paramLabel'].connect(self.qPoslabel_slot)
@@ -60,6 +62,10 @@ class VisualizationController(GUIController):
             self.playToggle = True
             self.simImage()
         
+    def initVisCanvas(self):
+        self.viewBox = self.view.main_canvas.addViewBox(lockAspect=True)
+        self.vis_img_view = ImageItem()
+        self.viewBox.addItem(self.vis_img_view)
 
     def show(self):
         self.view.visualizationFrame.setHidden(False)
@@ -92,7 +98,7 @@ class VisualizationController(GUIController):
 
         Called by default when the "Play" button is presssed.
         """
-        if self.enabled:
+        if self.enabled
             self.playToggle = True
             parameters = self.parametersController.buildParameters()
             if parameters is None:
@@ -137,10 +143,11 @@ class VisualizationController(GUIController):
     def main_canvas_slot(self, img):
         if self.recording:
             self.fileManager.sendFrame(self.view.visualizationFrame.grab())
-        img = QtGui.QImage(img.T.tobytes(),img.shape[0],img.shape[1],QtGui.QImage.Format_Indexed8)
-        img.setColorTable(Model.colorMap)
-        self.view.main_canvas.pixmap().convertFromImage(img)
-        self.view.main_canvas.update()
+        self.vis_img_view.setImage(img)
+        # img = QtGui.QImage(img.T.tobytes(),img.shape[0],img.shape[1],QtGui.QImage.Format_Indexed8)
+        # img.setColorTable(Model.colorMap)
+        # self.view.main_canvas.pixmap().convertFromImage(img)
+        # self.view.main_canvas.update()/
 
     def curve_canvas_slot(self, x, y):
         self.view.curve_canvas.plot(x, y, clear=True,pen={'width':5})

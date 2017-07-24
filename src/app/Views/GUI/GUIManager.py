@@ -7,16 +7,19 @@ Created on May 31, 2017
 import sys
 
 from PyQt5 import QtWidgets, uic, QtCore
+from PyQt5.QtWidgets import QProgressDialog
 
-from ...Controllers.ParametersController import ParametersController
-from ...Controllers.VisualizationController import VisualizationController
+from app.Controllers.VisualizationController import VisualizationController
+import factory
+
+from ... import mainUIFile
 from ...Controllers.QueueController import QueueController
 from ...Utility import Vector2D
-from PyQt5.QtWidgets import QProgressDialog
 from ...Utility.SignalRepo import SignalRepo
-from ... import mainUIFile
 
 
+# from ...Controllers.ParametersController import ParametersController
+# from ...Controllers.VisualizationController import VisualizationController
 class GUIManager(QtWidgets.QMainWindow,SignalRepo):
     '''
     classdocs
@@ -46,9 +49,12 @@ class GUIManager(QtWidgets.QMainWindow,SignalRepo):
         self.visualizationBox.setHidden(True)
         self.queueFrame.setHidden(True)
         self.queueBox.setHidden(True)
-        self.parametersController = ParametersController(self)
-        self.visualPerspective = VisualizationController(self)
-        self.queuePerspective = QueueController(self)
+        self.parametersController = factory._ParametersControllerFactory(self)
+#         self.parametersController = ParametersController(self)
+        self.visualPerspective = factory._VisualizationControllerFactory(self)
+#         self.visualPerspective = VisualizationController(self)
+        self.queuePerspective = factory._ExperimentTableController(self)
+#         self.queuePerspective = QueueController(self)
         self.magTracingPerspective = None
         self.perspective = None
         self.switchToVisualizing()
@@ -111,3 +117,5 @@ class GUIManager(QtWidgets.QMainWindow,SignalRepo):
     def startProgressDialog(self,minimum,maximum,message):
         self.dialog = QProgressDialog(message,'Ok',minimum,maximum)
         self.progressBar_signal.connect(self.dialog.setValue)
+        
+        
