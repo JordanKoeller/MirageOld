@@ -173,7 +173,7 @@ class MagMapTracerController(GUIController):
             mag2[:,0] = magmap.shape[0] - magmap[:,0]
             mag2[:,1] = magmap[:,1]
             self.tracerView.setMagMap(mag2,baseMag)
-#             Model.updateParameters(params)
+            Model.updateParameters(params)
         else:
             paramsLoader = ParametersFileManager(self.view.signals)
             params = paramsLoader.read()

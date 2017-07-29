@@ -1,10 +1,10 @@
 '''
-Created on Jul 23, 2017
+Created on Jul 25, 2017
 
 @author: jkoeller
 '''
 
-import json
+import json 
 
 class _PreferencesParser(object):
     '''
@@ -21,6 +21,7 @@ class _PreferencesParser(object):
         with open(self.fileLoc,encoding='utf-8') as file:
             data = json.load(file)
             self._prefMap = data
+            print(self._prefMap)
         
     def __getitem__(self,key):
         if isinstance(key, str):
@@ -36,5 +37,5 @@ class _PreferencesParser(object):
         json.dump(self._prefMap, open(self.fileLoc,'w+'))
         
 
-globalPreferences = _PreferencesParser('Resources/.default_global_preferences.json')
-tracerPreferences = _PreferencesParser('Resources/.default_tracer_preferences.json')
+GlobalPreferences = _PreferencesParser('Resources/.default_global_preferences.json')
+TracerPreferences = _PreferencesParser('Resources/.default_tracer_preferences.json')

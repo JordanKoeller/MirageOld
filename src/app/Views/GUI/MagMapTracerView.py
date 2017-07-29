@@ -60,7 +60,6 @@ class MagMapTracerView(QtCore.QObject):
             self._lcPane.plot(xVals,yVals,clear=True,pen={'width':5})
             
     def _getCenteredGradient(self,center):
-        print(center/self._imgStatic.max())
         default = {'ticks':[(0.0, (0, 255, 255, 255)), (1.0, (255, 255, 0, 255)), (center/self._imgStatic.max(), (0, 0, 0, 255)), (center/self._imgStatic.max()/2, (0, 0, 255, 255)), (self._imgStatic.max()/255/2, (255, 0, 0, 255))],'mode':'rgb'}
         return default
         

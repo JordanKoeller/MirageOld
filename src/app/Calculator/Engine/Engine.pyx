@@ -55,7 +55,7 @@ cdef class Engine:
 		# try:
 		# 	return self.ray_trace_gpu()
 		# except:
-		return self.ray_trace_cpu()
+		return self.ray_trace_gpu()
 
 	cdef ray_trace_gpu(self):
 		import pyopencl.tools

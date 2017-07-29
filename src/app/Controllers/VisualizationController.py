@@ -4,13 +4,17 @@ Created on May 31, 2017
 @author: jkoeller
 '''
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore
 
 from .GUIController import GUIController
 from .Threads.VisualizerThread import VisualizerThread
 from .FileManagers.FITSFileManager import FITSFileManager
 from .FileManagers.MediaFileManager import MediaFileManager
 from ..Models.Model import Model
+from ..Views.ViewLayout import ViewLayout
+from ..Views.LensedImageView import LensedImageView
+from ..Views.LightCurvePlotView import LightCurvePlotView
+from . import ControllerFactory
 
 
 class VisualizationController(GUIController):
@@ -30,6 +34,7 @@ class VisualizationController(GUIController):
         self.playToggle = False
         self.enabled = False
         self.thread = VisualizerThread(self.view.signals)
+        self.recording = False
         self.view.pauseButton.clicked.connect(self.pause)
         self.view.playButton.clicked.connect(self.simImage)
         self.view.playPauseAction.triggered.connect(self.togglePlaying)
@@ -40,19 +45,15 @@ class VisualizationController(GUIController):
         self.view.visualizeDataButton.clicked.connect(self.visualizeData)
         self.view.developerExportButton.clicked.connect(self.saveVisualization)
         self.view.regenerateStars.clicked.connect(self.regenerateStarsHelper)
-        # filler_img = QtGui.QImage(2000, 2000, QtGui.QImage.Format_Indexed8)
-        # filler_img.setColorTable([QtGui.qRgb(0, 0, 0)])
-        # filler_img.fill(0)
-        # self.view.main_canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
+        self.views = []
         self.initVisCanvas()
-        filler = np.zeros((1000,1000,3),dtype=np.uint8)
-        self.main_canvas_slot(filler)
-        self.view.signals["imageCanvas"].connect(self.main_canvas_slot)
-        self.view.signals["curveCanvas"].connect(self.curve_canvas_slot)
+#         filler = np.zeros((1000,1000,3),dtype=np.uint8)
+#         self.main_canvas_slot(filler)
+#         self.view.signals["imageCanvas"].connect(self.main_canvas_slot)
+#         self.view.signals["curveCanvas"].connect(self.curve_canvas_slot)
         self.view.signals['paramLabel'].connect(self.qPoslabel_slot)
         self.parametersController = self.view.parametersController
         self.fileManager = MediaFileManager(self.view.signals)
-        self.recording = False
 
     def togglePlaying(self):
         if self.playToggle:
@@ -63,9 +64,22 @@ class VisualizationController(GUIController):
             self.simImage()
         
     def initVisCanvas(self):
-        self.viewBox = self.view.main_canvas.addViewBox(lockAspect=True)
-        self.vis_img_view = ImageItem()
-        self.viewBox.addItem(self.vis_img_view)
+        layout = ViewLayout(None,None)
+        imgCanvas = LensedImageView(None)
+        # imgCanvas2 = LensedImageView(None)
+        plCanvas = LightCurvePlotView(None)
+        # plCanvas2 = LightCurvePlotView(None)
+        self.views.append(imgCanvas)
+        # self.views.append(imgCanvas2)
+        self.views.append(plCanvas)
+        # self.views.append(plCanvas2)
+        layout.addView(plCanvas)
+        # layout.addView(plCanvas2)
+        layout.addView(imgCanvas)
+        # layout.addView(imgCanvas2)
+        # imgCanvas.connectSignal(self.view.signals['imageCanvas'])
+        # plCanvas.connectSignal(self.view.signals['curveCanvas'])
+        self.view.mainSplitter.addWidget(layout)
 
     def show(self):
         self.view.visualizationFrame.setHidden(False)
@@ -98,13 +112,16 @@ class VisualizationController(GUIController):
 
         Called by default when the "Play" button is presssed.
         """
-        if self.enabled
+        if self.enabled:
             self.playToggle = True
             parameters = self.parametersController.buildParameters()
             if parameters is None:
                 return
             Model.updateParameters(parameters)
-            self.thread.start()
+            controller = ControllerFactory(self.views)
+            controller.run()
+            self.thread = controller
+
 
     def record(self):
         """Calling this method will configure the system to save each frame of an animation, for compiling to a video that can be saved."""

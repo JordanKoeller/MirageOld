@@ -1,0 +1,21 @@
+
+Different Types:
+    modelQuestionerDelegate
+        ParametersGetter
+        TablePuller
+        
+    dataFetcherDelegate
+        PixelFetcher
+        MagFetcher
+        
+    postProcessorDelegate
+        FrameDrawer
+        ModelUpdater
+        CurveAppender
+        
+    senderDelegate
+        FileManagerExporter
+        curveExporter
+        FrameExporter
+        MagMapTracerUpdater
+        

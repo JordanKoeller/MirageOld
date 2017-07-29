@@ -5,7 +5,7 @@ from .ShearLenser import ShearLenser
 from .Drawable import Drawable
 from .Cosmic import Cosmic
 from ...Views.Drawer.ShapeDrawer import drawPointLensers, drawSquare
-from ...Views.Drawer.ShapeDrawer_rgb import drawPointLensers_rgb, drawSquare_rgb
+from ...Views.Drawer.ShapeDrawer import drawPointLensers, drawSquare
 from ..ParametersError import ParametersError
 from ..Model import Model
 from ...Calculator import Conversions
@@ -35,14 +35,14 @@ class Galaxy(Drawable, Cosmic):
 	def drawStars(self, img, parameters):
 		if len(self.__stars) != 0:
 			if img.ndim == 3:
-				drawPointLensers_rgb(self.__stars, img, parameters)
+				drawPointLensers(self.__stars, img, parameters)
 			else:
 				drawPointLensers(self.__stars, img, parameters)
 
 	def drawGalaxy(self, img, parameters):
 		center = Conversions.angleToPixel(self.position,parameters)
 		if img.ndim == 3:
-			drawSquare_rgb(int(center.x),int(center.y),5,img,self.colorKey)
+			drawSquare(int(center.x),int(center.y),5,img,self.colorKey)
 		else:
 			drawSquare(int(center.x),int(center.y),5,img,self.colorKey)
 
