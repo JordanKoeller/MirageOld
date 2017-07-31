@@ -17,18 +17,21 @@ import numpy as np
 
 
 class __Model(object):
-    def __init__(self):
+
+    __colormap = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66), QtGui.qRgb(53,252,92)]
+    __colorMapArr = np.array([[0,0,0],[255,255,0],[255,255,255],[50,101,255],[244,191,66],[53,252,92]],dtype=np.uint8)
+    #Index 0: Black
+    #Index 1: Yellow
+    #Index 2: White
+    #Index 3: Blue
+    #Index 4: Orange
+    #Index 5: Green
+    
+
+    def __init__(self,paramters=None):
         self.__Engine = Engine_Grid()
-        print("Grid Engine")
-        self.__colormap = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66), QtGui.qRgb(53,252,92)]
-        self.__colorMapArr = np.array([[0,0,0],[255,255,0],[255,255,255],[50,101,255],[244,191,66],[53,252,92]],dtype=np.uint8)
-        #Index 0: Black
-        #Index 1: Yellow
-        #Index 2: White
-        #Index 3: Blue
-        #Index 4: Orange
-        #Index 5: Green
-        
+        if paramters:
+            self.updateParameters(paramters)
     def updateParameters(self, params):
         # if params.galaxy.starVelocityParams and isinstance(self.__Engine,Engine_Grid):
         #     self.__Engine = Engine_Brute()
@@ -69,3 +72,6 @@ class __Model(object):
 
 Model = __Model()
 
+
+def addModel(parameters):
+    Model.append(__Model(parameters))

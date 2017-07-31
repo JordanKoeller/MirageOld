@@ -85,7 +85,7 @@ class ParametersController(GUIController):
                 gPositionRaDec = self.view.gPositionEntry.text()
                 apparentV = None
                 if len(gComponents) == 2:
-                    apparentV = self.view.vectorFromQString(self.view.qVelocity.text())
+                    apparentV = self.vectorFromQString(self.view.qVelocity.text())
                 else:
                     gVelocity = CartesianRepresentation(gComponents[0],gComponents[1],gComponents[2],'')
 
@@ -95,7 +95,7 @@ class ParametersController(GUIController):
                     apparentV = self.getApparentVelocity(gPositionRaDec,gVelocity)
 
                 #Quasar properties
-                qPosition = self.view.vectorFromQString(self.view.qPosition.text(), unit='arcsec').to('rad')
+                qPosition = self.vectorFromQString(self.view.qPosition.text(), unit='arcsec').to('rad')
                 qRadius = u.Quantity(float(self.view.qRadius.text()), 'uas')
                 
                 #Galaxy properties
@@ -110,7 +110,7 @@ class ParametersController(GUIController):
                     gStarParams = None
                 else:
                     gStarParams = (gStarMean,gStarStdDev)
-                displayCenter = self.view.vectorFromQString(self.view.gCenter.text(), unit='arcsec').to('rad')
+                displayCenter = self.vectorFromQString(self.view.gCenter.text(), unit='arcsec').to('rad')
                 dTheta = u.Quantity(float(self.view.scaleInput.text()), inputUnit).to('rad').value
                 canvasDim = int(self.view.dimensionInput.text())
                 displayQuasar = self.view.displayQuasar.isChecked()
@@ -222,3 +222,19 @@ class ParametersController(GUIController):
             self.view.signals['paramSetter'].emit(params)
             
             
+    def vectorFromQString(self, string,unit = None):
+        """
+        Converts an ordered pair string of the form (x,y) into a Vector2D of x and y.
+
+        Parameters:
+            reverse_y : Boolean
+                specify whether or not to negate y-coordinates to convert a conventional coordinate system of positive y in the up direction to
+                positive y in the down direction as used by graphics libraries. Default False
+
+            transpose : Boolean
+                Specify whether or not to flip x and y coordinates. In other words, return a Vector2D of (y,x) rather than (x,y). Default True
+        """
+        x, y = (string.strip('()')).split(',')
+        if ' ' in y:
+            y = y.split(' ')[0]
+        return Vector2D(float(x), float(y),unit)

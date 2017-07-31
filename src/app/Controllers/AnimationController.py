@@ -12,9 +12,12 @@ from ..Preferences import GlobalPreferences
 
 class AnimationController(MasterController):
     
-    def __init__(self,*args,**kwargs):
-        MasterController.__init__(self,*args,**kwargs)
+    def __init__(self,*signals):
+        MasterController.__init__(self)
         self._animating = False
+        signals[0].connect(self.run)
+        signals[1].connect(self.pause)
+        signals[2].connect(self.stop)
         
         
     @asynchronous

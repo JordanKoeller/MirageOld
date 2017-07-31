@@ -35,8 +35,8 @@ from ..Views.LightCurvePlotView import LightCurvePlotView
 #         return masterController
 #         
 
-def ControllerFactory(views):
-  masterController = AnimationController()
+def ControllerFactory(views,*signals):
+  masterController = AnimationController(*signals)
   modelGetter = Delegates.TrajectoryParametersGetter()
 
   masterController.addChild(modelGetter)

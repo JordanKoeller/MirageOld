@@ -33,6 +33,8 @@
        <addaction name="load_setup"/>
        <addaction name="save_setup"/>
        <addaction name="separator"/>
+       <addaction name="actionAddModel"/>
+       <addaction name="separator"/>
        <addaction name="record_button"/>
        <addaction name="separator"/>
        <addaction name="shutdown"/>
@@ -60,9 +62,19 @@
        </property>
        <addaction name="parametersEntryHelpAction"/>
       </widget>
+      <widget class="QMenu" name="menuDisplay">
+       <property name="title">
+        <string>Display</string>
+       </property>
+       <addaction name="separator"/>
+       <addaction name="actionAddCurvePane"/>
+       <addaction name="actionAddImgPane"/>
+       <addaction name="actionAddMagPane"/>
+      </widget>
       <addaction name="menuFile"/>
       <addaction name="menuPerspective"/>
       <addaction name="menuView"/>
+      <addaction name="menuDisplay"/>
       <addaction name="menuHelp"/>
      </widget>
     </item>
@@ -70,7 +82,7 @@
      <widget class="QSplitter" name="mainSplitter">
       <property name="maximumSize">
        <size>
-        <width>16777215</width>
+        <width>600</width>
         <height>180000</height>
        </size>
       </property>
@@ -115,7 +127,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
+          <y>-313</y>
           <width>582</width>
           <height>1280</height>
          </rect>
@@ -1287,86 +1299,6 @@ newParams = copy.deepcopy(oldParams)</string>
         </layout>
        </widget>
       </widget>
-      <widget class="QFrame" name="optFrame">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <widget class="QFrame" name="queueFrame">
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_8">
-           <item>
-            <widget class="QGroupBox" name="groupBox_5">
-             <property name="title">
-              <string/>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
-              <item>
-               <widget class="QPushButton" name="queueStartButton">
-                <property name="text">
-                 <string>Start</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="clearTableButton">
-                <property name="text">
-                 <string>Clear</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="visualizationFrame">
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-       <zorder>visualizationFrame</zorder>
-       <zorder>queueFrame</zorder>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -1434,6 +1366,7 @@ newParams = copy.deepcopy(oldParams)</string>
     </action>
    </actiongroup>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="playPauseAction">
    <property name="text">
     <string>Play/Pause</string>
@@ -1477,6 +1410,26 @@ newParams = copy.deepcopy(oldParams)</string>
   <action name="magMapTracerSelector">
    <property name="text">
     <string>Magnification Map Tracer</string>
+   </property>
+  </action>
+  <action name="actionAddCurvePane">
+   <property name="text">
+    <string>Add Curve pane</string>
+   </property>
+  </action>
+  <action name="actionAddImgPane">
+   <property name="text">
+    <string>Add Image Pane</string>
+   </property>
+  </action>
+  <action name="actionAddMagPane">
+   <property name="text">
+    <string>Add MagMap Pane</string>
+   </property>
+  </action>
+  <action name="actionAddModel">
+   <property name="text">
+    <string>Add Model</string>
    </property>
   </action>
  </widget>

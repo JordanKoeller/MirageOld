@@ -7,17 +7,17 @@ import os
 import sys
 from PyQt5 import QtWidgets
 
-from app.Views.GUI.GUIManager import GUIManager
+# from app.Views.GUI.GUIManager import GUIManager
+from app.Views.MainView import MainView as GUIManager
 from app.Controllers.FileManagers.ParametersFileManager import ParametersFileManager
 from app.Controllers.FileManagers.QueueFileManager import QueueFileManager
 from app.Controllers.Threads.QueueThread import QueueThread
 from app.Controllers.FileManagers.TableFileManager import TableFileManager
-
 import argparse
 
 
 if __name__ == "__main__":
-    print('____________________________\n\n\n'+"Process ID = " + str(os.getpid())+'\n\n\n____________________________')
+    print('____________________________ \n\n'+"Process ID = " + str(os.getpid())+'\n\n____________________________')
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--load",nargs='?', type=str, help='Follow with a .param file to load in as parameters.')
@@ -43,7 +43,8 @@ if __name__ == "__main__":
         if args.queue:
             ui.switchToQueue()
         else:
-            ui.switchToVisualizing()
+            pass
+            # ui.switchToVisualizing()
         ui.show()
         if args.load:
             paramLoader = ParametersFileManager()

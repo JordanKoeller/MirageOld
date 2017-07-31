@@ -21,7 +21,6 @@ class _PreferencesParser(object):
         with open(self.fileLoc,encoding='utf-8') as file:
             data = json.load(file)
             self._prefMap = data
-            print(self._prefMap)
         
     def __getitem__(self,key):
         if isinstance(key, str):
