@@ -9,20 +9,20 @@ Created on Jun 1, 2017
 
 
 
-from PyQt5 import QtCore
+# from PyQt5 import QtCore
 
-from ..Calculator.ExperimentResultCalculator import varyTrial
-from .GUIController import GUIController
-from .FileManagers.QueueFileManager import QueueFileManager
-from .Threads.QueueThread import QueueThread
-from ..Models.ExperimentQueue.ExperimentQueueTable import ExperimentQueueTable
-from ..Models.Parameters.ExperimentParams import ExperimentParams
-from ..Models.Parameters.MagMapParameters import MagMapParameters
-from ..Models.Parameters.LightCurveParameters import LightCurveParameters
-from ..Models.Parameters.StarFieldData import StarFieldData
-from ..Models.ParametersError import ParametersError
-from ..Models.Model import Model
-from ..Controllers.FileManagers.TableFileManager import TableFileManager
+# from ..Calculator.ExperimentResultCalculator import varyTrial
+# from .GUIController import GUIController
+# from .FileManagers.QueueFileManager import QueueFileManager
+# from .Threads.QueueThread import QueueThread
+# from ..Models.ExperimentQueue.ExperimentQueueTable import ExperimentQueueTable
+# from ..Models.Parameters.ExperimentParams import ExperimentParams
+# from ..Models.Parameters.MagMapParameters import MagMapParameters
+# from ..Models.Parameters.LightCurveParameters import LightCurveParameters
+# from ..Models.Parameters.StarFieldData import StarFieldData
+# from ..Models.ParametersError import ParametersError
+# from app.Models import ModelImpl
+# from ..Controllers.FileManagers.TableFileManager import TableFileManager
 
 def _queueExtrasBuilder(view,parameters,inputUnit):
     name = view.experimentNameEntry.text()
@@ -39,7 +39,7 @@ def _queueExtrasBuilder(view,parameters,inputUnit):
     if view.enableMagMap.isChecked():
         magmapdims = view.vectorFromQString(view.magMapDimEntry.text(),unit=inputUnit)
         magmapres = view.vectorFromQString(view.magMapResolutionEntry.text(),None)
-        magmapcenter = Model.engine.getCenterCoords(parameters)
+        magmapcenter = ModelImpl.engine.getCenterCoords(parameters)
         magmapparams = MagMapParameters(magmapcenter,magmapdims,magmapres)
         datasets.append(magmapparams)
     if view.queueSaveStarfield.isChecked():
@@ -80,6 +80,130 @@ def _queueExtrasBinder(view,obj):
             view.trialSpinBox.setValue(obj.extras.numTrials)
             view.varianceTextArea.document().setPlainText(obj.extras.trialVarianceFunction)
 
+# class QueueController(GUIController):
+#     '''
+#     classdocs
+#     '''
+    
+#     editExpt_signal = QtCore.pyqtSignal(object,int)
+
+#     def __init__(self, view):
+#         '''
+#         Constructor
+#         '''
+#         GUIController.__init__(self,view,_queueExtrasBinder,_queueExtrasBuilder)
+#         self.view.addSignals(editExpt = self.editExpt_signal)
+#         self.view.signals['editExpt'].connect(self.editParams)
+#         self.view.addToQueueButton.clicked.connect(self.addToQueue)
+#         self.view.enableLightCurve.toggled.connect(self.toggleLightCurveEntry)
+#         self.view.enableMagMap.toggled.connect(self.toggleMagMapEntry)
+#         self.view.saveTableAction.triggered.connect(self.saveTable)
+#         self.view.loadTableAction.triggered.connect(self.loadTable)
+#         self.tableFileManager = TableFileManager(self.view.signals)
+#         self.toggleLightCurveEntry(False)
+#         self.toggleMagMapEntry(False)
+#         self.editing = -1
+#         self.runner = QueueThread(self.view.signals)
+#         self.__initTable()
+        
+    
+        
+#     def __initTable(self):
+#         tableSignal = self.view.signals['editExpt']
+#         self.table = ExperimentQueueTable(tableSignal,self.view.groupBox_5,editable = False)
+#         self.view.verticalLayout_8.insertWidget(0,self.table)
+#         self.view.queueStartButton.clicked.connect(self.runExperiments)
+#         self.view.queueEditCancelButton.clicked.connect(self.cancelEdit)
+#         self.view.queueEditCancelButton.setEnabled(False)
+#         self.view.clearTableButton.clicked.connect(self.table.clearTable)
+    
+    
+#     def show(self):
+#         self.view.queueFrame.setHidden(False)
+#         self.view.queueBox.setHidden(False)
+        
+#     def editParams(self,params,row):
+#         self.view.signals['paramSetter'].emit(params)
+#         self.view.bindFields(params)
+#         self.editing = row
+#         self.view.queueEditCancelButton.setEnabled(True)
+#         self.view.addToQueueButton.setText("Update")
+             
+                
+#     def addToQueue(self):
+#         exp = self.view.buildParameters()
+#         if exp:
+#             if self.editing == -1:
+#                 self.table.addExperiment(exp)
+#             else:
+#                 self.table.updateExperiment(exp,self.editing)
+#                 self.cancelEdit()
+                
+#     def saveTable(self):
+#         tableFull = self.table.experiments
+#         self.tableFileManager.write(tableFull)
+        
+#     def loadTable(self):
+#         tableFull = self.tableFileManager.read()
+#         if tableFull:
+#             self.table.clearTable()
+#             for i in tableFull:
+#                 self.table.addExperiment(i)
+            
+            
+#     def cancelEdit(self):
+#         self.view.queueEditCancelButton.setEnabled(False)
+#         self.view.addToQueueButton.setText("Add to Queue")
+#         self.editing = -1
+        
+#     def toggleLightCurveEntry(self,on):
+#         if on:
+#             self.view.quasarPathStart.setEnabled(True)
+#             self.view.quasarPathEnd.setEnabled(True)
+#             self.view.dataPointSpinBox.setEnabled(True)
+#         else:
+#             self.view.quasarPathEnd.setEnabled(False)
+#             self.view.quasarPathStart.setEnabled(False)
+#             self.view.dataPointSpinBox.setEnabled(False)
+    
+#     def toggleMagMapEntry(self,on):
+#         if on:
+#             self.view.magMapDimEntry.setEnabled(True)
+#             self.view.magMapResolutionEntry.setEnabled(True)
+#         else:
+#             self.view.magMapDimEntry.setEnabled(False)
+#             self.view.magMapResolutionEntry.setEnabled(False)
+        
+#     def runExperiments(self):
+#         fileRunner = QueueFileManager(self.view.signals)
+#         if fileRunner.madeDirectory:
+#             experiments = self.table.experiments
+#             self.runner.bindExperiments(experiments,fileRunner)
+#             self.runner.start()
+        
+
+#     def hide(self):
+#         self.view.queueFrame.setHidden(True)
+#         self.view.queueBox.setHidden(True)
+
+
+
+from PyQt5 import QtCore
+
+from ..Calculator.ExperimentResultCalculator import varyTrial
+from .GUIController import GUIController
+from .FileManagers.QueueFileManager import QueueFileManager
+from .Threads.QueueThread import QueueThread
+from ..Views.ExperimentQueueTable import ExperimentQueueTable
+from ..Models.Parameters.ExperimentParams import ExperimentParams
+from ..Models.Parameters.MagMapParameters import MagMapParameters
+from ..Models.Parameters.LightCurveParameters import LightCurveParameters
+from ..Models.Parameters.StarFieldData import StarFieldData
+from ..Models.ParametersError import ParametersError
+from app.Models import ModelImpl
+from ..Controllers.FileManagers.TableFileManager import TableFileManager
+from .ParametersController import ParametersController
+
 class QueueController(GUIController):
     '''
     classdocs
@@ -87,101 +211,57 @@ class QueueController(GUIController):
     
     editExpt_signal = QtCore.pyqtSignal(object,int)
 
-    def __init__(self, view):
+    def __init__(self, tableview=None, parametersview=None):
         '''
         Constructor
         '''
-        GUIController.__init__(self,view,_queueExtrasBinder,_queueExtrasBuilder)
-        self.view.addSignals(editExpt = self.editExpt_signal)
-        self.view.signals['editExpt'].connect(self.editParams)
-        self.view.addToQueueButton.clicked.connect(self.addToQueue)
-        self.view.enableLightCurve.toggled.connect(self.toggleLightCurveEntry)
-        self.view.enableMagMap.toggled.connect(self.toggleMagMapEntry)
-        self.view.saveTableAction.triggered.connect(self.saveTable)
-        self.view.loadTableAction.triggered.connect(self.loadTable)
-        self.tableFileManager = TableFileManager(self.view.signals)
-        self.toggleLightCurveEntry(False)
-        self.toggleMagMapEntry(False)
+        GUIController.__init__(self,None,None,None)
+        self.tableView = tableview
+        self.parametersView = parametersview
+        self.parametersController = ParametersController(self.parametersView)
+        self.parametersView.scaleUnitOption.currentTextChanged.connect(self.setUnits)
         self.editing = -1
-        self.runner = QueueThread(self.view.signals)
-        self.__initTable()
+
+        # self.runner = QueueThread(self.view.signals)
         
     
-        
-    def __initTable(self):
-        tableSignal = self.view.signals['editExpt']
-        self.table = ExperimentQueueTable(tableSignal,self.view.groupBox_5,editable = False)
-        self.view.verticalLayout_8.insertWidget(0,self.table)
-        self.view.queueStartButton.clicked.connect(self.runExperiments)
-        self.view.queueEditCancelButton.clicked.connect(self.cancelEdit)
-        self.view.queueEditCancelButton.setEnabled(False)
-        self.view.clearTableButton.clicked.connect(self.table.clearTable)
-    
-    
-    def show(self):
-        self.view.queueFrame.setHidden(False)
-        self.view.queueBox.setHidden(False)
         
     def editParams(self,params,row):
-        self.view.signals['paramSetter'].emit(params)
-        self.view.bindFields(params)
+        self.tableView.signals['paramSetter'].emit(params)
+        self.parametersController.bindFields(params,_queueExtrasBinder)
         self.editing = row
-        self.view.queueEditCancelButton.setEnabled(True)
-        self.view.addToQueueButton.setText("Update")
+        self.tableView.queueEditCancelButton.setEnabled(True)
+        self.tableView.addToQueueButton.setText("Update")
              
                 
     def addToQueue(self):
-        exp = self.view.buildParameters()
+        exp = self.parametersController.buildParameters(_queueExtrasBuilder)
         if exp:
             if self.editing == -1:
-                self.table.addExperiment(exp)
+                self.tableView.addExperiment(exp)
             else:
-                self.table.updateExperiment(exp,self.editing)
+                self.tableView.updateExperiment(exp,self.editing)
                 self.cancelEdit()
                 
     def saveTable(self):
-        tableFull = self.table.experiments
+        tableFull = self.tableView.experiments
         self.tableFileManager.write(tableFull)
         
     def loadTable(self):
         tableFull = self.tableFileManager.read()
         if tableFull:
-            self.table.clearTable()
+            self.tableView.clearTable()
             for i in tableFull:
-                self.table.addExperiment(i)
+                self.tableView.addExperiment(i)
             
             
     def cancelEdit(self):
-        self.view.queueEditCancelButton.setEnabled(False)
-        self.view.addToQueueButton.setText("Add to Queue")
+        self.tableView.queueEditCancelButton.setEnabled(False)
+        self.tableView.addToQueueButton.setText("Add to Queue")
         self.editing = -1
         
-    def toggleLightCurveEntry(self,on):
-        if on:
-            self.view.quasarPathStart.setEnabled(True)
-            self.view.quasarPathEnd.setEnabled(True)
-            self.view.dataPointSpinBox.setEnabled(True)
-        else:
-            self.view.quasarPathEnd.setEnabled(False)
-            self.view.quasarPathStart.setEnabled(False)
-            self.view.dataPointSpinBox.setEnabled(False)
-    
-    def toggleMagMapEntry(self,on):
-        if on:
-            self.view.magMapDimEntry.setEnabled(True)
-            self.view.magMapResolutionEntry.setEnabled(True)
-        else:
-            self.view.magMapDimEntry.setEnabled(False)
-            self.view.magMapResolutionEntry.setEnabled(False)
-        
-    def runExperiments(self):
-        fileRunner = QueueFileManager(self.view.signals)
-        if fileRunner.madeDirectory:
-            experiments = self.table.experiments
-            self.runner.bindExperiments(experiments,fileRunner)
-            self.runner.start()
-        
 
-    def hide(self):
-        self.view.queueFrame.setHidden(True)
-        self.view.queueBox.setHidden(True)
+    def setUnits(self,unitString):
+        self.tableView.unitLabel_3.setText(unitString)
+        self.tableView.unitLabel_4.setText(unitString)
+        self.tableView.unitLabel_6.setText(unitString)

@@ -11,7 +11,7 @@ import imageio
 from app import Preferences
 from app.Utility import asynchronous
 
-from .FileManager import FileWriter
+from .FileManager import FileWriter, FileReader
 
 
 class RecordingFileManager(FileWriter):
@@ -94,4 +94,12 @@ class TableFileManager(FileWriter):
     @property
     def _fileextension(self):
         return '.params'
+    
+class ModelFileManager(FileReader):
+    """class for reading model configurations. Can accept .dat, .param, and .params files and parse to a model"""
+    def __init__(self):
+        super(ModelFileManager, self).__init__()
         
+    @property
+    def _fileextension(self):
+        return '.param'

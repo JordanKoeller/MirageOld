@@ -16,9 +16,12 @@ class ViewLayout(QFrame):
         self.setLayout(layout)
         
     def addView(self,view):
-        dock = Dock(view.title)
+        dock = Dock(view.title,closable=True)
         dock.addWidget(view)
         self._layout.addDock(dock)
+
+    def clear(self):
+        self._layout.clear()
     
         
         

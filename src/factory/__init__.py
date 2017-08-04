@@ -7,14 +7,14 @@ from app.Controllers.VisualizationController import VisualizationController
 from app.Preferences import GlobalPreferences
 
 
-def _ParametersControllerFactory(view):
+def ParametersControllerFactory(view):
     return ParametersController(view)
 
-def _VisualizationControllerFactory(view):
+def VisualizationControllerFactory(view):
     return VisualizationController(view)
 
-def _ExperimentTableController(view):
-    return QueueController(view)
+def TableControllerFactory(tv,pv):
+    return QueueController(tv,pv)
 
 def _TracerController(view):
     return MagMapTracerController(view)

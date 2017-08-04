@@ -5,7 +5,7 @@ Created on Jun 6, 2017
 '''
 import math
 
-from ..Models.Model import Model
+from app.Models import ModelImpl
 from ..Models.Parameters.ExperimentParams import ResultTypes
 from ..Utility import Vector2D
 import time
@@ -71,18 +71,18 @@ class ExperimentResultCalculator(object):
 
     
     def __LIGHT_CURVE(self,index):
-        special = Model.parameters.extras.desiredResults[index]
+        special = ModelImpl.parameters.extras.desiredResults[index]
         start,finish = (special.pathStart,special.pathEnd)
         res = special.resolution
-        return Model.engine.makeLightCurve(start,finish,res)
+        return ModelImpl.engine.makeLightCurve(start,finish,res)
         
     def __MAGMAP(self,index):
-        special = Model.parameters.extras.desiredResults[index]
-        return Model.engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
+        special = ModelImpl.parameters.extras.desiredResults[index]
+        return ModelImpl.engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
 
     def __STARFIELD(self,index):
-        return Model.parameters.galaxy.stars 
+        return ModelImpl.parameters.galaxy.stars 
 
     def __VIDEO(self):
         pass################################### MAY IMPLIMENT LATER

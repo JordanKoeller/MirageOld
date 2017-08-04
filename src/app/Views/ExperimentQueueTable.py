@@ -7,16 +7,15 @@ Created on Jun 2, 2017
 from PyQt5.Qt import QPushButton
 from pyqtgraph.widgets.TableWidget import TableWidget
 
-from ...Utility.NullSignal import NullSignal
+from ..Utility.NullSignal import NullSignal
 
 
 class ExperimentQueueTable(TableWidget): 
-    def __init__(self, signal=NullSignal,parent=None,editable = True): 
+    def __init__(self,parent=None,editable = True): 
         """ datain: a list of QueueEntries
             headerdata: a list of strings
         """
         TableWidget.__init__(self,parent,editable=editable)
-        self.signal = signal
         self.__experiments = []
         self.__initClearTable()
 

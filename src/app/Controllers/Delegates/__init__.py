@@ -1,28 +1,31 @@
-from ...Models.Model import Model
+from app.Models import Model
 from ...Utility.NullSignal import NullSignal
 from ...Views.Drawer.LensedImageDrawer import LensedImageDrawer
 from ..Controller import Controller
 from ...Views.Drawer.Drawer import PlotDrawer
-
+# from ...Utility.AsyncSignal import AsyncSignal
 import numpy as np
 
 
 # MODELQUESTIONERDELEGATES
-class ParametersGetter(Controller):
+class ModelGetter(Controller):
     
-    def __init__(self):
+    def __init__(self,mname):
         Controller.__init__(self)
+        self.modelID = mname
         
-    def calculate(self,*args,**kwargs):
-        return Model.parameters
+    def calculate(self,*args):
+        return (Model[self.modelID],)
 
-class TrajectoryParametersGetter(Controller):
-    def __init__(self):
+
+class TrajectoryModelGetter(Controller):
+    def __init__(self,mnane):
         Controller.__init__(self)
+        self.modelID = mnane
 
-    def calculate(self,*args,**kwargs):
-        Model.parameters.incrementTime(Model.parameters.dt)
-        return Model.parameters
+    def calculate(self,*args):
+        Model[self.modelID].parameters.incrementTime(Model[self.modelID].parameters.dt)
+        return (Model[self.modelID],)
     
 
 #DATAFETCHERDELEGATE
@@ -31,29 +34,29 @@ class PixelFetcherDelegate(Controller):
     def __init__(self):
         Controller.__init__(self)
         
-    def calculate(self, *args, **kwargs):
-        return Model.engine.getFrame()
+    def calculate(self,model,*args):
+        return (model,model.engine.getFrame())
     
 class MagnificationFetcherDelegate(Controller):
     def __init__(self):
         Controller.__init__(self)
         
-    def calculate(self):
-            return Model.engine.getMagnification(None)
+    def calculate(self,model,*args):
+            return (model,model.engine.getMagnification(None))
     
 class LightCurveFetcherDelegate(Controller):
     def __init__(self):
         Controller.__init__(self)
         
-    def calculate(self, min,max,resolution):
-        return Model.engine.makeLightCurve(min,max,resolution)
+    def calculate(self,model, min,max,resolution,*args):
+        return (model,model.engine.makeLightCurve(min,max,resolution))
     
 class MagMapFetcherDelegate(Controller):
     def __init__(self):
         Controller.__init__(self)
         
-    def calculate(self, center,dims,resolution,signal=NullSignal,signalMax = NullSignal):
-        return Model.engine.makeMagMap(center,dims,resolution,signal,signalMax) 
+    def calculate(self,model, center,dims,resolution,signal=NullSignal,signalMax = NullSignal,*args):
+        return (model,ModelImpl.engine.makeMagMap(center,dims,resolution,signal,signalMax))
 
 
         
@@ -64,19 +67,19 @@ class FrameDrawerDelegate(Controller):
         Controller.__init__(self)
         self._drawer = LensedImageDrawer()
         
-    def calculate(self,pixels):
-        parameters = Model.parameters
-        return self._drawer.draw((parameters,pixels))
+    def calculate(self,model,pixels,*args):
+        return (model,self._drawer.draw((model,pixels)))
         
 class CurveDrawerDelegate(Controller):
     def __init__(self):
         Controller.__init__(self)
         self._drawer = PlotDrawer()
-    def calculate(self,data):
+
+    def calculate(self,model,data,*args):
         if isinstance(data,int):
-            return self._drawer.append(data)
+            return (model,self._drawer.append(data))
         else:
-            return self._drawer.append(Model.engine.getMagnification(len(data)))
+            return (model,self._drawer.append(model.engine.getMagnification(len(data))))
 
 
 
@@ -85,16 +88,18 @@ class CurveDrawerDelegate(Controller):
 class CurveExporter(Controller):
     def __init__(self,signal):
         Controller.__init__(self)
+        # self._signal = AsyncSignal(signal)
         self._signal = signal
     
-    def calculate(self, data):
+    def calculate(self, model,data):
         self._signal.emit(data)
         
 class FrameExporter(Controller):
     def __init__(self,signal):
         Controller.__init__(self)
         self._signal = signal
+        # self._signal = AsyncSignal(signal)
         
-    def calculate(self, frame):
-        self._signal.emit(frame)
+    def calculate(self, model,data):
+        self._signal.emit(data)
         

@@ -17,9 +17,6 @@ class MasterController(Controller):
         '''
         Constructor
         '''
-        pass
+        Controller.__init__(self)
         # self._children = delegates
-        
-                
-
                 

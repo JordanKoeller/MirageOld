@@ -3,7 +3,7 @@ Created on Jul 25, 2017
 
 @author: jkoeller
 '''
-from .CanvasView import CanvasView
+from .View import CanvasView
 from pyqtgraph.graphicsItems.PlotItem.PlotItem import PlotItem
 
 
@@ -13,14 +13,15 @@ class LightCurvePlotView(CanvasView):
     '''
 
 
-    def __init__(self, modelID, *args, **kwargs):
+    def __init__(self, modelID='system_0',title=None, *args, **kwargs):
         '''
         Constructor
         '''
-        CanvasView.__init__(self,modelID,*args,**kwargs)
+        CanvasView.__init__(self,modelID,title )
         self._plot = PlotItem()
         self.addItem(self._plot)
         self.title = "Light Curve"
+        self.type = "LightCurveView"
         self._signalRef.connect(self.update)
         
     def plot(self,x,y,clear=True,pen={'width':5},**kwargs):

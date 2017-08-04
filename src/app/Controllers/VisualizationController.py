@@ -10,7 +10,7 @@ from .GUIController import GUIController
 from .Threads.VisualizerThread import VisualizerThread
 from .FileManagers.FITSFileManager import FITSFileManager
 from .FileManagers.MediaFileManager import MediaFileManager
-from ..Models.Model import Model
+from app.Models import ModelImpl
 from ..Views.ViewLayout import ViewLayout
 from ..Views.LensedImageView import LensedImageView
 from ..Views.LightCurvePlotView import LightCurvePlotView
@@ -76,17 +76,17 @@ class VisualizationController(GUIController):
         
     # def drawQuasarHelper(self):
     #     """Interface for updating an animation in real time of whether or not to draw the physical location of the quasar to the screen as a guide."""
-    #     Model.parameters.showQuasar = self.view.displayQuasar.isChecked()
+    #     ModelImpl.parameters.showQuasar = self.view.displayQuasar.isChecked()
 
     # def drawGalaxyHelper(self):
     #     """
     #     Interface for updating an animation in real time of whether or not to draw the lensing galaxy's center of mass, along with any stars".
     #     """
-    #     Model.parameters.showGalaxy = self.view.displayGalaxy.isChecked()
+    #     ModelImpl.parameters.showGalaxy = self.view.displayGalaxy.isChecked()
         
     # def regenerateStarsHelper(self):
-    #     Model.parameters.regenerateStars()
-    #     Model.engine.reconfigure()
+    #     ModelImpl.parameters.regenerateStars()
+    #     ModelImpl.engine.reconfigure()
 
     def simImage(self):
         """
@@ -100,7 +100,7 @@ class VisualizationController(GUIController):
             parameters = self.parametersController.buildParameters()
             if parameters is None:
                 return
-            Model.updateParameters(parameters)
+            ModelImpl.updateParameters(parameters)
             controller = ControllerFactory(self.views)
             controller.run()
             self.thread = controller

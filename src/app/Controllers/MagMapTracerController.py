@@ -2,7 +2,7 @@ from PyQt5 import QtCore
 
 import numpy as np
 
-from ..Models.Model import Model
+from app.Models import ModelImpl
 from .FileManagers.MediaFileManager import MediaFileManager
 from .FileManagers.ParametersFileManager import ParametersFileManager
 from .GUIController import GUIController
@@ -80,14 +80,14 @@ class MagMapTracerController(GUIController):
     def drawQuasarHelper(self):
         """Interface for updating an animation in real time of whether or not to draw the physical location of the quasar to the screen as a guide."""
         self._showingQuasar = not self._showingQuasar
-        Model.parameters.showQuasar = self._showingQuasar
+        ModelImpl.parameters.showQuasar = self._showingQuasar
 
     def drawGalaxyHelper(self):
         """
         Interface for updating an animation in real time of whether or not to draw the lensing galaxy's center of mass, along with any stars".
         """
         self._showingGalaxy = not self._showingGalaxy
-        Model.parameters.showGalaxy = self._showingGalaxy
+        ModelImpl.parameters.showGalaxy = self._showingGalaxy
         
 
     def simImage(self,recording=False):
@@ -122,10 +122,10 @@ class MagMapTracerController(GUIController):
         fname = 'filler'
         resolution = 1000
         track = self.tracerView.getROI()
-        track = Model.parameters.extras.getParams('magmap').pixelToAngle(track)
+        track = ModelImpl.parameters.extras.getParams('magmap').pixelToAngle(track)
         start = Vector2D(track[0][0],track[0][1],'rad')
         finish = Vector2D(track[len(track)-1][0],track[len(track)-1][1],'rad')
-        yAxis = Model.engine.makeLightCurve(start,finish,resolution)
+        yAxis = ModelImpl.engine.makeLightCurve(start,finish,resolution)
         diff = (finish-start).magnitude()
         xAxis = np.arange(0,diff,diff/resolution)
         sE = np.array([[start.x,start.y],[finish.x,finish.y]])
@@ -173,7 +173,7 @@ class MagMapTracerController(GUIController):
             mag2[:,0] = magmap.shape[0] - magmap[:,0]
             mag2[:,1] = magmap[:,1]
             self.tracerView.setMagMap(mag2,baseMag)
-            Model.updateParameters(params)
+            ModelImpl.updateParameters(params)
         else:
             paramsLoader = ParametersFileManager(self.view.signals)
             params = paramsLoader.read()
@@ -183,7 +183,7 @@ class MagMapTracerController(GUIController):
     #         self.view.bindFields(params)
             array = np.asarray(magmap.convert('YCbCr'))[:,:,0]
             self.tracerView.setMagMap(array)
-            Model.updateParameters(params)
+            ModelImpl.updateParameters(params)
 
     
     def qPoslabel_slot(self, pos):

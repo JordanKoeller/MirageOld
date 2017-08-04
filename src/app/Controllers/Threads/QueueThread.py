@@ -7,7 +7,7 @@ Created on Jun 1, 2017
 from PyQt5 import QtCore
 
 from ...Calculator.ExperimentResultCalculator import ExperimentResultCalculator, varyTrial
-from ...Models.Model import Model
+from app.Models import ModelImpl
 from ...Utility.NullSignal import NullSignal
 
 
@@ -40,7 +40,7 @@ class QueueThread(QtCore.QThread):
                 self.signals['progressBar'].emit(expt+1)
                 self.signals['progressLabel'].emit("Processing trial "+str(expt+1) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
                 newP = varyTrial(params,expt+1) #NEED TO IMPLIMENT
-                Model.updateParameters(newP)
+                ModelImpl.updateParameters(newP)
                 data = exptRunner.runExperiment() #NEED TO IMPLIMENT
                 self.filemanager.sendTrial(data)
             self.filemanager.closeExperiment()
@@ -50,8 +50,8 @@ class QueueThread(QtCore.QThread):
         
         
     def runTrial(self,params):
-        Model.updateParameters(params)
-        lightCurveData = Model.engine.makeLightCurve(params.quasarStartPos, params.quasarEndPos, params.extras.resolution)
+        ModelImpl.updateParameters(params)
+        lightCurveData = ModelImpl.engine.makeLightCurve(params.quasarStartPos, params.quasarEndPos, params.extras.resolution)
         return lightCurveData
         
     

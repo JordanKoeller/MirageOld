@@ -25,6 +25,7 @@ class Controller(object):
         Constructor
         '''
         self._children = []
+        self._active = True
         # for child in children:
         #     self.addChild(child)
         
@@ -35,13 +36,18 @@ class Controller(object):
         return args
 
     def run(self,*args):
-        args = self.calculate(*args)
-        for child in self._children:
-            child.run(args)
+        if self._active:
+            args = self.calculate(*args)
+            for child in self._children:
+                child.run(*args)
 
 
     def addChild(self, child):
         self._children.append(child)
+
+    def deactivate(self):
+        print("Deactivated")
+        self._active = False
 
     @property
     def children(self):

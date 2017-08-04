@@ -15,7 +15,7 @@ from .FileManagers.ParametersFileManager import ParametersFileManager
 from ..Models.Stellar.Galaxy import Galaxy
 from ..Models.Parameters.Parameters import Parameters
 from ..Models.Stellar.Quasar import Quasar
-from ..Models.Model import Model
+from app.Models import Model
 import astropy.units as u
 from astropy import constants as const
 from ..Calculator import UnitConverter
@@ -41,10 +41,6 @@ class ParametersController(GUIController):
         '''
         GUIController.__init__(self, view,None,None)
         view.addSignals(paramLabel = self.paramLabel_signal, paramSetter = self.paramSetter_signal)
-        self.view.load_setup.triggered.connect(self.loadParams)
-        self.view.save_setup.triggered.connect(self.saveParams)
-        self.view.scaleUnitOption.currentTextChanged.connect(self.updateUnitLabels)
-        self.view.parametersEntryHelpAction.triggered.connect(self.displayHelpMessage)
         self.view.qVelRandomizer.clicked.connect(self.randomizeGVelocity)
         self.view.signals['paramSetter'].connect(self.bindFields)
         self.fileManager = ParametersFileManager(self.view.signals)
@@ -70,8 +66,8 @@ class ParametersController(GUIController):
         If the user inputs invalid arguments, will handle the error by returning None and sending a message
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
-        try:
-        # if True:
+        # try:
+        if True:
             gRedshift = float(self.view.gRedshift.text())
             qRedshift = float(self.view.qRedshift.text())
             qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')
@@ -113,8 +109,8 @@ class ParametersController(GUIController):
                 displayCenter = self.vectorFromQString(self.view.gCenter.text(), unit='arcsec').to('rad')
                 dTheta = u.Quantity(float(self.view.scaleInput.text()), inputUnit).to('rad').value
                 canvasDim = int(self.view.dimensionInput.text())
-                displayQuasar = self.view.displayQuasar.isChecked()
-                displayGalaxy = self.view.displayGalaxy.isChecked() 
+                displayQuasar = True
+                displayGalaxy = True
                 if self._tmpStars:
                     print("Binding stars")
                     galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity,stars = self._tmpStars[1])
@@ -134,24 +130,24 @@ class ParametersController(GUIController):
                 if extrasBuilder:
                     extrasBuilder(self.view,params,inputUnit)
                 return params
-        except (AttributeError, ValueError) as e:
-            self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
-            print(str(e))
-            return None
-        except ParametersError as e:
-            self.view.signals['progressLabel'].emit(e.value)
-            print(str(e))
-            return None
-        except SyntaxError as e:
-            print(str(e))
-            self.view.signals['progressLabel'].emit("Syntax error found in trial variance code block.")
-            return None
+        # except (AttributeError, ValueError) as e:
+        #     self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
+        #     print(str(e))
+        #     return None
+        # except ParametersError as e:
+        #     self.view.signals['progressLabel'].emit(e.value)
+        #     print(str(e))
+        #     return None
+        # except SyntaxError as e:
+        #     print(str(e))
+        #     self.view.signals['progressLabel'].emit("Syntax error found in trial variance code block.")
+        #     return None
         
-    def updateUnitLabels(self,unitString):
-#         self.view.unitLabel_1.setText(unitString)
-        self.view.unitLabel_3.setText(unitString)
-        self.view.unitLabel_4.setText(unitString)
-        self.view.unitLabel_6.setText(unitString)
+#     def updateUnitLabels(self,unitString):
+# #         self.view.unitLabel_1.setText(unitString)
+#         # self.view.unitLabel_3.setText(unitString)
+#         self.view.unitLabel_4.setText(unitString)
+#         self.view.unitLabel_6.setText(unitString)
 
     def getApparentVelocity(self,pos,v):
         ev = Model.earthVelocity
@@ -209,18 +205,6 @@ class ParametersController(GUIController):
             return 0
         else:
             return round(float(x), -int(math.floor(math.log10(abs(float(x))))) + (n - 1))
-            
-    def saveParams(self):
-        """Prompts the user for a file name, then saves the lensing system's parameters to be loaded in at a later session."""
-        print("Firing")
-        self.fileManager.write(Model.parameters or self.buildParameters())
-
-    def loadParams(self):
-        """Prompts the user to select a previously saved lensing system configuration, then when selected loads the system to model"""
-        params = self.fileManager.read()
-        if params:
-            self.view.signals['paramSetter'].emit(params)
-            
             
     def vectorFromQString(self, string,unit = None):
         """

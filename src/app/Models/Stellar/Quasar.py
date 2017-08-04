@@ -14,13 +14,13 @@ class Quasar(Movable,Cosmic):
 
 
 
-	def __init__(self,redshift = 0,radius = u.Quantity(0,'rad'),position = zeroVector,velocity = zeroVector, mass = u.Quantity(0,'solMass')):
-		Movable.__init__(self,position,velocity)
+	def __init__(self,redshift = 0.1,radius = u.Quantity(0,'rad'),position = Vector2D(0,0,'rad'),velocity = Vector2D(0,0,'km/s'), mass = u.Quantity(0,'solMass')):
+		# Movable.__init__(self,position,velocity)
 		self.__radius = radius
-		self.updateDrawable(position = position,colorKey = 3)
 		self.updateCosmic(redshift = redshift)
 		normVel = velocity.to('km/s')/self.angDiamDist.to('km').value
 		self.updateMovable(position = position, velocity = normVel.setUnit('rad'))
+		self.updateDrawable(position = position,colorKey = 3)
 		self.__mass = mass
 
 	def update(self, redshift = None, position = None, radius = None, velocity = None):
@@ -37,13 +37,13 @@ class Quasar(Movable,Cosmic):
 			raise e
 
 
-	def draw(self, img, parameters):
-		center = Conversions.angleToPixel(self.observedPosition,parameters)
-		radius = int(self.radius.value/parameters.dTheta.value)
+	def draw(self, img, model):
+		center = Conversions.angleToPixel(self.observedPosition,model)
+		radius = int(self.radius.value/model.parameters.dTheta.value)
 		if img.ndim == 3:
-			drawSolidCircle(int(center.x),int(center.y),radius,img,self.colorKey)
+			drawSolidCircle(int(center.x),int(center.y),radius,img,self.colorKey,model)
 		else:
-			drawSolidCircle(int(center.x),int(center.y),radius,img,self.colorKey)
+			drawSolidCircle(int(center.x),int(center.y),radius,img,self.colorKey,model)
 
 
 	def pixelRadius(self,dTheta):

@@ -3,7 +3,7 @@ from ...Utility.NullSignal import NullSignal
 cimport numpy as np
 import numpy as np
 import math 
-from ...Models.Model import Model
+from ...Models import Model
 
 cdef class Drawer(object):
 	def __init__(self,signal):

@@ -7,7 +7,7 @@ from .Cosmic import Cosmic
 from ...Views.Drawer.ShapeDrawer import drawPointLensers, drawSquare
 from ...Views.Drawer.ShapeDrawer import drawPointLensers, drawSquare
 from ..ParametersError import ParametersError
-from ..Model import Model
+from app.Models import ModelImpl
 from ...Calculator import Conversions
 
 class Galaxy(Drawable, Cosmic):
@@ -16,7 +16,7 @@ class Galaxy(Drawable, Cosmic):
 	__shear = None
 	__stars = []
 
-	def __init__(self, redshift=0.0, velocityDispersion=u.Quantity(0, 'km/s'), shearMag=0, shearAngle=0, percentStars=0, center=zeroVector, starVelocityParams = None, skyCoords= None, velocity=None,stars = []):
+	def __init__(self, redshift=0.01, velocityDispersion=u.Quantity(0, 'km/s'), shearMag=0, shearAngle=u.Quantity(0,'degree'), percentStars=0.0, center=zeroVector.setUnit('rad'), starVelocityParams = None, skyCoords= None, velocity=u.Quantity(0,'km/s'),stars = []):
 		Drawable.__init__(self)
 		Cosmic.__init__(self)
 		self.__velocityDispersion = velocityDispersion
@@ -32,19 +32,19 @@ class Galaxy(Drawable, Cosmic):
 		if stars != []:
 			print("Came with stars")
 
-	def drawStars(self, img, parameters):
+	def drawStars(self, img, model):
 		if len(self.__stars) != 0:
 			if img.ndim == 3:
-				drawPointLensers(self.__stars, img, parameters)
+				drawPointLensers(self.__stars, img, model)
 			else:
-				drawPointLensers(self.__stars, img, parameters)
+				drawPointLensers(self.__stars, img, model)
 
-	def drawGalaxy(self, img, parameters):
-		center = Conversions.angleToPixel(self.position,parameters)
+	def drawGalaxy(self, img, model):
+		center = Conversions.angleToPixel(self.position,model)
 		if img.ndim == 3:
-			drawSquare(int(center.x),int(center.y),5,img,self.colorKey)
+			drawSquare(int(center.x),int(center.y),5,img,self.colorKey,model)
 		else:
-			drawSquare(int(center.x),int(center.y),5,img,self.colorKey)
+			drawSquare(int(center.x),int(center.y),5,img,self.colorKey,model)
 
 
 	@property
@@ -147,7 +147,7 @@ class Galaxy(Drawable, Cosmic):
 
 	@property
 	def apparentVelocity(self):
-		relVel = self.velocity - Model.earthVelocity	
+		relVel = self.velocity - ModelImpl.earthVelocity	
 		rCart = relVel.to_cartesian()
 		l,b = (self.skyCoords.galactic.l, self.skyCoords.galactic.b.to('rad'))
 		theta, phi = (math.pi/2 - b, l)

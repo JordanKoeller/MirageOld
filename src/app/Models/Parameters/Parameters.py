@@ -8,6 +8,8 @@ from astropy.cosmology import WMAP7 as cosmo
 from scipy.stats import norm
 import numpy as np 
 import random as rand 
+from ..Stellar.Galaxy import Galaxy
+from ..Stellar.Quasar import Quasar
 
 
 from ...Calculator.InitialMassFunction import Evolved_IMF
@@ -119,12 +121,11 @@ class Quasar:<br>
 		
 	"""
 		
-	def __init__(self, galaxy = None, quasar = None, dTheta = 600/800, canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0, curveDim = Vector2D(800,200)):
+	def __init__(self, galaxy = Galaxy(), quasar = Quasar(), dTheta = u.Quantity(600/800,'arcsec'), canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0):
 		self.__galaxy = galaxy
 		self.__quasar = quasar
 		self.__dTheta = u.Quantity(dTheta/canvasDim,'rad')
 		self.__canvasDim = canvasDim
-		self.__curveDim = curveDim
 		self.showGalaxy = showGalaxy
 		self.showQuasar = showQuasar
 		self.numStars = numStars

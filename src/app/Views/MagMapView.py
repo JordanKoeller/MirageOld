@@ -5,13 +5,15 @@ Created on Jul 25, 2017
 '''
 from pyqtgraph.graphicsItems.ImageItem import ImageItem
 
-from .CanvasView import CanvasView
+from .View import CanvasView
+from .. import magmapUIFile
 from pyqtgraph.widgets.GradientWidget import GradientWidget
 from .Drawer.ShapeDrawer import drawSolidCircle
 
 import numpy as np
 from pyqtgraph.graphicsItems.ROI import LineSegmentROI
 
+from PyQt5 import uic
 
 class MagMapView(CanvasView):
     '''
@@ -19,27 +21,26 @@ class MagMapView(CanvasView):
     '''
 
 
-    def __init__(self, modelID,*args,**kwargs):
-        CanvasView.__init__(self,modelID,*args,**kwargs)
-        self._viewBox = self.addViewBox(lockAspect=True)
+    def __init__(self, modelID,title=None):
+        CanvasView.__init__(self,modelID,title)
+        uic.loadUi(magmapUIFile,self)
+        self._viewBox = self.imgPane.addViewBox(lockAspect=True)
         self._viewBox.invertY()
         self._imgItem = ImageItem()
-        self._gradientItem = GradientWidget()
         self._viewBox.addItem(self._imgItem)
-        self._viewBox.nextRow()
-        self._viewBox.addItem(self._gradientItem)
         self.title = "MagMap Image"
+        self.type = "MagMapView"
         self.radius = 5
         self._roi = None
         
     def _setColorMap(self):
-        gradient = self._gradientItem.getLookupTable(500,alpha=False)
+        gradient = self.gradientWidget.getLookupTable(500,alpha=False)
         self._magMapImg.setLookupTable(gradient,True)
         
     def setMagMap(self,img,baseMag):
         self._imgStatic = img
         self._imgItem.setImage(img)
-        self._gradientItem.restoreState(self._getCenteredGradient(baseMag))
+        self.gradientWidget.restoreState(self._getCenteredGradient(baseMag))
         self._baseMag = int(baseMag)
         self._magMapDataCoords = np.ndarray((img.shape[0],img.shape[1],2))
         for i in range(img.shape[0]):

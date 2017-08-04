@@ -1,17 +1,18 @@
 
 from pyqtgraph.graphicsItems.ImageItem import ImageItem
 from pyqtgraph import RectROI
-from .CanvasView import CanvasView
+from .View import CanvasView
 
 class LensedImageView(CanvasView):
 	"""docstring for LensedImageView"""
-	def __init__(self, modelID,*args,**kwargs):
-		CanvasView.__init__(self,modelID,*args,**kwargs)
+	def __init__(self, modelID='system_0',title=None):
+		CanvasView.__init__(self,modelID,title,)
 		self._viewBox = self.addViewBox(lockAspect=True)
 		self._viewBox.invertY()
 		self._imgItem = ImageItem()
 		self._viewBox.addItem(self._imgItem)
 		self.title = "Lensed Image"
+		self.type = "ImageView"
 		self._signalRef.connect(self.setImage)
 
 	def setImage(self,img,*args,**kwargs):

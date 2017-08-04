@@ -1,9 +1,9 @@
 import numpy as np 
 from ..Utility.Vec2D import Vector2D
-from ..Models.Model import Model
+# from ..Models import Model
 
-def angleToPixel(angles,parameters=None):
-    parameters = parameters or Model.parameters 
+def angleToPixel(angles,model):
+    parameters = model.parameters
     canvasDim = parameters.canvasDim
     dTheta = parameters.dTheta.to('rad').value
 
@@ -16,8 +16,8 @@ def angleToPixel(angles,parameters=None):
         return Vector2D(angles.x+canvasDim/2,canvasDim/2 - angles.y)
 
 
-def pixelToAngle(pixels,parameters=None):
-    parameters = parameters or Model.parameters
+def pixelToAngle(pixels,model):
+    parameters = model.parameters
     canvasDim = parameters.canvasDim
     dTheta = parameters.dTheta.to('rad').value
 
