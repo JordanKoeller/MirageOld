@@ -12,6 +12,8 @@ from app import Preferences
 from app.Utility import asynchronous
 
 from .FileManager import FileWriter, FileReader
+from ..Models.ModelImpl import ModelImpl
+from ..Models.Parameters.Parameters import Parameters
 
 
 class RecordingFileManager(FileWriter):
@@ -60,7 +62,8 @@ class ParametersFileManager(FileWriter):
         
     def open(self, filename=None):
         FileWriter.open(self, filename)
-        self._file = open(self._filename,'wb+')
+        if self._filename:
+            self._file = open(self._filename,'wb+')
         
     def write(self, data):
         pickle.dump(data,self._file)
@@ -74,32 +77,83 @@ class ParametersFileManager(FileWriter):
         return '.params'
     
 
-class TableFileManager(FileWriter):
+class TableFileWriter(FileWriter):
     
     def __init__(self):
         FileWriter.__init__(self)
-        self._parametersFileManager = ParametersFileManager()
         
     def open(self, filename=None):
-        self._parametersFileManager.open(filename)
-        
+        FileWriter.open(self,filename)
+
     def write(self,data):
-        for i in data:
-            self._parametersFileManager.write(i)
+        if self._filename:
+            self._file = open(self._filename,'wb+')
+            pickle.dump(data,self._file)
         
     def close(self):
-        self._parametersFileManager.close()
-        
+        pass        
         
     @property
     def _fileextension(self):
         return '.params'
     
-class ModelFileManager(FileReader):
+class TableFileReader(FileReader):
+    
+    def __init__(self):
+        FileWriter.__init__(self)
+        
+    def open(self, filename=None):
+        FileWriter.open(self,filename)
+
+    def load(self):
+        if self._filename:
+            self._file = open(self._filename,'rb+')
+            return pickle.load(self._file)
+        
+    def close(self):
+        pass        
+        
+    @property
+    def _fileextension(self):
+        return '.params'
+
+class ModelFileReader(FileReader):
     """class for reading model configurations. Can accept .dat, .param, and .params files and parse to a model"""
     def __init__(self):
-        super(ModelFileManager, self).__init__()
+        super(ModelFileReader, self).__init__()
+        
+
+    def load(self,filename=None,*args,**kwargs):
+        if self._filename:
+            self._file = open(self._filename,'rb+')
+            model = pickle.load(self._file)
+            if isinstance(model,Parameters):
+                model = ModelImpl(model)
+            elif isinstance(model,ModelImpl):
+                pass
+            else:
+                raise IOError("Specified file does not contain a model.")
+            return model
+        else: return None
+
+    @property
+    def _fileextension(self):
+        return '.param'
+
+class ModelFileWriter(FileWriter):
+    """class for reading model configurations. Can accept .dat, .param, and .params files and parse to a model"""
+    def __init__(self):
+        super(ModelFileWriter, self).__init__()
         
     @property
     def _fileextension(self):
         return '.param'
+
+    def write(self,data):
+        if self._filename:
+            self._file = open(self._filename,'wb+')
+            pickle.dump(data,self._file)
+        else:
+            self.open()
+            self.write(data)
+

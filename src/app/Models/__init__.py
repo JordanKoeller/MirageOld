@@ -1,4 +1,4 @@
-from ..Controllers.FileManagerImpl import ModelFileManager
+from ..Controllers.FileManagerImpl import ModelFileReader
 from .ModelImpl import ModelImpl
 from astropy.coordinates import SphericalRepresentation as SR
 import numpy as np 
@@ -9,22 +9,25 @@ class __Model(dict):
     """Wrapper of a dict instance, with added functionality for global values like earthVelocity"""
     def __init__(self):
         dict.__init__(self)
+        self.addModel('default',Parameters())
         
     @property
     def earthVelocity(self):
         return SR(u.Quantity(265,'degree'),u.Quantity(48,'degree'),365)
 
-    def addModel(self, name=None,parameters=None):
-        if name and parameters:
-            self[name] = ModelImpl(parameters)
-        elif name:
-            paramLoader = ModelFileManager()
-            parameters = paramLoader.load(name)
+    def addModel(self, modelID=None,parameters=None):
+        if modelID and parameters:
+            self[modelID] = ModelImpl(parameters)
+        elif modelID:
+            paramLoader = ModelFileReader()
+            paramLoader.open()
+            parameters = paramLoader.load(modelID)
             self[paramLoader.prettyString] = parameters
         elif parameters:
             self[self._generateName()] = ModelImpl(parameters)
         else:
-            paramLoader = ModelFileManager()
+            paramLoader = ModelFileReader()
+            paramLoader.open()
             parameters = paramLoader.load()
             self[self._generateName()] = parameters
 
@@ -35,26 +38,18 @@ class __Model(dict):
             else:
                 v.dynamic = False
 
-    def replaceModel(self,model):
-        pass
-        # self.clear()
-        # for k,v in model.items():
-        #     self[k] = v
-
-    def updateModel(self,parameters):
-        if len(self) is 0:
-            self.addModel(parameters = parameters)
-            self.setUpdatable('system_'+str(0))
-        for k,model in self.items():
-            if model.dynamic:
-                model.updateParameters(parameters)
+    def updateModel(self,modelID,parameters):
+        if modelID in self:
+            self[modelID].updateParameters(parameters)
+        else:
+            self.addModel(modelID = modelID, parameters=parameters)
 
     def DefaultModel(self):
         return ModelImpl(Parameters())
 
 
     def _generateName(self):
-        return "system_"+str(len(self))
+        return "default"
 
 
 

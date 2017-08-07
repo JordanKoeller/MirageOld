@@ -428,7 +428,7 @@ cdef class Engine:
 				self.needsReconfiguring = True
 		elif not self.__parameters.isSimilar(parameters):
 			print("Not similar")
-			self.__parameters.canvasDim = parameters.canvasDim
+			self.__parameters.update(canvasDim = parameters.canvasDim)
 			if self.__parameters.isSimilar(parameters):
 				self.__parameters = parameters
 				if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:

@@ -16,5 +16,5 @@ def VisualizationControllerFactory(view):
 def TableControllerFactory(tv,pv):
     return QueueController(tv,pv)
 
-def _TracerController(view):
+def TracerController(view):
     return MagMapTracerController(view)

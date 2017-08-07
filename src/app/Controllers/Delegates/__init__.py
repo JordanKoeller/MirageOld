@@ -22,6 +22,7 @@ class TrajectoryModelGetter(Controller):
     def __init__(self,mnane):
         Controller.__init__(self)
         self.modelID = mnane
+        Model[self.modelID].modelID = self.modelID
 
     def calculate(self,*args):
         Model[self.modelID].parameters.incrementTime(Model[self.modelID].parameters.dt)

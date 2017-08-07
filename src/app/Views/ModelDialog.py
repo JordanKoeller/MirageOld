@@ -7,7 +7,7 @@ from .. import modeldialogUIFile
 from pyqtgraph.widgets.TableWidget import TableWidget
 from .ViewTable import ViewTable
 from ..Models import Model
-# from ..Controller.ModelFileManager import ModelFileManager
+from ..Controllers.FileManagerImpl import ModelFileReader
 
 class ModelDialog(QDialog):
 	"""provides a dialog for editing the models associated with the 
@@ -50,21 +50,25 @@ class ModelDialog(QDialog):
 
 	def addModel(self,source):
 		self.addModelButton.setCurrentIndex(0)
-		if source == 1:
-			#Means from File
-			modelLoader = ModelFileManager()
-			model = model.load()
-		elif source == 2:
-			#Means from scratch
+		if source != 0:
 			name,success = QInputDialog.getText(self,"Add Model","Enter a name for the new model")
+			model = None
 			if success:
-				model = Model.DefaultModel()
+				print(source)
+				if source == 1:
+					#Means from File
+					modelLoader = ModelFileReader()
+					modelLoader.open()
+					model = modelLoader.load()
+					if not model: return
+				elif source == 2:
+					#Means from scratch
+						model = Model.DefaultModel()
 				model.modelID = name
 				self._models[name] = model
 				self._updateModelList()
 
 	def exportModel(self):
-		print(self._models)
 		print("Done printing")
 		return self._models
 		# return copy.deepcopy(self._models)

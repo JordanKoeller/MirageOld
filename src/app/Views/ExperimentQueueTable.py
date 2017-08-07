@@ -5,12 +5,17 @@ Created on Jun 2, 2017
 '''
 
 from PyQt5.Qt import QPushButton
+from PyQt5 import QtCore
 from pyqtgraph.widgets.TableWidget import TableWidget
 
 from ..Utility.NullSignal import NullSignal
 
 
-class ExperimentQueueTable(TableWidget): 
+class ExperimentQueueTable(TableWidget):
+
+
+    editingSignal = QtCore.pyqtSignal(object,int)
+
     def __init__(self,parent=None,editable = True): 
         """ datain: a list of QueueEntries
             headerdata: a list of strings
@@ -27,7 +32,7 @@ class ExperimentQueueTable(TableWidget):
         exptButton = QPushButton()
         exptButton.setText("Edit")
         exptButton.setMinimumWidth(50)
-        exptButton.clicked.connect(lambda: self.signal.emit(experiment,self.numRows-1))
+        exptButton.clicked.connect(lambda: self.editingSignal.emit(experiment,self.numRows-1))
         self.setCellWidget(self.numRows,len(txtRow),exptButton)
         clearButton = QPushButton()
         clearButton.setText("Remove")

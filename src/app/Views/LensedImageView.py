@@ -5,7 +5,7 @@ from .View import CanvasView
 
 class LensedImageView(CanvasView):
 	"""docstring for LensedImageView"""
-	def __init__(self, modelID='system_0',title=None):
+	def __init__(self, modelID='default',title=None):
 		CanvasView.__init__(self,modelID,title,)
 		self._viewBox = self.addViewBox(lockAspect=True)
 		self._viewBox.invertY()

@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5 import QtWidgets, uic, QtCore
-from PyQt5.QtWidgets import QProgressDialog
+from PyQt5.QtWidgets import QProgressDialog, QInputDialog
 from PyQt5 import QtCore, QtWidgets
 
 import factory
@@ -19,6 +19,9 @@ from .ViewLayout import ViewLayout
 from .ModelDialog import ModelDialog
 import factory
 from app.Models import Model
+from ..Controllers.ParametersController import ParametersController
+from ..Controllers.QueueController import QueueController
+from ..Controllers.FileManagerImpl import ParametersFileManager
 
 class MainView(QtWidgets.QMainWindow,SignalRepo):
 	"""
@@ -41,19 +44,20 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 						reset = self.resetSignal,
 						progressDialog = self.progressDialogSignal
 						)
+
 		#Set up menubar interraction
 		self.playPauseAction.triggered.connect(self._playPauseToggle)
 		self.resetAction.triggered.connect(self._resetHelper)
-		# self.saveTableAction.triggered.connect(???)
-		# self.loadTableAction.triggered.connect(???)
+		self.saveTableAction.triggered.connect(self.saveTable)
+		self.loadTableAction.triggered.connect(self.loadTable)
 		# self.parametersEntryHelpAction.triggered.connect(???)
 		self.actionAddCurvePane.triggered.connect(self.addCurvePane)
 		self.actionAddImgPane.triggered.connect(self.addImgPane)
 		self.actionAddMagPane.triggered.connect(self.addMagPane)
 		self.actionAddParametersPane.triggered.connect(self.addParametersPane)
-		self.actionAddTablePane.triggered.connect(self.addTablePane)
-		# self.load_setup.triggered.connect(???)
-		# self.save_setup.triggered.connect(???)
+		# self.actionAddTablePane.triggered.connect(self.addTablePane)
+		self.save_setup.triggered.connect(self.saveSetup)
+		self.load_setup.triggered.connect(self.loadSetup)
 		# self.record_button.triggered.connect(???)
 		self.visualizerViewSelector.triggered.connect(self.showVisSetup)
 		self.queueViewSelector.triggered.connect(self.showTableSetup)
@@ -62,28 +66,65 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 
 		self.parent = parent
 		self.progressDialogSignal.connect(self.openDialog)
-		self.canvasViews = []
 		self.controller = None
-		self.controllerViews = []
+		self.modelControllers = []
 		self.isPlaying = False
 		self.layout = ViewLayout(None,None)
+		self.layout.sigModelDestroyed.connect(self.removeModelController)
 		self.mainSplitter.addWidget(self.layout)
 		self.initVisCanvas()
 		self._mkStatusBar()
 
+	def saveTable(self):
+		tableController = self._findControllerHelper(QueueController)
+		tableController.saveTable()
+
+	def saveSetup(self):
+		paramController = self._findControllerHelper(ParametersController)
+		filer = ParametersFileManager()
+		filer.open()
+		filer.write(Model[paramController.modelID].parameters)
+
+	def loadTable(self):
+		tableController = self._findControllerHelper(QueueController)
+		tableController.loadTable()
+
+	def loadSetup(self):
+		paramController = self._findControllerHelper(ParametersController)
+
+
+	def _findControllerHelper(self,kind):
+		ret = []
+		for c in self.modelControllers:
+			if isinstance(c,kind):
+				ret.append(c)
+		if len(ret) == 1:
+			ret = ret[0]
+		elif len(ret) == 0:
+			ret = None
+		else:
+			model = QInputDialog.getItem(self,"Select Model",
+				"Please Select a Model to save.",
+				map(lambda i: i.modelID,filter(lambda v: isinstance(v,kind),self.modelControllers)))
+			if model[1]:
+				ret = next(filter(lambda i:i.modelID == model[0],self.modelControllers))
+			else:
+				ret = None
+		return ret
+
 	def _playPauseToggle(self):
-		print("Pressed")
 		if self.isPlaying:
 			self.isPlaying = False
 			self.pauseSignal.emit()
 			self.deactivateSignal.emit()
 		else:
-			paramters = self.parametersController.buildParameters()
-			if paramters:
-				Model.updateModel(paramters)
-				self.controller = ControllerFactory(self.canvasViews,self.playSignal,self.pauseSignal,self.resetSignal,self.deactivateSignal)
-				self.isPlaying = True
-				self.playSignal.emit()
+			for controllerView in self.modelControllers:
+				parameters = controllerView.buildObject()
+				if parameters:
+					Model.updateModel(controllerView.modelID,parameters)
+			self.controller = ControllerFactory(self.canvasViews,self.playSignal,self.pauseSignal,self.resetSignal,self.deactivateSignal)
+			self.isPlaying = True
+			self.playSignal.emit()
 
 	def _resetHelper(self):
 		self.isPlaying = False
@@ -99,34 +140,29 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 	def addImgPane(self):
 		imgCanvas = LensedImageView()
 		self.layout.addView(imgCanvas)
-		self.canvasViews.append(imgCanvas)
 
 	def addCurvePane(self):
 		plCanvas = LightCurvePlotView()
 		self.layout.addView(plCanvas)
-		self.canvasViews.append(plCanvas)
 
 	def addParametersPane(self):
 		pv = ParametersView()
-		self.parametersController = factory.ParametersControllerFactory(pv)
+		parametersController = factory.ParametersControllerFactory(pv)
 		self.layout.addView(pv)
-		self.controllerViews.append(pv)
-		return pv
+		self.modelControllers.append(parametersController)
+		return parametersController
 
-	def addTablePane(self):
+	def addTablePane(self,parametersController=None):
 		tv = TableView()
+		pc = parametersController or self.addParametersPane()
 		#Will need refactoring. TableControllerFactory is outdated
-		self.tableViewController = factory.TableControllerFactory(tv,self.addParametersPane())
+		tableViewController = factory.TableControllerFactory(tv,pc)
 		self.layout.addView(tv)
-		self.controllerViews.append(tv)
+		self.modelControllers.append(tableViewController)
 		
 	def addMagPane(self):
 		magCanvas = MagMapView()
 		self.layout.addView(magCanvas)
-		self.canvasViews.append(magCanvas)
-
-	def addModel(self):
-		pass
 
 	def showVisSetup(self):
 		self.layout.clear()
@@ -136,7 +172,6 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 
 	def showTableSetup(self):
 		self.layout.clear()
-		self.addParametersPane()
 		self.addTablePane()
 
 	def showTracerSetup(self):
@@ -155,16 +190,29 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 		self.statusBar.addWidget(resetButton)
 		self.statusBar.addWidget(statusLabel)
 
+	def removeModelController(self,view):
+		removing = None
+		for c in self.modelControllers:
+			if c.view == view:
+				removing = c
+		if removing:
+			self.modelControllers.remove(removing)
+
+	def updateModels(self,model):
+		# Model.replaceModel(model)
+		pc = filter(lambda i: isinstance(i,ParametersController),self.modelControllers)
+		for i in pc:
+			i.bindFields(Model[i.modelID].parameters)
+
+	@property
+	def canvasViews(self):
+		return self.layout.canvasViews
+
 	def openDialog(self,minimum,maximum,message):
 		self.dialog = QProgressDialog(message,'Ok',minimum,maximum)
 		self.progressBar_signal.connect(self.dialog.setValue)
 
-	def updateModels(self,model):
-		print(model)
-		Model.replaceModel(model)
-
 	def openModelDialog(self):
-		dialog = ModelDialog(self.canvasViews+self.controllerViews,self)
+		dialog = ModelDialog(self.canvasViews+[i.view for i in self.modelControllers],self)
 		dialog.show()
 		dialog.accepted.connect(lambda: self.updateModels(dialog.exportModel()))
-		

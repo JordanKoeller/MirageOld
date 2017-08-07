@@ -13,7 +13,7 @@ class LightCurvePlotView(CanvasView):
     '''
 
 
-    def __init__(self, modelID='system_0',title=None, *args, **kwargs):
+    def __init__(self, modelID='default',title=None, *args, **kwargs):
         '''
         Constructor
         '''
@@ -28,4 +28,5 @@ class LightCurvePlotView(CanvasView):
         self._plot.plot(x, y,clear=clear,pen=pen,**kwargs)
         
     def update(self,args,kwargs={}):
-        self.plot(*args,**kwargs)
+        if self.enabled:
+            self.plot(*args,**kwargs)

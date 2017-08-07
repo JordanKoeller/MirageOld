@@ -15,21 +15,19 @@ def ControllerFactory(viewers,*signals):
   masterController = AnimationController(*signals)
   for model,views in modelView.items():
     modelGetter = Delegates.TrajectoryModelGetter(model)
-
     masterController.addChild(modelGetter)
     fetcher = Delegates.PixelFetcherDelegate()
-
+    modelGetter.addChild(fetcher)
     for view in views:
       if isinstance(view, LensedImageView):
         processor = Delegates.FrameDrawerDelegate()
         exporter = Delegates.FrameExporter(view.signal)
-        modelGetter.addChild(fetcher)
         fetcher.addChild(processor)
         processor.addChild(exporter)
       elif isinstance(view,LightCurvePlotView):
         processor = Delegates.CurveDrawerDelegate()
         exporter = Delegates.CurveExporter(view.signal)
-        modelGetter.addChild(fetcher)
+        # modelGetter.addChild(fetcher)
         fetcher.addChild(processor)
         processor.addChild(exporter)
   return masterController

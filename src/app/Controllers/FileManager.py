@@ -71,7 +71,7 @@ class FileWriter(object):
             else:
                 self._filename = filename+self._fileextension
         else:
-            self._filename = QtWidgets.QFileDialog.getSaveFileName(filter=self._fileextension)[0]
+            self._filename = QtWidgets.QFileDialog.getSaveFileName(filter='*'+self._fileextension)[0]
         return self._filename
     
     def open(self, filename=None, *args,**kwargs):
@@ -132,7 +132,8 @@ Provides an interface for loading data from files.
     def __init__(self,*args,**kwargs):
         pass
     
-    
+    def open(self,filename=None,*args,**kwargs):
+        self.getFile(filename)
 
     def getFile(self,filename=None,*args,**kwargs):
         if filename:
@@ -141,7 +142,7 @@ Provides an interface for loading data from files.
             else:
                 self._filename = filename+self._fileextension
         else:
-            self._filename = QtWidgets.QFileDialog.getOpenFileName(filter=self.fileextension)[0]
+            self._filename = QtWidgets.QFileDialog.getOpenFileName(filter='*'+self._fileextension)[0]
         return self._filename
 
     def load(self, filename=None, *args,**kwargs):

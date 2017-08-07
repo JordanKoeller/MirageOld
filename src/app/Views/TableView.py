@@ -4,7 +4,7 @@ from .View import ControllerView
 from .ExperimentQueueTable import ExperimentQueueTable
 class TableView(ControllerView):
 	"""Wraps a custom QtWidget to make a experiment table for setting up batch runs."""
-	def __init__(self,modelID='system_0',title='Table View'):
+	def __init__(self,modelID='default',title='Table View'):
 		ControllerView.__init__(self,modelID,title)
 		uic.loadUi(tableUIFile,self)
 		self.__initTable()
@@ -13,3 +13,15 @@ class TableView(ControllerView):
 	def __initTable(self):
 		self.table = ExperimentQueueTable(self.scrollAreaWidgetContents,editable = False)
 	
+	def addExperiment(self,*args,**kwargs):
+		self.table.addExperiment(*args,**kwargs)
+
+	def updateExperiement(self,*args,**kwargs):
+		self.table.updateExperiement(*args,**kwargs)
+
+	def clearTable(self):
+		self.table.clearTable()
+
+	@property
+	def experiments(self):
+		return self.table.experiments	
