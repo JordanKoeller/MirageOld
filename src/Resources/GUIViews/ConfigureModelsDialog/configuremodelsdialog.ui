@@ -43,6 +43,11 @@
        </item>
        <item>
         <property name="text">
+         <string>From Magnification Map</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>From Scratch</string>
         </property>
        </item>

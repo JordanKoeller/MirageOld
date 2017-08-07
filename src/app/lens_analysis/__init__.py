@@ -15,11 +15,16 @@ from PyQt5 import QtWidgets
 import sys
 
 def load(filename='Untitled.dat'):
-    lngth = len(filename)
-    if filename[lngth-4::] == '.dat':
-        return Experiment(filename)
+    if filename is None:
+        filename = QtWidgets.QFileDialog.getOpenFileName(filter='*.dat')[0]
+    if filename:
+        lngth = len(filename)
+        if filename[lngth-4::] == '.dat':
+            return Experiment(filename)
+        else:
+            return DirectoryMap(filename)
     else:
-        return DirectoryMap(filename)
+        return None
 
 def describe(filename):
     if isinstance(filename, str):

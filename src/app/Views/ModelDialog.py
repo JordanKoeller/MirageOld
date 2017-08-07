@@ -8,7 +8,8 @@ from pyqtgraph.widgets.TableWidget import TableWidget
 from .ViewTable import ViewTable
 from ..Models import Model
 from ..Controllers.FileManagerImpl import ModelFileReader
-
+from .. import lens_analysis as la
+from ..Models.MagnificationMapModel import MagnificationMapModel
 class ModelDialog(QDialog):
 	"""provides a dialog for editing the models associated with the 
 	simulator."""
@@ -62,6 +63,13 @@ class ModelDialog(QDialog):
 					model = modelLoader.load()
 					if not model: return
 				elif source == 2:
+					#From a MagMap instance
+					modelLoader = la.load(None)
+					trialNum,success = QInputDialog.getInt(self,'Add Model', 'Specify which trial to select.',0,0,modelLoader.numTrials)
+					if success:
+						model = MagnificationMapModel(modelLoader[trialNum])
+						self._models[name] = model
+				elif source == 3:
 					#Means from scratch
 						model = Model.DefaultModel()
 				model.modelID = name

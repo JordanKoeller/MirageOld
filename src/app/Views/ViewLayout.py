@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QFrame, QVBoxLayout
 from PyQt5 import QtCore
-from .dockarea.Dock import Dock
-from .dockarea.DockArea import DockArea
+from pyqtgraph.dockarea.Dock import Dock
+from pyqtgraph.dockarea.DockArea import DockArea
 from .View import CanvasView, ControllerView
 from .CompositeView import CompositeView
 class ViewLayout(QFrame):
@@ -21,7 +21,7 @@ class ViewLayout(QFrame):
         self._modelViews = []
         layout.addWidget(self._layout)
         self.setLayout(layout)
-        self.mergeSignal.connect(self.mergePlots)
+        self.mergeSignal.connect(self.mergeViews)
         
     def addView(self,view):
         dock = Dock(view.title,closable=True,mergeSignal = self.mergeSignal)
@@ -46,11 +46,13 @@ class ViewLayout(QFrame):
     def canvasViews(self):
         return self._canvasViews
 
-    def mergePlots(self,plot1,plot2):
-        print("Merging")
-        plot1.disableUpdates()
-        plot2.disableUpdates()
-        self.composite = CompositeView(plot1,plot2)
+    def mergeViews(self,view1,view2):
+        if type(view1) == type(view2):
+            view1.disableUpdates()
+            view2.disableUpdates()
+            self.composite = CompositeView(view1,view2)
+        else:
+            print("Type Error")
     
         
         

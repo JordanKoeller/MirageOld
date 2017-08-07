@@ -29,6 +29,7 @@ class TrajectoryModelGetter(Controller):
         return (Model[self.modelID],)
     
 
+
 #DATAFETCHERDELEGATE
 
 class PixelFetcherDelegate(Controller):
