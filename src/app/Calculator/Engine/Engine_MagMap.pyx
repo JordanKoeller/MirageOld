@@ -9,6 +9,7 @@ cdef class Engine_MagMap(Engine):
 		Engine.__init__(self,parameters)
 		self.magMapParameters = magMapParameters
 		self.magMapArray = magMapArray
+		self.__internalEngine = None
 
 
 	def reconfigure(self):
@@ -32,9 +33,9 @@ cdef class Engine_MagMap(Engine):
 			return self.__internalEngine.makeLightCurve_helper(mmin,mmax,resolution)
 		else:
 			pixels = self.makePixelSteps(mmin,mmax)
-			retArr = np.ones_like(pixels.shape[0],dtype=np.float64)
-			for index in range(len(retArr)):
-				value = self.magMapArray[round(pixels[index,0]),round(pixels[index,1])]
+			retArr = np.ndarray(pixels.shape[0],dtype=np.float64)
+			for index in range(pixels.shape[0]):
+				value = self.magMapArray[int(round(pixels[index,0])),int(round(pixels[index,1]))]
 				retArr[index] = value
 			return retArr
 
@@ -47,7 +48,7 @@ cdef class Engine_MagMap(Engine):
 		pixelEnd = mmax#self.magMapParameters.angleToPixel(mmax)
 		dx = pixelEnd.x - pixelStart.x
 		dy = pixelEnd.y - pixelStart.y
-		maxD = max(dx,dy)
+		maxD = max(abs(dx),abs(dy))
 		xPixels = np.arange(pixelStart.x,pixelEnd.x,dx/maxD)
 		yPixels = np.arange(pixelStart.y,pixelEnd.y,dy/maxD)
 		ret = np.ndarray((len(xPixels),2))

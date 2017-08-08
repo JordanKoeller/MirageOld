@@ -41,7 +41,6 @@ cdef class Engine:
 		self.__parameters = parameters
 		self.__preCalculating = False
 		self.core_count = GlobalPreferences['core_count']
-		print(self.core_count)
 
 	@property
 	def parameters(self):

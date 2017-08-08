@@ -1,12 +1,20 @@
 from .AnimationController import AnimationController
-
+from .MasterController import MasterController
 from . import Delegates
 from ..Views.LensedImageView import LensedImageView
 from ..Views.LightCurvePlotView import LightCurvePlotView
 from ..Views.MagMapView import MagMapView
 from ..Models import Model
+from app.Preferences import GlobalPreferences
 
 def ControllerFactory(viewers,*signals):
+    masterController = AnimationController(*signals)
+    noImgView = True
+    for view in viewers:
+        if isinstance(view,LensedImageView):
+            noImgView = False
+    if not GlobalPreferences['animate_motion'] and noImgView:
+        masterController = MasterController(signals[0])
     modelView = {}
     for view in viewers:
         if view.modelID in Model:
@@ -14,7 +22,6 @@ def ControllerFactory(viewers,*signals):
                 modelView[view.modelID].append(view)
             else:
                 modelView[view.modelID] = [view]
-    masterController = AnimationController(*signals)
     for model,views in modelView.items():
         flag = False
         modelGetter = None
@@ -23,8 +30,14 @@ def ControllerFactory(viewers,*signals):
             if isinstance(view,MagMapView):
                 start = view.roiStartPos
                 end = view.roiEndPos
-                modelGetter = Delegates.MagMapModelGetter(model,start,end)
-                fetcher = Delegates.MagnificationFetcherDelegate()
+                modelGetter = None
+                fetcher = None
+                if noImgView:
+                    modelGetter = Delegates.MagMapLCGetter(model,start,end)
+                    fetcher = Delegates.LightCurveFetcherDelegate()
+                else:
+                    modelGetter = Delegates.MagMapModelGetter(model,start,end)
+                    fetcher = Delegates.MagnificationFetcherDelegate()
                 flag = True
         if not flag:
             modelGetter = Delegates.TrajectoryModelGetter(model)

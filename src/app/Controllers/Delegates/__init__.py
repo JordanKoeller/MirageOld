@@ -1,4 +1,5 @@
 from app.Models import Model
+from app.Preferences import GlobalPreferences
 from ...Utility.NullSignal import NullSignal
 from ...Views.Drawer.LensedImageDrawer import LensedImageDrawer
 from ..Controller import Controller
@@ -47,6 +48,16 @@ class MagMapModelGetter(Controller):
         Model[self.modelID].parameters.quasar.setPos(next(self.trackGenerator))
         return (Model[self.modelID],)
 
+class MagMapLCGetter(Controller):
+    def __init__(self,mname,startTrace,endTrace):
+        Controller.__init__(self)
+        self.modelID = mname
+        Model[self.modelID].modelID = self.modelID
+        self.startTrace = Vector2D(startTrace[0],startTrace[1])
+        self.endTrace = Vector2D(endTrace[0],endTrace[1])
+
+    def calculate(self,*args):
+        return (Model[self.modelID],self.startTrace,self.endTrace)
 
 #DATAFETCHERDELEGATE
 
@@ -67,9 +78,9 @@ class MagnificationFetcherDelegate(Controller):
 class LightCurveFetcherDelegate(Controller):
     def __init__(self):
         Controller.__init__(self)
-        
-    def calculate(self,model, min,max,resolution,*args):
-        return (model,model.engine.makeLightCurve(min,max,resolution))
+        self.resolution = GlobalPreferences['lightCurve_resolution']
+    def calculate(self,model, mmin,mmax,*args):
+        return (model,model.engine.makeLightCurve(mmin,mmax,self.resolution))
     
 class MagMapFetcherDelegate(Controller):
     def __init__(self):
@@ -96,10 +107,13 @@ class CurveDrawerDelegate(Controller):
         self._drawer = PlotDrawer()
 
     def calculate(self,model,data,*args):
-        if isinstance(data,np.ndarray):
+        if isinstance(data,np.ndarray) and data.dtype == np.int32: #Here's the bug. I need to move the calculation on the next line up one delegate
             return (model,self._drawer.append(model.engine.getMagnification(len(data))))
-        else:
+        elif isinstance(data,float):
             return (model,self._drawer.append(data))
+        else:
+            x = np.arange(0,len(data))
+            return (model,self._drawer.plotAxes(np.array(x,dtype=np.float64),np.array(data,dtype=np.float64)))
 
 class NullDelegate(Controller):
     def __init__(self,*args,**kwargs):

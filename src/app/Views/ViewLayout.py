@@ -5,7 +5,7 @@ from pyqtgraph.dockarea.DockArea import DockArea
 from .View import CanvasView, ControllerView
 from .LightCurvePlotView import LightCurvePlotView
 from .MagMapView import MagMapView
-from .CompositeView import CompositePlot, CompositeMagMap
+from .CompositeView import CompositePlot, CompositeMagMap, CompositeView
 class ViewLayout(QFrame):
 
 
@@ -44,14 +44,17 @@ class ViewLayout(QFrame):
                 self._canvasViews.remove(widget)
             elif isinstance(widget,ControllerView):
                 self.sigModelDestroyed.emit(widget)
+                
     @property
     def canvasViews(self):
         return self._canvasViews
 
     def mergeViews(self,view1,view2):
+        if isinstance(view1,CompositeView):
+            view1.addView(view2)
+        if isinstance(view2,CompositeView):
+            view2.addView(view1)
         if type(view1) == type(view2) and isinstance(view1,LightCurvePlotView):
-            # view1.disableUpdates()
-            # view2.disableUpdates()
             self.composite = CompositePlot(view1,view2)
         elif type(view1) == type(view2) and isinstance(view1,MagMapView):
             self.composite2 = CompositeMagMap(view1,view2)

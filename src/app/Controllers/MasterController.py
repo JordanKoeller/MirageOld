@@ -13,10 +13,14 @@ class MasterController(Controller):
     '''
 
 
-    def __init__(self):
+    def __init__(self,startSignal=None):
         '''
         Constructor
         '''
         Controller.__init__(self)
+        if startSignal:
+	        self.startSignal = startSignal
+	        self.startSignal.connect(self.run)
+	        self.run()
         # self._children = delegates
                 

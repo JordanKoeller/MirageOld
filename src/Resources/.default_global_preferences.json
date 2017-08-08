@@ -27,6 +27,10 @@
 		"visualization"
 	],
 
-	"auto_normalize_magmap":false
+	"auto_normalize_magmap":false,
+
+	"animate_motion":false,
+
+	"lightCurve_resolution":200
 
 }

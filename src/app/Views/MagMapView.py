@@ -48,7 +48,6 @@ class MagMapView(CanvasView):
         
     def setMagMap(self,img,baseMag):
         self._imgStatic = img
-        # img = np.random.random((500,500))
         self._imgItem.setImage(img)
         self.gradientWidget.restoreState(self._getCenteredGradient(baseMag))
         self._baseMag = int(baseMag)
@@ -69,7 +68,6 @@ class MagMapView(CanvasView):
         return (self.roiStartPos,self.roiEndPos)
 
     def _mkROI(self,pos):
-        # print("_mkROI")
         self.roiStartPos = [pos.x(),pos.y()]
         self.startDrag = True
         self.setROI(self.roiStartPos,self.roiStartPos)

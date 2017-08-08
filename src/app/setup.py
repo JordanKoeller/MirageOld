@@ -25,8 +25,7 @@ lensedimgdrawer = Extension("Views/Drawer/LensedImageDrawer", sources = ["Views/
 datavisdrawer = Extension("Views/Drawer/DataVisualizerDrawer", sources = ["Views/Drawer/DataVisualizerDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 shapedrawer = Extension("Views/Drawer/ShapeDrawer", sources = ["Views/Drawer/ShapeDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 shapedrawer = Extension("Views/Drawer/ShapeDrawer", sources = ["Views/Drawer/ShapeDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
-# curvedrawer = Extension("Views/Drawer/CurveDrawer", sources = ["Views/Drawer/CurveDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
-# diagnosticdrawer = Extension("Views/Drawer/DiagnosticDrawer", sources = ["Views/Drawer/DiagnosticDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+
 setup(
 	ext_modules =cythonize([tree,
 							grid,
