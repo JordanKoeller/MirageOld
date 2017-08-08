@@ -25,8 +25,6 @@ from libc.math cimport sin, cos, atan2, sqrt
 from Models.Parameters.Parameters import Parameters
 from scipy import interpolate
 from libcpp.pair cimport pair
-# from Utility.Grid cimport Grid
-# from Utility.Grid cimport Pixel
 from Utility.SpatialTree cimport SpatialTree, Pixel
 from libcpp cimport bool
 

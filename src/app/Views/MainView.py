@@ -22,7 +22,7 @@ from app.Models import Model
 from ..Controllers.ParametersController import ParametersController
 from ..Controllers.QueueController import QueueController
 from ..Controllers.FileManagerImpl import ParametersFileManager
-
+from ..Models.MagnificationMapModel import MagnificationMapModel
 class MainView(QtWidgets.QMainWindow,SignalRepo):
 	"""
 
@@ -73,6 +73,8 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 		self.layout.sigModelDestroyed.connect(self.removeModelController)
 		self.mainSplitter.addWidget(self.layout)
 		self.initVisCanvas()
+		# self.addCurvePane()
+		# self.addMagPane()
 		self._mkStatusBar()
 
 	def saveTable(self):
@@ -203,6 +205,13 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 		pc = filter(lambda i: isinstance(i,ParametersController),self.modelControllers)
 		for i in pc:
 			i.bindFields(Model[i.modelID].parameters)
+		for k,v in model.items():
+			if isinstance(v,MagnificationMapModel):
+				for view in self.canvasViews:
+					if isinstance(view,MagMapView) and view.modelID == k:
+						view.setMagMap(v.magMapArray,8.0)
+
+
 
 	@property
 	def canvasViews(self):

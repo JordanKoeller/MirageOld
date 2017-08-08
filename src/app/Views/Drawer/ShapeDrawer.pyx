@@ -99,3 +99,19 @@ cpdef void drawPointLensers(np.ndarray[np.float64_t, ndim=2] stars, np.ndarray[n
         m = stars[s,2]
         r = math.sqrt(m+2.0)
         drawSquare_optimized(<int>x,<int> y, <int> (r*2),canvas,2, <int> (w2*2),model)
+
+cpdef void drawSolidCircle_Gradient(int x0, int y0, int r, np.ndarray[np.float64_t, ndim=2] canvas, double color):
+    cdef int rSquared = r * r
+    cdef int x, y
+    cdef int canvasDim = canvas.shape[0]
+    for x in range(0,r+1):
+        for y in range(0,r+1):
+            if x*x + y*y <= rSquared:
+                if x0+x > 0 and y0+y > 0 and x0+x < canvasDim and y0+y < canvasDim:
+                    canvas[x0+x,y0+y] = color
+                if x0+x > 0 and y0-y > 0 and x0+x < canvasDim and y0-y < canvasDim:
+                    canvas[x0+x,y0-y] = color
+                if x0-x > 0 and y0+y > 0 and x0-x < canvasDim and y0+y < canvasDim:
+                    canvas[x0-x,y0+y] = color
+                if x0-x > 0 and y0-y > 0 and x0-x < canvasDim and y0-y < canvasDim:
+                    canvas[x0-x,y0-y] = color

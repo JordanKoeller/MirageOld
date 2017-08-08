@@ -13,7 +13,6 @@ class LensedImageView(CanvasView):
 		self._viewBox.addItem(self._imgItem)
 		self.title = "Lensed Image"
 		self.type = "ImageView"
-		self._signalRef.connect(self.setImage)
 
 	def setImage(self,img,*args,**kwargs):
 		self._imgItem.setImage(img)

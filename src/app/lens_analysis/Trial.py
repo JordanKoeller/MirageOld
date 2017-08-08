@@ -96,6 +96,7 @@ class Trial(AbstractFileWrapper):
     def regenerateParameters(self,ind,filename=None):
         params = copy.deepcopy(self.parameters)
         stars = self.getStars()
+        print(stars)
         params.setStars(stars)
         if filename:
             saver = ParametersFileManager(NullSignal)

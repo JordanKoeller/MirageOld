@@ -1,10 +1,10 @@
 {
 
-	"use_gpu":true,
+	"use_openCL":true,
 	
-	"cl_device":0,
+	"cl_device":3,
 
-	"memory_warning_threshold":"5G",
+	"memory_warning_threshold":5,
 
 	"core_count":"all",
 

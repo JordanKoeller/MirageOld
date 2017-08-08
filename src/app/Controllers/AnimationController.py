@@ -35,14 +35,16 @@ class AnimationController(MasterController):
         self._animating = True
         interval = 1/GlobalPreferences['max_frame_rate']
         while self._animating:
-            QtGui.QApplication.processEvents()
-            begin = time.clock()
-            MasterController.run(self,())
-            deltaT = time.clock()-begin
-            # self._animating = self.checkPaused()
-            # self._animating = self.checkStopped()
-            if deltaT < interval:
-                time.sleep(interval-deltaT)
+            try:
+                QtGui.QApplication.processEvents()
+                begin = time.clock()
+                MasterController.run(self,())
+                deltaT = time.clock()-begin
+                if deltaT < interval:
+                    time.sleep(interval-deltaT)
+            except StopIteration:
+                self._animating = False
+                break
 
     def readSignals(self):
         for signal in self._signals:

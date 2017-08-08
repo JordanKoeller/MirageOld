@@ -45,10 +45,15 @@ class CanvasView(View):
     def __init__(self,modelID,title=None,*args,**kwargs):
         View.__init__(self,modelID,title)
         modelID = 'default'
+        self.signal.connect(self.receiveSignal)
 
     def update(self,*args,**kwargs):
         pass
     
     def getFrame(self):
         pass
+
+    def receiveSignal(self,*args):
+        if self.enabled:
+            self.update(*args)
  

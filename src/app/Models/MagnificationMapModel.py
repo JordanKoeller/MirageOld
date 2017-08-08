@@ -30,3 +30,7 @@ class MagnificationMapModel(object):
 	@property
 	def trial(self):
 		return la.load(self.fileName)[trialNo]
+
+	@property
+	def engine(self):
+		return self._Engine

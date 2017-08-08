@@ -3,8 +3,8 @@ import numpy as np
 
 cdef class Engine_MagMap(Engine):
 
-	cdef object magMapParameters
-	cdef object magMapArray
+	cdef public object magMapParameters
+	cdef public object magMapArray
 	cdef Engine __internalEngine
 
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil

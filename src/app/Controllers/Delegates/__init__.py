@@ -3,6 +3,7 @@ from ...Utility.NullSignal import NullSignal
 from ...Views.Drawer.LensedImageDrawer import LensedImageDrawer
 from ..Controller import Controller
 from ...Views.Drawer.Drawer import PlotDrawer
+from ...Utility.Vec2D import Vector2D
 # from ...Utility.AsyncSignal import AsyncSignal
 import numpy as np
 
@@ -28,6 +29,23 @@ class TrajectoryModelGetter(Controller):
         Model[self.modelID].parameters.incrementTime(Model[self.modelID].parameters.dt)
         return (Model[self.modelID],)
     
+class MagMapModelGetter(Controller):
+    def __init__(self,mname,startTrace,endTrace):
+        Controller.__init__(self)
+        self.modelID = mname
+        startTrace = Vector2D(startTrace[0],startTrace[1])
+        endTrace = Vector2D(endTrace[0],endTrace[1])
+        Model[self.modelID].modelID = self.modelID
+        self.track = Model[self.modelID].engine.makePixelSteps(startTrace,endTrace)
+        self.trackGenerator = self.getNextPos()
+
+    def getNextPos(self):
+        for x,y in self.track:
+            yield Model[self.modelID].magMapParameters.pixelToAngle(Vector2D(x,y))
+
+    def calculate(self,*args):
+        Model[self.modelID].parameters.quasar.setPos(next(self.trackGenerator))
+        return (Model[self.modelID],)
 
 
 #DATAFETCHERDELEGATE
@@ -78,10 +96,26 @@ class CurveDrawerDelegate(Controller):
         self._drawer = PlotDrawer()
 
     def calculate(self,model,data,*args):
-        if isinstance(data,int):
-            return (model,self._drawer.append(data))
-        else:
+        if isinstance(data,np.ndarray):
             return (model,self._drawer.append(model.engine.getMagnification(len(data))))
+        else:
+            return (model,self._drawer.append(data))
+
+class NullDelegate(Controller):
+    def __init__(self,*args,**kwargs):
+        Controller.__init__(self)
+
+    def calculate(self,*args):
+        return args
+
+class MagMapTracerDelegate(Controller):
+    def __init__(self):
+        Controller.__init__(self)
+
+    def calculate(self,model,data,*args):
+        pos = model.parameters.quasar.observedPosition
+        pixPos = model.magMapParameters.angleToPixel(pos)
+        return (model,pixPos.asTuple)
 
 
 
@@ -105,3 +139,10 @@ class FrameExporter(Controller):
     def calculate(self, model,data):
         self._signal.emit(data)
         
+class MagMapTracerExporter(Controller):
+    def __init__(self,signal):
+        Controller.__init__(self)
+        self._signal = signal
+
+    def calculate(self,model,data):
+        self._signal.emit((model,data))

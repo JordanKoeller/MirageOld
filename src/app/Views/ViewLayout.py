@@ -3,7 +3,9 @@ from PyQt5 import QtCore
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea
 from .View import CanvasView, ControllerView
-from .CompositeView import CompositeView
+from .LightCurvePlotView import LightCurvePlotView
+from .MagMapView import MagMapView
+from .CompositeView import CompositePlot, CompositeMagMap
 class ViewLayout(QFrame):
 
 
@@ -47,12 +49,12 @@ class ViewLayout(QFrame):
         return self._canvasViews
 
     def mergeViews(self,view1,view2):
-        if type(view1) == type(view2):
-            view1.disableUpdates()
-            view2.disableUpdates()
-            self.composite = CompositeView(view1,view2)
-        else:
-            print("Type Error")
+        if type(view1) == type(view2) and isinstance(view1,LightCurvePlotView):
+            # view1.disableUpdates()
+            # view2.disableUpdates()
+            self.composite = CompositePlot(view1,view2)
+        elif type(view1) == type(view2) and isinstance(view1,MagMapView):
+            self.composite2 = CompositeMagMap(view1,view2)
     
         
         

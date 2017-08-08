@@ -22,11 +22,9 @@ class LightCurvePlotView(CanvasView):
         self.addItem(self._plot)
         self.title = "Light Curve"
         self.type = "LightCurveView"
-        self._signalRef.connect(self.update)
         
     def plot(self,x,y,clear=True,pen={'width':5},**kwargs):
         self._plot.plot(x, y,clear=clear,pen=pen,**kwargs)
         
-    def update(self,args,kwargs={}):
-        if self.enabled:
-            self.plot(*args,**kwargs)
+    def update(self,args):
+        self.plot(*args)
