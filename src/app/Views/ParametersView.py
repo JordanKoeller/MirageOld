@@ -6,7 +6,6 @@ from .View import ControllerView
 class ParametersView(ControllerView,SignalRepo):
 	"""Wraps custom QtWidget with boxes/buttons for the user to specify 
 	parameters of a system."""
-	title = 'Parameters'
 	def __init__(self,modelID='default',title=None):
 		ControllerView.__init__(self,modelID,title)
 		uic.loadUi(parametersUIFile,self)

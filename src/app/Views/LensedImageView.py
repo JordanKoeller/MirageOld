@@ -11,7 +11,7 @@ class LensedImageView(CanvasView):
 		self._viewBox.invertY()
 		self._imgItem = ImageItem()
 		self._viewBox.addItem(self._imgItem)
-		self.title = "Lensed Image"
+		# self.title = "Lensed Image"
 		self.type = "ImageView"
 
 	def setImage(self,img,*args,**kwargs):

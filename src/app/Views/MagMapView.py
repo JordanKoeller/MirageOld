@@ -9,7 +9,7 @@ from .View import CanvasView
 from .. import magmapUIFile
 from pyqtgraph.widgets.GradientWidget import GradientWidget
 from .Drawer.ShapeDrawer import drawSolidCircle_Gradient
-
+from .CompositeView import CompositeMagMap
 import numpy as np
 from pyqtgraph.graphicsItems.ROI import LineSegmentROI
 
@@ -29,7 +29,7 @@ class MagMapView(CanvasView):
         self._viewBox.invertY()
         self._imgItem = MagMapImageItem()
         self._viewBox.addItem(self._imgItem)
-        self.title = "MagMap Image"
+        # self.title = "MagMap Image"
         self.type = "MagMapView"
         self.radius = 5
         self._roi = None
@@ -88,6 +88,17 @@ class MagMapView(CanvasView):
     def update(self,args):
         self.setTracer(*args)
     
-    
+
+    def setBridge(self,bridge):
+        self._bridge = bridge
+
+    def bridgeTo(self,view):
+        if not self._bridge and not view._bridge:
+            CompositeMagMap(self,view)
+            # view.setBridge(self._bridge)
+        elif not self._bridge:
+            view._bridge.addView(self)
+        else:
+            self._bridge.addView(view)
         
     

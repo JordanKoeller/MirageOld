@@ -11,9 +11,10 @@ class View(GraphicsLayoutWidget):
         super(View, self).__init__()
         self.modelID = modelID
         self.type = ''
-        if title:
-            self.title = title
-        self.__enabled = True
+        self._bridge = None
+        # if title:
+        #     self.title = title
+        # self.__enabled = True
 
     @property
     def signal(self):
@@ -21,13 +22,21 @@ class View(GraphicsLayoutWidget):
 
     @property
     def enabled(self):
-        return self.__enabled
+        # print(self._bridge)
+        return self._bridge == None
 
-    def disableUpdates(self):
-        self.__enabled = False
+    @property
+    def title(self):
+        return self.modelID + " " + self.type
 
-    def enableUpdates(self):
-        self.__enabled = True
+    # def disableUpdates(self):
+    #     self.__enabled = False
+
+    # def enableUpdates(self):
+    #     self.__enabled = True
+
+    def bridgeTo(self,view):
+        self._bridge = bridge
 
 class ControllerView(View):
     """abstract view with methods to get user data out of the view."""
@@ -56,4 +65,21 @@ class CanvasView(View):
     def receiveSignal(self,*args):
         if self.enabled:
             self.update(*args)
- 
+
+class ViewBridge(object):
+    def __init__(self,*views):
+        self._views = []
+        self._dataBin = []
+        for view in views[::-1]:
+            self.addView(view)
+
+    def addView(self,view):
+        # if isinstance(view,self._DTYPE):
+        view.signal.connect(self.update)
+        view.setBridge(self)
+        # view.disableUpdates()
+        self._views.append(view)
+        # view.bridgeTo(self)
+
+    def update(self,data):
+        pass
