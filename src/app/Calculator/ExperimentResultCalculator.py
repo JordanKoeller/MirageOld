@@ -74,15 +74,15 @@ class ExperimentResultCalculator(object):
         special = ModelImpl.parameters.extras.desiredResults[index]
         start,finish = (special.pathStart,special.pathEnd)
         res = special.resolution
-        return ModelImpl.engine.makeLightCurve(start,finish,res)
+        return Model['default'].engine.makeLightCurve(start,finish,res)
         
     def __MAGMAP(self,index):
         special = ModelImpl.parameters.extras.desiredResults[index]
-        return ModelImpl.engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
+        return Model['default'].engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
 
     def __STARFIELD(self,index):
-        return ModelImpl.parameters.galaxy.stars 
+        return Model['defautl'].parameters.galaxy.stars 
 
     def __VIDEO(self):
         pass################################### MAY IMPLIMENT LATER

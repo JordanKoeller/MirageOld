@@ -5,13 +5,12 @@ Created on Jun 1, 2017
 '''
 
 from PyQt5 import QtCore
-
 from ...Calculator.ExperimentResultCalculator import ExperimentResultCalculator, varyTrial
-from app.Models import ModelImpl
+from app.Models import Model
 from ...Utility.NullSignal import NullSignal
+from ...Utility import asynchronous
 
-
-class QueueThread(QtCore.QThread):
+class QueueThread(object):
     '''
     classdocs
     '''
@@ -21,7 +20,7 @@ class QueueThread(QtCore.QThread):
         '''
         Constructor
         '''
-        QtCore.QThread.__init__(self)
+        # QtCore.QThread.__init__(self)
         self.signals = signals
 
     def bindExperiments(self,experiments,filemanager):
@@ -40,9 +39,13 @@ class QueueThread(QtCore.QThread):
                 self.signals['progressBar'].emit(expt+1)
                 self.signals['progressLabel'].emit("Processing trial "+str(expt+1) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
                 newP = varyTrial(params,expt+1) #NEED TO IMPLIMENT
-                ModelImpl.updateParameters(newP)
+                print("Done trial")
+                Model.updateModel('default',newP)
+                print("Done update")
                 data = exptRunner.runExperiment() #NEED TO IMPLIMENT
+                print("Done expt")
                 self.filemanager.sendTrial(data)
+                print("Finished Trial")
             self.filemanager.closeExperiment()
         self.filemanager.flush()
         self.filemanager.close()
