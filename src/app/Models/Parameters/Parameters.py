@@ -14,7 +14,7 @@ from ..Stellar.Quasar import Quasar
 
 from ...Calculator.InitialMassFunction import Evolved_IMF
 from ...Utility import Vector2D
-from ..ParametersError import ParametersError
+from ...Utility.ParametersError import ParametersError
 
 
 class Parameters(object):

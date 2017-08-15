@@ -39,6 +39,7 @@
        <addaction name="record_button"/>
        <addaction name="separator"/>
        <addaction name="shutdown"/>
+       <addaction name="actionExport"/>
       </widget>
       <widget class="QMenu" name="menuView">
        <property name="title">
@@ -260,6 +261,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+T</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>Export</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
  </widget>

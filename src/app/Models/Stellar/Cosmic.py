@@ -1,5 +1,5 @@
 from astropy.cosmology import WMAP7 as cosmo
-from ..ParametersError import ParametersError
+from ...Utility.ParametersError import ParametersError
 
 class Cosmic(object):
 	__redshift = 0.0

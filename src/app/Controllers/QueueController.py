@@ -15,7 +15,7 @@ from ..Models.Parameters.ExperimentParams import ExperimentParams
 from ..Models.Parameters.MagMapParameters import MagMapParameters
 from ..Models.Parameters.LightCurveParameters import LightCurveParameters
 from ..Models.Parameters.StarFieldData import StarFieldData
-from ..Models.ParametersError import ParametersError
+from ..Utility.ParametersError import ParametersError
 from app.Models import ModelImpl
 from ..Controllers.FileManagerImpl import TableFileWriter, TableFileReader
 from .ParametersController import ParametersController

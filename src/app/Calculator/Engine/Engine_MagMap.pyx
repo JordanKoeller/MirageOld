@@ -8,7 +8,7 @@ cdef class Engine_MagMap(Engine):
 	def __init__(self, parameters, magMapParameters, magMapArray):
 		Engine.__init__(self,parameters)
 		self.magMapParameters = magMapParameters
-		self.magMapArray = magMapArray
+		self.magMapArray = magMapArray.copy()
 		self.__internalEngine = None
 
 
@@ -36,6 +36,7 @@ cdef class Engine_MagMap(Engine):
 			retArr = np.ndarray(pixels.shape[0],dtype=np.float64)
 			for index in range(pixels.shape[0]):
 				value = self.magMapArray[int(round(pixels[index,0])),int(round(pixels[index,1]))]
+				value = -2.5*np.log10(value)
 				retArr[index] = value
 			return retArr
 

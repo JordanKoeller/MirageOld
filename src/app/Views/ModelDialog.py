@@ -10,6 +10,7 @@ from ..Models import Model
 from ..Controllers.FileManagerImpl import ModelFileReader
 from .. import lens_analysis as la
 from ..Models.MagnificationMapModel import MagnificationMapModel
+
 class ModelDialog(QDialog):
 	"""provides a dialog for editing the models associated with the 
 	simulator."""
@@ -55,7 +56,6 @@ class ModelDialog(QDialog):
 			name,success = QInputDialog.getText(self,"Add Model","Enter a name for the new model")
 			model = None
 			if success:
-				print(source)
 				if source == 1:
 					#Means from File
 					modelLoader = ModelFileReader()
@@ -65,10 +65,19 @@ class ModelDialog(QDialog):
 				elif source == 2:
 					#From a MagMap instance
 					modelLoader = la.load(None)
-					trialNum,success = QInputDialog.getInt(self,'Add Model', 'Specify which trial to select.',0,0,modelLoader.numTrials)
+					descString = 'Specify which trial to select. \n Choose -1 to load all in one view.'
+					trialNum,success = QInputDialog.getInt(self,'Add Model', descString,-1,-1,modelLoader.numTrials)
 					if success:
-						model = MagnificationMapModel(modelLoader[trialNum])
-						self._models[name] = model
+						if trialNum == -1:
+							for i in range(modelLoader.numTrials):
+								model = MagnificationMapModel(modelLoader[i])
+								model.modelID = name+'_'+str(i)
+								self._models[name+'_'+str(i)] = model
+							self._updateModelList()
+							return
+						else:
+							model = MagnificationMapModel(modelLoader[trialNum])
+							self._models[name] = model
 				elif source == 3:
 					#Means from scratch
 						model = Model.DefaultModel()

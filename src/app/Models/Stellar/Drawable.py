@@ -1,5 +1,5 @@
 from ...Utility import zeroVector
-from ..ParametersError import ParametersError
+from ...Utility.ParametersError import ParametersError
 
 class Drawable(object):
 	__position = zeroVector

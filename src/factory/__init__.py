@@ -18,3 +18,4 @@ def TableControllerFactory(tv,pv):
 
 def TracerController(view):
     return MagMapTracerController(view)
+

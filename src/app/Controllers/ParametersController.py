@@ -24,7 +24,7 @@ from astropy.coordinates import SkyCoord
 from astropy.coordinates import CartesianRepresentation
 import random
 from ..Utility import Vector2D
-from ..Models.ParametersError import ParametersError
+from ..Utility.ParametersError import ParametersError
 from .UserInputParser import UserInputParser
 
 class ParametersController(UserInputParser,GUIController):

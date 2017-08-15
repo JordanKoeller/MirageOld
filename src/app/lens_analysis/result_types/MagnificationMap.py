@@ -6,7 +6,7 @@ Created on Jul 23, 2017
 from ...Models.Parameters.MagMapParameters import MagMapParameters
 import numpy as np
 
-from ...Models.ParametersError import ParametersError
+from ...Utility.ParametersError import ParametersError
 from ...Utility.Vec2D import Vector2D
 
 

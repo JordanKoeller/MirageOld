@@ -143,7 +143,7 @@ class CurveExporter(Controller):
     
     def calculate(self, model,data):
         self._signal.emit(data)
-        
+
 class FrameExporter(Controller):
     def __init__(self,signal):
         Controller.__init__(self)
@@ -160,3 +160,15 @@ class MagMapTracerExporter(Controller):
 
     def calculate(self,model,data):
         self._signal.emit((model,data))
+
+from PyQt5 import QtCore
+class CurveFileExporter(QtCore.QObject,Controller):
+
+    signal = QtCore.pyqtSignal(object)
+
+    def __init__(self):
+        Controller.__init__(self)
+        QtCore.QObject.__init__(self)
+        
+    def calculate(self,model,data):
+        self.signal.emit({model.modelID : data})

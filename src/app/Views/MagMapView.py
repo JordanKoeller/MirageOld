@@ -47,8 +47,8 @@ class MagMapView(CanvasView):
         self._imgItem.setLookupTable(gradient,True)
         
     def setMagMap(self,img,baseMag):
-        self._imgStatic = img
-        self._imgItem.setImage(img)
+        self._imgStatic = img.copy()
+        self._imgItem.setImage(self._imgStatic)
         self.gradientWidget.restoreState(self._getCenteredGradient(baseMag))
         self._baseMag = int(baseMag)
                 

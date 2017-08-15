@@ -1,4 +1,4 @@
-from ..ParametersError import ParametersError
+from ...Utility.ParametersError import ParametersError
 
 class ShearLenser(object):
 	__mag = 0

@@ -6,6 +6,7 @@ from ..Views.LightCurvePlotView import LightCurvePlotView
 from ..Views.MagMapView import MagMapView
 from ..Models import Model
 from app.Preferences import GlobalPreferences
+from .CurveFileExporter import CurveFileExporter
 
 def ControllerFactory(viewers,*signals):
     masterController = AnimationController(*signals)
@@ -61,3 +62,36 @@ def ControllerFactory(viewers,*signals):
                 fetcher.addChild(processor)
                 processor.addChild(exporter)
     return masterController
+
+def LightCurveExporterFactory(views,startSignal):
+    views = filter(lambda view: isinstance(view,MagMapView) or isinstance(view,LightCurvePlotView),views)
+    filemanager = CurveFileExporter()
+    masterController = MasterController(startSignal)
+    masterController.filemanager = filemanager
+    modelView = {}
+    for view in views:
+        if view.modelID in Model:
+            if view.modelID in modelView:
+                modelView[view.modelID].append(view)
+            else:
+                modelView[view.modelID] = [view]
+    for model,views in modelView.items():
+        fetcher = None
+        for view in views:
+            if isinstance(view,MagMapView):
+                start = view.roiStartPos
+                end = view.roiEndPos
+                modelGetter = Delegates.MagMapLCGetter(model,start,end)
+                masterController.addChild(modelGetter)
+                fetcher = Delegates.LightCurveFetcherDelegate()
+                modelGetter.addChild(fetcher)
+                processor = Delegates.CurveDrawerDelegate()
+                exporter = Delegates.CurveFileExporter()
+                fetcher.addChild(processor)
+                processor.addChild(exporter)
+                filemanager.addSignal(exporter.signal)
+    return masterController
+
+def ExportFactory(views,startSignal):
+    return LightCurveExporterFactory(views,startSignal)
+

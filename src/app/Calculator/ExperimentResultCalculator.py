@@ -3,18 +3,12 @@ Created on Jun 6, 2017
 
 @author: jkoeller
 '''
-import math
-
-from app.Models import ModelImpl
-from ..Models.Parameters.ExperimentParams import ResultTypes
-from ..Utility import Vector2D
 import time
+
 import numpy as np
+
+from ..Utility.ParametersError import ParametersError
 from ..Utility.NullSignal import NullSignal
-from ..Models.Parameters.MagMapParameters import MagMapParameters
-from ..Models.Parameters.LightCurveParameters import LightCurveParameters
-from ..Models.ParametersError import ParametersError
-from ..Models.Parameters.StarFieldData import StarFieldData
 
 # from Controllers.QueueController import defaultVariance
 def defaultVariance(params,trialNo):
@@ -46,6 +40,9 @@ class ExperimentResultCalculator(object):
         '''
         Constructor
         '''
+        from ..Models.Parameters.MagMapParameters import MagMapParameters
+        from ..Models.Parameters.LightCurveParameters import LightCurveParameters
+        from ..Models.Parameters.StarFieldData import StarFieldData
         expTypes = parameters.extras.desiredResults
         self.signals = signals
         #Parse expTypes to functions to run.

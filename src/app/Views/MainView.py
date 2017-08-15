@@ -9,7 +9,7 @@ import factory
 from .. import mainUIFile
 from ..Utility import Vector2D
 from ..Utility.SignalRepo import SignalRepo
-from ..Controllers import ControllerFactory
+from ..Controllers import ControllerFactory, ExportFactory
 from .LensedImageView import LensedImageView
 from .LightCurvePlotView import LightCurvePlotView
 from .ParametersView import ParametersView
@@ -63,6 +63,7 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 		self.queueViewSelector.triggered.connect(self.showTableSetup)
 		self.tracerViewSelector.triggered.connect(self.showTracerSetup)
 		self.actionConfigure_Models.triggered.connect(self.openModelDialog)
+		self.actionExport.triggered.connect(self.exportLightCurves)
 
 		self.parent = parent
 		self.progressDialogSignal.connect(self.openDialog)
@@ -127,6 +128,14 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 			self.controller = ControllerFactory(self.canvasViews,self.playSignal,self.pauseSignal,self.resetSignal,self.deactivateSignal)
 			self.isPlaying = True
 			self.playSignal.emit()
+
+	def exportLightCurves(self):
+		for controllerView in self.modelControllers:
+			parameters = controllerView.buildObject()
+			if parameters:
+				Model.updateModel(controllerView.modelID,parameters)
+		controller = ExportFactory(self.canvasViews,self.playSignal)
+		self.playSignal.emit()
 
 	def _resetHelper(self):
 		self.isPlaying = False

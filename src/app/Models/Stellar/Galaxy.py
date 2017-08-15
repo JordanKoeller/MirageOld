@@ -6,7 +6,7 @@ from .Drawable import Drawable
 from .Cosmic import Cosmic
 from ...Views.Drawer.ShapeDrawer import drawPointLensers, drawSquare
 from ...Views.Drawer.ShapeDrawer import drawPointLensers, drawSquare
-from ..ParametersError import ParametersError
+from ...Utility.ParametersError import ParametersError
 from app.Models import ModelImpl
 from ...Calculator import Conversions
 
