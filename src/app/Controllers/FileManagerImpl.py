@@ -5,6 +5,7 @@ Created on Jul 28, 2017
 '''
 
 import pickle
+import json
 
 import imageio
 
@@ -48,17 +49,24 @@ class RecordingFileManager(FileWriter):
         self._writer.close()
 
 
-class ParametersFileManager(FileWriter):
+class ParametersFileManager(FileWriter,json.JSONEncoder):
     '''
     classdocs
     '''
 
-
-    def __init__(self):
+    def __init__(self,*args,**kwargs):
         '''
         Constructor
         '''
         FileWriter.__init__(self)
+        json.JSONEncoder.__init__(self,*args,**kwargs)
+
+    def default(self,o):
+        res = o.__dict__
+        res2 = {}
+        for k,v in res.items():
+            if isinstance(v,Vector2D):
+                res2[k] = {'value': }
         
     def open(self, filename=None):
         FileWriter.open(self, filename)
