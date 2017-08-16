@@ -1,9 +1,9 @@
 from multiprocessing import Process, Queue, Pipe
-from threading import Thread 
-from PyQt5.QtCore import QObject, QTimer
-
 import sys
+from threading import Thread 
 import time
+
+from PyQt5.QtCore import QObject, QTimer
 
 
 class Listener(Thread,QObject):

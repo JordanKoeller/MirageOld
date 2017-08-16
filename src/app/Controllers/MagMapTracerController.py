@@ -6,12 +6,11 @@
 # from .FileManagers.MediaFileManager import MediaFileManager
 # from .FileManagers.ParametersFileManager import ParametersFileManager
 from .GUIController import GUIController
-# from .Threads.MagMapTracerThread import MagMapTracerThread
 
+
+# from .Threads.MagMapTracerThread import MagMapTracerThread
 # from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce
 # from app.Utility.Vec2D import Vector2D
-
-
 # class MagMapTracerController(GUIController):
 #     '''
 #     classdocs
@@ -21,7 +20,6 @@ from .GUIController import GUIController
 #     tracer_updated = QtCore.pyqtSignal(str)
 #     run_done = QtCore.pyqtSignal(str)
 #     save_lightCurve = QtCore.pyqtSignal()
-
 #     def __init__(self, view,tracerView,trialName=None,trialNum=0):
 #         '''
 #         Constructor
@@ -50,12 +48,9 @@ from .GUIController import GUIController
 #         self.__initView()
 #         self.initialize(trialName,trialNum)
 #         self.animating = False
-
 #     def __initView(self):
 #         self.update_view_signal.connect(self.tracerView.updateAll)
 #         self.tracerView.hasUpdated.connect(self.fileManager.sendFrame)
-        
-        
 #     def togglePlaying(self):
 #         if self.playToggle:
 #             self.playToggle = False
@@ -63,38 +58,30 @@ from .GUIController import GUIController
 #         else:
 #             self.playToggle = True
 #             self.simImage()
-        
-
 #     def show(self):
 #         self.view.magTracerFrame.setHidden(False)
 #         self.view.regenerateStars.setEnabled(False)
 #         self.view.visualizationBox.setHidden(False)
 #         self.enabled = True
-        
 #     def hide(self):
 #         self.view.magTracerFrame.setHidden(True)
 #         self.view.regenerateStars.setEnabled(True)
 #         self.view.visualizationBox.setHidden(True)
 #         self.enabled = False
-        
 #     def drawQuasarHelper(self):
 #         """Interface for updating an animation in real time of whether or not to draw the physical location of the quasar to the screen as a guide."""
 #         self._showingQuasar = not self._showingQuasar
 #         ModelImpl.parameters.showQuasar = self._showingQuasar
-
 #     def drawGalaxyHelper(self):
 #         """
 #         Interface for updating an animation in real time of whether or not to draw the lensing galaxy's center of mass, along with any stars".
 #         """
 #         self._showingGalaxy = not self._showingGalaxy
 #         ModelImpl.parameters.showGalaxy = self._showingGalaxy
-        
-
 #     def simImage(self,recording=False):
 #         """
 #         Reads user input, updates the engine, and instructs the engine to begin
 #         calculating what the user desired.
-
 #         Called by default when the "Play" button is presssed.
 #         """
 #         if self.enabled:
@@ -117,7 +104,6 @@ from .GUIController import GUIController
 #                 y = np.array(y)
 #                 y = -2.5*np.log10(y)
 #                 self.tracerView._updateLightCurve(np.arange(0,len(y)),y)
-            
 #     def saveLightCurve(self):
 #         fname = 'filler'
 #         resolution = 1000
@@ -130,18 +116,14 @@ from .GUIController import GUIController
 #         xAxis = np.arange(0,diff,diff/resolution)
 #         sE = np.array([[start.x,start.y],[finish.x,finish.y]])
 #         np.savez(fname,xAxis = xAxis, yAxis = yAxis,startEnd = sE)
-        
-
 #     def record(self):
 #         """Calling this method will configure the system to save each frame of an animation, for compiling to a video that can be saved."""
 #         if self.enabled:
 #             self.simImage(recording=True)
-
 #     def pause(self):
 #         if self.enabled:
 #             self.playToggle = False
 #             self.thread.pause()
-
 #     def restart(self):
 #         """Returns the system to its t=0 configuration. If the system was configured to record, will automatically prompt the user for a file name,
 #         render and save the video."""
@@ -149,14 +131,11 @@ from .GUIController import GUIController
 #             self.playToggle = False
 #             self.thread.restart()
 #             self.fileManager.cancelRecording()
-            
 #     def writeMov(self):
 #         self.fileManager.write()
-            
 #     def sendOffFrame(self,filler):
 #         frame = self.tracerView.getFrame()
 #         self.fileManager.sendFrame(frame)
-        
 #     def initialize(self,fileName = None,trialNum=0):
 #         from .. import lens_analysis
 #         if fileName:
@@ -184,13 +163,10 @@ from .GUIController import GUIController
 #             array = np.asarray(magmap.convert('YCbCr'))[:,:,0]
 #             self.tracerView.setMagMap(array)
 #             ModelImpl.updateParameters(params)
-
-    
 #     def qPoslabel_slot(self, pos):
 #         pass
 # #         self.view.sourcePosLabel.setText(pos)
 # # 
-
 class MagMapTracerController(GUIController):
 
 

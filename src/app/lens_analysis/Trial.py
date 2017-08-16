@@ -7,18 +7,12 @@ Created on Jun 7, 2017
 import copy
 import math
 
-from astropy.io import fits
-
 
 import numpy as np
 
-from ..Calculator.ExperimentResultCalculator import varyTrial
-from ..Controllers.FileManagers.FITSFileManager import FITSFileManager
-from ..Controllers.FileManagers.ParametersFileManager import ParametersFileManager
-from ..Models.Parameters.LightCurveParameters import LightCurveParameters
-from ..Models.Parameters.MagMapParameters import MagMapParameters
-from ..Models.Parameters.StarFieldData import StarFieldData
-from ..Utility.NullSignal import NullSignal
+from ..Parameters import LightCurveParameters
+from ..Parameters import MagMapParameters
+from ..Parameters import StarFieldData
 from .AbstractFileWrapper import AbstractFileWrapper
 
 
@@ -52,11 +46,13 @@ class Trial(AbstractFileWrapper):
     
     @requiresDtype(MagMapParameters)
     def getFitsFile(self,ind,filename = None):
+        from ..Controllers.FileManagers.FITSFileManager import FITSFileManager
         arr = self._getDataSet(ind)
         if filename:
+            from astropy.io import fits
             fits.writeto(filename,arr)
         else:
-            saver = FITSFileManager(NullSignal)
+            saver = FITSFileManager()
             saver.write(arr)
         print("Magnification Map saved")
 
@@ -94,12 +90,12 @@ class Trial(AbstractFileWrapper):
         
     @requiresDtype(StarFieldData)
     def regenerateParameters(self,ind,filename=None):
+        from ..Controllers.FileManagers.ParametersFileManager import ParametersFileManager
         params = copy.deepcopy(self.parameters)
         stars = self.getStars()
-        print(stars)
         params.setStars(stars)
         if filename:
-            saver = ParametersFileManager(NullSignal)
+            saver = ParametersFileManager()
             saver.write(params)
             print("Parameters Saved")
         else:
@@ -113,7 +109,8 @@ class Trial(AbstractFileWrapper):
         return (magnifications,params)
         
     def saveParameters(self,filename=None):
-        saver = ParametersFileManager(NullSignal)
+        from ..Controllers.FileManagers.ParametersFileManager import ParametersFileManager
+        saver = ParametersFileManager()
         if filename:
             saver.write(copy.deepcopy(self.parameters),filename)
         else:
@@ -126,6 +123,7 @@ class Trial(AbstractFileWrapper):
 
     @property
     def parameters(self):
+        from ..Calculator.ExperimentResultCalculator import varyTrial
         params = varyTrial(self._params,self.trialNumber)
         return params 
 

@@ -1,29 +1,31 @@
 import sys
 
+from PyQt5 import QtCore, QtWidgets
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QProgressDialog, QInputDialog
-from PyQt5 import QtCore, QtWidgets
 
+from app.Models import Model
+import factory
 import factory
 
 from .. import mainUIFile
-from ..Utility import Vector2D
-from ..Utility.SignalRepo import SignalRepo
 from ..Controllers import ControllerFactory, ExportFactory
-from .LensedImageView import LensedImageView
-from .LightCurvePlotView import LightCurvePlotView
-from .ParametersView import ParametersView
-from .TableView import TableView
-from .MagMapView import MagMapView
-from .ViewLayout import ViewLayout
-from .ModelDialog import ModelDialog
-import factory
-from app.Models import Model
+from ..Controllers.FileManagerImpl import ParametersFileManager
 from ..Controllers.ParametersController import ParametersController
 from ..Controllers.QueueController import QueueController
-from ..Controllers.FileManagerImpl import ParametersFileManager
 from ..Models.MagnificationMapModel import MagnificationMapModel
-class MainView(QtWidgets.QMainWindow,SignalRepo):
+from ..Utility import Vector2D
+from ..Utility.SignalRepo import SignalRepo
+from .LensedImageView import LensedImageView
+from .LightCurvePlotView import LightCurvePlotView
+from .MagMapView import MagMapView
+from .ModelDialog import ModelDialog
+from .ParametersView import ParametersView
+from .TableView import TableView
+from .ViewLayout import ViewLayout
+
+
+class MainView(QtWidgets.QMainWindow, SignalRepo):
 	"""
 
 	"""
@@ -32,20 +34,20 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 	pauseSignal = QtCore.pyqtSignal()
 	resetSignal = QtCore.pyqtSignal()
 	deactivateSignal = QtCore.pyqtSignal()
-	progressDialogSignal = QtCore.pyqtSignal(int,int,str)
+	progressDialogSignal = QtCore.pyqtSignal(int, int, str)
 	progressLabelSignal = QtCore.pyqtSignal(str)
 
 	def __init__(self, parent=None):
 		super(MainView, self).__init__()
-		uic.loadUi(mainUIFile,self)
-		self.addSignals(progressLabel = self.progressLabelSignal,
-						play = self.playSignal,
-						pause = self.pauseSignal,
-						reset = self.resetSignal,
-						progressDialog = self.progressDialogSignal
+		uic.loadUi(mainUIFile, self)
+		self.addSignals(progressLabel=self.progressLabelSignal,
+						play=self.playSignal,
+						pause=self.pauseSignal,
+						reset=self.resetSignal,
+						progressDialog=self.progressDialogSignal
 						)
 
-		#Set up menubar interraction
+		# Set up menubar interraction
 		self.playPauseAction.triggered.connect(self._playPauseToggle)
 		self.resetAction.triggered.connect(self._resetHelper)
 		self.saveTableAction.triggered.connect(self.saveTable)
@@ -70,7 +72,7 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 		self.controller = None
 		self.modelControllers = []
 		self.isPlaying = False
-		self.layout = ViewLayout(None,None)
+		self.layout = ViewLayout(None, None)
 		self.layout.sigModelDestroyed.connect(self.removeModelController)
 		self.mainSplitter.addWidget(self.layout)
 		self.initVisCanvas()
@@ -96,21 +98,21 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 		paramController = self._findControllerHelper(ParametersController)
 
 
-	def _findControllerHelper(self,kind):
+	def _findControllerHelper(self, kind):
 		ret = []
 		for c in self.modelControllers:
-			if isinstance(c,kind):
+			if isinstance(c, kind):
 				ret.append(c)
 		if len(ret) == 1:
 			ret = ret[0]
 		elif len(ret) == 0:
 			ret = None
 		else:
-			model = QInputDialog.getItem(self,"Select Model",
+			model = QInputDialog.getItem(self, "Select Model",
 				"Please Select a Model to save.",
-				map(lambda i: i.modelID,filter(lambda v: isinstance(v,kind),self.modelControllers)))
+				map(lambda i: i.modelID, filter(lambda v: isinstance(v, kind), self.modelControllers)))
 			if model[1]:
-				ret = next(filter(lambda i:i.modelID == model[0],self.modelControllers))
+				ret = next(filter(lambda i:i.modelID == model[0], self.modelControllers))
 			else:
 				ret = None
 		return ret
@@ -121,11 +123,14 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 			self.pauseSignal.emit()
 			self.deactivateSignal.emit()
 		else:
+			print("Trying")
 			for controllerView in self.modelControllers:
+				print("Trying")
 				parameters = controllerView.buildObject()
 				if parameters:
-					Model.updateModel(controllerView.modelID,parameters)
-			self.controller = ControllerFactory(self.canvasViews,self.playSignal,self.pauseSignal,self.resetSignal,self.deactivateSignal)
+					print("Got cv")
+					Model.updateModel(controllerView.modelID, parameters)
+			self.controller = ControllerFactory(self.canvasViews, self.playSignal, self.pauseSignal, self.resetSignal, self.deactivateSignal)
 			self.isPlaying = True
 			self.playSignal.emit()
 
@@ -133,14 +138,14 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 		for controllerView in self.modelControllers:
 			parameters = controllerView.buildObject()
 			if parameters:
-				Model.updateModel(controllerView.modelID,parameters)
-		controller = ExportFactory(self.canvasViews,self.playSignal)
+				Model.updateModel(controllerView.modelID, parameters)
+		controller = ExportFactory(self.canvasViews, self.playSignal)
 		self.playSignal.emit()
 
 	def _resetHelper(self):
 		self.isPlaying = False
 		self.resetSignal.emit()
-		for id,model in Model.items():
+		for id, model in Model.items():
 			model.reset()
 
 	def initVisCanvas(self):
@@ -163,11 +168,11 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 		self.modelControllers.append(parametersController)
 		return parametersController
 
-	def addTablePane(self,parametersController=None):
+	def addTablePane(self, parametersController=None):
 		tv = TableView()
 		pc = parametersController or self.addParametersPane()
-		#Will need refactoring. TableControllerFactory is outdated
-		tableViewController = factory.TableControllerFactory(tv,pc)
+		# Will need refactoring. TableControllerFactory is outdated
+		tableViewController = factory.TableControllerFactory(tv, pc)
 		self.layout.addView(tv)
 		self.modelControllers.append(tableViewController)
 		
@@ -201,7 +206,7 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 		self.statusBar.addWidget(resetButton)
 		self.statusBar.addWidget(statusLabel)
 
-	def removeModelController(self,view):
+	def removeModelController(self, view):
 		removing = None
 		for c in self.modelControllers:
 			if c.view == view:
@@ -209,16 +214,16 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 		if removing:
 			self.modelControllers.remove(removing)
 
-	def updateModels(self,model):
-		# Model.replaceModel(model)
-		pc = filter(lambda i: isinstance(i,ParametersController),self.modelControllers)
+	def updateModels(self, model):
+# 		Model.replaceModel(model)
+		pc = filter(lambda i: isinstance(i, ParametersController), self.modelControllers)
 		for i in pc:
 			i.bindFields(Model[i.modelID].parameters)
-		for k,v in model.items():
-			if isinstance(v,MagnificationMapModel):
+		for k, v in model.items():
+			if isinstance(v, MagnificationMapModel):
 				for view in self.canvasViews:
-					if isinstance(view,MagMapView) and view.modelID == k:
-						view.setMagMap(v.magMapArray,8.0)
+					if isinstance(view, MagMapView) and view.modelID == k:
+						view.setMagMap(v.magMapArray, 8.0)
 
 
 
@@ -226,11 +231,11 @@ class MainView(QtWidgets.QMainWindow,SignalRepo):
 	def canvasViews(self):
 		return self.layout.canvasViews
 
-	def openDialog(self,minimum,maximum,message):
-		self.dialog = QProgressDialog(message,'Ok',minimum,maximum)
+	def openDialog(self, minimum, maximum, message):
+		self.dialog = QProgressDialog(message, 'Ok', minimum, maximum)
 		self.progressBar_signal.connect(self.dialog.setValue)
 
 	def openModelDialog(self):
-		dialog = ModelDialog(self.canvasViews+[i.view for i in self.modelControllers],self)
+		dialog = ModelDialog(self.canvasViews + [i.view for i in self.modelControllers], self)
 		dialog.show()
 		dialog.accepted.connect(lambda: self.updateModels(dialog.exportModel()))

@@ -1,8 +1,8 @@
 from PyQt5 import QtCore
-from pyqtgraph import LineSegmentROI
-from pyqtgraph.graphicsItems.ImageItem import ImageItem
 
 import numpy as np
+from pyqtgraph import LineSegmentROI
+from pyqtgraph.graphicsItems.ImageItem import ImageItem
 
 from ...Utility.NullSignal import NullSignal
 from ...Views.Drawer.ShapeDrawer import drawSolidCircle

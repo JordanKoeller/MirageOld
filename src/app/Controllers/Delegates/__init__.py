@@ -1,14 +1,17 @@
+from PyQt5 import QtCore
+
 from app.Models import Model
 from app.Preferences import GlobalPreferences
-from ...Utility.NullSignal import NullSignal
-from ...Views.Drawer.LensedImageDrawer import LensedImageDrawer
-from ..Controller import Controller
-from ...Views.Drawer.Drawer import PlotDrawer
-from ...Utility.Vec2D import Vector2D
-# from ...Utility.AsyncSignal import AsyncSignal
 import numpy as np
 
+from ...Utility.NullSignal import NullSignal
+from ...Utility.Vec2D import Vector2D
+from ...Views.Drawer.Drawer import PlotDrawer
+from ...Views.Drawer.LensedImageDrawer import LensedImageDrawer
+from ..Controller import Controller
 
+
+# from ...Utility.AsyncSignal import AsyncSignal
 # MODELQUESTIONERDELEGATES
 class ModelGetter(Controller):
     
@@ -161,7 +164,6 @@ class MagMapTracerExporter(Controller):
     def calculate(self,model,data):
         self._signal.emit((model,data))
 
-from PyQt5 import QtCore
 class CurveFileExporter(QtCore.QObject,Controller):
 
     signal = QtCore.pyqtSignal(object)

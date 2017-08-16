@@ -1,5 +1,4 @@
 
-from .. import lens_analysis as la
 from ..Calculator.Engine.Engine_MagMap import Engine_MagMap
 
 
@@ -26,10 +25,6 @@ class MagnificationMapModel(object):
 	@property
 	def magMapParameters(self):
 		return self._Engine.magMapParameters
-
-	@property
-	def trial(self):
-		return la.load(self.fileName)[trialNo]
 
 	@property
 	def engine(self):

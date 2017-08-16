@@ -1,9 +1,10 @@
-from .Vec2D import Vector2D, zeroVector
-from threading import Thread
-from multiprocessing import Process, Queue
-from .AsyncSignal import AsyncSignal, Listener
-
 import concurrent.futures
+from multiprocessing import Process, Queue
+from threading import Thread
+
+from .AsyncSignal import AsyncSignal, Listener
+from .Vec2D import Vector2D, zeroVector
+
 
 def asynchronous(fn):       
         def ret(*args,**kwargs):         

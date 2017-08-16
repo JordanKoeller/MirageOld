@@ -3,13 +3,15 @@ import copy
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QListWidgetItem, QInputDialog
 
-from .. import modeldialogUIFile
 from pyqtgraph.widgets.TableWidget import TableWidget
-from .ViewTable import ViewTable
-from ..Models import Model
-from ..Controllers.FileManagerImpl import ModelFileReader
+
 from .. import lens_analysis as la
+from .. import modeldialogUIFile
+from ..Controllers.FileManagerImpl import ModelFileReader
+from ..Models import Model
 from ..Models.MagnificationMapModel import MagnificationMapModel
+from .ViewTable import ViewTable
+
 
 class ModelDialog(QDialog):
 	"""provides a dialog for editing the models associated with the 

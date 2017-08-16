@@ -1,5 +1,7 @@
-from pyqtgraph.widgets.GraphicsLayoutWidget import GraphicsLayoutWidget
 from PyQt5 import QtCore
+
+from pyqtgraph.widgets.GraphicsLayoutWidget import GraphicsLayoutWidget
+
 
 class View(GraphicsLayoutWidget):
     """General view class that can be added to the program's layout.

@@ -6,15 +6,16 @@ Created on Jun 1, 2017
 
 
 
-from ..Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Grid
-# from ..Calculator.Engine.Engine_ShapeGrid import Engine_ShapeGrid as Engine_Grid
-from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brute
-# from Calculator.Engine.Engine_Grid import Engine_Grid as Engine_Grid
 from PyQt5 import QtGui
-from astropy import units as u
+
 import numpy as np
 
+from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brute
+from ..Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Grid
 
+
+# from ..Calculator.Engine.Engine_ShapeGrid import Engine_ShapeGrid as Engine_Grid
+# from Calculator.Engine.Engine_Grid import Engine_Grid as Engine_Grid
 class ModelImpl(object):
 
     __colormap = [QtGui.qRgb(0,0,0),QtGui.qRgb(255,255,0),QtGui.qRgb(255,255,255),QtGui.qRgb(50,101,255),QtGui.qRgb(244,191,66), QtGui.qRgb(53,252,92)]

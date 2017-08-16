@@ -1,6 +1,7 @@
 from .Engine cimport Engine
 import numpy as np
 
+
 cdef class Engine_MagMap(Engine):
 
 	cdef public object magMapParameters

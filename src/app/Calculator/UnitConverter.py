@@ -1,13 +1,14 @@
+import math
+
 from astropy import constants as const
 from astropy import units as u
 from astropy.cosmology import WMAP7 as cosmo
-import math
+
 
 # def generateSpecialUnits(qMass,qR,gR):
 #     rgUnit = u.def_unit('r_g',(1/angleRg.value)*u.rad)
 #     thetaEUnit = u.def_unit('theta_E',math.sqrt(thetaE.value)*u.rad)
 #     return [thetaEUnit,rgUnit]
-
 def _scaleFactor(qR,gR):
 	return (cosmo.angular_diameter_distance_z1z2(gR,qR)/cosmo.angular_diameter_distance(qR)/cosmo.angular_diameter_distance(gR)).to('1/m')
 

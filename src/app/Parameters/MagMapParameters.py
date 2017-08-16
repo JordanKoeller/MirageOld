@@ -1,5 +1,7 @@
 import numpy as np
-from ...Utility.Vec2D import Vector2D
+
+from ..Utility.Vec2D import Vector2D
+
 
 class MagMapParameters(object):
     
@@ -20,13 +22,13 @@ class MagMapParameters(object):
             return delta + self.center.to('rad')
     
     def angleToPixel(self,angle):
+        dTheta = self.dimensions.to('rad')/self.resolution
         if isinstance(angle, np.ndarray):
             angle[:,0] = (angle[:,0] - self.center.to('rad').x)/dTheta.x + self.resolution.x/2
             angle[:,1] = self.resolution.y/2 - (angle[:,1] - self.center.to('rad').y)/dTheta.y
             return np.array(angle,dtype=np.int)
         else:
             delta = angle - self.center.to('rad')
-            dTheta = self.dimensions.to('rad')/self.resolution
             pixel = (delta/dTheta).unitless()
             return Vector2D(int(pixel.x + self.resolution.x/2),int(self.resolution.y/2 - pixel.y))
     

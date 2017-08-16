@@ -1,7 +1,9 @@
 
-from pyqtgraph.graphicsItems.ImageItem import ImageItem
 from pyqtgraph import RectROI
+from pyqtgraph.graphicsItems.ImageItem import ImageItem
+
 from .View import CanvasView
+
 
 class LensedImageView(CanvasView):
 	"""docstring for LensedImageView"""

@@ -13,17 +13,18 @@ from astropy import constants as const
 from astropy import units as u
 from astropy.cosmology import WMAP7 as cosmo
 import cython
+from matplotlib.mlab import griddata
 import pyopencl.tools
 from scipy import interpolate
 
-from ...Utility import Vector2D
-from ...Utility import zeroVector
-# from ...Views.Drawer.Drawer import PlotDrawer
 import numpy as np
 import pyopencl as cl
-from matplotlib.mlab import griddata
+
+from ...Utility import Vector2D
+from ...Utility import zeroVector
 
 
+# from ...Views.Drawer.Drawer import PlotDrawer
 # from Models.Stellar.Galaxy import Galaxy
 # from Models.Parameters.Parameters import Parameters
 # from Models.Stellar.Quasar import Quasar

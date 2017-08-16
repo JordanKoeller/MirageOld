@@ -6,10 +6,11 @@ Created on Jun 5, 2017
 
 from PyQt5 import QtWidgets
 
-from .ParametersFileManager import ParametersFileManager
-from .FileManager import FileManager
 import numpy as np
+
 from ...Utility.NullSignal import NullSignal
+from .FileManager import FileManager
+from .ParametersFileManager import ParametersFileManager
 
 
 class QueueFileManager(FileManager):

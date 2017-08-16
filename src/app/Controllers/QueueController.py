@@ -6,20 +6,22 @@ Created on Jun 1, 2017
 
 from PyQt5 import QtCore
 
-from ..Calculator.ExperimentResultCalculator import varyTrial
-from .GUIController import GUIController
-from .FileManagers.QueueFileManager import QueueFileManager
-from .Threads.QueueThread import QueueThread
-from ..Views.ExperimentQueueTable import ExperimentQueueTable
-from ..Models.Parameters.ExperimentParams import ExperimentParams
-from ..Models.Parameters.MagMapParameters import MagMapParameters
-from ..Models.Parameters.LightCurveParameters import LightCurveParameters
-from ..Models.Parameters.StarFieldData import StarFieldData
-from ..Utility.ParametersError import ParametersError
 from app.Models import ModelImpl
+
+from ..Calculator.ExperimentResultCalculator import varyTrial
 from ..Controllers.FileManagerImpl import TableFileWriter, TableFileReader
+from app.Parameters import ExperimentParams
+from app.Parameters import LightCurveParameters
+from app.Parameters import MagMapParameters
+from app.Parameters import StarFieldData
+from ..Utility.ParametersError import ParametersError
+from ..Views.ExperimentQueueTable import ExperimentQueueTable
+from .FileManagers.QueueFileManager import QueueFileManager
+from .GUIController import GUIController
 from .ParametersController import ParametersController
+from .Threads.QueueThread import QueueThread
 from .UserInputParser import UserInputParser
+
 
 class QueueController(UserInputParser,GUIController):
     '''

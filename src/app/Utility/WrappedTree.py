@@ -1,5 +1,6 @@
 from scipy import spatial as sp
 
+
 class WrappedTree(object):
 	"Spatial Tree map data structure. Based on the Scipy spatial tree algorithms."
 	def __init__(self):

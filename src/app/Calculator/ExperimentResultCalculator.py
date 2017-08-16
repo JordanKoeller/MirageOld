@@ -7,8 +7,9 @@ import time
 
 import numpy as np
 
-from ..Utility.ParametersError import ParametersError
 from ..Utility.NullSignal import NullSignal
+from ..Utility.ParametersError import ParametersError
+
 
 # from Controllers.QueueController import defaultVariance
 def defaultVariance(params,trialNo):
@@ -40,9 +41,9 @@ class ExperimentResultCalculator(object):
         '''
         Constructor
         '''
-        from ..Models.Parameters.MagMapParameters import MagMapParameters
-        from ..Models.Parameters.LightCurveParameters import LightCurveParameters
-        from ..Models.Parameters.StarFieldData import StarFieldData
+        from app.Parameters import MagMapParameters
+        from app.Parameters import LightCurveParameters
+        from app.Parameters import StarFieldData
         expTypes = parameters.extras.desiredResults
         self.signals = signals
         #Parse expTypes to functions to run.

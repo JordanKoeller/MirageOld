@@ -6,14 +6,6 @@ Created on Jun 4, 2017
 from enum import Enum
 
 
-
-class ResultTypes(Enum):
-    LIGHT_CURVE = 1
-    MAGMAP = 2
-    STARFIELD = 3
-    NOTHING = -1
-#     VIDEO = 4
-
 class ExperimentParams(object):
     '''
     classdocs

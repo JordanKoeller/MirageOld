@@ -3,9 +3,11 @@ Created on Jul 25, 2017
 
 @author: jkoeller
 '''
-from .View import CanvasView
 from pyqtgraph.graphicsItems.PlotItem.PlotItem import PlotItem
+
 from .CompositeView import CompositePlot
+from .View import CanvasView
+
 
 class LightCurvePlotView(CanvasView):
     '''

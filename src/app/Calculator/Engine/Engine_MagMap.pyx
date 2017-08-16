@@ -1,6 +1,8 @@
 from .Engine cimport Engine
-from ...Utility.Vec2D import Vector2D
 import numpy as np
+
+from ...Utility.Vec2D import Vector2D
+
 
 cdef class Engine_MagMap(Engine):
 	"""Engine for querying an array of magnification map data. Allows for the same interface whether dealing with pre-generated

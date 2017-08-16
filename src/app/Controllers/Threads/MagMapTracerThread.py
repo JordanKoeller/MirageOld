@@ -1,13 +1,13 @@
-from PyQt5 import QtCore
-
-
-from ...Views.Drawer.CompositeDrawerFactory import MagTracerComposite
-from ...Utility.NullSignal import NullSignal
-from ...Utility.Vec2D import Vector2D
-from app.Models import ModelImpl
-import numpy as np
 import time
 
+from PyQt5 import QtCore
+
+from app.Models import ModelImpl
+import numpy as np
+
+from ...Utility.NullSignal import NullSignal
+from ...Utility.Vec2D import Vector2D
+from ...Views.Drawer.CompositeDrawerFactory import MagTracerComposite
 
 
 class MagMapTracerThread(QtCore.QThread):

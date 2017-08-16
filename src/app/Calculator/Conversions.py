@@ -1,7 +1,9 @@
 import numpy as np 
-from ..Utility.Vec2D import Vector2D
-# from ..Models import Model
 
+from ..Utility.Vec2D import Vector2D
+
+
+# from ..Models import Model
 def angleToPixel(angles,model):
     parameters = model.parameters
     canvasDim = parameters.canvasDim

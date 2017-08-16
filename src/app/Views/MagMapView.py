@@ -3,17 +3,18 @@ Created on Jul 25, 2017
 
 @author: jkoeller
 '''
-from pyqtgraph.graphicsItems.MagMapImageItem import MagMapImageItem
-
-from .View import CanvasView
-from .. import magmapUIFile
-from pyqtgraph.widgets.GradientWidget import GradientWidget
-from .Drawer.ShapeDrawer import drawSolidCircle_Gradient
-from .CompositeView import CompositeMagMap
-import numpy as np
-from pyqtgraph.graphicsItems.ROI import LineSegmentROI
-
 from PyQt5 import uic, QtCore
+
+import numpy as np
+from pyqtgraph.graphicsItems.MagMapImageItem import MagMapImageItem
+from pyqtgraph.graphicsItems.ROI import LineSegmentROI
+from pyqtgraph.widgets.GradientWidget import GradientWidget
+
+from .. import magmapUIFile
+from .CompositeView import CompositeMagMap
+from .Drawer.ShapeDrawer import drawSolidCircle_Gradient
+from .View import CanvasView
+
 
 class MagMapView(CanvasView):
     '''

@@ -6,6 +6,7 @@ from distutils.core import setup, Extension
 from Cython.Build import cythonize
 import numpy
 
+
 tree = Extension("Utility/SpatialTree_new", sources = ["Utility/SpatialTree_new.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries=["m"])
 grid = Extension("Utility/Grid", sources = ["Utility/Grid.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"])
 ptrgrid = Extension("Utility/PointerGrid", sources = ["Utility/PointerGrid.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"])

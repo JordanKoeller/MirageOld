@@ -3,6 +3,7 @@ from libc cimport math
 from libc.math cimport fabs
 import cython
 
+
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)
 cpdef void drawCircle(int x0, int y0, int r, np.ndarray[np.uint8_t, ndim=3] canvas, int color, object model):

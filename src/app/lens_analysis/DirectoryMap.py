@@ -4,11 +4,13 @@ Created on Jun 8, 2017
 @author: jkoeller
 '''
 
+import glob
+import os
+
 import numpy as np
 
-import os
 from .Experiment import Experiment
-import glob
+
 
 class DirectoryMap(object):
     '''

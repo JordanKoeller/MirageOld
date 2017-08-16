@@ -1,5 +1,6 @@
 from .FileManager import FileWriter
 
+
 class CurveFileExporter(FileWriter):
 	"""Accepts light curve data via the passed-in signal. Has two parameters:
 

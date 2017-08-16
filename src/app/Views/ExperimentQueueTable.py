@@ -4,8 +4,9 @@ Created on Jun 2, 2017
 @author: jkoeller
 '''
 
-from PyQt5.Qt import QPushButton
 from PyQt5 import QtCore
+from PyQt5.Qt import QPushButton
+
 from pyqtgraph.widgets.TableWidget import TableWidget
 
 from ..Utility.NullSignal import NullSignal

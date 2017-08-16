@@ -1,12 +1,14 @@
-from .AnimationController import AnimationController
-from .MasterController import MasterController
+from app.Preferences import GlobalPreferences
+
 from . import Delegates
+from ..Models import Model
 from ..Views.LensedImageView import LensedImageView
 from ..Views.LightCurvePlotView import LightCurvePlotView
 from ..Views.MagMapView import MagMapView
-from ..Models import Model
-from app.Preferences import GlobalPreferences
+from .AnimationController import AnimationController
 from .CurveFileExporter import CurveFileExporter
+from .MasterController import MasterController
+
 
 def ControllerFactory(viewers,*signals):
     masterController = AnimationController(*signals)

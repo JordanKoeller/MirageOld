@@ -1,5 +1,6 @@
 
 
+
 class UserInputParser(object):
 	"""Provides an interface for constructing and parsing objects specified by user input.
 
@@ -37,10 +38,10 @@ class UserInputParser(object):
 		the GUI messageBar, and None is returned. 
 
 		*args and **kwargs are passed onto this methods helper function"""
-		try:
-			return self._buildObjectHelper(*args,**kwargs)
-		except:
-			return None 
+# 		try:
+		return self._buildObjectHelper(*args,**kwargs)
+# 		except:
+# 			return None 
 
 	def bindFields(self,obj,*args,**kwargs):
 		"""Parses obj's attributes, and sets self.view's fields to reflect them.
@@ -51,21 +52,18 @@ class UserInputParser(object):
 		*args and **kwargs are passed onto this methods helper function"""
 		try:
 			return self._bindFieldsHelper(obj,*args,**kwargs)
-		except:
-			return None 
-
-        # except (AttributeError, ValueError) as e:
-        #     self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
-        #     print(str(e))
-        #     return None
-        # except ParametersError as e:
-        #     self.view.signals['progressLabel'].emit(e.value)
-        #     print(str(e))
-        #     return None
-        # except SyntaxError as e:
-        #     print(str(e))
-        #     self.view.signals['progressLabel'].emit("Syntax error found in trial variance code block.")
-        #     return None
+		except (AttributeError, ValueError) as e:
+			self.view.signals['progressLabel'].emit("Error. Input could not be parsed to numbers.")
+			print(str(e))
+			return None
+		except ParametersError as e:
+			self.view.signals['progressLabel'].emit(e.value)
+			print(str(e))
+			return None
+		except SyntaxError as e:
+			print(str(e))
+			self.view.signals['progressLabel'].emit("Syntax error found in trial variance code block.")
+			return None
 
 	def _buildObjectHelper(self,*args,**kwargs):
 		'''Abstract method to be overwritten with the code specifying how to build the object 

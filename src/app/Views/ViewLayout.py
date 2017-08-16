@@ -1,11 +1,15 @@
-from PyQt5.QtWidgets import QFrame, QVBoxLayout
 from PyQt5 import QtCore
+from PyQt5.QtWidgets import QFrame, QVBoxLayout
+
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea
-from .View import CanvasView, ControllerView
+
+from .CompositeView import CompositePlot, CompositeMagMap
 from .LightCurvePlotView import LightCurvePlotView
 from .MagMapView import MagMapView
-from .CompositeView import CompositePlot, CompositeMagMap
+from .View import CanvasView, ControllerView
+
+
 class ViewLayout(QFrame):
 
 

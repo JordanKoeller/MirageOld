@@ -1,9 +1,10 @@
-from ..Controllers.FileManagerImpl import ModelFileReader
-from .ModelImpl import ModelImpl
-from astropy.coordinates import SphericalRepresentation as SR
+
+
 import numpy as np 
-from astropy import units as u
-from .Parameters.Parameters import Parameters
+
+from .ModelImpl import ModelImpl
+from app.Parameters.Parameters import Parameters
+
 
 class __Model(dict):
     """Wrapper of a dict instance, with added functionality for global values like earthVelocity"""
@@ -11,14 +12,11 @@ class __Model(dict):
         dict.__init__(self)
         self.addModel('default',Parameters())
         
-    @property
-    def earthVelocity(self):
-        return SR(u.Quantity(265,'degree'),u.Quantity(48,'degree'),365)
-
     def addModel(self, modelID=None,parameters=None):
         if modelID and parameters:
             self[modelID] = ModelImpl(parameters)
         elif modelID:
+            from ..Controllers.FileManagerImpl import ModelFileReader
             paramLoader = ModelFileReader()
             paramLoader.open()
             parameters = paramLoader.load(modelID)

@@ -6,15 +6,16 @@ from astropy import constants as const
 from astropy import units as u 
 from astropy.cosmology import WMAP7 as cosmo
 from scipy.stats import norm
+
+from .ExperimentParams import ExperimentParams
 import numpy as np 
 import random as rand 
-from ..Stellar.Galaxy import Galaxy
-from ..Stellar.Quasar import Quasar
 
-
-from ...Calculator.InitialMassFunction import Evolved_IMF
-from ...Utility import Vector2D
-from ...Utility.ParametersError import ParametersError
+from ..Calculator.InitialMassFunction import Evolved_IMF
+from ..Utility import Vector2D
+from ..Utility.ParametersError import ParametersError
+from .Stellar import Galaxy
+from .Stellar import Quasar
 
 
 class Parameters(object):

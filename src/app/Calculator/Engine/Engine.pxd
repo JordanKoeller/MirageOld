@@ -14,9 +14,10 @@ import cython
 import pyopencl.tools
 from scipy import interpolate
 
+import pyopencl as cl
+
 from ...Utility import Vector2D
 from ...Utility import zeroVector
-import pyopencl as cl
 
 
 from libcpp.vector cimport vector

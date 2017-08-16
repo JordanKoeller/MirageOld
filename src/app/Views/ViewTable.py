@@ -1,6 +1,7 @@
 
-from pyqtgraph.widgets.TableWidget import TableWidget
 from PyQt5.Qt import QPushButton, QCheckBox, QTableWidget, QLabel
+
+from pyqtgraph.widgets.TableWidget import TableWidget
 
 
 class ViewTable(QTableWidget):

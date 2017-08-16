@@ -11,9 +11,9 @@ import imageio
 from app import Preferences
 from app.Utility import asynchronous
 
-from .FileManager import FileWriter, FileReader
 from ..Models.ModelImpl import ModelImpl
-from ..Models.Parameters.Parameters import Parameters
+from app.Parameters import Parameters
+from .FileManager import FileWriter, FileReader
 
 
 class RecordingFileManager(FileWriter):

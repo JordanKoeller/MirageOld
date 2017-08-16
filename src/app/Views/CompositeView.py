@@ -1,8 +1,8 @@
 from .View import CanvasView, ViewBridge
+
+
 # from .LightCurvePlotView import LightCurvePlotView
 # from .MagMapView import MagMapView
-
-
 class CompositePlot(ViewBridge):
 	"""View that holds other views inside. Using this enables merging of two plot views to display
 	both data sets on one coordinate plane."""

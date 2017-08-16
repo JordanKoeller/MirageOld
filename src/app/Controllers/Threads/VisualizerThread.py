@@ -4,9 +4,10 @@ import time
 from PyQt5 import QtCore
 
 from app.Models import ModelImpl
+
+from ...Utility.NullSignal import NullSignal
 from ...Views.Drawer import DataVisualizerDrawer
 from ...Views.Drawer.CompositeDrawerFactory import LensedImageLightCurveComposite
-from ...Utility.NullSignal import NullSignal
 
 
 # Form implementation generated from reading ui file 'mainwindow.ui'

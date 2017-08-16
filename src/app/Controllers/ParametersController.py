@@ -7,25 +7,26 @@ Created on May 31, 2017
 
 #Code associated with constructing/deconstructing an instance of a Parameters Class 
 import math
+import random
+import numpy as np 
 
 from PyQt5 import QtCore
+from astropy import constants as const
+from astropy.coordinates import CartesianRepresentation
+from astropy.coordinates import SkyCoord
 
-from .GUIController import GUIController
-from .FileManagers.ParametersFileManager import ParametersFileManager
-from ..Models.Stellar.Galaxy import Galaxy
-from ..Models.Parameters.Parameters import Parameters
-from ..Models.Stellar.Quasar import Quasar
 from app.Models import Model
 import astropy.units as u
-from astropy import constants as const
+
 from ..Calculator import UnitConverter
-from ..Views.GUI.HelpDialog import HelpDialog
-from astropy.coordinates import SkyCoord
-from astropy.coordinates import CartesianRepresentation
-import random
+from ..Parameters.Parameters import Parameters
+from ..Parameters.Stellar import Galaxy, Quasar, EarthVelocity
 from ..Utility import Vector2D
-from ..Utility.ParametersError import ParametersError
+from ..Views.GUI.HelpDialog import HelpDialog
+from .FileManagers.ParametersFileManager import ParametersFileManager
+from .GUIController import GUIController
 from .UserInputParser import UserInputParser
+
 
 class ParametersController(UserInputParser,GUIController):
     '''
@@ -131,7 +132,7 @@ class ParametersController(UserInputParser,GUIController):
         
 
     def getApparentVelocity(self,pos,v):
-        ev = Model.earthVelocity
+        ev = EarthVelocity
         apparentV = ev.to_cartesian() - v
         posInSky = pos.galactic
         phi,theta = (posInSky.l.to('rad').value,math.pi/2 - posInSky.b.to('rad').value)

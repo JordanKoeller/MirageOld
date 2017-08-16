@@ -1,7 +1,10 @@
 from PyQt5 import uic
+
 from .. import tableUIFile
-from .View import ControllerView
 from .ExperimentQueueTable import ExperimentQueueTable
+from .View import ControllerView
+
+
 class TableView(ControllerView):
 	"""Wraps a custom QtWidget to make a experiment table for setting up batch runs."""
 	def __init__(self,modelID='default',title='Table View'):
