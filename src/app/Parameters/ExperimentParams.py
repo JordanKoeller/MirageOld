@@ -4,8 +4,25 @@ Created on Jun 4, 2017
 @author: jkoeller
 '''
 from enum import Enum
+import json
 
 
+class ExperimentParamsJSONEncoder(object):
+    """docstring for ExperimentParamsJSONEncoder"""
+    def __init__(self):
+        super(ExperimentParamsJSONEncoder, self).__init__()
+        
+    def encode(self,o):
+        if isinstance(o,ExperimentParams):
+            res = {}
+            res['name'] = o.name
+            res['description'] = o.description
+            res['numTrials'] = o.numTrials
+            res['trialVariance'] = str(o.trialVariance)
+            res['resultList'] = map(lambda i:i.jsonString,o.desiredResults)
+            return res
+        else:
+            raise TypeError("Attribute o must be of type ExperimentParams")
 class ExperimentParams(object):
     '''
     classdocs
@@ -37,6 +54,11 @@ class ExperimentParams(object):
     @property
     def desc(self):
         return self.description
+
+    @property
+    def jsonString(self):
+        encoder = ExperimentParamsJSONEncoder()
+        return encoder.encode(self)
         
     def __str__(self):
         string =  "Name = "+self.name+"\nDescription = "+self.desc+"\nNumber of Trials = "+str(self.numTrials)+"\n"

@@ -49,7 +49,7 @@ class RecordingFileManager(FileWriter):
         self._writer.close()
 
 
-class ParametersFileManager(FileWriter,json.JSONEncoder):
+class ParametersFileManager(FileWriter):
     '''
     classdocs
     '''
@@ -59,22 +59,15 @@ class ParametersFileManager(FileWriter,json.JSONEncoder):
         Constructor
         '''
         FileWriter.__init__(self)
-        json.JSONEncoder.__init__(self,*args,**kwargs)
+        object.__init__(self,*args,**kwargs)
 
-    def default(self,o):
-        res = o.__dict__
-        res2 = {}
-        for k,v in res.items():
-            if isinstance(v,Vector2D):
-                res2[k] = {'value': }
-        
     def open(self, filename=None):
         FileWriter.open(self, filename)
         if self._filename:
-            self._file = open(self._filename,'wb+')
+            self._file = open(self._filename,'w+')
         
     def write(self, data):
-        pickle.dump(data,self._file)
+        self._file.write(data.jsonString)
 
     def close(self):
         self._file.close()

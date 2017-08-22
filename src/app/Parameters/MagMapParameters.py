@@ -1,7 +1,21 @@
 import numpy as np
 
 from ..Utility.Vec2D import Vector2D
+import json
 
+class MagMapJSONEncoder(object):
+    """docstring for MagMapJSONEncoder"""
+    def __init__(self):
+        super(MagMapJSONEncoder, self).__init__()
+    def encode(self,o):
+        if isinstance(o, MagMapParameters):
+            res = {}
+            res['center'] = o.center.jsonString
+            res['dimensions'] = o.dimensions.jsonString
+            res['resolution'] = o.resolution.jsonString
+            return res
+        else:
+            raise TypeError("Argument o must be of type MagMapParameters.")
 
 class MagMapParameters(object):
     
@@ -36,6 +50,11 @@ class MagMapParameters(object):
     def keyword(self):
         return "magmap"
         
+    @property
+    def jsonString(self):
+        encoder = MagMapJSONEncoder()
+        return encoder.encode(self)
+
         
         
     def __str__(self):

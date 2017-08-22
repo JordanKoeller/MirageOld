@@ -8,6 +8,10 @@ class StarFieldData(object):
 	@property
 	def keyword(self):
 		return "starfield"
+
+	@property
+	def jsonString(self):
+		return '[]'
 		
 	def __str__(self):
 		return ""

@@ -1,6 +1,7 @@
 from __future__ import division
 
 import math
+import json
 
 from astropy import constants as const
 from astropy import units as u 
@@ -16,6 +17,29 @@ from ..Utility import Vector2D
 from ..Utility.ParametersError import ParametersError
 from .Stellar import Galaxy
 from .Stellar import Quasar
+from ..Utility.QuantityJSONEncoder import QuantityJSONEncoder
+
+
+class ParametersJSONEncoder(object):
+	"""docstring for ParametersJSONEncoder"""
+	def __init__(self):
+		super(ParametersJSONEncoder, self).__init__()
+	
+	def encode(self,o):
+		if isinstance(o,Parameters):
+			res = {}
+			quantEncoder = QuantityJSONEncoder()
+			res['galaxy'] = o.galaxy.jsonString
+			res['quasar'] = o.quasar.jsonString
+			res['canvasDim'] = o.canvasDim
+			res['dTheta'] = quantEncoder.encode(o.dTheta)
+			if o.extras is None:
+				res['extraParameters'] = None
+			else:
+				res['extraParameters'] = o.extras.jsonString
+			return res
+		else:
+			raise TypeError("Argument o must be of type Parameters.")
 
 
 class Parameters(object):
@@ -366,6 +390,10 @@ class Quasar:<br>
 			return False
 		return True
 
+	@property
+	def jsonString(self):
+		encoder = ParametersJSONEncoder()
+		return encoder.encode(self)
 
 	def __eq__(self,other):
 		if not self.isSimilar(other):
@@ -381,5 +409,4 @@ class Quasar:<br>
 
 	def __str__(self):
 		return ("\nPARAMETERS:\ndTheta = " + str(self.dTheta)) + ("\ncanvasDim = " + str(self.canvasDim)) + "\n" + str(self.quasar) + str (self.galaxy) + ("\ndLS = "+ str(self.dLS)) + ("\nEinstein Radius = " + str(self.einsteinRadius) + "\n\nEXTRAS:\n"+str(self.extras))
-	
 	

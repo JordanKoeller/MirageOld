@@ -1,5 +1,5 @@
 import math
-
+import json
 from astropy import units as u
 from astropy.coordinates import SphericalRepresentation as SR
 from astropy.cosmology import WMAP7 as cosmo
@@ -8,9 +8,57 @@ from ...Calculator import Conversions
 from ...Utility.ParametersError import ParametersError
 from ...Utility.Vec2D import zeroVector, Vector2D
 from ...Views.Drawer.ShapeDrawer import drawPointLensers, drawCircle, drawSolidCircle, drawSquare
-
+from ...Utility.QuantityJSONEncoder import QuantityJSONEncoder
 EarthVelocity = SR(u.Quantity(265,'degree'),u.Quantity(48,'degree'),365)
 
+class GalaxyJSONEncoder(object):
+	"""
+	Provides a way to convert a Galaxy class instance into a json representation."""
+	def __init__(self):
+		super(GalaxyJSONEncoder, self).__init__()
+
+
+	def encode(self,o):
+		if isinstance(o,Galaxy):
+			quantDecoder = QuantityJSONEncoder()
+			res = {}
+			res['position'] = o.center.jsonString
+			res['velocityDispersion'] = quantDecoder.encode(o.velocityDispersion)
+			res['redshift'] = o.redshift
+			res['shearAngle'] = quantDecoder.encode(o.shearAngle)
+			res['shearMag'] = o.shearMag
+			m,x,y = o.starArray
+			res['starMasses'] = m
+			res['starXPos'] = x 
+			res['starYPos'] = y 
+			res['velocity'] = quantDecoder.encode(o.velocity)
+			res['pcntStars'] = o.percentStars
+			res['skyCoords'] = o.skyCoords #WILL NEED HELP HERE
+			res['colorKey'] = o.colorKey
+			res['avgStarMass'] = o.averageStarMass
+			return res
+		else:
+			raise TypeError("parameter o must be Galaxy instance.")
+
+class QuasarJSONEncoder(object):
+	"""Provides a way to convert a Quasar class instance into a json representation."""
+	def __init__(self):
+		super(QuasarJSONEncoder, self).__init__()
+	
+	def encode(self,o):
+		if isinstance(o,Quasar):
+			quantDecoder = QuantityJSONEncoder()
+			res = {}
+			res['position'] = o.position.jsonString
+			res['mass'] = quantDecoder.encode(o.mass)
+			res['velocity'] = o.velocity.jsonString
+			res['observedPosition'] = o.observedPosition.jsonString
+			res['radius'] = quantDecoder.encode(o.radius)
+			res['redshift'] = o.redshift
+			res['colorKey'] = o.colorKey
+			return res
+		else:
+			raise TypeError("parameter o must be a Quasar instance.")
 
 class Cosmic(object):
 	__redshift = 0.0
@@ -219,6 +267,11 @@ class Quasar(Movable,Cosmic):
 	def mass(self):
 		return self.__mass
 
+	@property
+	def jsonString(self):
+		encoder = QuasarJSONEncoder()
+		return encoder.encode(self)
+
 			
 	def __str__(self):
 		return "QUASAR:\n" + self.cosmicString() + "\n" + self.drawableString() + "\nvelocity = " + str(self.velocity) + "\nradius = " + str(self.radius) + "\n\n"
@@ -412,6 +465,12 @@ class Galaxy(Drawable, Cosmic):
 		capPhi = rCart.y*math.cos(phi)-rCart.x*math.sin(phi)
 		return Vector2D(capTheta,capPhi,'km/s')
 
+	@property
+	def jsonString(self):
+		encoder = GalaxyJSONEncoder()
+		return encoder.encode(self)
+
+
 
 defaultGalaxy = Galaxy(redshift=0.0073,
 	velocityDispersion=u.Quantity(1500, "km/s"),
@@ -432,3 +491,8 @@ microQuasar = Quasar(redshift = 0.073,
 	position = Vector2D(0,0,"rad"),
 	radius = u.Quantity(1.7037e-6,"rad"),
 	velocity = Vector2D(1.59016e-8,0,"km/s"))
+
+
+
+####### JSON Encoders ########
+

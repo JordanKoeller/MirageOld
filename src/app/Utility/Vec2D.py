@@ -4,10 +4,27 @@ Created on Jun 8, 2017
 @author: jkoeller
 '''
 
-from builtins import property
 import math
 
 from astropy import units as u
+
+import json
+
+class Vector2DJSONEncoder(object):
+    '''Inherits from JSONEncoder, allows for creating a json instance of a Vector2D instance. '''
+
+    def __init__(self):
+        object.__init__(self)
+
+    def encode(self, o):
+        print(o)
+        # if isinstance(o, Vector2D):
+        x = o.x
+        y = o.y
+        unit = o.unit.to_string()
+        return {"x":x,"y":y,"unit":unit}
+        # else:
+        #     raise TypeError("Argument o must be a Vector2D instance")
 
 
 class Vector2D(object):
@@ -131,13 +148,17 @@ class Vector2D(object):
     def asString(self):
         return "("+str(self.x)+","+str(self.y)+")"
 
+    @property
+    def jsonString(self):
+        encoder = Vector2DJSONEncoder()
+        return encoder.encode(self)
+
     def __str__(self):
         "Pretty print"
         if self.unit != None:
             return "("+str(self.__round_to_n(self.x))+","+str(self.__round_to_n(self.y))+" " +str(self.unit) + ")"
         else:
             return "("+str(self.__round_to_n(self.x))+","+str(self.__round_to_n(self.y))+")"
-
 
 
 zeroVector = Vector2D(0.0,0.0,None)
