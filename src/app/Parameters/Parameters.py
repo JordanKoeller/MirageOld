@@ -15,9 +15,8 @@ import random as rand
 from ..Calculator.InitialMassFunction import Evolved_IMF
 from ..Utility import Vector2D
 from ..Utility.ParametersError import ParametersError
-from .Stellar import Galaxy
-from .Stellar import Quasar
-from ..Utility.QuantityJSONEncoder import QuantityJSONEncoder
+from .Stellar import Galaxy, Quasar, GalaxyJSONDecoder, QuasarJSONDecoder
+from ..Utility.QuantityJSONEncoder import QuantityJSONEncoder, QuantityJSONDecoder
 
 
 class ParametersJSONEncoder(object):
@@ -41,6 +40,20 @@ class ParametersJSONEncoder(object):
 		else:
 			raise TypeError("Argument o must be of type Parameters.")
 
+class ParametersJSONDecoder(object):
+	"""docstring for ParametersJSONDecoder"""
+	def __init__(self):
+		super(ParametersJSONDecoder, self).__init__()
+		
+	def decode(self,js):
+		gd = GalaxyJSONDecoder()
+		qd = QuasarJSONDecoder()
+		qDecode = QuantityJSONDecoder()
+		galaxy = gd.decode(js['galaxy'])
+		quasar = qd.decode(js['quasar'])
+		canvasDim = js['canvasDim']
+		dTheta = qDecode.decode(js['dTheta'])
+		return Parameters(galaxy,quasar,dTheta,canvasDim)
 
 class Parameters(object):
 	"""
@@ -143,7 +156,7 @@ class Quasar:<br>
 		pixelRadius(dTheta):Numeric<br>
 			given a measurement of angle per pixel, return the radius of the quasar in pixels.<br>
 
-		
+		super(ParametersJSONDecoder, self).__init__()
 	"""
 		
 	def __init__(self, galaxy = Galaxy(), quasar = Quasar(), dTheta = u.Quantity(600/800,'arcsec'), canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0):

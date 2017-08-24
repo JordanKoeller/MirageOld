@@ -5,15 +5,13 @@ Created on Jul 28, 2017
 '''
 
 import pickle
-import json
-
 import imageio
 
 from app import Preferences
 from app.Utility import asynchronous
 
 from ..Models.ModelImpl import ModelImpl
-from app.Parameters import Parameters
+from ..Parameters import Parameters
 from .FileManager import FileWriter, FileReader
 
 
@@ -75,7 +73,25 @@ class ParametersFileManager(FileWriter):
         
     @property
     def _fileextension(self):
-        return '.params'
+        return '.param'
+
+class ParametersFileReader(FileReader):
+
+    def __init__(self,*args,**kwargs):
+        FileReader.__init__(self,*args,**kwargs)
+
+    def open(self, filename=None):
+        FileReader.open(self,filename)
+
+    def load(self):
+        self._filename = self._filename or self.open()
+        import json
+        from ..Parameters.Parameters import ParametersJSONDecoder
+        self._file = open(self._filename)
+        model = json.load(self._file)
+        decoder = ParametersJSONDecoder()
+        model = decoder.decode(model)
+        return model
     
 
 class TableFileWriter(FileWriter):
@@ -126,12 +142,14 @@ class ModelFileReader(FileReader):
 
     def load(self,filename=None,*args,**kwargs):
         if self._filename:
-            self._file = open(self._filename,'rb+')
-            model = pickle.load(self._file)
-            if isinstance(model,Parameters):
+            import json
+            from ..Parameters.Parameters import ParametersJSONDecoder
+            self._file = open(self._filename)
+            model = json.load(self._file)
+            decoder = ParametersJSONDecoder()
+            model = decoder.decode(model)
+            if model:
                 model = ModelImpl(model)
-            elif isinstance(model,ModelImpl):
-                pass
             else:
                 raise IOError("Specified file does not contain a model.")
             return model

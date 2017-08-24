@@ -66,6 +66,7 @@ class ModelDialog(QDialog):
 					if not model: return
 				elif source == 2:
 					#From a MagMap instance
+					
 					modelLoader = la.load(None)
 					descString = 'Specify which trial to select. \n Choose -1 to load all in one view.'
 					trialNum,success = QInputDialog.getInt(self,'Add Model', descString,-1,-1,modelLoader.numTrials)

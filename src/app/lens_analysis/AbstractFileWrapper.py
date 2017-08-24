@@ -20,14 +20,14 @@ class AbstractFileWrapper(object):
         '''
         self._filepath = filepath
         if not fileobject:
-            self._fileobject = open(filepath, 'rb')
+            self._fileobject = open(filepath)
         else:
             self._fileobject = fileobject
         if not params:
-            try:
-                self._params = pickle.load(self._fileobject)
-            except ImportError:
-                self._params = pickle.load(self._fileobject)
+            from ..Controllers.FileManagerImpl import ParametersFileReader
+            paramLoader = ParametersFileReader()
+            paramLoader.open(self._filepath)
+            self._params = paramLoader.load()
         else:
             self._params = params
         if lookuptable == []:

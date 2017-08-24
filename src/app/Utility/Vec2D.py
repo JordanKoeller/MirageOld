@@ -26,6 +26,14 @@ class Vector2DJSONEncoder(object):
         # else:
         #     raise TypeError("Argument o must be a Vector2D instance")
 
+class Vector2DJSONDecoder(object):
+    """docstring for Vector2DJSONDecoder"""
+    def __init__(self):
+        super(Vector2DJSONDecoder, self).__init__()
+        
+    def decode(self,json):
+        return Vector2D(json['x'],json['y'],json['unit'])
+
 
 class Vector2D(object):
     '''

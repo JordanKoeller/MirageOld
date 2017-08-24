@@ -2,14 +2,6 @@
 
 import sys
 
-
-# from ..Controllers.FileManagers import QueueFileManager
-# from ..Controllers.FileManagers.TableFileManager import TableFileManager
-# from ..Controllers.Threads.QueueThread import QueueThread
-# from ..Models.Parameters.ExperimentParams import ResultTypes
-# from ..Models.Parameters.Parameters import Parameters
-# from ..Utility.NullSignal import NullSignal
-# from ..Views.GUI.GUIManager import GUIManager
 from .AbstractFileWrapper import AbstractFileWrapper
 from .DirectoryMap import DirectoryMap
 from .Experiment import Experiment
@@ -17,12 +9,17 @@ from .Trial import Trial
 
 
 def load(filename='Untitled.dat'):
-    lngth = len(filename)
-    if filename[lngth-4::] == '.dat':
-        return Experiment(filename)
+    if filename is None:
+        from PyQt5 import QtWidgets
+        filename = QtWidgets.QFileDialog.getOpenFileName(filter='*.dat')[0]
+    if filename:
+        lngth = len(filename)
+        if filename[lngth-4::] == '.dat':
+            return Experiment(filename)
+        else:
+            return DirectoryMap(filename)
     else:
-        return DirectoryMap(filename)
-
+        return None
 def describe(filename):
     if isinstance(filename, str):
         tmp = load(filename)

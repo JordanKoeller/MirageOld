@@ -15,3 +15,11 @@ class QuantityJSONEncoder(object):
 			return res
 		else:
 			raise TypeError("Argument o must be an astropy.units.Quantity instance")
+
+class QuantityJSONDecoder(object):
+
+	def __init__(self):
+		pass
+
+	def decode(self,js):
+		return u.Quantity(js['value'],js['unit'])
