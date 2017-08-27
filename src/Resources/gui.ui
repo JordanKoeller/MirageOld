@@ -131,6 +131,9 @@
     </property>
    </action>
    <action name="record_button">
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
     <property name="text">
      <string>Record</string>
     </property>

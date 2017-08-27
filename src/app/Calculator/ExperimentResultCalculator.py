@@ -9,11 +9,11 @@ import numpy as np
 
 from ..Utility.NullSignal import NullSignal
 from ..Utility.ParametersError import ParametersError
+from ..Models import Model
 
-
-# from Controllers.QueueController import defaultVariance
-def defaultVariance(params,trialNo):
-    print("Defaulting")
+# from Controllers.QueueController import exptModelVariance
+def exptModelVariance(params,trialNo):
+    print("exptModeling")
     return params
 
 def varyTrial(params,trialNo):
@@ -41,9 +41,7 @@ class ExperimentResultCalculator(object):
         '''
         Constructor
         '''
-        from app.Parameters import MagMapParameters
-        from app.Parameters import LightCurveParameters
-        from app.Parameters import StarFieldData
+        from app.Parameters.ExperimentParams import MagMapParameters, LightCurveParameters, StarFieldData
         expTypes = parameters.extras.desiredResults
         self.signals = signals
         #Parse expTypes to functions to run.
@@ -69,18 +67,19 @@ class ExperimentResultCalculator(object):
 
     
     def __LIGHT_CURVE(self,index):
-        special = ModelImpl.parameters.extras.desiredResults[index]
+        special = Model['exptModel'].parameters.extras.desiredResults[index]
         start,finish = (special.pathStart,special.pathEnd)
         res = special.resolution
-        return Model['default'].engine.makeLightCurve(start,finish,res)
+        return Model['exptModel'].engine.makeLightCurve(start,finish,res)
         
     def __MAGMAP(self,index):
-        special = ModelImpl.parameters.extras.desiredResults[index]
-        return Model['default'].engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
+        special = Model['exptModel'].parameters.extras.desiredResults[index]
+        ret = Model['exptModel'].engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
+        return ret
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
 
     def __STARFIELD(self,index):
-        return Model['defautl'].parameters.galaxy.stars 
+        return Model['exptModel'].parameters.galaxy.stars 
 
     def __VIDEO(self):
         pass################################### MAY IMPLIMENT LATER

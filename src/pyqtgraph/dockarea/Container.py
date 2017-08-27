@@ -273,5 +273,8 @@ class TContainer(Container, QtGui.QWidget):
     def stackChildEvent(self, ev):
         QtGui.QStackedWidget.childEvent(self.stack, ev)
         Container.childEvent(self, ev)
+
         
 from . import Dock
+
+

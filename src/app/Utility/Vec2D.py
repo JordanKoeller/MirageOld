@@ -17,14 +17,13 @@ class Vector2DJSONEncoder(object):
         object.__init__(self)
 
     def encode(self, o):
-        print(o)
-        # if isinstance(o, Vector2D):
-        x = o.x
-        y = o.y
-        unit = o.unit.to_string()
-        return {"x":x,"y":y,"unit":unit}
-        # else:
-        #     raise TypeError("Argument o must be a Vector2D instance")
+        if isinstance(o, Vector2D):
+            x = o.x
+            y = o.y
+            unit = o.unit.to_string()
+            return {"x":x,"y":y,"unit":unit}
+        else:
+            raise TypeError("Argument o must be a Vector2D instance")
 
 class Vector2DJSONDecoder(object):
     """docstring for Vector2DJSONDecoder"""

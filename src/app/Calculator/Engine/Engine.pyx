@@ -372,7 +372,6 @@ cdef class Engine:
 		cdef double y0 = start.to('rad').y+dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
-		print("Making mag map")
 		for i in prange(0,resx,nogil=True,schedule='guided',num_threads=self.core_count):
 			if i % 10 == 0:
 				with gil:
@@ -415,21 +414,17 @@ cdef class Engine:
 		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
 		if self.__parameters is None:
 			self.__parameters = parameters
-			print("Not similar")
 			if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
-				print("Found None, Making stars")
 				self.__parameters.regenerateStars()
 			if autoRecalculate:
 				self.reconfigure()
 			else:
 				self.needsReconfiguring = True
 		elif not self.__parameters.isSimilar(parameters):
-			print("Not similar")
 			self.__parameters.update(canvasDim = parameters.canvasDim)
 			if self.__parameters.isSimilar(parameters):
 				self.__parameters = parameters
 				if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
-					print("Not similar so regenerating stars")
 					self.__parameters.regenerateStars()
 			else:
 				self.__parameters = parameters
@@ -438,6 +433,5 @@ cdef class Engine:
 			else:
 				self.needsReconfiguring = True
 		else:
-			print("No need to recalulate anything")
 			parameters.setStars(self.__parameters.stars)
 			self.__parameters = parameters

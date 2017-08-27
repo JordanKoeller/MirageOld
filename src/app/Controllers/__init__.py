@@ -1,16 +1,16 @@
-from app.Preferences import GlobalPreferences
-
-from . import Delegates
-from ..Models import Model
-from ..Views.LensedImageView import LensedImageView
-from ..Views.LightCurvePlotView import LightCurvePlotView
-from ..Views.MagMapView import MagMapView
-from .AnimationController import AnimationController
-from .CurveFileExporter import CurveFileExporter
-from .MasterController import MasterController
 
 
 def ControllerFactory(viewers,*signals):
+    from app.Preferences import GlobalPreferences
+    
+    from . import Delegates
+    from ..Models import Model
+    from ..Views.LensedImageView import LensedImageView
+    from ..Views.LightCurvePlotView import LightCurvePlotView
+    from ..Views.MagMapView import MagMapView
+    from .AnimationController import AnimationController
+    from .CurveFileExporter import CurveFileExporter
+    from .MasterController import MasterController
     masterController = AnimationController(*signals)
     noImgView = True
     for view in viewers:
@@ -66,6 +66,16 @@ def ControllerFactory(viewers,*signals):
     return masterController
 
 def LightCurveExporterFactory(views,startSignal):
+    from app.Preferences import GlobalPreferences
+    
+    from . import Delegates
+    from ..Models import Model
+    from ..Views.LensedImageView import LensedImageView
+    from ..Views.LightCurvePlotView import LightCurvePlotView
+    from ..Views.MagMapView import MagMapView
+    from .AnimationController import AnimationController
+    from .CurveFileExporter import CurveFileExporter
+    from .MasterController import MasterController
     views = filter(lambda view: isinstance(view,MagMapView) or isinstance(view,LightCurvePlotView),views)
     filemanager = CurveFileExporter()
     masterController = MasterController(startSignal)

@@ -1,7 +1,6 @@
 from __future__ import division
 
 import math
-import json
 
 from astropy import constants as const
 from astropy import units as u 
@@ -17,6 +16,7 @@ from ..Utility import Vector2D
 from ..Utility.ParametersError import ParametersError
 from .Stellar import Galaxy, Quasar, GalaxyJSONDecoder, QuasarJSONDecoder
 from ..Utility.QuantityJSONEncoder import QuantityJSONEncoder, QuantityJSONDecoder
+from .ExperimentParams import ExperimentParamsJSONDecoder
 
 
 class ParametersJSONEncoder(object):
@@ -52,8 +52,13 @@ class ParametersJSONDecoder(object):
 		galaxy = gd.decode(js['galaxy'])
 		quasar = qd.decode(js['quasar'])
 		canvasDim = js['canvasDim']
-		dTheta = qDecode.decode(js['dTheta'])
-		return Parameters(galaxy,quasar,dTheta,canvasDim)
+		dTheta = qDecode.decode(js['dTheta'])*canvasDim
+		parameters = Parameters(galaxy,quasar,dTheta,canvasDim)
+		if js['extraParameters']:
+			decoder = ExperimentParamsJSONDecoder()
+			extras = decoder.decode(js['extraParameters'])
+			parameters.extras = extras
+		return parameters
 
 class Parameters(object):
 	"""
@@ -159,7 +164,7 @@ class Quasar:<br>
 		super(ParametersJSONDecoder, self).__init__()
 	"""
 		
-	def __init__(self, galaxy = Galaxy(), quasar = Quasar(), dTheta = u.Quantity(600/800,'arcsec'), canvasDim = 800, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0):
+	def __init__(self, galaxy = Galaxy(), quasar = Quasar(), dTheta = u.Quantity(4/20,'arcsec'), canvasDim = 2000, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0):
 		self.__galaxy = galaxy
 		self.__quasar = quasar
 		self.__dTheta = u.Quantity(dTheta/canvasDim,'rad')

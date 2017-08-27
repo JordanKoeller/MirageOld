@@ -2,13 +2,17 @@ import math
 import json
 from astropy import units as u
 from astropy.coordinates import SphericalRepresentation as SR
+from astropy.coordinates import CartesianRepresentation as CR
 from astropy.cosmology import WMAP7 as cosmo
+import numpy as np
+
 
 from ...Calculator import Conversions
 from ...Utility.ParametersError import ParametersError
 from ...Utility.Vec2D import zeroVector, Vector2D, Vector2DJSONDecoder
 from ...Views.Drawer.ShapeDrawer import drawPointLensers, drawCircle, drawSolidCircle, drawSquare
 from ...Utility.QuantityJSONEncoder import QuantityJSONEncoder, QuantityJSONDecoder
+
 EarthVelocity = SR(u.Quantity(265,'degree'),u.Quantity(48,'degree'),365)
 
 class GalaxyJSONEncoder(object):
@@ -30,8 +34,11 @@ class GalaxyJSONEncoder(object):
 			m,x,y = o.starArray
 			res['starMasses'] = m
 			res['starXPos'] = x 
-			res['starYPos'] = y 
-			res['velocity'] = quantDecoder.encode(o.velocity)
+			res['starYPos'] = y
+			x = quantDecoder.encode(o.velocity.x)
+			y = quantDecoder.encode(o.velocity.y)
+			z = quantDecoder.encode(o.velocity.z)
+			res['velocity'] = {'x':x,'y':y,'z':z}
 			res['pcntStars'] = o.percentStars
 			# res['skyCoords'] = o.skyCoords #WILL NEED HELP HERE
 			res['colorKey'] = o.colorKey
@@ -46,7 +53,6 @@ class GalaxyJSONDecoder(object):
 		super(GalaxyJSONDecoder, self).__init__()
 		
 	def decode(self,js):
-		import numpy as np
 		vd = Vector2DJSONDecoder()
 		qd = QuantityJSONDecoder()
 		position = vd.decode(js['position'])
@@ -57,19 +63,20 @@ class GalaxyJSONDecoder(object):
 		starm = js['starMasses']
 		starx = js['starXPos']
 		stary = js['starYPos']
-		# velocity = qd.decode(js['velocity'])
+		vx = qd.decode(js['velocity']['x'])
+		vy = qd.decode(js['velocity']['y'])
+		vz = qd.decode(js['velocity']['z'])
+		velocity = CR(vx,vy,vz)
 		pcntStars = js['pcntStars']
 		# skyCoords = #NEED HELP HERE
-		colorKey = js['colorKey']
-		avgStarMass = js['avgStarMass']
 		if len(starm) > 0:
-			stars = np.ndarrray((len(starm),3))
+			stars = np.ndarray((len(starm),3))
 			stars[:0] = starm
 			stars[:1] = starx
 			stars[:2] = stary
-			return Galaxy(redshift,velD,shearMag,shearAngle,pcntStars,position,stars=stars)
+			return Galaxy(redshift,velD,shearMag,shearAngle,pcntStars,position,velocity=velocity,stars=stars)
 		else:
-			return Galaxy(redshift,velD,shearMag,shearAngle,pcntStars,position)
+			return Galaxy(redshift,velD,shearMag,shearAngle,pcntStars,position,velocity=velocity)
 
 
 class QuasarJSONEncoder(object):
@@ -93,7 +100,7 @@ class QuasarJSONEncoder(object):
 			raise TypeError("parameter o must be a Quasar instance.")
 
 class QuasarJSONDecoder(object):
-	"""docstring for QuasarJSONDecodr"""
+	"""docstring for QuasarJSONDecoder"""
 	def __init__(self):
 		super(QuasarJSONDecoder, self).__init__()
 		
@@ -107,12 +114,9 @@ class QuasarJSONDecoder(object):
 		tmpCosmic = Cosmic()
 		tmpCosmic.updateCosmic(redshift = redshift)
 		velocity = (velocity*tmpCosmic.angDiamDist.to('m').value).setUnit('km/s')
-		obsp = vd.decode(js['observedPosition'])
 		radius = qd.decode(js['radius'])
-		cc = js['colorKey']
 		return Quasar(redshift,radius,position,velocity,mass)
 
-	# def __init__(self,redshift = 0.1,radius = u.Quantity(0,'rad'),position = Vector2D(0,0,'rad'),velocity = Vector2D(0,0,'km/s'), mass = u.Quantity(0,'solMass')):
 
 class Cosmic(object):
 	__redshift = 0.0
@@ -279,7 +283,7 @@ class Quasar(Movable,Cosmic):
 
 
 
-	def __init__(self,redshift = 0.1,radius = u.Quantity(0,'rad'),position = Vector2D(0,0,'rad'),velocity = Vector2D(0,0,'km/s'), mass = u.Quantity(0,'solMass')):
+	def __init__(self,redshift = 2,radius = u.Quantity(1e6,'uas'),position = Vector2D(0,0,'rad'),velocity = Vector2D(0,0,'km/s'), mass = u.Quantity(1e9,'solMass')):
 		self.__radius = radius
 		self.updateCosmic(redshift = redshift)
 		normVel = velocity.to('km/s')/self.angDiamDist.to('km').value
@@ -380,7 +384,7 @@ class Galaxy(Drawable, Cosmic):
 	__shear = None
 	__stars = []
 
-	def __init__(self, redshift=0.01, velocityDispersion=u.Quantity(0, 'km/s'), shearMag=0, shearAngle=u.Quantity(0,'degree'), percentStars=0.0, center=zeroVector.setUnit('rad'), starVelocityParams = None, skyCoords= None, velocity=u.Quantity(0,'km/s'),stars = []):
+	def __init__(self, redshift=0.5, velocityDispersion=u.Quantity(1500, 'km/s'), shearMag=0.306, shearAngle=u.Quantity(30,'degree'), percentStars=0.0, center=zeroVector.setUnit('rad'), starVelocityParams = None, skyCoords= None, velocity=u.Quantity(0,'km/s'),stars = []):
 		Drawable.__init__(self)
 		Cosmic.__init__(self)
 		self.__velocityDispersion = velocityDispersion

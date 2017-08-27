@@ -19,16 +19,14 @@ class AbstractFileWrapper(object):
         Constructor
         '''
         self._filepath = filepath
-        if not fileobject:
-            self._fileobject = open(filepath)
+        if not fileobject or not params:
+            from ..Controllers.FileManagerImpl import ExperimentDataFileReader
+            reader = ExperimentDataFileReader()
+            reader.open(self._filepath)
+            self._params, self._fileobject = reader.load()
+            reader.close()
         else:
             self._fileobject = fileobject
-        if not params:
-            from ..Controllers.FileManagerImpl import ParametersFileReader
-            paramLoader = ParametersFileReader()
-            paramLoader.open(self._filepath)
-            self._params = paramLoader.load()
-        else:
             self._params = params
         if lookuptable == []:
             self._lookupTable = np.load(self._fileobject)

@@ -1,20 +1,16 @@
-import sys
 
-from PyQt5 import QtCore, QtWidgets
-from PyQt5 import QtWidgets, uic, QtCore
+from PyQt5 import uic, QtWidgets, QtCore
 from PyQt5.QtWidgets import QProgressDialog, QInputDialog
 
 from app.Models import Model
 import factory
-import factory
 
 from .. import mainUIFile
 from ..Controllers import ControllerFactory, ExportFactory
-from ..Controllers.FileManagerImpl import ParametersFileManager
+from ..Controllers.FileManagerImpl import ParametersFileManager, RecordingFileManager
 from ..Controllers.ParametersController import ParametersController
 from ..Controllers.QueueController import QueueController
 from ..Models.MagnificationMapModel import MagnificationMapModel
-from ..Utility import Vector2D
 from ..Utility.SignalRepo import SignalRepo
 from .LensedImageView import LensedImageView
 from .LightCurvePlotView import LightCurvePlotView
@@ -34,6 +30,7 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 	pauseSignal = QtCore.pyqtSignal()
 	resetSignal = QtCore.pyqtSignal()
 	deactivateSignal = QtCore.pyqtSignal()
+	recordSignal = QtCore.pyqtSignal()
 	progressDialogSignal = QtCore.pyqtSignal(int, int, str)
 	progressLabelSignal = QtCore.pyqtSignal(str)
 
@@ -46,6 +43,7 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 						reset=self.resetSignal,
 						progressDialog=self.progressDialogSignal
 						)
+		self.recordingFileManager = None
 
 		# Set up menubar interraction
 		self.playPauseAction.triggered.connect(self._playPauseToggle)
@@ -60,13 +58,14 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 		# self.actionAddTablePane.triggered.connect(self.addTablePane)
 		self.save_setup.triggered.connect(self.saveSetup)
 		self.load_setup.triggered.connect(self.loadSetup)
-		# self.record_button.triggered.connect(???)
+		self.record_button.triggered.connect(self.toggleRecording)
 		self.visualizerViewSelector.triggered.connect(self.showVisSetup)
 		self.queueViewSelector.triggered.connect(self.showTableSetup)
 		self.tracerViewSelector.triggered.connect(self.showTracerSetup)
 		self.actionConfigure_Models.triggered.connect(self.openModelDialog)
 		self.actionExport.triggered.connect(self.exportLightCurves)
-
+		self.recordSignal.connect(self.recordWindow)
+		
 		self.parent = parent
 		self.progressDialogSignal.connect(self.openDialog)
 		self.controller = None
@@ -79,6 +78,19 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 		# self.addCurvePane()
 		# self.addMagPane()
 		self._mkStatusBar()
+		
+	def toggleRecording(self):
+		from mpi4py import MPI
+		comm = MPI.COMM_WORLD
+		if self.recordingFileManager:
+			comm.isend([self.recordingFileManager.close],dest=1,tag=11)
+# 			self.recordingFileManager.close()
+# 			self.recordingFileManager = None
+		else:
+			self.recordingFileManager = RecordingFileManager()
+			self.recordingFileManager.open()
+			comm.isend([self.recordingFileManager.write],dest=1,tag=11)
+			
 
 	def saveTable(self):
 		tableController = self._findControllerHelper(QueueController)
@@ -123,14 +135,11 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 			self.pauseSignal.emit()
 			self.deactivateSignal.emit()
 		else:
-			print("Trying")
 			for controllerView in self.modelControllers:
-				print("Trying")
 				parameters = controllerView.buildObject()
 				if parameters:
-					print("Got cv")
 					Model.updateModel(controllerView.modelID, parameters)
-			self.controller = ControllerFactory(self.canvasViews, self.playSignal, self.pauseSignal, self.resetSignal, self.deactivateSignal)
+			self.controller = ControllerFactory(self.canvasViews, self.playSignal, self.pauseSignal, self.resetSignal, self.recordSignal)
 			self.isPlaying = True
 			self.playSignal.emit()
 
@@ -225,6 +234,22 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 					if isinstance(view, MagMapView) and view.modelID == k:
 						view.setMagMap(v.magMapArray, 8.0)
 
+	def recordWindow(self):
+		if self.recordingFileManager:
+			from mpi4py import MPI
+			import numpy as np
+			comm = MPI.COMM_WORLD
+			im = self.grab()
+			im = im.toImage()
+			im = im.convertToFormat(4)
+			width = im.width()
+			height = im.height()
+			ptr = im.bits()
+			ptr.setsize(im.byteCount())
+			arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
+			comm.isend(arr,dest=1,tag=11)
+# 			self.recordingFileManager.write(frame)
+		
 
 
 	@property

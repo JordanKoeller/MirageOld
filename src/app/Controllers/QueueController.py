@@ -4,22 +4,13 @@ Created on Jun 1, 2017
 @author: jkoeller
 '''
 
-from PyQt5 import QtCore
-
-from app.Models import ModelImpl
+from app.Models import Model
 
 from ..Calculator.ExperimentResultCalculator import varyTrial
 from ..Controllers.FileManagerImpl import TableFileWriter, TableFileReader
-from app.Parameters import ExperimentParams
-from app.Parameters import LightCurveParameters
-from app.Parameters import MagMapParameters
-from app.Parameters import StarFieldData
+from app.Parameters.ExperimentParams import ExperimentParams, LightCurveParameters, StarFieldData, MagMapParameters
 from ..Utility.ParametersError import ParametersError
-from ..Views.ExperimentQueueTable import ExperimentQueueTable
-from .FileManagers.QueueFileManager import QueueFileManager
 from .GUIController import GUIController
-from .ParametersController import ParametersController
-from .Threads.QueueThread import QueueThread
 from .UserInputParser import UserInputParser
 
 
@@ -107,14 +98,14 @@ class QueueController(UserInputParser,GUIController):
         datasets = []
         if self.view.enableLightCurve.isChecked():
             resolution = self.view.dataPointSpinBox.value()
-            pstart =self.view.vectorFromQString(self.view.quasarPathStart.text(),unit=inputUnit)
-            pend = self.view.vectorFromQString(self.view.quasarPathEnd.text(),unit=inputUnit)
+            pstart =self.parametersController.vectorFromQString(self.view.quasarPathStart.text(),unit=inputUnit)
+            pend = self.parametersController.vectorFromQString(self.view.quasarPathEnd.text(),unit=inputUnit)
             lcparams = LightCurveParameters(pstart,pend,resolution)
             datasets.append(lcparams)
         if self.view.enableMagMap.isChecked():
-            magmapdims = self.view.vectorFromQString(self.view.magMapDimEntry.text(),unit=inputUnit)
-            magmapres = self.view.vectorFromQString(self.view.magMapResolutionEntry.text(),None)
-            magmapcenter = ModelImpl.engine.getCenterCoords(parameters)
+            magmapdims = self.parametersController.vectorFromQString(self.view.magMapDimEntry.text(),unit=inputUnit)
+            magmapres = self.parametersController.vectorFromQString(self.view.magMapResolutionEntry.text(),None)
+            magmapcenter = Model[self.view.modelID].engine.getCenterCoords(parameters)
             magmapparams = MagMapParameters(magmapcenter,magmapdims,magmapres)
             datasets.append(magmapparams)
         if self.view.queueSaveStarfield.isChecked():
@@ -139,11 +130,11 @@ class QueueController(UserInputParser,GUIController):
                     if isinstance(i , MagMapParameters):
                         self.view.enableMagMap.setChecked(True)
                         self.view.magMapResolutionEntry.setText(i.resolution.asString)
-                        dims = i.dimensions.to(view.unitLabel_6.text())
+                        dims = i.dimensions.to(self.view.unitLabel_6.text())
                         self.view.magMapDimEntry.setText(dims.asString)
                     elif isinstance(i , LightCurveParameters):
                         self.view.enableLightCurve.setChecked(True)
-                        unit = view.unitLabel_3.text()
+                        unit = self.view.unitLabel_3.text()
                         start = i.pathStart.to(unit)
                         end = i.pathEnd.to(unit)
                         self.view.quasarPathStart.setText(start.asString)

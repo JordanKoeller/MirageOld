@@ -69,6 +69,7 @@ class FileWriter(object):
             if self._fileextension in filename:
                 self._filename=filename
             else:
+                print(type(filename))
                 self._filename = filename+self._fileextension
         else:
             self._filename = QtWidgets.QFileDialog.getSaveFileName(filter='*'+self._fileextension)[0]

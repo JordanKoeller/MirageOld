@@ -26,8 +26,7 @@ class AnimationController(MasterController):
         sig0.connect(self.run)
         sig1.connect(self.pause)
         sig2.connect(self.stop)
-        # sig3.connect(self.deactivate)
-        self._signals = [sig1,sig2,sig3]
+        self._signals = [sig0,sig1,sig2,sig3]
         self.run()
         
     @asynchronous
@@ -40,6 +39,7 @@ class AnimationController(MasterController):
                 begin = time.clock()
                 MasterController.run(self,())
                 deltaT = time.clock()-begin
+                self._signals[3].emit()
                 if deltaT < interval:
                     time.sleep(interval-deltaT)
             except StopIteration:

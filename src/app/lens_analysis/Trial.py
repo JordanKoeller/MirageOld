@@ -10,9 +10,7 @@ import math
 
 import numpy as np
 
-from ..Parameters import LightCurveParameters
-from ..Parameters import MagMapParameters
-from ..Parameters import StarFieldData
+from ..Parameters.ExperimentParams import LightCurveParameters, MagMapParameters, StarFieldData
 from .AbstractFileWrapper import AbstractFileWrapper
 
 
