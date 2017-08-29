@@ -35,7 +35,7 @@ class AnimationController(MasterController):
         interval = 1/GlobalPreferences['max_frame_rate']
         while self._animating:
             try:
-                QtGui.QApplication.processEvents()
+#                 QtGui.QApplication.processEvents()
                 begin = time.clock()
                 MasterController.run(self,())
                 deltaT = time.clock()-begin

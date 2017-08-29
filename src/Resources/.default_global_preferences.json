@@ -20,7 +20,7 @@
 		"background":"#000000"
 	},
 
-	"max_frame_rate" : 15,
+	"max_frame_rate" : 60,
 
 	"default_perspective":[
 		"parameter",

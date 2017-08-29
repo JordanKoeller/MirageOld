@@ -80,24 +80,23 @@ if __name__ == "__main__" and isMainProcess():
     sys.exit(app.exec_())
     
 else:
-    
     #Add subprocesses to processPool
     from mpi4py import MPI
     comm = MPI.COMM_WORLD
     print("Adding process "+str(comm.Get_rank()) + " To the Pool.")
-    processPool.append(comm)
-    while True:
-        with comm.recv(source=0,tag=11) as data:
-            fn = None
-            if type(isinstance(data,list)):
-                fn = data[0]
-                try:
-                    fn(data[1])
-                except:
-                    pass
-            else:
-                print("Accepting")
-                fn(data)
+#     processPool.append(comm)
+    fn = None
+    data = comm.recv(source=0,tag=11)
+    print(data)
+#     print("Accepting")
+    if type(isinstance(data,list)):
+        fn = data[0]
+        try:
+            fn(data[1])
+        except:
+            pass
+    else:
+        fn(data)
     
 
 

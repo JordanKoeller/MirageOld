@@ -1,7 +1,7 @@
 from multiprocessing import Pipe
 from threading import Thread 
 
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtSignal
 
 
 class Listener(Thread,QObject):
@@ -57,6 +57,29 @@ class AsyncSignal(object):
 
 	def connect(self,fn):
 		self.signal.connect(fn)
+	
+	
+class ProcessSignal(QObject):
+	_signal = pyqtSignal(object)
+	_accepts = None
+	_fn = []
+	
+	def __init__(self,*args):
+		self._accepts = args
+		self.recv, self.send = Pipe()
+		
+	def connect(self,fn,listener):
+		def pollSignal(*args):
+			fn(*args)
+		listener.addToTimer(pollSignal)
+		
+	def emit(self,*args):
+		if len(args) == len(self._args):
+			self.send.send(*args)
+				
+		else:
+			raise ValueError("Expected "+str(len(self._args))+" arguments, received "+str(len(args))+".")
+			
 
 
 class PipeSignal(object):
