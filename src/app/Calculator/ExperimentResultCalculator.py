@@ -3,11 +3,8 @@ Created on Jun 6, 2017
 
 @author: jkoeller
 '''
-import math
 
 from ..Models.Model import Model
-from ..Models.Parameters.ExperimentParams import ResultTypes
-from ..Utility import Vector2D
 import time
 import numpy as np
 from ..Utility.NullSignal import NullSignal
@@ -38,13 +35,22 @@ def varyTrial(params,trialNo):
 
 class ExperimentResultCalculator(object):
     '''
-    classdocs
+    Object responsible for calculating result datasets when performing calculations based on input from an experiment table.
+
+    Parses a parameters instance upon initialization and determines what calculations need to be performed. Then calls private member methods to perform those calculations. 
     '''
 
 
     def __init__(self, parameters,signals = NullSignal):
         '''
-        Constructor
+        Constructor. Parses parameters to determine what calculations need to be performed.
+
+        Arguments:
+        ==================
+
+        parameters: parameters instance to be parsed. Based on parameters.extras field, will configure this ExperimentResultCalculator instance to run parameters's experiments.
+        signals: (defualt NullSignal) dict. Signals to be emitted upon completions of various calculations. If none are provided, NullSignal is used, sending all text to standard
+        output.
         '''
         expTypes = parameters.extras.desiredResults
         self.signals = signals
@@ -60,6 +66,9 @@ class ExperimentResultCalculator(object):
         
         
     def runExperiment(self):
+        '''
+        Function to call to calculate results. Returns a list of the resultant data.
+        '''
         ret = []
         begin = time.clock()
         for exp in range(0,len(self.experimentRunners)):
@@ -71,12 +80,19 @@ class ExperimentResultCalculator(object):
 
     
     def __LIGHT_CURVE(self,index):
+        '''
+        Internal Function. Instructs the engine to make a light curve and returns the data.
+        '''
         special = Model.parameters.extras.desiredResults[index]
         start,finish = (special.pathStart,special.pathEnd)
         res = special.resolution
         return Model.engine.makeLightCurve(start,finish,res)
         
     def __MAGMAP(self,index):
+        '''
+        Internal Function. Instructs the engine to make a magnification map and returns the data.
+
+        '''
         special = Model.parameters.extras.desiredResults[index]
         return Model.engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
