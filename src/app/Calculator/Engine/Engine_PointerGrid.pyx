@@ -78,6 +78,7 @@ cdef class Engine_PointerGrid(Engine):
 		"""
 		Returns a 2D numpy array, containing the coordinates of pixels illuminated by the source specified in the system's parameters.
 		"""
+		#Possible optimization by using vector data rather than copy?
 		while self.__preCalculating:
 			print("waiting")
 			time.sleep(0.1)

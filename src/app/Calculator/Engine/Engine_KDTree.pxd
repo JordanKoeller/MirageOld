@@ -1,10 +1,15 @@
 from __future__ import division
+
+import ctypes
+
+import cython
+
 import numpy as np
+
+
 cimport numpy as np
 from libcpp.vector cimport vector
 from libcpp cimport bool
-import cython
-import ctypes
 from libcpp.pair cimport pair
 from Calculator.Engine.Engine cimport Engine
 

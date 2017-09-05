@@ -1,26 +1,25 @@
 # %gui qt5
 
+import sys
+
 from .AbstractFileWrapper import AbstractFileWrapper
 from .DirectoryMap import DirectoryMap
 from .Experiment import Experiment
 from .Trial import Trial
-from ..Views.GUI.GUIManager import GUIManager
-from ..Models.Parameters.Parameters import Parameters
-from ..Models.Parameters.ExperimentParams import ResultTypes
-from ..Controllers.FileManagers.TableFileManager import TableFileManager
-from ..Controllers.Threads.QueueThread import QueueThread
-from ..Controllers.FileManagers import QueueFileManager
-from ..Utility.NullSignal import NullSignal
-from PyQt5 import QtWidgets
-import sys
+
 
 def load(filename='Untitled.dat'):
-    lngth = len(filename)
-    if filename[lngth-4::] == '.dat':
-        return Experiment(filename)
+    if filename is None:
+        from PyQt5 import QtWidgets
+        filename = QtWidgets.QFileDialog.getOpenFileName(filter='*.dat')[0]
+    if filename:
+        lngth = len(filename)
+        if filename[lngth-4::] == '.dat':
+            return Experiment(filename)
+        else:
+            return DirectoryMap(filename)
     else:
-        return DirectoryMap(filename)
-
+        return None
 def describe(filename):
     if isinstance(filename, str):
         tmp = load(filename)
@@ -30,34 +29,37 @@ def describe(filename):
     else:
         raise ValueError("argument must be a filename or AbstractFileWrapper subtype.")
 
-def traceQuasar(expt,trialNum=0):
-    from ..Views.GUI.GUITracerWindow import GUITracerWindow
-    app = QtWidgets.QApplication(sys.argv)
-    if isinstance(expt,str):
-        ui = GUITracerWindow(expt,trialNum=trialNum)
-        ui.show()
-    else:
-        ui = GUITracerWindow(expt.file.name,expt.trialNumber)
-        ui.show()
-    app.exec_()
+# def traceQuasar(expt,trialNum=0):
+#     from PyQt5 import QtWidgets
+#     from ..Views.GUI.GUITracerWindow import GUITracerWindow
+#     app = QtWidgets.QApplication(sys.argv)
+#     if isinstance(expt,str):
+#         ui = GUITracerWindow(expt,trialNum=trialNum)
+#         ui.show()
+#     else:
+#         ui = GUITracerWindow(expt.file.name,expt.trialNumber)
+#         ui.show()
+#     app.exec_()
+# 
+# def explore(expt):
+#     params = None
+#     if isinstance(expt,AbstractFileWrapper):
+#         params = expt.parameters
+#     elif isinstance(expt, Parameters):
+#         params = expt
+#     else:
+#         raise ValueError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
+#         return
+#     if not params:
+#         return ValueError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
+#         return
+#     try:
+#         ui = GUIManager()
+#         ui.switchToVisualizing()
+#         ui.bindFields(params)
+#         ui.switchToVisualizing()
+#         ui.show()
+#     except:
+#         raise EnvironmentError("Must have a Qt event loop running. If you are in ipython, execute the command '%gui qt5' then try again.")
 
-def explore(expt):
-    params = None
-    if isinstance(expt,AbstractFileWrapper):
-        params = expt.parameters
-    elif isinstance(expt, Parameters):
-        params = expt
-    else:
-        raise ValueError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
-        return
-    if not params:
-        return ValueError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
-        return
-    try:
-        ui = GUIManager()
-        ui.switchToVisualizing()
-        ui.bindFields(params)
-        ui.switchToVisualizing()
-        ui.show()
-    except:
-        raise EnvironmentError("Must have a Qt event loop running. If you are in ipython, execute the command '%gui qt5' then try again.")
+print("Finished loading")
