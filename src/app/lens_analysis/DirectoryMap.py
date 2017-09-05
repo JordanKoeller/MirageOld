@@ -4,13 +4,11 @@ Created on Jun 8, 2017
 @author: jkoeller
 '''
 
-import glob
-import os
-
 import numpy as np
 
+import os
 from .Experiment import Experiment
-
+import glob
 
 class DirectoryMap(object):
     '''
@@ -41,6 +39,10 @@ class DirectoryMap(object):
     def length(self):
         return len(self)
     
+    def _getDataSet(self,trialNo,tableNo):
+            self._fileobject.seek(self._lookupTable[trialNo,tableNo])
+            return np.load(self._fileobject)
+
     @property
     def directory(self):
         return self.__directory

@@ -1,13 +1,10 @@
-import math
-
-from astropy import constants as const
 from scipy.optimize import broyden1 as Solver
-
+import math
+from astropy import constants as const
 from ..Utility import Vector2D
 
-
 class __ImageFinder(object):
-	"""depricated"""
+	"""docstring for ImageFinder"""
 	def __init__(self):
 		pass
 		# super(__ImageFinder, self).__init__()

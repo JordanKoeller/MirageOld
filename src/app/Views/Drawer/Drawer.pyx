@@ -3,7 +3,7 @@ from ...Utility.NullSignal import NullSignal
 cimport numpy as np
 import numpy as np
 import math 
-from ...Models import Model
+from ...Models.Model import Model
 
 cdef class Drawer(object):
 	def __init__(self,signal):
@@ -32,7 +32,7 @@ cdef class PlotDrawer(Drawer):
 		Drawer.__init__(self,signal)
 		self.reset()
 
-	cpdef append(self, double y, double x=-1):
+	cdef append(self, double y, double x=-1):
 		# print(y)
 		cdef np.ndarray[np.float64_t, ndim=1] replaceX
 		cdef np.ndarray[np.float64_t, ndim=1] replaceY
@@ -51,7 +51,7 @@ cdef class PlotDrawer(Drawer):
 		self.signal.emit(tmpx,tmpy)
 		return (tmpx,tmpy)
 
-	cpdef plotAxes(self, np.ndarray[np.float64_t, ndim=1] x, np.ndarray[np.float64_t, ndim=1] y):
+	cdef plotAxes(self, np.ndarray[np.float64_t, ndim=1] x, np.ndarray[np.float64_t, ndim=1] y):
 		self.xAxis = x
 		self.yAxis = y
 		self.index = x.shape[0] - 1

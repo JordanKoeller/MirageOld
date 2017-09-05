@@ -33,20 +33,26 @@
        <addaction name="load_setup"/>
        <addaction name="save_setup"/>
        <addaction name="separator"/>
-       <addaction name="saveTableAction"/>
-       <addaction name="loadTableAction"/>
-       <addaction name="separator"/>
        <addaction name="record_button"/>
        <addaction name="separator"/>
        <addaction name="shutdown"/>
-       <addaction name="actionExport"/>
       </widget>
       <widget class="QMenu" name="menuView">
        <property name="title">
-        <string>Run</string>
+        <string>View</string>
        </property>
+       <addaction name="visualizerViewSelector"/>
+       <addaction name="queueViewSelector"/>
+       <addaction name="separator"/>
        <addaction name="playPauseAction"/>
        <addaction name="resetAction"/>
+      </widget>
+      <widget class="QMenu" name="menuPerspective">
+       <property name="title">
+        <string>Perspective</string>
+       </property>
+       <addaction name="saveTableAction"/>
+       <addaction name="loadTableAction"/>
       </widget>
       <widget class="QMenu" name="menuHelp">
        <property name="title">
@@ -54,32 +60,9 @@
        </property>
        <addaction name="parametersEntryHelpAction"/>
       </widget>
-      <widget class="QMenu" name="menuDisplay">
-       <property name="title">
-        <string>View</string>
-       </property>
-       <addaction name="queueViewSelector"/>
-       <addaction name="visualizerViewSelector"/>
-       <addaction name="tracerViewSelector"/>
-       <addaction name="separator"/>
-       <addaction name="actionAddCurvePane"/>
-       <addaction name="actionAddImgPane"/>
-       <addaction name="actionAddMagPane"/>
-       <addaction name="separator"/>
-       <addaction name="actionAddParametersPane"/>
-       <addaction name="actionAddTablePane"/>
-      </widget>
-      <widget class="QMenu" name="menuModel">
-       <property name="title">
-        <string>Model</string>
-       </property>
-       <addaction name="actionConfigure_Models"/>
-       <addaction name="separator"/>
-      </widget>
       <addaction name="menuFile"/>
+      <addaction name="menuPerspective"/>
       <addaction name="menuView"/>
-      <addaction name="menuDisplay"/>
-      <addaction name="menuModel"/>
       <addaction name="menuHelp"/>
      </widget>
     </item>
@@ -88,7 +71,7 @@
       <property name="maximumSize">
        <size>
         <width>16777215</width>
-        <height>16777215</height>
+        <height>180000</height>
        </size>
       </property>
       <property name="orientation">
@@ -103,7 +86,6 @@
       <property name="childrenCollapsible">
        <bool>true</bool>
       </property>
-<<<<<<< HEAD
       <widget class="QScrollArea" name="paramFrame">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1413,8 +1395,6 @@ newParams = copy.deepcopy(oldParams)</string>
        <zorder>visualizationFrame</zorder>
        <zorder>queueFrame</zorder>
       </widget>
-=======
->>>>>>> 491e7782492888a33860c98eeb114680b089ab82
      </widget>
     </item>
    </layout>
@@ -1434,6 +1414,11 @@ newParams = copy.deepcopy(oldParams)</string>
      <string>Ctrl+O</string>
     </property>
    </action>
+   <action name="load_run">
+    <property name="text">
+     <string>Run</string>
+    </property>
+   </action>
    <action name="save_setup">
     <property name="text">
      <string>Save Parameters</string>
@@ -1442,10 +1427,12 @@ newParams = copy.deepcopy(oldParams)</string>
      <string>Ctrl+S</string>
     </property>
    </action>
-   <action name="record_button">
-    <property name="checkable">
-     <bool>true</bool>
+   <action name="save_run">
+    <property name="text">
+     <string>Run</string>
     </property>
+   </action>
+   <action name="record_button">
     <property name="text">
      <string>Record</string>
     </property>
@@ -1462,10 +1449,7 @@ newParams = copy.deepcopy(oldParams)</string>
       <bool>true</bool>
      </property>
      <property name="text">
-      <string>Visualization View</string>
-     </property>
-     <property name="shortcut">
-      <string>Ctrl+Shift+V</string>
+      <string>Visualize</string>
      </property>
     </action>
     <action name="queueViewSelector">
@@ -1473,15 +1457,11 @@ newParams = copy.deepcopy(oldParams)</string>
       <bool>true</bool>
      </property>
      <property name="text">
-      <string>Batch Table View</string>
-     </property>
-     <property name="shortcut">
-      <string>Ctrl+T</string>
+      <string>Queue</string>
      </property>
     </action>
    </actiongroup>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="playPauseAction">
    <property name="text">
     <string>Play/Pause</string>
@@ -1522,73 +1502,13 @@ newParams = copy.deepcopy(oldParams)</string>
     <string>Parameters Variance</string>
    </property>
   </action>
-  <action name="actionAddCurvePane">
+  <action name="magMapTracerSelector">
    <property name="text">
-    <string>Add Plot Pane</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+C</string>
-   </property>
-  </action>
-  <action name="actionAddImgPane">
-   <property name="text">
-    <string>Add Image Pane</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+I</string>
-   </property>
-  </action>
-  <action name="actionAddMagPane">
-   <property name="text">
-    <string>Add MagMap Pane</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+M</string>
-   </property>
-  </action>
-  <action name="actionConfigure_Models">
-   <property name="text">
-    <string>Configure Models</string>
-   </property>
-  </action>
-  <action name="tracerViewSelector">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Magnification Map View</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+F</string>
-   </property>
-  </action>
-  <action name="actionAddParametersPane">
-   <property name="text">
-    <string>Add Parameters Pane</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+P</string>
-   </property>
-  </action>
-  <action name="actionAddTablePane">
-   <property name="text">
-    <string>Add Table Pane</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+T</string>
-   </property>
-  </action>
-  <action name="actionExport">
-   <property name="text">
-    <string>Export</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+E</string>
+    <string>Magnification Map Tracer</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
-<<<<<<< HEAD
  <customwidgets>
   <customwidget>
    <class>PlotWidget</class>
@@ -1601,8 +1521,6 @@ newParams = copy.deepcopy(oldParams)</string>
    <header>pyqtgraph.h</header>
   </customwidget>
  </customwidgets>
-=======
->>>>>>> 491e7782492888a33860c98eeb114680b089ab82
  <resources/>
  <connections>
   <connection>

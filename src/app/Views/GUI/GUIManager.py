@@ -45,7 +45,6 @@ class GUIManager(QtWidgets.QMainWindow,SignalRepo):
         self.signals['progressLabel'].connect(self.progressLabel.setText)
         self.signals['progressBarMax'].connect(self.progressBar.setMaximum)
         self.signals['progressDialog'].connect(self.startProgressDialog)
-<<<<<<< HEAD
         self.visualizationFrame.setHidden(True)
         self.visualizationBox.setHidden(True)
         self.queueFrame.setHidden(True)
@@ -56,28 +55,32 @@ class GUIManager(QtWidgets.QMainWindow,SignalRepo):
 #         self.visualPerspective = VisualizationController(self)
         self.queuePerspective = factory._ExperimentTableController(self)
 #         self.queuePerspective = QueueController(self)
-=======
-        self.parametersController = factory._ParametersControllerFactory(self)
-        self.visController = VisualizationController(self)
-        self.isPlaying = False
-        # self.visController.show()
->>>>>>> 491e7782492888a33860c98eeb114680b089ab82
         self.magTracingPerspective = None
         self.perspective = None
+        self.switchToVisualizing()
         self.progressBar.setValue(0)
         self.shutdown.triggered.connect(sys.exit)
-        self.initStatusBar()
-    # def togglePlaying(self):
-    #     if self.isPlaying:
-    #         self.isPlaying = False
-    #         self.thread.pause()
-    #     else:
-    #         self.isPlaying = True
-
-
-    # def reset(self):
-
-
+        self.visualizerViewSelector.triggered.connect(self.switchToVisualizing)
+        self.queueViewSelector.triggered.connect(self.switchToQueue)
+    
+    def __switchToPerspective(self,perspective):
+        if self.perspective:
+            self.perspective.hide()
+        self.perspective = perspective
+        self.perspective.show()
+        
+    def switchToVisualizing(self):
+        if self.visualPerspective:
+            self.__switchToPerspective(self.visualPerspective)
+        else:
+            self.__switchToPerspective(VisualizationController(self))
+    
+    def switchToQueue(self):
+        if self.queuePerspective:
+            self.__switchToPerspective(self.queuePerspective)
+        else:
+            self.__switchToPerspective(QueueController(self))
+    
     def hideParameters(self):
         self.parametersController.hide()
             
@@ -89,14 +92,6 @@ class GUIManager(QtWidgets.QMainWindow,SignalRepo):
         
     def buildParameters(self):
         return self.parametersController.buildParameters(self.perspective.extrasBuilder)
-
-    def initStatusBar(self):
-        playButton = QtWidgets.QPushButton("Play/Pause")
-        # playButton.clicked.connect(self.togglePlaying)
-        resetButton = QtWidgets.QPushButton("Reset")
-        # resetButton.clicked.connect(self.reset)
-        self.statusBar.addWidget(playButton)
-        self.statusBar.addWidget(resetButton)
 
             
             
@@ -116,6 +111,8 @@ class GUIManager(QtWidgets.QMainWindow,SignalRepo):
         if ' ' in y:
             y = y.split(' ')[0]
         return Vector2D(float(x), float(y),unit)
+
+    
 
     def startProgressDialog(self,minimum,maximum,message):
         self.dialog = QProgressDialog(message,'Ok',minimum,maximum)

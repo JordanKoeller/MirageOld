@@ -4,16 +4,15 @@ Created on Jun 5, 2017
 @author: jkoeller
 '''
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
-import numpy as np
-
-from ...Utility.NullSignal import NullSignal
-from .FileManager import FileManager
 from .ParametersFileManager import ParametersFileManager
+from .FileManager import FileManager
+import numpy as np
+from ...Utility.NullSignal import NullSignal
 
 
-class QueueFileManager(FileManager):
+class QueueFileManager(FileManager,QtCore.QThread):
     '''
     classdocs
     '''
@@ -24,7 +23,7 @@ class QueueFileManager(FileManager):
         Constructor
         '''
         FileManager.__init__(self, signals)
-        # QtCore.QThread.__init__(self)
+        QtCore.QThread.__init__(self)
         self.signals = signals
         self.__paramsFileManager = ParametersFileManager(signals)
         self.exptFile = None

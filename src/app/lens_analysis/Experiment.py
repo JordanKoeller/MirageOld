@@ -60,10 +60,6 @@ class Experiment(AbstractFileWrapper):
     @property
     def length(self):
         return len(self)
-
-    @property
-    def numTrials(self):
-        return self.length
         
         
     def exportParameters(self,filename):

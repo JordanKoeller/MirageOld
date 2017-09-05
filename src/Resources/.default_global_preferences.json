@@ -1,18 +1,10 @@
 {
 
-<<<<<<< HEAD
 	"use_gpu":true,
 	
 	"cl_device":0,
 
 	"memory_warning_threshold":"5G",
-=======
-	"use_openCL":true,
-	
-	"cl_device":3,
-
-	"memory_warning_threshold":5,
->>>>>>> 491e7782492888a33860c98eeb114680b089ab82
 
 	"core_count":"all",
 
@@ -28,27 +20,13 @@
 		"background":"#000000"
 	},
 
-<<<<<<< HEAD
 	"max_frame_rate" : 15,
-=======
-	"max_frame_rate" : 60,
->>>>>>> 491e7782492888a33860c98eeb114680b089ab82
 
 	"default_perspective":[
 		"parameter",
 		"visualization"
 	],
 
-<<<<<<< HEAD
 	"auto_normalize_magmap":false
 
 }
-=======
-	"auto_normalize_magmap":false,
-
-	"animate_motion":false,
-
-	"lightCurve_resolution":200
-
-}
->>>>>>> 491e7782492888a33860c98eeb114680b089ab82

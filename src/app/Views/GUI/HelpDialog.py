@@ -1,9 +1,6 @@
-import inspect 
-
 from PyQt5 import QtWidgets
-
-from app.Parameters import Parameters
-
+import inspect 
+from ...Models.Parameters.Parameters import Parameters
 
 class HelpDialog(object):
 	def __init__(self,parent):

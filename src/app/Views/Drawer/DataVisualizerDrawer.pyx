@@ -1,13 +1,9 @@
 from .Drawer cimport ImageDrawer
-from astropy.io import fits
-
-import numpy as np 
 from pyqtgraph import QtCore, QtGui
-
 from ...Utility.NullSignal import NullSignal
-
-
 cimport numpy as np 
+import numpy as np 
+from astropy.io import fits
 
 cdef class DataVisualizerDrawer(ImageDrawer):
 

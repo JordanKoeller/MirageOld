@@ -1,0 +1,6 @@
+Magmap from atlas08/zoomout_3_diffQSizes.dat
+
+Depicts two light curves overlaid. Blue line of 10 R_g quasar and orange of 80 R_g quasar. 
+
+start: (0.01306544, -0.0321034) arcsec
+end:   (0.01306693, -0.0321090) arcsec

@@ -16,18 +16,17 @@ import cython
 import pyopencl.tools
 from scipy import interpolate
 
-import numpy as np
-import pyopencl as cl
-
-from ...Utility import Vector2D
-from ...Utility import zeroVector
-from ...Views.Drawer.Drawer import PlotDrawer
-
-
 # from Models.Stellar.Galaxy import Galaxy
 # from Models.Parameters.Parameters import Parameters
 # from Models.Stellar.Quasar import Quasar
+from ...Utility import Vector2D
 # from Utility import WrappedTree
+from ...Utility import zeroVector
+from ...Views.Drawer.Drawer import PlotDrawer
+import numpy as np
+import pyopencl as cl
+
+
 cimport numpy as np
 from libcpp.vector cimport vector
 from libc.math cimport sin, cos, atan2, sqrt

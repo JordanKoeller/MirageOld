@@ -5,8 +5,8 @@ Created on Jun 3, 2017
 '''
 import pickle
 
-from ...Utility.NullSignal import NullSignal
 from .FileManager import FileManager
+from ...Utility.NullSignal import NullSignal
 
 
 class TableFileManager(FileManager):

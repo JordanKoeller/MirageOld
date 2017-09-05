@@ -4,17 +4,13 @@ Created on May 31, 2017
 @author: jkoeller
 '''
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 
 from .GUIController import GUIController
 from .Threads.VisualizerThread import VisualizerThread
 from .FileManagers.FITSFileManager import FITSFileManager
 from .FileManagers.MediaFileManager import MediaFileManager
-from app.Models import ModelImpl
-from ..Views.ViewLayout import ViewLayout
-from ..Views.LensedImageView import LensedImageView
-from ..Views.LightCurvePlotView import LightCurvePlotView
-from . import ControllerFactory
+from ..Models.Model import Model
 
 
 class VisualizationController(GUIController):
@@ -34,17 +30,26 @@ class VisualizationController(GUIController):
         self.playToggle = False
         self.enabled = False
         self.thread = VisualizerThread(self.view.signals)
-        self.recording = False
         self.view.pauseButton.clicked.connect(self.pause)
         self.view.playButton.clicked.connect(self.simImage)
         self.view.playPauseAction.triggered.connect(self.togglePlaying)
         self.view.resetAction.triggered.connect(self.restart)
+        self.view.displayQuasar.clicked.connect(self.drawQuasarHelper)
+        self.view.displayGalaxy.clicked.connect(self.drawGalaxyHelper)
         self.view.record_button.triggered.connect(self.record)
-        self.views = []
-        self.initVisCanvas()
+        self.view.visualizeDataButton.clicked.connect(self.visualizeData)
+        self.view.developerExportButton.clicked.connect(self.saveVisualization)
+        self.view.regenerateStars.clicked.connect(self.regenerateStarsHelper)
+        filler_img = QtGui.QImage(2000, 2000, QtGui.QImage.Format_Indexed8)
+        filler_img.setColorTable([QtGui.qRgb(0, 0, 0)])
+        filler_img.fill(0)
+        self.view.main_canvas.setPixmap(QtGui.QPixmap.fromImage(filler_img))
+        self.view.signals["imageCanvas"].connect(self.main_canvas_slot)
+        self.view.signals["curveCanvas"].connect(self.curve_canvas_slot)
         self.view.signals['paramLabel'].connect(self.qPoslabel_slot)
         self.parametersController = self.view.parametersController
         self.fileManager = MediaFileManager(self.view.signals)
+        self.recording = False
 
     def togglePlaying(self):
         if self.playToggle:
@@ -54,15 +59,6 @@ class VisualizationController(GUIController):
             self.playToggle = True
             self.simImage()
         
-    def initVisCanvas(self):
-        layout = ViewLayout(None,None)
-        imgCanvas = LensedImageView(None)
-        plCanvas = LightCurvePlotView(None)
-        self.views.append(imgCanvas)
-        self.views.append(plCanvas)
-        layout.addView(plCanvas)
-        layout.addView(imgCanvas)
-        self.view.mainSplitter.addWidget(layout)
 
     def show(self):
         self.view.visualizationFrame.setHidden(False)
@@ -74,19 +70,19 @@ class VisualizationController(GUIController):
         self.view.visualizationFrame.setHidden(True)
         self.enabled = False
         
-    # def drawQuasarHelper(self):
-    #     """Interface for updating an animation in real time of whether or not to draw the physical location of the quasar to the screen as a guide."""
-    #     ModelImpl.parameters.showQuasar = self.view.displayQuasar.isChecked()
+    def drawQuasarHelper(self):
+        """Interface for updating an animation in real time of whether or not to draw the physical location of the quasar to the screen as a guide."""
+        Model.parameters.showQuasar = self.view.displayQuasar.isChecked()
 
-    # def drawGalaxyHelper(self):
-    #     """
-    #     Interface for updating an animation in real time of whether or not to draw the lensing galaxy's center of mass, along with any stars".
-    #     """
-    #     ModelImpl.parameters.showGalaxy = self.view.displayGalaxy.isChecked()
+    def drawGalaxyHelper(self):
+        """
+        Interface for updating an animation in real time of whether or not to draw the lensing galaxy's center of mass, along with any stars".
+        """
+        Model.parameters.showGalaxy = self.view.displayGalaxy.isChecked()
         
-    # def regenerateStarsHelper(self):
-    #     ModelImpl.parameters.regenerateStars()
-    #     ModelImpl.engine.reconfigure()
+    def regenerateStarsHelper(self):
+        Model.parameters.regenerateStars()
+        Model.engine.reconfigure()
 
     def simImage(self):
         """
@@ -100,11 +96,8 @@ class VisualizationController(GUIController):
             parameters = self.parametersController.buildParameters()
             if parameters is None:
                 return
-            ModelImpl.updateParameters(parameters)
-            controller = ControllerFactory(self.views)
-            controller.run()
-            self.thread = controller
-
+            Model.updateParameters(parameters)
+            self.thread.start()
 
     def record(self):
         """Calling this method will configure the system to save each frame of an animation, for compiling to a video that can be saved."""
@@ -126,6 +119,32 @@ class VisualizationController(GUIController):
             if self.recording:
                 self.fileManager.write()
             self.recording = False
+        
+        
+    def visualizeData(self):
+        params = self.parametersController.buildParameters()
+        return self.thread.visualize(params)
 
+    def saveVisualization(self):
+        """Calculates and saves a point-source magnification map as a FITS file"""
+        fitsFileManager = FITSFileManager(self.view.signals)
+        data = self.visualizeData()
+        fitsFileManager.write(data)
+        # self.fileManager.save_still(self.main_canvas)
+
+        
+    def main_canvas_slot(self, img):
+        if self.recording:
+            self.fileManager.sendFrame(self.view.visualizationFrame.grab())
+        img = QtGui.QImage(img.T.tobytes(),img.shape[0],img.shape[1],QtGui.QImage.Format_Indexed8)
+        img.setColorTable(Model.colorMap)
+        self.view.main_canvas.pixmap().convertFromImage(img)
+        self.view.main_canvas.update()
+
+    def curve_canvas_slot(self, x, y):
+        self.view.curve_canvas.plot(x, y, clear=True,pen={'width':5})
+    
     def qPoslabel_slot(self,pos):
         self.view.sourcePosLabel.setText(pos)
+        
+# 

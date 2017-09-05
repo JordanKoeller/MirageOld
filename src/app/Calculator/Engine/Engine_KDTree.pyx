@@ -17,8 +17,8 @@ import pyopencl.tools
 from scipy import interpolate
 
 from Utility import Vector2D
-from Utility import WrappedTree
 from Utility import zeroVector
+from Utility import WrappedTree
 import numpy as np
 import pyopencl as cl
 

@@ -18,7 +18,6 @@ from scipy import interpolate
 
 from ...Utility import Vector2D
 from ...Utility import zeroVector
-from app.Preferences import GlobalPreferences
 import numpy as np
 
 from .. import gpu_kernel
@@ -40,7 +39,6 @@ cdef class Engine:
 	def __init__(self, parameters=None):
 		self.__parameters = parameters
 		self.__preCalculating = False
-		self.core_count = GlobalPreferences['core_count']
 
 	@property
 	def parameters(self):
@@ -53,29 +51,18 @@ cdef class Engine:
 			the source plane, respectively.
 
 			Performs calculations with OpenCL acceleration. If the computer's graphics processor supports 64-bit floating-point arithmetic,
-<<<<<<< HEAD
-			the graphics processor may be used. Otherwise, will perform calculations on the CPU.
-			
-			Must call reconfigure() before this method."""
-		try:
-			return self.ray_trace_gpu()
-		except:
-			return self.ray_trace_cpu()
-=======
 			the graphics processor may be used. Otherwise, will perform calculations on the CPU."""
 		# try:
 		# 	return self.ray_trace_gpu()
 		# except:
-		return self.ray_trace_gpu()
->>>>>>> 491e7782492888a33860c98eeb114680b089ab82
+		return self.ray_trace_cpu()
 
 	cdef ray_trace_gpu(self):
-		'''Ray-traces the system on the graphics processor. Callable from Cython objects only
-		
-		Requires openCL. Must call reconfigure() before this function.'''
 		import pyopencl.tools
 		import pyopencl as cl
 		begin = time.clock()
+		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
+		os.environ['PYOPENCL_CTX'] = '3'
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
 		cdef double dTheta = self.__parameters.dTheta.value
@@ -131,12 +118,11 @@ cdef class Engine:
 		return (result_nparray_x, result_nparray_y)
 
 	cdef ray_trace_gpu_raw(self):
-		'''Ray-traces the sample without accounting for microlensing on the GPU. Useful to get baseline magnification coefficient of the system.
-		
-		Requires openCL. Must call reconfigure() before this function'''
 		begin = time.clock()
 		import pyopencl.tools
 		import pyopencl as cl
+		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
+		os.environ['PYOPENCL_CTX'] = '3'
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
 		cdef double dTheta = self.__parameters.dTheta.value
@@ -194,10 +180,6 @@ cdef class Engine:
 	@cython.boundscheck(False)
 	@cython.wraparound(False)
 	cdef ray_trace_cpu(self):
-		'''Ray-traces the system on the CPU. Does not require openCL
-		
-		Must call reconfigure() before this method.
-		'''
 		begin = time.clock()
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
@@ -214,6 +196,7 @@ cdef class Engine:
 		if self.__parameters.galaxy.percentStars > 0.0:
 			stars_mass, stars_x, stars_y = self.__parameters.galaxy.starArray
 			numStars = len(stars_x)
+			print(stars_x)
 		cdef double shearMag = self.__parameters.galaxy.shear.magnitude
 		cdef double shearAngle = self.__parameters.galaxy.shear.angle.value
 		cdef double centerX = self.__parameters.galaxy.position.to('rad').x
@@ -223,7 +206,7 @@ cdef class Engine:
 		cdef double pi2 = math.pi/2
 		cdef int x, y, i
 		cdef double incident_angle_x, incident_angle_y, r, deltaR_x, deltaR_y, phi
-		for x in prange(0,width*2,1,nogil=True,schedule='static',num_threads=self.core_count):
+		for x in prange(0,width*2,1,nogil=True,schedule='static'):
 			for y in range(0,height*2):
 				incident_angle_x = (x - width)*dTheta
 				incident_angle_y = (height - y)*dTheta
@@ -256,8 +239,6 @@ cdef class Engine:
 
 	def getCenterCoords(self,params = None):
 
-		'''Calculates and returns the location of a ray sent out from the center of the screen after 
-		projecting onto the Source Plane.'''
 		#Pulling parameters out of parameters class
 		parameters = params or self.__parameters
 		height = parameters.canvasDim
@@ -306,7 +287,6 @@ cdef class Engine:
 		return Vector2D(resx,resy,'rad')
 
 	def calTheta(self):
-		'''Deprecated'''
 		k = (4 * math.pi * (const.c ** -2).to('s2/km2').value * self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value * self.__parameters.galaxy.velocityDispersion.value * self.__parameters.galaxy.velocityDispersion.value) + (self.__parameters.quasar.position - self.__parameters.galaxy.position).magnitude()
 		theta = (k / (1 - (self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value) * self.__parameters.galaxy.shearMag))
 		theta2 = (k / (1 + (self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value) * self.__parameters.galaxy.shearMag))
@@ -320,7 +300,6 @@ cdef class Engine:
 
 	@property
 	def trueLuminosity(self):
-		'''Returns radius of the quasar in units of pixels^2'''
 		return math.pi * (self.parameters.quasar.radius.value / self.parameters.dTheta.value) ** 2
 
 
@@ -343,11 +322,7 @@ cdef class Engine:
 		return 0
 		
 	cdef makeLightCurve_helper(self, object mmin, object mmax, int resolution):  # Needs updateing
-		"""Returns a numpy array of the magnification coefficients of a quasar 
-		traveling along the path from mmin to mmax. resolution specifies the number of 
-		steps to take along the path and report in the numpy array. len(ret) == resolution.
-		
-		Cython callable only"""
+		"""Deprecated"""
 # 		print("MAKING LIGHT CURVE")
 		while self.__preCalculating:
 			print("Waiting")
@@ -377,19 +352,12 @@ cdef class Engine:
 		return yAxis
 	
 	def makeLightCurve(self,mmin, mmax, resolution):
-		'''Python-callable wrapper of makeLightCurve_helper'''
 		return self.makeLightCurve_helper(mmin,mmax,resolution)
 
 		
 	
 	
 	cpdef makeMagMap(self, object center, object dims, object resolution, object signal, object signalMax): #######Possibly slow implementation. Temporary
-		'''Calulates and returns a 2D magnification map of the magnification coefficients 
-		of a quasar placed around the point center. dims specifies the width and height of the magnification
-		map in units of arc. resolution specifies the dimensions of the magnification map.
-		The signals allow for feedback on progress of the calculation. If none are supplied, output is silenced, 
-		causing the calulation to go slightly faster. If a NullSignal is supplied, progress updates are sent 
-		to the standard output.'''
 		########################## I STILL WANT TO SEE IF CAN MAKE MAGMAP FROM THE SOURCEPLANE RAY TRACE LOCATIONS, BUT IN THE MEANTIME
 		########################## I'M DOING IT THE OLD-FASHIONED WAY #################################################################
 		cdef int resx = <int> resolution.x
@@ -407,7 +375,8 @@ cdef class Engine:
 		cdef double y0 = start.to('rad').y+dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
-		for i in prange(0,resx,nogil=True,schedule='guided',num_threads=self.core_count):
+		print("Making mag map")
+		for i in prange(0,resx,nogil=True,schedule='guided'):
 			if i % 10 == 0:
 				with gil:
 					signal.emit(i)
@@ -420,9 +389,7 @@ cdef class Engine:
 		"""
 		Calcualtes and returns an image of the system's magnification map for a point source. 
 
-		This calculation is performed by correlating the density of rays on the source plane to a magnification coefficient at that location.
-		
-		DEPRECATED"""
+		This calculation is performed by correlating the density of rays on the source plane to a magnification coefficient at that location."""
 		cdef np.ndarray[np.float64_t, ndim = 2] x
 		cdef np.ndarray[np.float64_t, ndim = 2] y
 		x, y = self.ray_trace(use_GPU=True)
@@ -451,17 +418,21 @@ cdef class Engine:
 		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
 		if self.__parameters is None:
 			self.__parameters = parameters
+			print("Not similar")
 			if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
+				print("Found None, Making stars")
 				self.__parameters.regenerateStars()
 			if autoRecalculate:
 				self.reconfigure()
 			else:
 				self.needsReconfiguring = True
 		elif not self.__parameters.isSimilar(parameters):
-			self.__parameters.update(canvasDim = parameters.canvasDim)
+			print("Not similar")
+			self.__parameters.canvasDim = parameters.canvasDim
 			if self.__parameters.isSimilar(parameters):
 				self.__parameters = parameters
 				if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
+					print("Not similar so regenerating stars")
 					self.__parameters.regenerateStars()
 			else:
 				self.__parameters = parameters
@@ -470,5 +441,6 @@ cdef class Engine:
 			else:
 				self.needsReconfiguring = True
 		else:
+			print("No need to recalulate anything")
 			parameters.setStars(self.__parameters.stars)
 			self.__parameters = parameters

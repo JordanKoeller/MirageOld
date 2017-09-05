@@ -1,13 +1,13 @@
-import time
-
 from PyQt5 import QtCore
 
-from app.Models import ModelImpl
-import numpy as np
 
+from ...Views.Drawer.CompositeDrawerFactory import MagTracerComposite
 from ...Utility.NullSignal import NullSignal
 from ...Utility.Vec2D import Vector2D
-from ...Views.Drawer.CompositeDrawerFactory import MagTracerComposite
+from ...Models.Model import Model
+import numpy as np
+import time
+
 
 
 class MagMapTracerThread(QtCore.QThread):
@@ -19,7 +19,7 @@ class MagMapTracerThread(QtCore.QThread):
             pixels = self._interpolate(pixels,numFrames)
             self.angles = pixels.copy()
         else:
-            pixels = ModelImpl.parameters.extras.getParams('magmap').pixelToAngle(pixels)
+            pixels = Model.parameters.extras.getParams('magmap').pixelToAngle(pixels)
             self.angles = pixels.copy()
         self.__calculating = False
         self.__frameRate = 25
@@ -41,14 +41,14 @@ class MagMapTracerThread(QtCore.QThread):
             x = self.angles[self.__counter,0]
             y = self.angles[self.__counter,1]
             pos = Vector2D(x,y,'rad')
-            ModelImpl.parameters.quasar.setPos(pos)
-            self.signals['qPosLabel'].emit(ModelImpl.parameters.quasar.position.to('arcsec'))
+            Model.parameters.quasar.setPos(pos)
+            self.signals['qPosLabel'].emit(Model.parameters.quasar.position.to('arcsec'))
             timer = time.clock()
             if self.recording:
                 self.signals['tracerUpdated'].emit('Done')
-            pixels = ModelImpl.engine.getFrame()
-            mag = ModelImpl.engine.getMagnification(pixels.shape[0])
-            img,curve = self.__drawer.draw([ModelImpl.parameters,pixels],[mag])
+            pixels = Model.engine.getFrame()
+            mag = Model.engine.getMagnification(pixels.shape[0])
+            img,curve = self.__drawer.draw([Model.parameters,pixels],[mag])
             self.signals['tracerView'].emit(img,curve,self.pixels[self.__counter])
             self.signals['progressBar'].emit(self.__counter)
             if not self.recording:
@@ -68,7 +68,7 @@ class MagMapTracerThread(QtCore.QThread):
         pixels = np.ndarray((numFrames,2))
         for i in range(numFrames):
             pixels[i] = [start[0]+i*dx,start[1]+dy*i]
-        return ModelImpl.parameters.extras.getParams('magmap').pixelToAngle(pixels)
+        return Model.parameters.extras.getParams('magmap').pixelToAngle(pixels)
 
         
     def pause(self):
@@ -78,11 +78,11 @@ class MagMapTracerThread(QtCore.QThread):
     def restart(self):
         self.signals['progressLabel'].emit("Restarted.")
         self.__calculating = False
-        pixels = ModelImpl.engine.getFrame(self.pixels[0,0],self.pixels[0,1],ModelImpl.parameters.quasar.radius.to('rad').value)
-        mag = ModelImpl.engine.getMagnification(len(pixels))
-        self.__drawer.draw([ModelImpl.parameters,pixels],[mag])
+        pixels = Model.engine.getFrame(self.pixels[0,0],self.pixels[0,1],Model.parameters.quasar.radius.to('rad').value)
+        mag = Model.engine.getMagnification(len(pixels))
+        self.__drawer.draw([Model.parameters,pixels],[mag])
         self.signals['tracerUpdate'].emit(self.pixels[0])
-#         self.sourcePos_label_update.emit(str(ModelImpl.parameters.quasar.position.to('arcsec')))
+#         self.sourcePos_label_update.emit(str(Model.parameters.quasar.position.to('arcsec')))
         self.__counter = 0
         self.__drawer.reset()
 

@@ -6,10 +6,9 @@ Created on Jun 4, 2017
 from PyQt5 import QtCore
 import imageio
 
-import numpy as np
-
-from ...Utility.NullSignal import NullSignal
 from .FileManager import FileManager
+import numpy as np
+from ...Utility.NullSignal import NullSignal
 
 
 class VisualizationFileManager(FileManager,QtCore.QThread):

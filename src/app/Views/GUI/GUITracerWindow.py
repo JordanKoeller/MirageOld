@@ -7,9 +7,10 @@ from PyQt5 import QtCore, uic
 from PyQt5.QtWidgets import QMainWindow, QProgressDialog, QLabel
 
 from ...Controllers.MagMapTracerController import MagMapTracerController
-from ...Utility.SignalRepo import SignalRepo
 from .MagMapTracerView import MagMapTracerView
 from .TracerPreferences import PreferencesDialog
+
+from ...Utility.SignalRepo import SignalRepo
 
 
 class GUITracerWindow(QMainWindow,SignalRepo):
