@@ -54,9 +54,12 @@ cdef class Engine_PointerGrid(Engine):
 		return ret
 	
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil:
+		'''Counts up and returns the number of rays that intersect a circle of radius radius at (x,y) on the source plane.'''
 		return self.__grid.find_within_count(x, y, radius)
 
 	def reconfigure(self):
+		'''
+		Reads the associated parameters instance, uses it to calculate all the ray-tracing and store in the engine's spatial data structure'''
 		print("Reconfiguring")
 		self.__grid = PointerGrid()
 		begin = time.clock()

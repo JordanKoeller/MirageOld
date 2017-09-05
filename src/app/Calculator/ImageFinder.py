@@ -4,7 +4,7 @@ from astropy import constants as const
 from ..Utility import Vector2D
 
 class __ImageFinder(object):
-	"""docstring for ImageFinder"""
+	"""depricated"""
 	def __init__(self):
 		pass
 		# super(__ImageFinder, self).__init__()

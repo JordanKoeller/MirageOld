@@ -51,13 +51,18 @@ cdef class Engine:
 			the source plane, respectively.
 
 			Performs calculations with OpenCL acceleration. If the computer's graphics processor supports 64-bit floating-point arithmetic,
-			the graphics processor may be used. Otherwise, will perform calculations on the CPU."""
-		# try:
-		# 	return self.ray_trace_gpu()
-		# except:
-		return self.ray_trace_cpu()
+			the graphics processor may be used. Otherwise, will perform calculations on the CPU.
+			
+			Must call reconfigure() before this method."""
+		try:
+			return self.ray_trace_gpu()
+		except:
+			return self.ray_trace_cpu()
 
 	cdef ray_trace_gpu(self):
+		'''Ray-traces the system on the graphics processor. Callable from Cython objects only
+		
+		Requires openCL. Must call reconfigure() before this function.'''
 		import pyopencl.tools
 		import pyopencl as cl
 		begin = time.clock()
@@ -118,6 +123,9 @@ cdef class Engine:
 		return (result_nparray_x, result_nparray_y)
 
 	cdef ray_trace_gpu_raw(self):
+		'''Ray-traces the sample without accounting for microlensing on the GPU. Useful to get baseline magnification coefficient of the system.
+		
+		Requires openCL. Must call reconfigure() before this function'''
 		begin = time.clock()
 		import pyopencl.tools
 		import pyopencl as cl
@@ -180,6 +188,10 @@ cdef class Engine:
 	@cython.boundscheck(False)
 	@cython.wraparound(False)
 	cdef ray_trace_cpu(self):
+		'''Ray-traces the system on the CPU. Does not require openCL
+		
+		Must call reconfigure() before this method.
+		'''
 		begin = time.clock()
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
@@ -239,6 +251,8 @@ cdef class Engine:
 
 	def getCenterCoords(self,params = None):
 
+		'''Calculates and returns the location of a ray sent out from the center of the screen after 
+		projecting onto the Source Plane.'''
 		#Pulling parameters out of parameters class
 		parameters = params or self.__parameters
 		height = parameters.canvasDim
@@ -287,6 +301,7 @@ cdef class Engine:
 		return Vector2D(resx,resy,'rad')
 
 	def calTheta(self):
+		'''Deprecated'''
 		k = (4 * math.pi * (const.c ** -2).to('s2/km2').value * self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value * self.__parameters.galaxy.velocityDispersion.value * self.__parameters.galaxy.velocityDispersion.value) + (self.__parameters.quasar.position - self.__parameters.galaxy.position).magnitude()
 		theta = (k / (1 - (self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value) * self.__parameters.galaxy.shearMag))
 		theta2 = (k / (1 + (self.__parameters.dLS.value / self.__parameters.quasar.angDiamDist.value) * self.__parameters.galaxy.shearMag))
@@ -300,6 +315,7 @@ cdef class Engine:
 
 	@property
 	def trueLuminosity(self):
+		'''Returns radius of the quasar in units of pixels^2'''
 		return math.pi * (self.parameters.quasar.radius.value / self.parameters.dTheta.value) ** 2
 
 
@@ -322,7 +338,11 @@ cdef class Engine:
 		return 0
 		
 	cdef makeLightCurve_helper(self, object mmin, object mmax, int resolution):  # Needs updateing
-		"""Deprecated"""
+		"""Returns a numpy array of the magnification coefficients of a quasar 
+		traveling along the path from mmin to mmax. resolution specifies the number of 
+		steps to take along the path and report in the numpy array. len(ret) == resolution.
+		
+		Cython callable only"""
 # 		print("MAKING LIGHT CURVE")
 		while self.__preCalculating:
 			print("Waiting")
@@ -352,12 +372,19 @@ cdef class Engine:
 		return yAxis
 	
 	def makeLightCurve(self,mmin, mmax, resolution):
+		'''Python-callable wrapper of makeLightCurve_helper'''
 		return self.makeLightCurve_helper(mmin,mmax,resolution)
 
 		
 	
 	
 	cpdef makeMagMap(self, object center, object dims, object resolution, object signal, object signalMax): #######Possibly slow implementation. Temporary
+		'''Calulates and returns a 2D magnification map of the magnification coefficients 
+		of a quasar placed around the point center. dims specifies the width and height of the magnification
+		map in units of arc. resolution specifies the dimensions of the magnification map.
+		The signals allow for feedback on progress of the calculation. If none are supplied, output is silenced, 
+		causing the calulation to go slightly faster. If a NullSignal is supplied, progress updates are sent 
+		to the standard output.'''
 		########################## I STILL WANT TO SEE IF CAN MAKE MAGMAP FROM THE SOURCEPLANE RAY TRACE LOCATIONS, BUT IN THE MEANTIME
 		########################## I'M DOING IT THE OLD-FASHIONED WAY #################################################################
 		cdef int resx = <int> resolution.x
@@ -389,7 +416,9 @@ cdef class Engine:
 		"""
 		Calcualtes and returns an image of the system's magnification map for a point source. 
 
-		This calculation is performed by correlating the density of rays on the source plane to a magnification coefficient at that location."""
+		This calculation is performed by correlating the density of rays on the source plane to a magnification coefficient at that location.
+		
+		DEPRECATED"""
 		cdef np.ndarray[np.float64_t, ndim = 2] x
 		cdef np.ndarray[np.float64_t, ndim = 2] y
 		x, y = self.ray_trace(use_GPU=True)

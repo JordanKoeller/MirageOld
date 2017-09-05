@@ -14,7 +14,27 @@ from app.Utility.Vec2D import Vector2D
 
 class MagMapTracerController(GUIController):
     '''
-    classdocs
+    Object tasked with configuring a MagMapView to properly handle
+    user input. Also includes methods for exporting a light curve from a
+    MagMapEngine instance.
+    
+    Arguments:
+    =================
+    view: MainView instance to wrap for user input. Must be supplied
+    to properly handle actionEvents.
+    tracerView: MagMapView instance to wrap.
+    trialName: Name of file to load in with the MagMap data.
+        If none is supplied, will prompt the user for a file to open.
+    trialNum: Trial Number to analyze from the MagMap data.
+    
+    Signals:
+    
+    tracer_signal(object)
+    update_view_signal(object,object,object)
+    tracer_updated(str)
+    run_done(str)
+    save_lightCurve()
+    
     '''
     tracer_signal = QtCore.pyqtSignal(object)
     update_view_signal = QtCore.pyqtSignal(object,object,object)
@@ -24,7 +44,7 @@ class MagMapTracerController(GUIController):
 
     def __init__(self, view,tracerView,trialName=None,trialNum=0):
         '''
-        Constructor
+        Constructor.
         '''
         GUIController.__init__(self, view, None, None)
         view.addSignals(tracerUpdate=self.tracer_signal,
@@ -138,19 +158,23 @@ class MagMapTracerController(GUIController):
             self.simImage(recording=True)
 
     def pause(self):
+        '''Pause Animation. Typically called by emitting a signal'''
         if self.enabled:
             self.playToggle = False
             self.thread.pause()
 
     def restart(self):
         """Returns the system to its t=0 configuration. If the system was configured to record, will automatically prompt the user for a file name,
-        render and save the video."""
+        render and save the video. Typically called by emitting a signal"""
         if self.enabled:
             self.playToggle = False
             self.thread.restart()
             self.fileManager.cancelRecording()
             
     def writeMov(self):
+        '''Write the movie.
+        
+        DEPRECATED'''
         self.fileManager.write()
             
     def sendOffFrame(self,filler):
