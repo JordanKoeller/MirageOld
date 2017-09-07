@@ -44,14 +44,12 @@ class Trial(AbstractFileWrapper):
     
     @requiresDtype(MagMapParameters)
     def getFitsFile(self,ind,filename = None):
-        from ..Controllers.FileManagers.FITSFileManager import FITSFileManager
+        from ..Controllers.FileManagerImpl import FITSFileWriter
         arr = self._getDataSet(ind)
-        if filename:
-            from astropy.io import fits
-            fits.writeto(filename,arr)
-        else:
-            saver = FITSFileManager()
-            saver.write(arr)
+        fm = FITSFileWriter()
+        fm.open(filename)
+        fm.write(arr)
+        fm.close()
         print("Magnification Map saved")
 
     @requiresDtype(StarFieldData)
@@ -88,7 +86,7 @@ class Trial(AbstractFileWrapper):
         
     @requiresDtype(StarFieldData)
     def regenerateParameters(self,ind,filename=None):
-        from ..Controllers.FileManagers.ParametersFileManager import ParametersFileManager
+        from ..Controllers.FileManagerImpl import ParametersFileManager
         params = copy.deepcopy(self.parameters)
         stars = self.getStars()
         params.setStars(stars)
@@ -107,7 +105,7 @@ class Trial(AbstractFileWrapper):
         return (magnifications,params)
         
     def saveParameters(self,filename=None):
-        from ..Controllers.FileManagers.ParametersFileManager import ParametersFileManager
+        from ..Controllers.FileManagerImpl import ParametersFileManager
         saver = ParametersFileManager()
         if filename:
             saver.write(copy.deepcopy(self.parameters),filename)

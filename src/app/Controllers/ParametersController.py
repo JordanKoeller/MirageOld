@@ -23,7 +23,7 @@ from ..Parameters.Parameters import Parameters
 from ..Parameters.Stellar import Galaxy, Quasar, EarthVelocity
 from ..Utility import Vector2D
 from ..Views.GUI.HelpDialog import HelpDialog
-from .FileManagers.ParametersFileManager import ParametersFileManager
+from .FileManagerImpl import ParametersFileManager
 from .GUIController import GUIController
 from .UserInputParser import UserInputParser
 

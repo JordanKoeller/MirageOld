@@ -7,9 +7,6 @@ Created on May 31, 2017
 from PyQt5 import QtCore
 
 from .GUIController import GUIController
-from .Threads.VisualizerThread import VisualizerThread
-from .FileManagers.FITSFileManager import FITSFileManager
-from .FileManagers.MediaFileManager import MediaFileManager
 from app.Models import ModelImpl
 from ..Views.ViewLayout import ViewLayout
 from ..Views.LensedImageView import LensedImageView

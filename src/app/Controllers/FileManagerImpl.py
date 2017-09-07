@@ -330,3 +330,34 @@ class ExperimentDataFileReader(FileReader):
 
     def close(self):
         pass
+
+from astropy.io import fits
+
+
+
+class FITSFileWriter(FileWriter):
+    '''
+    classdocs
+    '''
+
+
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        FileWriter.__init__(self)
+        
+
+    def open(self,filename = None):
+        self._filename = filename or self.getFile()
+
+    def write(self,data):
+        from astropy.io import fits
+        fits.writeto(self._filename,data)
+        
+    def close(self):
+        pass
+        
+    @property
+    def fileextension(self):
+        return ".fits"

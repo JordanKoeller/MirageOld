@@ -4,11 +4,11 @@ from app.Models import Model
 from app.Preferences import GlobalPreferences
 import numpy as np
 
-from ...Utility.NullSignal import NullSignal
-from ...Utility.Vec2D import Vector2D
-from ...Views.Drawer.Drawer import PlotDrawer
-from ...Views.Drawer.LensedImageDrawer import LensedImageDrawer
-from ..Controller import Controller
+from ..Utility.NullSignal import NullSignal
+from ..Utility.Vec2D import Vector2D
+from ..Views.Drawer.Drawer import PlotDrawer
+from ..Views.Drawer.LensedImageDrawer import LensedImageDrawer
+from .Controller import Controller
 
 
 # from ...Utility.AsyncSignal import AsyncSignal

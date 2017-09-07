@@ -44,7 +44,7 @@ if __name__ == "__main__" and isMainProcess():
 
     if args.run:
         sys.stdout = open(os.devnull,'w')
-        from app.Controllers.Threads.QueueThread import QueueThread
+        from app.Controllers.ExperimentTableRunner import ExperimentTableRunner as QueueThread
         from app.Controllers.FileManagerImpl import TableFileReader, ExperimentDataFileWriter
         infile = args.run[0]
         outfile = args.run[1]
@@ -57,6 +57,7 @@ if __name__ == "__main__" and isMainProcess():
         fileWriter.open(outfile)
         queueThread.bindExperiments(table,fileWriter)
         queueThread.run()
+        print('____________________________ \n\n Caluations Finished \n\n____________________________')
         sys.exit()
     else:
         from PyQt5 import QtWidgets
