@@ -1,0 +1,3 @@
+
+s = theta*r
+theta = s/r

@@ -5,8 +5,8 @@ Created on Jun 4, 2017
 '''
 from astropy.io import fits
 
-from .FileManager import FileManager
 from ...Utility.NullSignal import NullSignal
+from .FileManager import FileManager
 
 
 class FITSFileManager(FileManager):

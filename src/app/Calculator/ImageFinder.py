@@ -1,7 +1,10 @@
-from scipy.optimize import broyden1 as Solver
 import math
+
 from astropy import constants as const
+from scipy.optimize import broyden1 as Solver
+
 from ..Utility import Vector2D
+
 
 class __ImageFinder(object):
 	"""docstring for ImageFinder"""

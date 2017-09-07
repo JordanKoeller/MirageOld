@@ -5,19 +5,34 @@ Created on May 31, 2017
 '''
 import os
 import sys
-from PyQt5 import QtWidgets
-
-from app.Views.GUI.GUIManager import GUIManager
-from app.Controllers.FileManagers.ParametersFileManager import ParametersFileManager
-from app.Controllers.FileManagers.QueueFileManager import QueueFileManager
-from app.Controllers.Threads.QueueThread import QueueThread
-from app.Controllers.FileManagers.TableFileManager import TableFileManager
 
 import argparse
 
+def usingMPI():
+    try:
+        from mpi4py import MPI
+        
+        comm = MPI.COMM_WORLD
+        sz = comm.Get_size()
+        return sz > 0
+    except:
+        return False
+    
+def isMainProcess():
+    if not usingMPI():
+        return True
+    else:
+        try:
+            from mpi4py import MPI
+            comm = MPI.COMM_WORLD
+            return comm.Get_rank() == 0
+        except:
+            return False
+    
+processPool = []
 
-if __name__ == "__main__":
-    print('____________________________\n\n\n'+"Process ID = " + str(os.getpid())+'\n\n\n____________________________')
+if __name__ == "__main__" and isMainProcess():
+    print('____________________________ \n\n'+"Process ID = " + str(os.getpid())+'\n\n____________________________')
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--load",nargs='?', type=str, help='Follow with a .param file to load in as parameters.')
@@ -26,33 +41,62 @@ if __name__ == "__main__":
     parser.add_argument("-q","--queue",action='store_true',help='Launch program in experiment queue perspective.')
     args = parser.parse_args()
     
-    app = QtWidgets.QApplication(sys.argv)
 
     if args.run:
+        sys.stdout = open(os.devnull,'w')
+        from app.Controllers.Threads.QueueThread import QueueThread
+        from app.Controllers.FileManagerImpl import TableFileReader, ExperimentDataFileWriter
         infile = args.run[0]
         outfile = args.run[1]
         queueThread = QueueThread()
-        fileLoader = TableFileManager()
-        table = fileLoader.read(infile)
-        fileWriter = QueueFileManager(directory=outfile)
+        fileLoader = TableFileReader()
+        fileLoader.open(infile)
+        table = fileLoader.load()
+        fileLoader.close()
+        fileWriter = ExperimentDataFileWriter()
+        fileWriter.open(outfile)
         queueThread.bindExperiments(table,fileWriter)
         queueThread.run()
         sys.exit()
     else:
+        from PyQt5 import QtWidgets
+        from app.Views.MainView import MainView as GUIManager
+        app = QtWidgets.QApplication(sys.argv)
         ui = GUIManager()
         if args.queue:
             ui.switchToQueue()
         else:
-            ui.switchToVisualizing()
+            pass
+            # ui.switchToVisualizing()
         ui.show()
         if args.load:
-            paramLoader = ParametersFileManager()
-            params = paramLoader.read(args.load)
+            from app.Controllers.FileManagerImpl import ParametersFileReader
+            paramLoader = ParametersFileReader()
+            paramLoader.open(args.load)
+            params = paramLoader.load()
+            paramLoader.close()
             ui.switchToVisualizing()
             ui.bindFields(params)
-            # Model.updateParameters(params)
-
     sys.exit(app.exec_())
+    
+else:
+    #Add subprocesses to processPool
+    from mpi4py import MPI
+    comm = MPI.COMM_WORLD
+    print("Adding process "+str(comm.Get_rank()) + " To the Pool.")
+#     processPool.append(comm)
+    fn = None
+    data = comm.recv(source=0,tag=11)
+    print(data)
+#     print("Accepting")
+    if type(isinstance(data,list)):
+        fn = data[0]
+        try:
+            fn(data[1])
+        except:
+            pass
+    else:
+        fn(data)
     
 
 

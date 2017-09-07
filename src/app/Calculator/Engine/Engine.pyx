@@ -18,6 +18,7 @@ from scipy import interpolate
 
 from ...Utility import Vector2D
 from ...Utility import zeroVector
+from app.Preferences import GlobalPreferences
 import numpy as np
 
 from .. import gpu_kernel
@@ -39,6 +40,7 @@ cdef class Engine:
 	def __init__(self, parameters=None):
 		self.__parameters = parameters
 		self.__preCalculating = False
+		self.core_count = GlobalPreferences['core_count']
 
 	@property
 	def parameters(self):
@@ -55,14 +57,12 @@ cdef class Engine:
 		# try:
 		# 	return self.ray_trace_gpu()
 		# except:
-		return self.ray_trace_cpu()
+		return self.ray_trace_gpu()
 
 	cdef ray_trace_gpu(self):
 		import pyopencl.tools
 		import pyopencl as cl
 		begin = time.clock()
-		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
-		os.environ['PYOPENCL_CTX'] = '3'
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
 		cdef double dTheta = self.__parameters.dTheta.value
@@ -121,8 +121,6 @@ cdef class Engine:
 		begin = time.clock()
 		import pyopencl.tools
 		import pyopencl as cl
-		os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
-		os.environ['PYOPENCL_CTX'] = '3'
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
 		cdef double dTheta = self.__parameters.dTheta.value
@@ -196,7 +194,6 @@ cdef class Engine:
 		if self.__parameters.galaxy.percentStars > 0.0:
 			stars_mass, stars_x, stars_y = self.__parameters.galaxy.starArray
 			numStars = len(stars_x)
-			print(stars_x)
 		cdef double shearMag = self.__parameters.galaxy.shear.magnitude
 		cdef double shearAngle = self.__parameters.galaxy.shear.angle.value
 		cdef double centerX = self.__parameters.galaxy.position.to('rad').x
@@ -206,7 +203,7 @@ cdef class Engine:
 		cdef double pi2 = math.pi/2
 		cdef int x, y, i
 		cdef double incident_angle_x, incident_angle_y, r, deltaR_x, deltaR_y, phi
-		for x in prange(0,width*2,1,nogil=True,schedule='static'):
+		for x in prange(0,width*2,1,nogil=True,schedule='static',num_threads=self.core_count):
 			for y in range(0,height*2):
 				incident_angle_x = (x - width)*dTheta
 				incident_angle_y = (height - y)*dTheta
@@ -375,8 +372,7 @@ cdef class Engine:
 		cdef double y0 = start.to('rad').y+dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
-		print("Making mag map")
-		for i in prange(0,resx,nogil=True,schedule='guided'):
+		for i in prange(0,resx,nogil=True,schedule='guided',num_threads=self.core_count):
 			if i % 10 == 0:
 				with gil:
 					signal.emit(i)
@@ -418,21 +414,17 @@ cdef class Engine:
 		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
 		if self.__parameters is None:
 			self.__parameters = parameters
-			print("Not similar")
 			if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
-				print("Found None, Making stars")
 				self.__parameters.regenerateStars()
 			if autoRecalculate:
 				self.reconfigure()
 			else:
 				self.needsReconfiguring = True
 		elif not self.__parameters.isSimilar(parameters):
-			print("Not similar")
-			self.__parameters.canvasDim = parameters.canvasDim
+			self.__parameters.update(canvasDim = parameters.canvasDim)
 			if self.__parameters.isSimilar(parameters):
 				self.__parameters = parameters
 				if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
-					print("Not similar so regenerating stars")
 					self.__parameters.regenerateStars()
 			else:
 				self.__parameters = parameters
@@ -441,6 +433,5 @@ cdef class Engine:
 			else:
 				self.needsReconfiguring = True
 		else:
-			print("No need to recalulate anything")
 			parameters.setStars(self.__parameters.stars)
 			self.__parameters = parameters

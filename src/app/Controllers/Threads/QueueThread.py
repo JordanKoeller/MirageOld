@@ -4,14 +4,13 @@ Created on Jun 1, 2017
 @author: jkoeller
 '''
 
-from PyQt5 import QtCore
-
+# from PyQt5 import QtCore
 from ...Calculator.ExperimentResultCalculator import ExperimentResultCalculator, varyTrial
-from ...Models.Model import Model
+from app.Models import Model
 from ...Utility.NullSignal import NullSignal
+# from ...Utility import asynchronous
 
-
-class QueueThread(QtCore.QThread):
+class QueueThread(object):
     '''
     classdocs
     '''
@@ -21,7 +20,7 @@ class QueueThread(QtCore.QThread):
         '''
         Constructor
         '''
-        QtCore.QThread.__init__(self)
+        # QtCore.QThread.__init__(self)
         self.signals = signals
 
     def bindExperiments(self,experiments,filemanager):
@@ -31,7 +30,6 @@ class QueueThread(QtCore.QThread):
     def run(self):
         ctr = 0
         for params in self.experimentQueue:
-            print(params.galaxy.stars)
             ctr += 1
             numTrials = params.extras.numTrials 
             self.filemanager.newExperiment(params) #NEED TO IMPLIMENT
@@ -40,18 +38,13 @@ class QueueThread(QtCore.QThread):
                 self.signals['progressBar'].emit(expt+1)
                 self.signals['progressLabel'].emit("Processing trial "+str(expt+1) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
                 newP = varyTrial(params,expt+1) #NEED TO IMPLIMENT
-                Model.updateParameters(newP)
+                Model.updateModel('exptModel',newP)
                 data = exptRunner.runExperiment() #NEED TO IMPLIMENT
-                self.filemanager.sendTrial(data)
+                self.filemanager.write(data)
             self.filemanager.closeExperiment()
         self.filemanager.flush()
         self.filemanager.close()
         self.signals['progressLabel'].emit("All experiments going in " + self.filemanager.prettyName + " are finished.")
         
-        
-    def runTrial(self,params):
-        Model.updateParameters(params)
-        lightCurveData = Model.engine.makeLightCurve(params.quasarStartPos, params.quasarEndPos, params.extras.resolution)
-        return lightCurveData
-        
+    
     

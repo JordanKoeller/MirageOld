@@ -1,8 +1,8 @@
 from PyQt5 import QtCore
-from pyqtgraph import LineSegmentROI
-from pyqtgraph.graphicsItems.ImageItem import ImageItem
 
 import numpy as np
+from pyqtgraph import LineSegmentROI
+from pyqtgraph.graphicsItems.ImageItem import ImageItem
 
 from ...Utility.NullSignal import NullSignal
 from ...Views.Drawer.ShapeDrawer import drawSolidCircle
@@ -38,7 +38,7 @@ class MagMapTracerView(QtCore.QObject):
     def updateAll(self,img,lc,tracerPos):
         # self._updateImgPane(img)
         self._updateLightCurve(lc[0],lc[1])
-        self._positionTracer(tracerPos)
+        # self._positionTracer(tracerPos)
 #         self.hasUpdated.emit(self.getFrame())
 
     def _setColorMap(self):
@@ -60,7 +60,6 @@ class MagMapTracerView(QtCore.QObject):
             self._lcPane.plot(xVals,yVals,clear=True,pen={'width':5})
             
     def _getCenteredGradient(self,center):
-        print(center/self._imgStatic.max())
         default = {'ticks':[(0.0, (0, 255, 255, 255)), (1.0, (255, 255, 0, 255)), (center/self._imgStatic.max(), (0, 0, 0, 255)), (center/self._imgStatic.max()/2, (0, 0, 255, 255)), (self._imgStatic.max()/255/2, (255, 0, 0, 255))],'mode':'rgb'}
         return default
         
