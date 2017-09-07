@@ -591,7 +591,14 @@ class Weidner_Kroupa_2004(IMF_broken_powerlaw):
 
 class Evolved_IMF(object):
     def __init__(self,distro = Kroupa_2001(),conversions={0.8:0.6,8:1.4,30:10}):
-        """Conversions is a dict, where the key is the lower limit of the star mass, value is what those masses get converted to."""
+        """
+        Generates masses based on the Kropa_2001 IMF, then simulates an aging galaxy by applying conversions.
+        
+        Arguments:
+        ================
+        distro (default Kroupa_2001): IMF Mass Distribution to start with. Can swap in an instance of another IMF to start with a different model.
+        
+        Conversions: dict, where the key is the lower limit of the star mass, value is what those masses get converted to."""
         self.IMF = distro
         self.__conversions = []
         for k,v in conversions.items():

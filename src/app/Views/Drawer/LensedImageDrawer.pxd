@@ -11,5 +11,5 @@ cdef class LensedImageDrawer(ImageDrawer):
     cpdef draw(self,object args)
     cdef void drawBoundary(self, np.ndarray[np.uint8_t,ndim=3] canvas,model)
     cdef void __drawEinsteinRadius(self,np.ndarray[np.uint8_t,ndim=3] canvas,object model)
-    cdef void __drawTrackers(self,np.ndarray[np.uint8_t,ndim=3] canvas, object model)
+#     cdef void __drawTrackers(self,np.ndarray[np.uint8_t,ndim=3] canvas, object model)
     cdef getColorCode(self, np.ndarray[np.int32_t,ndim=2] pixels, object model)

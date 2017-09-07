@@ -8,6 +8,13 @@
 	#define M_PI_2 1.5707963267948966
 #endif
 
+/*
+    Ray-tracing calulation code, implimented in OpenCL to allow for
+    hardware acceleration.
+    
+    Note: Hardware must support 64-bit floating point arithmetic, else 
+    will not produce the correct result.
+*/
 __kernel void ray_trace(
 		__global const double *stars_mass,
 		__global const double *stars_x,

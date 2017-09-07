@@ -8,7 +8,6 @@ from scipy.cluster.vq import vq, kmeans, whiten
 import numpy as np
 import pyqtgraph as pg 
 
-from ...Calculator import ImageFinder
 from ...Utility import Vector2D
 from ...Utility.NullSignal import NullSignal
 
@@ -81,14 +80,14 @@ cdef class LensedImageDrawer(ImageDrawer):
         return ret
         
         
-    cdef void __drawTrackers(self,np.ndarray[np.uint8_t,ndim=3] canvas, object model): #*************NOT OPTIMIZED **************
-        x = ImageFinder.getRoot(-1,-1,model.parameters)
-        xNorm = x
-        xInt = Vector2D(int(xNorm.x),int(xNorm.y))
-        cdef np.ndarray[np.uint8_t, ndim=2] lookup = model.colorMap_arr
-        for i in range(-1,1):
-            for j in range(-1,1):
-                canvas[i+xInt.x+ int(model.parameters.canvasDim/2)][int(model.parameters.canvasDim/2) - (j+xInt.y)] = lookup[3]
+#     cdef void __drawTrackers(self,np.ndarray[np.uint8_t,ndim=3] canvas, object model): #*************NOT OPTIMIZED **************
+#         x = ImageFinder.getRoot(-1,-1,model.parameters)
+#         xNorm = x
+#         xInt = Vector2D(int(xNorm.x),int(xNorm.y))
+#         cdef np.ndarray[np.uint8_t, ndim=2] lookup = model.colorMap_arr
+#         for i in range(-1,1):
+#             for j in range(-1,1):
+#                 canvas[i+xInt.x+ int(model.parameters.canvasDim/2)][int(model.parameters.canvasDim/2) - (j+xInt.y)] = lookup[3]
 
     def drawCriticalRadius(self,canvas,model):
         nu = 2*(model.parameters.galaxy.shearAngle.to('rad').value - model.parameters.quasar.position.angle)
