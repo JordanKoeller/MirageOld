@@ -58,11 +58,11 @@ class Controller(object):
         return args
 
     def run(self,*args):
-    '''
-    Method that recurses through all delegates, calling their respective calculate methods. 
-    
-    If self is deactivated before, by calling self.deactivate(), this method does nothing.
-    '''
+        '''
+        Method that recurses through all delegates, calling their respective calculate methods. 
+        
+        If self is deactivated before, by calling self.deactivate(), this method does nothing.
+        '''
         if self._active:
             args = self.calculate(*args)
             for child in self._children:

@@ -14,6 +14,24 @@ from PyQt5 import QtGui
 
 
 class AnimationController(MasterController):
+
+    '''
+    extends MasterController.
+
+    
+    Controller that continually calls calculate on its children in a timer. Useful for rendering animations.
+
+    Runs animation calculations in a separate process to keep the GUI Thread responsive and fast.
+
+    Constructor has three arguments: startSignal, pauseSignal, and stopSignal. All three must be instances of QtCore.pyqtSignal().
+
+    Emitting startSignal will start the animation.
+    Emitting pauseSignal will pause the signal, allowing it to be resumed later with another startSignal emission.
+    Emitting stopSignal will reset the controller to the state it was in before animating anything.
+
+
+    
+    '''
     
     def __init__(self,*signals):
         MasterController.__init__(self)

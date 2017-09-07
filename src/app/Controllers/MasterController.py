@@ -9,13 +9,22 @@ from .Controller import Controller
 
 class MasterController(Controller):
     '''
-    classdocs
+    extends Controller
+
+    
+    Top - level controller. Alone, this controller does nothing, other than accept signals emitted by startSignal.
+
+    When supplied with delegates, MasterController will call calculate() on all its children, and have all its children call
+    calculate on their children, until no children remain.
     '''
 
 
     def __init__(self,startSignal=None):
         '''
         Constructor
+
+        args:
+        startSignal (QtCore.pyqtSignal) signal that when emitted, will cause this controller to calculate.
         '''
         Controller.__init__(self)
         if startSignal:

@@ -30,7 +30,49 @@ from .UserInputParser import UserInputParser
 
 class ParametersController(UserInputParser,GUIController):
     '''
-    For Controlling user input to specify the parameters for the run
+    extends UserInputParser, GUIController
+
+    ParametersController is a wrapper of a ParametersView, in charge of pulling information from what the user enters into the ParametersView pane, 
+    as well as pushing internal Model data to the ParametersView to communicate to the user.
+
+    More specifically, its primary role is to parse user input to construct a Parameters object instance.
+    
+
+    ===========================================
+    METHODS:
+
+    displayHelpMessage()
+        opens a dialog, displaying the docstrings for the Parameters class.
+
+    hide()
+        DEPRECATED.
+
+    show()
+        DEPRECATED.
+
+    randomizeGVelocity()
+        Produces a random 3D velocity vector for a galaxy, projected into two dimensions orthogonal to the line of sight.
+        Called internally when constructing a Parameters instance, when a random velocity is requested by the user.
+
+
+
+    ===================================
+
+    ATTRIBUTES:
+
+    modelID
+        (str) modelID of the model this controller is associated with. 
+
+    ===================================
+
+    SIGNALS:
+
+    paramLabel_signal 
+        DEPRECATED
+
+    paramSetter_signal(object)
+        signal that when emitted, will bind the Parameters instance included to the wrapped ParametersView
+
     '''
 
     paramLabel_signal = QtCore.pyqtSignal(str)
@@ -38,7 +80,8 @@ class ParametersController(UserInputParser,GUIController):
 
     def __init__(self,view):
         '''
-        Constructor
+        view (ParametersView)
+            view to be wrapped by this ParametersController instance.
         '''
         GUIController.__init__(self, view,None,None)
         UserInputParser.__init__(self,view)
@@ -49,22 +92,31 @@ class ParametersController(UserInputParser,GUIController):
         self._tmpStars = []
         
     def displayHelpMessage(self):
+        '''
+            opens a dialog, displaying the docstrings for the Parameters class.
+        '''
         dialog = HelpDialog(self.view)
         dialog.show()
         
     def hide(self):
+        '''
+        DEPRECATED.
+        '''
         self.view.mainSplitter.setSizes([0,100,100])
 #         self.view.paramFrame.setHidden(True)
 #         self.view.queueBox.setHidden(True)
 #         self.view.visualizationBox.setHidden(True)
         
     def show(self):
+        '''
+        DEPRECATED.
+        '''
         pass
         
     def _buildObjectHelper(self):
         """
         Collects and parses all the information from the various user input fields/checkboxes.
-        Stores them in a Parameters object.
+        returns them in a Parameters object.
         If the user inputs invalid arguments, will handle the error by returning None and sending a message
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
@@ -112,7 +164,6 @@ class ParametersController(UserInputParser,GUIController):
             displayQuasar = True
             displayGalaxy = True
             if self._tmpStars:
-                print("Binding stars")
                 galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity,stars = self._tmpStars[1])
             else:
                 galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity)
@@ -156,7 +207,6 @@ class ParametersController(UserInputParser,GUIController):
     def _bindFieldsHelper(self,parameters):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""
         if parameters.stars != []:
-            print("Found stars")
             self._tmpStars = (parameters.galaxy.percentStars,parameters.galaxy.stars)
         else:
             self._tmpStars = None
@@ -182,6 +232,9 @@ class ParametersController(UserInputParser,GUIController):
 
         
     def __round_to_n(self, x,n = 6):
+        '''
+        round x to n many significant figures. Default is 6
+        '''
         if x == 0.0:
             return 0
         else:
@@ -195,13 +248,6 @@ class ParametersController(UserInputParser,GUIController):
         """
         Converts an ordered pair string of the form (x,y) into a Vector2D of x and y.
 
-        Parameters:
-            reverse_y : Boolean
-                specify whether or not to negate y-coordinates to convert a conventional coordinate system of positive y in the up direction to
-                positive y in the down direction as used by graphics libraries. Default False
-
-            transpose : Boolean
-                Specify whether or not to flip x and y coordinates. In other words, return a Vector2D of (y,x) rather than (x,y). Default True
         """
         x, y = (string.strip('()')).split(',')
         if ' ' in y:
