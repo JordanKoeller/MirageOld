@@ -21,7 +21,8 @@ class AnimationController(MasterController):
     
     Controller that continually calls calculate on its children in a timer. Useful for rendering animations.
 
-    Runs animation calculations in a separate process to keep the GUI Thread responsive and fast.
+    Runs animation calculations in a separate process to keep the GUI Thread responsive and fast. Communication is facilitated via 
+    python's Pipe and Queue classes in the multiprocessing package.
 
     Constructor has three arguments: startSignal, pauseSignal, and stopSignal. All three must be instances of QtCore.pyqtSignal().
 

@@ -11,9 +11,13 @@ from ..Views.Drawer.LensedImageDrawer import LensedImageDrawer
 from .Controller import Controller
 
 
-# from ...Utility.AsyncSignal import AsyncSignal
 # MODELQUESTIONERDELEGATES
 class ModelGetter(Controller):
+    '''
+        inherits Controller.
+
+        
+    '''
     
     def __init__(self,mname):
         Controller.__init__(self)
