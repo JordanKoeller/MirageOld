@@ -76,6 +76,8 @@ coverage.xml
 *.mo
 *.pot
 
+#Vim swap files
+*.swp
 # Django stuff:
 *.log
 local_settings.py
