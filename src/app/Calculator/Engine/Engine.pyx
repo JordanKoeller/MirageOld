@@ -21,7 +21,7 @@ from ...Utility import zeroVector
 from app.Preferences import GlobalPreferences
 import numpy as np
 
-from .. import gpu_kernel
+from .. import gpu_kernel, currDir
 
 cimport numpy as np
 from libcpp.vector cimport vector
@@ -96,7 +96,7 @@ cdef class Engine:
 		# output buffers
 		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
-		prg = cl.Program(context, open('app/Calculator/ray_tracer.cl').read()).build()
+		prg = cl.Program(context, open(currDir+'ray_tracer.cl').read()).build()
 		prg.ray_trace(queue, (width, height), None,
 			stars_buffer_mass,
 			stars_buffer_x,
@@ -158,7 +158,7 @@ cdef class Engine:
 		# output buffers
 		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
-		prg = cl.Program(context, gpu_kernel.read()).build()
+		prg = cl.Program(context, open(currDir+'ray_tracer.cl').read()).build()
 		prg.ray_trace(queue, (width, height), None,
 			stars_buffer_mass,
 			stars_buffer_x,

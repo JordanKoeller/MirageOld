@@ -41,7 +41,7 @@ class _PreferencesParser(object):
 class _GlobalPreferences(_PreferencesParser):
     """docstring for _GlobalPreferences"""
     def __init__(self):
-        _PreferencesParser.__init__(self,'Resources/.default_global_preferences.json')
+        _PreferencesParser.__init__(self,os.environ['projectDir']+'Resources/.default_global_preferences.json')
         if self['core_count'] == 'all':
             self._prefMap['core_count'] = multiprocessing.cpu_count()
         if self['use_openCL']:
@@ -50,5 +50,5 @@ class _GlobalPreferences(_PreferencesParser):
 
 
 GlobalPreferences = _GlobalPreferences()
-TracerPreferences = _PreferencesParser('Resources/.default_tracer_preferences.json')
+TracerPreferences = _PreferencesParser(os.environ['projectDir']+'Resources/.default_tracer_preferences.json')
 
