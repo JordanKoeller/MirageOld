@@ -37,10 +37,8 @@ class ModelImpl(object):
     def updateParameters(self, params):
         if params.galaxy.starVelocityParams and isinstance(self.__Engine,Engine_Grid):
             self.__Engine = Engine_Brute()
-            print("Brute Forcing")
         elif not params.galaxy.starVelocityParams and isinstance(self.__Engine,Engine_Brute):
             self.__Engine = Engine_Grid()
-            print("Grid Structure")
         if self.parameters:
             if self.parameters.time != 0.0:
                 params.setTime(self.parameters.time)
@@ -61,7 +59,6 @@ class ModelImpl(object):
             self.__Engine.reconfigure()
 
     def reset(self):
-        # self.parameters.quasar.setTime(0)
         self.parameters.setTime(0)
 
     @property

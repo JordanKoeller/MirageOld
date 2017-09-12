@@ -7,6 +7,7 @@ Created on Jul 25, 2017
 import json 
 import multiprocessing
 import os
+
 class _PreferencesParser(object):
     '''
     classdocs
