@@ -202,7 +202,7 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 	def showTracerSetup(self):
 		self.layout.clear()
 		self.addCurvePane()
-		self.addImgPane()
+# 		self.addImgPane()
 		self.addMagPane()
 
 	def _mkStatusBar(self):

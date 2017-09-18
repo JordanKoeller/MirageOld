@@ -68,6 +68,7 @@ class ModelDialog(QDialog):
 					#From a MagMap instance
 					
 					modelLoader = la.load(None)
+					if not modelLoader: return
 					descString = 'Specify which trial to select. \n Choose -1 to load all in one view.'
 					trialNum,success = QInputDialog.getInt(self,'Add Model', descString,-1,-1,modelLoader.numTrials)
 					if success:
@@ -81,6 +82,7 @@ class ModelDialog(QDialog):
 						else:
 							model = MagnificationMapModel(modelLoader[trialNum])
 							self._models[name] = model
+					else: return
 				elif source == 3:
 					#Means from scratch
 						model = Model.DefaultModel()
