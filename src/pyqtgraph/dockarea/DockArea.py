@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 import weakref
+
 from PyQt5 import QtCore, QtGui
-from .Container import *
-from .DockDrop import *
-from .Dock import Dock
+from PyQt5 import uic, QtWidgets
 from pyqtgraph import debug as debug
 from pyqtgraph.python2_3 import basestring
+
+from .Container import *
+from .Dock import Dock
+from .DockDrop import *
+
 
 class DockArea(Container, QtGui.QWidget, DockDrop):
     def __init__(self, temporary=False, home=None,mergeSignal = None):
         Container.__init__(self, self)
         QtGui.QWidget.__init__(self)
         DockDrop.__init__(self, allowedAreas=['left', 'right', 'top', 'bottom'],mergeSignal = mergeSignal)
+        #IMPORT FILE HERE
         self.layout = QtGui.QVBoxLayout()
         self.layout.setContentsMargins(0,0,0,0)
         self.layout.setSpacing(0)
@@ -162,11 +167,15 @@ class DockArea(Container, QtGui.QWidget, DockDrop):
         self.resizeOverlay(self.size())
         
     def addTempArea(self):
+        import GUIMain
+        from app.Views.MainView import MainView
         if self.home is None:
             area = DockArea(temporary=True, home=self)
             self.tempAreas.append(area)
-            win = TempAreaWindow(area)
+            win = MainView(area)
+#             win = TempAreaWindow(area)
             area.win = win
+            GUIMain.bindWindow(win)
             win.show()
         else:
             area = self.home.addTempArea()
@@ -323,15 +332,17 @@ class DockArea(Container, QtGui.QWidget, DockDrop):
 
 
 
-
-class TempAreaWindow(QtGui.QMainWindow):
-    def __init__(self, area, **kwargs):
-        QtGui.QMainWindow.__init__(self, **kwargs)
-        self.setCentralWidget(area)
-
-    def closeEvent(self, *args, **kwargs):
-        self.centralWidget().clear()
-        QtGui.QMainWindow.closeEvent(self, *args, **kwargs)
+# from app.Views.WindowFrame import WindowFrame
+# 
+# class TempAreaWindow(WindowFrame):
+#     def __init__(self, area, **kwargs):
+#         WindowFrame.__init__(self, area=area,**kwargs)
+# 
+# 
+#     def closeEvent(self, *args, **kwargs):
+#         self.centralWidget().clear()
+#         QtGui.QMainWindow.closeEvent(self, *args, **kwargs)
+#         
 
 #     def grabFrame(self):
 #         return self.centralWidget.grab()

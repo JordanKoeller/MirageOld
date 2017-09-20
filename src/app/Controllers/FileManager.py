@@ -134,7 +134,7 @@ Provides an interface for loading data from files.
         pass
     
     def open(self,filename=None,*args,**kwargs):
-        self.getFile(filename)
+        return self.getFile(filename) is not None
 
     def getFile(self,filename=None,*args,**kwargs):
         if filename:

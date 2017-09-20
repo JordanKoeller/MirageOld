@@ -7,11 +7,11 @@ import factory
 
 from .. import mainUIFile
 from ..Controllers import ControllerFactory, ExportFactory
-from ..Controllers.FileManagerImpl import ParametersFileManager, RecordingFileManager
+from ..Controllers.FileManagerImpl import ParametersFileManager, RecordingFileManager, ParametersFileReader
 from ..Controllers.ParametersController import ParametersController
 from ..Controllers.QueueController import QueueController
+from ..Controllers import GlobalsController
 from ..Models.MagnificationMapModel import MagnificationMapModel
-from ..Utility.SignalRepo import SignalRepo
 from .LensedImageView import LensedImageView
 from .LightCurvePlotView import LightCurvePlotView
 from .MagMapView import MagMapView
@@ -19,52 +19,27 @@ from .ModelDialog import ModelDialog
 from .ParametersView import ParametersView
 from .TableView import TableView
 from .ViewLayout import ViewLayout
+from .WindowFrame import WindowFrame
 
 
-class MainView(QtWidgets.QMainWindow, SignalRepo):
+class MainView(WindowFrame):
 	"""
 
 	"""
 
-	playSignal = QtCore.pyqtSignal()
-	pauseSignal = QtCore.pyqtSignal()
-	resetSignal = QtCore.pyqtSignal()
-	deactivateSignal = QtCore.pyqtSignal()
-	recordSignal = QtCore.pyqtSignal()
-	progressDialogSignal = QtCore.pyqtSignal(int, int, str)
-	progressLabelSignal = QtCore.pyqtSignal(str)
-
-	def __init__(self, parent=None):
+	def __init__(self, area=None,parent=None):
 		super(MainView, self).__init__()
-		uic.loadUi(mainUIFile, self)
-		self.addSignals(progressLabel=self.progressLabelSignal,
-						play=self.playSignal,
-						pause=self.pauseSignal,
-						reset=self.resetSignal,
-						progressDialog=self.progressDialogSignal
-						)
+#		 uic.loadUi(mainUIFile, self)
+#		 self.addSignals(progressLabel=self.progressLabelSignal,
+#						 play=self.playSignal,
+#						 pause=self.pauseSignal,
+#						 reset=self.resetSignal,
+#						 progressDialog=self.progressDialogSignal
+#						 )
 		self.recordingFileManager = None
-
-		# Set up menubar interraction
-		self.playPauseAction.triggered.connect(self._playPauseToggle)
-		self.resetAction.triggered.connect(self._resetHelper)
-		self.saveTableAction.triggered.connect(self.saveTable)
-		self.loadTableAction.triggered.connect(self.loadTable)
-		# self.parametersEntryHelpAction.triggered.connect(???)
-		self.actionAddCurvePane.triggered.connect(self.addCurvePane)
-		self.actionAddImgPane.triggered.connect(self.addImgPane)
-		self.actionAddMagPane.triggered.connect(self.addMagPane)
-		self.actionAddParametersPane.triggered.connect(self.addParametersPane)
-		# self.actionAddTablePane.triggered.connect(self.addTablePane)
-		self.save_setup.triggered.connect(self.saveSetup)
-		self.load_setup.triggered.connect(self.loadSetup)
-		self.record_button.triggered.connect(self.toggleRecording)
-		self.visualizerViewSelector.triggered.connect(self.showVisSetup)
-		self.queueViewSelector.triggered.connect(self.showTableSetup)
-		self.tracerViewSelector.triggered.connect(self.showTracerSetup)
-		self.actionConfigure_Models.triggered.connect(self.openModelDialog)
-		self.actionExport.triggered.connect(self.exportLightCurves)
-		self.recordSignal.connect(self.recordWindow)
+		self.setCenter(area)
+# 
+#		 # Set up menubar interraction
 		
 		self.parent = parent
 		self.progressDialogSignal.connect(self.openDialog)
@@ -74,18 +49,18 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 		self.layout = ViewLayout(None, None)
 		self.layout.sigModelDestroyed.connect(self.removeModelController)
 		self.mainSplitter.addWidget(self.layout)
-		self.initVisCanvas()
-		# self.addCurvePane()
-		# self.addMagPane()
-		self._mkStatusBar()
-		
+		self.save_setup.triggered.connect(self.saveSetup)
+		self.load_setup.triggered.connect(self.loadSetup)
+		self.saveTableAction.triggered.connect(self.saveTable)
+		self.loadTableAction.triggered.connect(self.loadTable)
+
 	def toggleRecording(self):
 		from mpi4py import MPI
 		comm = MPI.COMM_WORLD
 		if self.recordingFileManager:
 			comm.isend([self.recordingFileManager.close],dest=1,tag=11)
-# 			self.recordingFileManager.close()
-# 			self.recordingFileManager = None
+#			 self.recordingFileManager.close()
+#			 self.recordingFileManager = None
 		else:
 			self.recordingFileManager = RecordingFileManager()
 			self.recordingFileManager.open()
@@ -99,16 +74,20 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 	def saveSetup(self):
 		paramController = self._findControllerHelper(ParametersController)
 		filer = ParametersFileManager()
-		filer.open()
-		filer.write(Model[paramController.modelID].parameters)
+		if filer.open():
+			filer.write(Model[paramController.modelID].parameters)
 
 	def loadTable(self):
 		tableController = self._findControllerHelper(QueueController)
 		tableController.loadTable()
 
 	def loadSetup(self):
+		print("Trying to load")
 		paramController = self._findControllerHelper(ParametersController)
-
+		loader = ParametersFileReader()
+		if loader.open():
+			params = loader.load()
+			paramController.paramSetter_signal.emit(params)
 
 	def _findControllerHelper(self, kind):
 		ret = []
@@ -202,7 +181,7 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 	def showTracerSetup(self):
 		self.layout.clear()
 		self.addCurvePane()
-# 		self.addImgPane()
+#		 self.addImgPane()
 		self.addMagPane()
 
 	def _mkStatusBar(self):
@@ -224,7 +203,7 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 			self.modelControllers.remove(removing)
 
 	def updateModels(self, model):
-# 		Model.replaceModel(model)
+#		 Model.replaceModel(model)
 		pc = filter(lambda i: isinstance(i, ParametersController), self.modelControllers)
 		for i in pc:
 			i.bindFields(Model[i.modelID].parameters)
@@ -248,7 +227,14 @@ class MainView(QtWidgets.QMainWindow, SignalRepo):
 			ptr.setsize(im.byteCount())
 			arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
 			comm.isend(arr,dest=1,tag=11)
-# 			self.recordingFileManager.write(frame)
+#			 self.recordingFileManager.write(frame)
+
+	def closeEvent(self,*args,**kwargs):
+		self.centralWidget().clear()
+		QtGui.QMainWindow.closeEvent(self,*args,**kwargs)
+		
+	def addView(self,view):
+		self.layout.addView(view)
 		
 
 

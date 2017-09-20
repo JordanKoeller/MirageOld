@@ -62,8 +62,11 @@ if __name__ == "__main__" and isMainProcess():
     else:
         from PyQt5 import QtWidgets
         from app.Views.MainView import MainView as GUIManager
+        import GUIMain 
         app = QtWidgets.QApplication(sys.argv)
         ui = GUIManager()
+        ui.initVisCanvas()
+        GUIMain.bindWindow(ui)
         if args.queue:
             ui.switchToQueue()
         else:

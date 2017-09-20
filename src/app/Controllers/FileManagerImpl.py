@@ -79,6 +79,9 @@ class ParametersFileManager(FileWriter):
         FileWriter.open(self, filename)
         if self._filename:
             self._file = open(self._filename,'w+')
+            return True
+        else:
+            return False
         
     def write(self, data):
         jsonString = _formatJson(data.jsonString)
@@ -98,7 +101,7 @@ class ParametersFileReader(FileReader):
         FileReader.__init__(self,*args,**kwargs)
 
     def open(self, filename=None):
-        FileReader.open(self,filename)
+        return FileReader.open(self,filename)
 
     def load(self):
         self._filename = self._filename or self.open()
