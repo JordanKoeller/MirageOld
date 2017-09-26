@@ -26,6 +26,7 @@ class VisualizationController(GUIController):
         '''
         Constructor
         '''
+        print("STILL USING THESE")
         GUIController.__init__(self,view,None,None)
         view.addSignals(imageCanvas = self.imageCanvas_signal, curveCanvas = self.curveCanvas_signal)
         self.playToggle = False

@@ -3,13 +3,11 @@ from PyQt5 import QtCore
 
 from app.Controllers import ControllerFactory, ExportFactory
 from app.Models import Model
-# from ..Controllers import ControllerFactory, ExportFactory
 from app.Controllers.FileManagerImpl import ParametersFileManager, RecordingFileManager
 from app.Controllers.ParametersController import ParametersController
 from app.Controllers.QueueController import QueueController
-from app.Controllers import GlobalsController
+# from app.Controllers import GlobalsController
 from app.Models.MagnificationMapModel import MagnificationMapModel
-# from ..Utility.SignalRepo import SignalRepo
 from app.Views.LensedImageView import LensedImageView
 from app.Views.LightCurvePlotView import LightCurvePlotView
 from app.Views.MagMapView import MagMapView
@@ -18,6 +16,7 @@ from app.Views.ParametersView import ParametersView
 from app.Views.TableView import TableView
 from app.Views.ViewLayout import ViewLayout
 from app.Views.WindowFrame import WindowFrame
+import factory
 
 class _UISignals(QObject):
     playSignal = QtCore.pyqtSignal()
@@ -27,6 +26,7 @@ class _UISignals(QObject):
     recordSignal = QtCore.pyqtSignal()
     progressDialogSignal = QtCore.pyqtSignal(int, int, str)
     progressLabelSignal = QtCore.pyqtSignal(str)
+    
     def __init__(self):
         QObject.__init__(self)
 
@@ -44,6 +44,8 @@ def modelControllers():
         for cv in window.modelControllers:
             cvs.append(cv)
     return cvs
+
+
 def canvasViews():
     dvs = []
     for window in __boundWindows:
@@ -101,11 +103,11 @@ def _resetHelper(window):
     for id, model in Model.items():
         model.reset()
 
-def _saveTable(window):
-    pass
-
-def _loadTable(window):
-      pass
+# def _saveTable(window):
+#     pass
+# 
+# def _loadTable(window):
+#       pass
 
 def _addCurvePane(window):
       plCanvas = LightCurvePlotView()
@@ -113,7 +115,9 @@ def _addCurvePane(window):
 
 def _addImgPane(window):
       view = LensedImageView()
+      controller = factory.LensedImageControllerFactory(view)
       window.addView(view)
+      window.modelControllers.append(controller)
 
 def _addMagPane(window):
       view = MagMapView()
@@ -125,11 +129,11 @@ def _addParametersPane(window):
       window.addView(view)
       window.modelControllers.append(controller)
 
-def _saveSetup(window):
-      pass
-
-def _loadSetup(window):
-      pass
+# def _saveSetup(window):
+#       pass
+# 
+# def _loadSetup(window):
+#       pass
 
 def _toggleRecording(window):
       pass
@@ -150,7 +154,15 @@ def _showTracerSetup(window):
       _addMagPane(window)
 
 def _openModelDialog(window):
-      pass
+    dialog = ModelDialog(canvasViews() + [i.view for i in modelControllers()], window)
+    dialog.show()
+    dialog.accepted.connect(lambda: _configureControllers(dialog.exportModel()))
+
+def _configureControllers(models):
+    for id,model in models.items():
+        relevantControllers = filter(lambda x: isinstance(x,ParametersController) and x.modelID == id,modelControllers())
+        for i in relevantControllers:
+            i.bindFields(model.parameters)
 
 def _exportLightCurves(window):
       pass

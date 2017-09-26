@@ -37,4 +37,4 @@ def pixelToAngle(pixels,model):
         return pixels
     else:
         pixels = pixels*dTheta
-        return Vector2D(pixels.x + canvasDim/2,canvasDim/2 - pixels.y)
+        return Vector2D(pixels.x + canvasDim/2,canvasDim/2 - pixels.y,'rad')

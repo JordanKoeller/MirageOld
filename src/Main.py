@@ -65,8 +65,9 @@ if __name__ == "__main__" and isMainProcess():
         import GUIMain 
         app = QtWidgets.QApplication(sys.argv)
         ui = GUIManager()
-        ui.initVisCanvas()
+#         ui.initVisCanvas()
         GUIMain.bindWindow(ui)
+        GUIMain._showVisSetup(ui)
         if args.queue:
             ui.switchToQueue()
         else:

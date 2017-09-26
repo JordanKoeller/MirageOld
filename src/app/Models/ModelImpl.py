@@ -34,7 +34,10 @@ class ModelImpl(object):
         if parameters:
             self.updateParameters(parameters)
             
-    def updateParameters(self, params):
+    def updateParameters(self, params=None,*args,**kwargs):
+        if not params:
+            self.parameters.update(*args,**kwargs)
+            params = self.parameters
         if params.galaxy.starVelocityParams and isinstance(self.__Engine,Engine_Grid):
             self.__Engine = Engine_Brute()
         elif not params.galaxy.starVelocityParams and isinstance(self.__Engine,Engine_Brute):

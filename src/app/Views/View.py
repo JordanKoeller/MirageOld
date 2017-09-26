@@ -6,21 +6,29 @@ from pyqtgraph.widgets.GraphicsLayoutWidget import GraphicsLayoutWidget
 class View(GraphicsLayoutWidget):
     """General view class that can be added to the program's layout.
     Accepts a modelID as an argument."""
-    title = ''
     _signalRef = QtCore.pyqtSignal(object)
+    sigTitleChanged = QtCore.pyqtSignal(str)
 
     def __init__(self, modelID='default',title=None):
         super(View, self).__init__()
-        self.modelID = modelID
+        self._modelID = modelID
         self.type = ''
         self._bridge = None
         # if title:
         #     self.title = title
         # self.__enabled = True
+        
+    def setModelID(self,string):
+        self._modelID = string
+        self.sigTitleChanged.emit(self.title)
 
     @property
     def signal(self):
         return self._signalRef
+    
+    @property
+    def modelID(self):
+        return self._modelID
 
     @property
     def enabled(self):

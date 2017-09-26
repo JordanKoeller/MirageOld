@@ -5,7 +5,7 @@ Having two Models from scratch.
 Bridging views when it shouldn't.
 Pulling apart bridged views.
 Update labels of views.
-Keyboard shortcuts don't work in subWindows.
+Keyboard shortcuts don't work in subWindows. FIXED
 Multiprocess calculation/gui/recording
 Pressing "Cancel" on ModelDialog causes changes to not be saved
 Checking a box in the ModelDialog updates the internal model,
@@ -20,9 +20,9 @@ Click-and-drag on imagePane to center image
 
 GUI MENUBAR CONTROLS
 Help menuItem doesn't show help dialog
-File->Load Parameters Doesn't do anything
-File->Save Parameters Crashes on cancel
-View->Add Table Pane Doesn't do anything
+File->Load Parameters Doesn't do anything FIXED
+File->Save Parameters Crashes on cancel FIXED
+View->Add Table Pane Doesn't do anything FIXED
 VIew->Macro Views are not mutually exclusive
 File->Export crashes if no LC traced
 File->Save Table Crashes if no table open

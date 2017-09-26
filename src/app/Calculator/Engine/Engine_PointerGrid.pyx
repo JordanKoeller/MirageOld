@@ -58,6 +58,7 @@ cdef class Engine_PointerGrid(Engine):
 
 	def reconfigure(self):
 		print("Reconfiguring")
+		print(self.__parameters)
 		self.__grid = PointerGrid()
 		begin = time.clock()
 		self.__preCalculating = True

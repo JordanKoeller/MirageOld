@@ -75,6 +75,9 @@ class Vector2D(object):
     
     def magnitude(self):
         return math.sqrt(self.x**2+self.y**2)
+
+    def magWithUnits(self):
+        return u.Quantity(self.magnitude(),self.unit)
     
     def normalized(self):
         mag = self.magnitude()
@@ -159,6 +162,12 @@ class Vector2D(object):
     def jsonString(self):
         encoder = Vector2DJSONEncoder()
         return encoder.encode(self)
+
+    @classmethod
+    def fromTuple(self,args):
+        x = args[0]
+        y = args[1]
+        return Vector2D(x,y)
 
     def __str__(self):
         "Pretty print"

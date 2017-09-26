@@ -29,7 +29,7 @@
 
 	"auto_normalize_magmap":false,
 
-	"animate_motion":false,
+	"animate_motion":true,
 
 	"lightCurve_resolution":200
 

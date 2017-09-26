@@ -45,10 +45,10 @@ class ModelDialog(QDialog):
 			selected = self._viewTable.selectedViews
 			deselected = self._viewTable.deselectedViews
 			for view in selected:
-				view.modelID = self._selected.modelID
+				view.setModelID(self._selected.modelID)
 			for view in deselected:
 				if view.modelID == self._selected.modelID:
-					view.modelID = ''
+					view.setModelID("")
 		self._selected = item
 		self._viewTable.selectModel(item.modelID)
 
@@ -85,12 +85,11 @@ class ModelDialog(QDialog):
 					else: return
 				elif source == 3:
 					#Means from scratch
-						model = Model.DefaultModel()
+					model = Model.DefaultModel()
 				model.modelID = name
 				self._models[name] = model
 				self._updateModelList()
 
 	def exportModel(self):
-		print("Done printing")
 		return self._models
 		# return copy.deepcopy(self._models)

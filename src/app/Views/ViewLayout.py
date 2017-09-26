@@ -32,6 +32,7 @@ class ViewLayout(QFrame):
     def addView(self,view):
         dock = Dock(view.title,closable=True,mergeSignal = self.mergeSignal)
         dock.addWidget(view)
+        view.sigTitleChanged.connect(dock.setTitle)
         self._layout.addDock(dock,position='right')
         dock.sigClosed.connect(self.removeView)
         if isinstance(view,CanvasView):

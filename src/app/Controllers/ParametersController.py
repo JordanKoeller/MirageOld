@@ -120,67 +120,69 @@ class ParametersController(UserInputParser,GUIController):
         If the user inputs invalid arguments, will handle the error by returning None and sending a message
         to the progress_label_slot saying "Error. Input could not be parsed to numbers."
         """
-        gRedshift = float(self.view.gRedshift.text())
-        qRedshift = float(self.view.qRedshift.text())
-        qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')
-        specials = UnitConverter.generateSpecialUnits(qBHMass,qRedshift,gRedshift)
-        with u.add_enabled_units(specials):
-            #Setting units
-            inputUnit = self.view.scaleUnitOption.currentText()
-            #Determination of relative motion
-            gVelocity = self.view.qVelocity.text()
-            gComponents = gVelocity.strip('()').split(',')
-            gPositionRaDec = self.view.gPositionEntry.text()
-            apparentV = None
-            if len(gComponents) == 2:
-                apparentV = self.vectorFromQString(self.view.qVelocity.text())
-            else:
-                gVelocity = CartesianRepresentation(gComponents[0],gComponents[1],gComponents[2],'')
-
-
-                ra,dec = gPositionRaDec.strip('()').split(',')
-                gPositionRaDec = SkyCoord(ra,dec, unit = (u.hourangle,u.deg))
-                apparentV = self.getApparentVelocity(gPositionRaDec,gVelocity)
-
-            #Quasar properties
-            qPosition = self.vectorFromQString(self.view.qPosition.text(), unit='arcsec').to('rad')
-            qRadius = u.Quantity(float(self.view.qRadius.text()), 'uas')
-            
-            #Galaxy properties
-            gVelDispersion = u.Quantity(float(self.view.gVelDispersion.text()), 'km/s')
-            gNumStars = int(self.view.gNumStars.text())
-            gShearMag = float(self.view.gShearMag.text())
-            gShearAngle = u.Quantity(float(self.view.gShearAngle.text()), 'degree')
-            gStarStdDev = float(self.view.gStarStdDev.text())
-            gStarMean = gVelDispersion
-            gStarParams = None
-            if gNumStars == 0 or gStarStdDev == 0:
+        try:
+            gRedshift = float(self.view.gRedshift.text())
+            qRedshift = float(self.view.qRedshift.text())
+            qBHMass = u.Quantity(float(self.view.quasarBHMassEntry.text()),'solMass')
+            specials = UnitConverter.generateSpecialUnits(qBHMass,qRedshift,gRedshift)
+            with u.add_enabled_units(specials):
+                #Setting units
+                inputUnit = self.view.scaleUnitOption.currentText()
+                #Determination of relative motion
+                gVelocity = self.view.qVelocity.text()
+                gComponents = gVelocity.strip('()').split(',')
+                gPositionRaDec = self.view.gPositionEntry.text()
+                apparentV = None
+                if len(gComponents) == 2:
+                    apparentV = self.vectorFromQString(self.view.qVelocity.text())
+                else:
+                    gVelocity = CartesianRepresentation(gComponents[0],gComponents[1],gComponents[2],'')
+    
+    
+                    ra,dec = gPositionRaDec.strip('()').split(',')
+                    gPositionRaDec = SkyCoord(ra,dec, unit = (u.hourangle,u.deg))
+                    apparentV = self.getApparentVelocity(gPositionRaDec,gVelocity)
+    
+                #Quasar properties
+                qPosition = self.vectorFromQString(self.view.qPosition.text(), unit='arcsec').to('rad')
+                qRadius = u.Quantity(float(self.view.qRadius.text()), 'uas')
+                
+                #Galaxy properties
+                gVelDispersion = u.Quantity(float(self.view.gVelDispersion.text()), 'km/s')
+                gNumStars = int(self.view.gNumStars.text())
+                gShearMag = float(self.view.gShearMag.text())
+                gShearAngle = u.Quantity(float(self.view.gShearAngle.text()), 'degree')
+                gStarStdDev = float(self.view.gStarStdDev.text())
+                gStarMean = gVelDispersion
                 gStarParams = None
-            else:
-                gStarParams = (gStarMean,gStarStdDev)
-            displayCenter = self.vectorFromQString(self.view.gCenter.text(), unit='arcsec').to('rad')
-            dTheta = u.Quantity(float(self.view.scaleInput.text()), inputUnit).to('rad').value
-            canvasDim = int(self.view.dimensionInput.text())
-            displayQuasar = True
-            displayGalaxy = True
-            if self._tmpStars:
-                galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity,stars = self._tmpStars[1])
-            else:
-                galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity)
-            quasar = Quasar(qRedshift, qRadius, qPosition, apparentV, mass = qBHMass)
-            params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
-            self._tmpStars = None
-            if self.view.qRadiusUnitOption.currentIndex() == 1:
-                absRg = (params.quasar.mass*const.G/const.c/const.c).to('m')
-                angle = absRg/params.quasar.angDiamDist.to('m')
-                params.quasar.update(radius = u.Quantity(angle.value*qRadius.value,'rad'))
-            self.view.pixelAngleLabel_angle.setText(str(self.__round_to_n(params.pixelScale_angle.value,4)))
-            self.view.pixelAngleLabel_thetaE.setText(str(self.__round_to_n(params.pixelScale_thetaE,4)))
-            self.view.pixelAngleLabel_Rg.setText(str(self.__round_to_n(params.pixelScale_Rg,4)))
-            self.view.quasarRadiusRGEntry.setText(str(self.__round_to_n(params.quasarRadius_rg, 4)))
-            return params
-
-        
+                if gNumStars == 0 or gStarStdDev == 0:
+                    gStarParams = None
+                else:
+                    gStarParams = (gStarMean,gStarStdDev)
+                displayCenter = self.vectorFromQString(self.view.gCenter.text(), unit='arcsec').to('rad')
+                dTheta = u.Quantity(float(self.view.scaleInput.text()), inputUnit).to('rad').value
+                canvasDim = int(self.view.dimensionInput.text())
+                displayQuasar = True
+                displayGalaxy = True
+                if self._tmpStars:
+                    galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity,stars = self._tmpStars[1])
+                else:
+                    galaxy = Galaxy(gRedshift, gVelDispersion, gShearMag, gShearAngle, gNumStars, center=displayCenter, starVelocityParams=gStarParams,skyCoords = gPositionRaDec, velocity = gVelocity)
+                quasar = Quasar(qRedshift, qRadius, qPosition, apparentV, mass = qBHMass)
+                params = Parameters(galaxy, quasar, dTheta, canvasDim, displayGalaxy, displayQuasar)
+                self._tmpStars = None
+                if self.view.qRadiusUnitOption.currentIndex() == 1:
+                    absRg = (params.quasar.mass*const.G/const.c/const.c).to('m')
+                    angle = absRg/params.quasar.angDiamDist.to('m')
+                    params.quasar.update(radius = u.Quantity(angle.value*qRadius.value,'rad'))
+                self.view.pixelAngleLabel_angle.setText(str(self.__round_to_n(params.pixelScale_angle.value,4)))
+                self.view.pixelAngleLabel_thetaE.setText(str(self.__round_to_n(params.pixelScale_thetaE,4)))
+                self.view.pixelAngleLabel_Rg.setText(str(self.__round_to_n(params.pixelScale_Rg,4)))
+                self.view.quasarRadiusRGEntry.setText(str(self.__round_to_n(params.quasarRadius_rg, 4)))
+                return params
+        except:
+            print("Tried. Failed to build Parameters Instance")
+            
 
     def getApparentVelocity(self,pos,v):
         ev = EarthVelocity
