@@ -1,6 +1,6 @@
 {
 
-	"use_openCL":false,
+	"use_openCL":true,
 	
 	"cl_device":3,
 
