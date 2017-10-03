@@ -1,0 +1,46 @@
+{
+
+	"use_openCL":false,
+	
+	"cl_device":"0:1",
+
+	"memory_warning_threshold":5,
+
+	"core_count":"all",
+
+	"query_type":"point",
+
+	"star_icon":"circle",
+
+	"color_scheme":{
+		"minimum":"#0000ff",
+		"saddle_pt":"#00ff00",
+		"sis_center":"#ff00ff",
+		"star":"#ffffff",
+		"background":"#000000"
+	},
+
+	"max_frame_rate" : 10,
+
+	"default_perspective":[
+		"parameter",
+		"visualization"
+	],
+
+	"auto_normalize_magmap":false,
+
+	"animate_motion":true,
+
+	"lightCurve_resolution":200,
+
+	"ray_trace_on_load":true,
+
+	"precise_light_curve":false,
+
+	"fast_generate_light_curve":false,
+
+	"display_quasar_icon":true,
+
+	"light_curve_export_resolution":200
+
+}
