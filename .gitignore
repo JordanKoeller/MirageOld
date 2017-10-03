@@ -30,7 +30,10 @@ a.out
 *.npy
 *.npz
 .GPUInfo
-
+*.un~
+*~
+*/*.un~
+*/*~
 # Distribution / packaging
 .Python
 env/
