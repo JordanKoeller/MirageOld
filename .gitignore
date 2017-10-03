@@ -148,4 +148,14 @@ bh_unicode_properties.cache
 # https://packagecontrol.io/packages/sublime-github
 GitHub.sublime-settings
 
-# End of https://www.gitignore.io/api/python,sublimetext
+
+
+
+
+#Project-Specific Files:
+.custom_global_parameters.json
+
+
+
+
+
