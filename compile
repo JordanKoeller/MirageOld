@@ -3,3 +3,9 @@ cd src/app
 python setup.py build_ext --inplace
 cd ../..
 echo "\n\n\nBuild Done"
+
+if [ ! -f .custom_preferences.json ]; then
+    echo "Custom Preferences not found."
+    echo "Using default parameters. To edit default, edit '.custom_preferences.json' in the project's root directory"
+    cat .default_preferences.json > .custom_preferences.json
+fi
