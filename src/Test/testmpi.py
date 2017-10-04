@@ -1,4 +1,3 @@
-print("Got HEre")
 from app.Utility.MPISignals import *
 
 from mpi4py import MPI

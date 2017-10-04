@@ -1,16 +1,18 @@
-guarantee magmap is at the center of the calculated canvas.					DONE
-Stop system from reconfiguring engine twice									DONE
-relative velocity input												DONE
-DOCUMENTATION
-debug shape-based query
-bind parameters to new fields												DONE
-report average mass of starfield, use for determining theta_e				DONE
+Documentation
+    refactor old with new format
+    write new
 
+Debugging
+    See BUGLIST.md
 
-Relative velocities															DONE
-Track image through magmap - transparent data for lightcurve 										DONE
-    multipane animation															DONE
-licensing info, etc
-scale coloring of magmap relative to magnification without point lenses				DONE
-Remote plotting to fix race condition?								FAILED
-Generate light curve from magmap pixel values							
+Multithreaded drawing with MPI
+
+Refactoring:
+    ViewBridge
+    How controllers update the model
+
+Windowing Decorator for Spatial Grid
+
+QSO2237+0305 Modeling
+
+RAM Metering/Warning system						
