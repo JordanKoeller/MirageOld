@@ -5,14 +5,18 @@
 #include <algorithm>
 #include <cfloat>
 #include <unordered_map>
+#include "SpatialGrid.hpp"
+
+#ifndef POINTERGRID
+#define POINTERGRID
 
 using namespace std;
 
 
-class PointerGrid
+class PointerGrid: public SpatialGrid
 {
 private:
-    typedef  unsigned int Index;
+//    typedef  unsigned int Index;
     // friend class PointerGrid::Node;
     double* rawData;
 
@@ -189,7 +193,7 @@ public:
         return *this;
     }
 
-    vector<pair<int,int>> find_within( double &x,  double &y,  double &r)
+    vector<pair<int,int>> find_within( double &x,  double &y,  double &r) override 
     {
         double r2 = r*r;
         Index cx = round((x-tlx)/NODE_WIDTH);
@@ -258,7 +262,7 @@ public:
         return ret;
     }
 
-    unsigned int find_within_count( double &x,  double &y,  double &r)
+    unsigned int find_within_count (double &x,  double &y,  double &r) override
     {
         double r2 = r*r;
         Index cx = round((x-tlx)/NODE_WIDTH);
@@ -347,7 +351,7 @@ public:
         delete[] rawData;
     }
 
-    bool clear()
+    bool clear() override
     {
         sz = 0;
         for (size_t i = 0; i < data.size(); ++i)
@@ -359,5 +363,8 @@ public:
         }
         return true;
     }
+
+    unsigned int size() override {return sz;}
 };
 
+#endif

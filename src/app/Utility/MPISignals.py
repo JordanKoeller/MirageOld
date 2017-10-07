@@ -4,6 +4,8 @@ import numpy as np
 from .NullSignal import NullSignal
 from threading import Thread
 import time
+
+import logging
 # from PyQt5.QtCore import QObject
 
 
@@ -16,6 +18,7 @@ class ProcessRole(Enum):
 class SignalCode(Enum):
     """A few enumerations to make 
     sending messages over MPI more readable."""
+    BUFFER_SPECS = 80
     START   = 91
     PAUSE   = 92
     RESET   = 93
@@ -30,7 +33,7 @@ class MPIDummy(object):
     calls from throwing errors when executing
     without MPI.'''
 
-    printOnAttempt = False
+    printOnAttempt = True
 
     def __init__(self):
         pass
@@ -71,10 +74,11 @@ class MPIListener(object):
         # QObject.__init__(self)
         self._listenerArgs = []
         self._listenerThread = Thread(target=self.listenLoop)
-        # self._listenerThread.start()
+        self._listenerThread.start()
 
 
     def listenFor(self,sender,tag=SignalCode.DEFAULT,msg=None,signal=NullSignal):
+        logging.info(str(tag) + " From "+str(sender))
         if isinstance(tag,SignalCode):
             tag = tag.value
         if isinstance(sender,ProcessRole):
@@ -84,16 +88,25 @@ class MPIListener(object):
     def listenLoop(self):
         # time.sleep(1)
         while True:
-            # print("FDSA")
             for sig in self._listenerArgs:
-                data = comm.recv(source = sig[0], tag=sig[1])
-                # hasData, data = receiver.test()
-                # if hasData:
-                print("Would emit the data" + str(data))
-                    # sig[3].emit(data)
-                # else:
-                #     receiver.Cancel()
-            # time.sleep(0.1) 
+                receiver = comm.irecv(source = sig[0], tag=sig[1])
+                hasData, data = receiver.test()
+                if hasData:
+                    if sig[1] == SignalCode.BUFFER_SPECS.value:
+                        logging.info("FOUND BUFFER_SPECS")
+                        ret = np.empty(data[0],dtype=data[1])
+                        foundData = comm.Irecv(ret,source=sig[0],tag=SignalCode.DEFAULT.value)
+                        while not foundData.Test():
+                            time.sleep(0.1)
+                        # foundData.wait()
+                        logging.info("Received an array of size " + str(ret.shape))
+                        logging.info("FIRST ELEM + "+str(ret[0,0]))
+                    else:
+                        logging.info(str(data))
+                        sig[3].emit(data)
+                else:
+                        receiver.Cancel()
+            time.sleep(0.1) 
 
 
 def usingMPI():
@@ -111,11 +124,12 @@ def usingMPI():
 #         comm.
 
 def sendContiguousArray(arr,dest,tag = SignalCode.DEFAULT): #Will update to be buffer-based, if necessary at a later time.
+    sendSignal((arr.shape,arr.dtype),dest,tag = SignalCode.BUFFER_SPECS)
     if isinstance(dest,ProcessRole):
         dest = dest.value
     if isinstance(tag,SignalCode):
         tag = tag.value
-    comm.isend(arr, dest=dest,tag=tag)
+    comm.Isend(arr, dest=dest,tag=tag)
 
 def sendSignal(data,dest,tag = SignalCode.DEFAULT):
     if isinstance(dest,ProcessRole):

@@ -161,3 +161,4 @@ GitHub.sublime-settings
 #PROJECT SPECIFIC FILES
 
 .custom_preferences.json
+.custom_compile

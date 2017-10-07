@@ -23,8 +23,11 @@ class __NullSignal(object):
     def emit(self,*args,**kwargs):
         for i in args:
             if isinstance(i, str):
-                logging.info(i)
+                pass
+                # print(i)
+                # logging.info(i)
             elif isinstance(i,int):
+                # print(i)
                 self.counter += 1
                 logging.info("On step "+str(self.counter))
 #                 print("On step "  + str(self.counter))
