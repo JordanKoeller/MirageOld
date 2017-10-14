@@ -62,7 +62,7 @@ def bindWindow(view):
         view.actionAddImgPane.triggered.connect(lambda: _addImgPane(view))
         view.actionAddMagPane.triggered.connect(lambda: _addMagPane(view))
         view.actionAddParametersPane.triggered.connect(lambda: _addParametersPane(view))
-        # view.actionAddTablePane.triggered.connect(view.addTablePane)
+        view.actionAddTablePane.triggered.connect(lambda: _addTablePane(view))
 #         view.save_setup.triggered.connect(lambda: _saveSetup(view))
 #         view.load_setup.triggered.connect(lambda: _loadSetup(view))
         view.record_button.triggered.connect(lambda: _toggleRecording(view))
@@ -128,6 +128,14 @@ def _addParametersPane(window):
       controller = factory.ParametersControllerFactory(view)
       window.addView(view)
       window.modelControllers.append(controller)
+
+def _addTablePane(window, parametersController=None):
+  tv = TableView()
+  pc = _findControllerHelper(ParametersController)
+  # Will need refactoring. TableControllerFactory is outdated
+  tableViewController = factory.TableControllerFactory(tv, pc)
+  window.addView(tv)
+  window.modelControllers.append(tableViewController)
 
 # def _saveSetup(window):
 #       pass

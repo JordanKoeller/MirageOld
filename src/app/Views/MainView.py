@@ -89,24 +89,24 @@ class MainView(WindowFrame):
 			params = loader.load()
 			paramController.paramSetter_signal.emit(params)
 
-# 	def _findControllerHelper(self, kind):
-# 		ret = []
-# 		for c in self.modelControllers:
-# 			if isinstance(c, kind):
-# 				ret.append(c)
-# 		if len(ret) == 1:
-# 			ret = ret[0]
-# 		elif len(ret) == 0:
-# 			ret = None
-# 		else:
-# 			model = QInputDialog.getItem(self, "Select Model",
-# 				"Please Select a Model to save.",
-# 				map(lambda i: i.modelID, filter(lambda v: isinstance(v, kind), self.modelControllers)))
-# 			if model[1]:
-# 				ret = next(filter(lambda i:i.modelID == model[0], self.modelControllers))
-# 			else:
-# 				ret = None
-# 		return ret
+	def _findControllerHelper(self, kind):
+		ret = []
+		for c in self.modelControllers:
+			if isinstance(c, kind):
+				ret.append(c)
+		if len(ret) == 1:
+			ret = ret[0]
+		elif len(ret) == 0:
+			ret = None
+		else:
+			model = QInputDialog.getItem(self, "Select Model",
+				"Please Select a Model to save.",
+				map(lambda i: i.modelID, filter(lambda v: isinstance(v, kind), self.modelControllers)))
+			if model[1]:
+				ret = next(filter(lambda i:i.modelID == model[0], self.modelControllers))
+			else:
+				ret = None
+		return ret
 # 
 # 	def _playPauseToggle(self):
 # 		if self.isPlaying:

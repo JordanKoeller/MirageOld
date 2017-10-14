@@ -89,7 +89,9 @@ class QueueController(UserInputParser,GUIController):
         self.view.unitLabel_6.setText(unitString)
 
 
-    def _buildObjectHelper(self,parameters):
+    def _buildObjectHelper(self,parameters=None):
+        if parameters is None:
+            return None
         inputUnit = self.view.unitLabel_6.text()
         name = self.view.experimentNameEntry.text()
         desc = self.view.experimentDescEntry.toPlainText()

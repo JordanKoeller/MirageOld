@@ -1,11 +1,13 @@
 #include <vector>
 #include <utility>
+#include <stdlib.h>
+
 #include "SpatialGrid.hpp"
 
 #ifndef WINDOWGRID
 #define WINDOWGRID
 
-#define DEFAULT_DIMENSIONS 0.1
+#define DEFAULT_DIMENSIONS 0.01
 
 using namespace std;
 
@@ -21,6 +23,8 @@ private:
 	int w;
 	int h;
 
+	int node_count;
+
 	Grid grid;
 
 	XYPair windowTL;
@@ -28,6 +32,22 @@ private:
 
 	XYPair datasetTL;
 	XYPair datasetBR;
+
+	XYPair windowHW;
+	XYPair datasetHW;
+
+	static inline void printPair(const XYPair & i)
+	{
+//		cout << get<0>(i) << "," << get<1>(i) << "\n";
+	}
+
+
+	static inline XYPair get_diff(XYPair &c1, XYPair &c2)
+	{
+		double dy = get<1>(c2)-get<1>(c1);
+		double dx = get<0>(c2)-get<0>(c1);
+		return make_pair(dx,dy);
+	}
 
 
 	static inline pair<XYPair, XYPair> getCorners(XYPair &c1, XYPair &c2)
@@ -55,25 +75,27 @@ private:
 		h = hh;
 		sz = w*h;
 		double minX = DBL_MAX;
-		double maxX = DBL_MIN;
+		double maxX = -DBL_MAX;
 		double minY = DBL_MAX;
-		double maxY = DBL_MIN;
+		double maxY = -DBL_MAX;
 		rawData = new double[sz*2];
 		for (int x = 0; x < w; ++x)
 		{
 			for (int y = 0; y < h; ++y)
 			{
-				Index i = (x*w+h);
+				int i = (x*w+y);
 				rawData[2*i] = xx[i];
 				rawData[2*i+1] = yy[i];
 				minX = min(xx[i],minX);
 				minY = min(yy[i],minY);
 				maxX = max(xx[i],maxX);
+//				if (yy[i] > maxY) {cout << "REPLACING "; maxY = yy[i];}
 				maxY = max(yy[i],maxY);
 			}
 		}
 		datasetTL = make_pair(minX,maxY);
 		datasetBR = make_pair(maxX,minY);
+		datasetHW = make_pair(maxX-minX,maxY-minY);
 	}
 
 	void window_into(XYPair c1, XYPair c2)
@@ -81,6 +103,9 @@ private:
 		auto windowCorners = getCorners(c1,c2);
 		windowTL = get<0>(windowCorners);
 		windowBR = get<1>(windowCorners);
+		windowHW = make_pair(get<0>(windowBR)-get<0>(windowTL),get<1>(windowTL)-get<1>(windowBR));
+		printPair(windowTL);
+		printPair(windowBR);
 		vector<double> relX;
 		vector<double> relY;
 		for (int x = 0; x < w; ++x)
@@ -94,8 +119,18 @@ private:
 					relX.push_back(get<0>(pt));
 					relY.push_back(get<1>(pt));
 				}
+				else {
+				}
 			}
 		}
+		relX.shrink_to_fit();
+		relY.shrink_to_fit();
+		cout << "Inserting " << relX.size() << " Elements into the grid. The rest are contiguous\n";
+		double scaleNum = get<0>(windowHW)/get<0>(datasetHW)*get<1>(windowHW)/get<1>(datasetHW);
+		printPair(windowHW);
+		printPair(datasetHW);
+		cout << "Scaling factor of " << scaleNum << " \n";
+		grid = Grid(relX.data(),relY.data(),relX.size(),1,2,node_count*scaleNum);
 	}
 
 
@@ -127,19 +162,25 @@ public:
 		grid = Grid();
 		windowTL = make_pair(0.0,0.0);
 		windowBR = make_pair(0.0,0.0);
+		windowHW = make_pair(0.0,0.0);
 		w = 0;
 		h = 0;
+		node_count = 1;
 
 	}
 
-	WindowGrid(double* xx, double* yy, int h, int w, int node_count)
+	WindowGrid(double* xx, double* yy, int hh, int ww, int node_cnt)
 	{
 		rawData = new double[10];
-		localize_data(xx,yy,h,w);
+		localize_data(xx,yy,hh,ww);
+		node_count = node_cnt;
 		auto dSetDims = make_pair(get<0>(datasetBR)-get<0>(datasetTL), get<1>(datasetTL) - get<1>(datasetBR));
+		printPair(datasetBR);
+		printPair(datasetTL);
 		auto windowDims = make_pair(get<0>(dSetDims)*DEFAULT_DIMENSIONS,get<1>(dSetDims)*DEFAULT_DIMENSIONS);
-		reshape_window_to(windowDims);
-		translate_window_to(datasetTL);
+		// translate_window_to(datasetTL);
+		translate_window_to(make_pair(0,0));
+		reshape_window_to(windowDims); //Can optimize with lazy evaluation
 	}
 
 	~WindowGrid() 
@@ -149,22 +190,29 @@ public:
 
     virtual vector<pair<int,int>> find_within( double &x, double &y, double &r)
 	{
+		cout << "WARNING: \nWARNING: DEPERECATED FUNCTION CALL\nWARNING: \n";
 		vector<pair<int,int>> ret;
 		return ret;
 	}
 
     virtual unsigned int find_within_count(double &x, double &y, double &r)
 	{
-		if (check_overlap(windowTL,windowBR,x,y,r))
+		if (r > get<0>(windowHW))
 		{
-			return grid.find_within_count(x,y,r);
+			cout << "Radius too large. Have to rescale window\n";
+			reshape_window_to(make_pair(r,get<1>(windowHW)));
 		}
-		else 
+		if (r > get<1>(windowHW))
+		{
+			cout << "Radius too large in Y. Have to rescale window\n";
+			reshape_window_to(make_pair(get<0>(windowHW),r));
+		}
+		if (!check_overlap(windowTL,windowBR,x,y,r))
 		{
 			cout << "Need to shift window\n";
 			translate_window_to(make_pair(x,y));
-			return 0;
 		}
+		return grid.find_within_count(x,y,r);
 	}
 
     virtual bool clear()
@@ -180,16 +228,39 @@ public:
 		return sz;
 	}
 
+
+	// XYPair windowTL;
+	// XYPair windowBR;
+
+	// XYPair datasetTL;
+	// XYPair datasetBR;
+
+
+
 	bool translate_window_to(const XYPair &center)
 	{
 		//Evaluate lazily?
-		return false;
+		XYPair dims = get_diff(windowBR,windowTL);
+		dims = make_pair(abs(get<0>(dims))/2.0,abs(get<1>(dims))/2.0);
+		windowTL = make_pair(get<0>(center)-get<0>(dims),get<1>(center)+get<1>(dims));
+		windowBR = make_pair(get<0>(center)+get<0>(dims),get<1>(center)-get<1>(dims));
+//		window_into(windowTL,windowBR);
+		return true;
 	}
 
 	bool reshape_window_to(const XYPair &dimensions)
 	{
 		//Evaluate lazily?
-		return false;
+		windowHW = dimensions;
+		double cx = (get<0>(windowBR)+get<0>(windowTL))/2.0;
+		double cy = (get<1>(windowBR)+get<1>(windowTL))/2.0;
+		printPair(dimensions);
+		windowTL = make_pair(cx-get<0>(dimensions)/2.0,cy+get<1>(dimensions)/2.0);
+		windowBR = make_pair(cx+get<0>(dimensions)/2.0,cy-get<1>(dimensions)/2.0);
+		printPair(windowTL);
+		printPair(windowBR);
+		window_into(windowTL,windowBR);
+		return true;
 	}
 };
 

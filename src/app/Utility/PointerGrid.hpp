@@ -55,6 +55,7 @@ private:
         tly = y1;
         int rootNodes = (int) sqrt(node_count);
         data = vector<vector<Node>>(rootNodes,vector<Node>(rootNodes));
+	cout << "Made " << rootNodes*rootNodes << " buckets\n";
         NODE_HEIGHT = (y2 - y1)/ (double) rootNodes;
         NODE_WIDTH = (x2 - x1)/(double) rootNodes;
 
