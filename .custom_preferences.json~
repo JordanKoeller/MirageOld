@@ -2,7 +2,7 @@
 
 	"use_openCL":false,
 	
-	"cl_device":"0:1",
+	"cl_device":"0:0",
 
 	"memory_warning_threshold":5,
 
