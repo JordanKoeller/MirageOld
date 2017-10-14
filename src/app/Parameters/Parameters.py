@@ -31,7 +31,7 @@ class ParametersJSONEncoder(object):
 			res['galaxy'] = o.galaxy.jsonString
 			res['quasar'] = o.quasar.jsonString
 			res['canvasDim'] = o.canvasDim
-			res['dTheta'] = quantEncoder.encode(o.dTheta)
+			res['dTheta'] = quantEncoder.encode(o.dTheta*o.canvasDim)
 			if o.extras is None:
 				res['extraParameters'] = None
 			else:
@@ -49,16 +49,17 @@ class ParametersJSONDecoder(object):
 		gd = GalaxyJSONDecoder()
 		qd = QuasarJSONDecoder()
 		qDecode = QuantityJSONDecoder()
-		galaxy = gd.decode(js['galaxy'])
-		quasar = qd.decode(js['quasar'])
-		canvasDim = js['canvasDim']
-		dTheta = qDecode.decode(js['dTheta'])*canvasDim
-		parameters = Parameters(galaxy,quasar,dTheta,canvasDim)
-		if js['extraParameters']:
-			decoder = ExperimentParamsJSONDecoder()
-			extras = decoder.decode(js['extraParameters'])
-			parameters.extras = extras
-		return parameters
+		with u.add_enabled_units(Parameters.calculateAvgMassEinsteinRadius(js['galaxy']['redshift'],js['quasar']['redshift'])):
+			galaxy = gd.decode(js['galaxy'])
+			quasar = qd.decode(js['quasar'])
+			canvasDim = js['canvasDim']
+			dTheta = qDecode.decode(js['dTheta'])
+			parameters = Parameters(galaxy,quasar,dTheta,canvasDim)
+			if js['extraParameters']:
+				decoder = ExperimentParamsJSONDecoder()
+				extras = decoder.decode(js['extraParameters'])
+				parameters.extras = extras
+			return parameters
 
 class Parameters(object):
 	"""
@@ -276,21 +277,32 @@ class Quasar:<br>
 		return u.def_unit('einstein_rad',self.einsteinRadius.value*u.rad)
 	@property
 	def gravitationalRadius(self):
-		linearRg = (self.quasar.mass.to('kg')*const.G/const.c/const.c).to('m')
-		angleRg = linearRg/self.quasar.angDiamDist.to('m')
-		rgUnit = u.def_unit('r_g',angleRg.value*u.rad)
-		return rgUnit
+		return Parameters.calculateGravRad(self.quasar.mass,self.quasar.redshift)
 
 	@property
 	def specialUnits(self):
 		return [self.avgMassEinsteinRadius,self.gravitationalRadius]
 
-	@property
-	def avgMassEinsteinRadius(self):
-		avgMass = 0.20358470458734301 #Average mass, in solMass of a generated star cluster of 10 million stars
-		thetaE = 4*const.G*u.Quantity(avgMass,'solMass').to('kg')*self.dLS.to('m')/self.quasar.angDiamDist.to('m')/self.galaxy.angDiamDist.to('m')/const.c/const.c
+	@staticmethod
+	def calculateAvgMassEinsteinRadius(gz,qz):
+		avgMass = 0.20358470458734301
+		dL = cosmo.angular_diameter_distance(gz).to('m')
+		dS = cosmo.angular_diameter_distance(qz).to('m')
+		dLS = cosmo.angular_diameter_distance_z1z2(gz,qz).to('m')
+		thetaE = 4*const.G*u.Quantity(avgMass,'solMass').to('kg')*dLS/dL/dS/const.c/const.c
 		thetaEUnit = u.def_unit('theta_E',math.sqrt(thetaE.value)*u.rad)
 		return thetaEUnit
+
+	@staticmethod
+	def calculateGravRad(mass,qz):
+		linRG = (mass.to('kg')*const.G/const.c/const.c).to('m')
+		angG = linRG/cosmo.angular_diameter_distance(qz).to('m')
+		rgUnit = u.def_unit('r_g',angG*u.rad)
+		return rgUnit
+
+	@property
+	def avgMassEinsteinRadius(self):
+		return Parameters.calculateAvgMassEinsteinRadius(self.galaxy.redshift,self.quasar.redshift)
 
 	@property
 	def displayQuasar(self):

@@ -17,6 +17,8 @@ References for Computational Geometry help.
 Paned spatial grid implimentation to save memory/speed.
 Click-and-drag on imagePane to center image
 
+URGENT:
+Error with changing CanvasDim leads to different amount of mass in stars
 
 GUI MENUBAR CONTROLS
 Help menuItem doesn't show help dialog
