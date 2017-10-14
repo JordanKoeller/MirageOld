@@ -57,7 +57,7 @@ cdef class Engine:
 		# try:
 		# 	return self.ray_trace_gpu()
 		# except:
-		return self.ray_trace_cpu()
+		return self.ray_trace_gpu()
 
 	cdef ray_trace_gpu(self):
 		'''Ray-traces the system on the graphics processor. Callable from Cython objects only
