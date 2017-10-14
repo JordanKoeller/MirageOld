@@ -4,12 +4,12 @@ from ..Utility.Vec2D import Vector2D
 
 
 # from ..Models import Model
-def angleToPixel(angles,model):
+def angleToPixel(angles,parameters=None):
     """
     Provides simple conversions between angle measurements to pixel coordinates. angles can be a numpy array, or a Vector2D instance.
     If no parameters are supplied, uses default parameters
     """
-    parameters = model.parameters
+    parameters = parameters or Model['default']
     canvasDim = parameters.canvasDim
     dTheta = parameters.dTheta.to('rad').value
 
@@ -22,12 +22,12 @@ def angleToPixel(angles,model):
         return Vector2D(angles.x+canvasDim/2,canvasDim/2 - angles.y)
 
 
-def pixelToAngle(pixels,model):
+def pixelToAngle(pixels,parameters=None):
     """
     Provides simple conversions between pixel coordinates and angle measurements. pixels can be a numpy array, or a Vector2D instance.
     If no parameters are supplied, uses default parameters
     """
-    parameters = model.parameters
+    parameters = parameters or Model['default']
     canvasDim = parameters.canvasDim
     dTheta = parameters.dTheta.to('rad').value
 
