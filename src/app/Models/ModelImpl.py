@@ -10,7 +10,7 @@ from PyQt5 import QtGui
 
 import numpy as np
 
-from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brute
+#from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brute
 from ..Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Grid
 
 
@@ -41,7 +41,7 @@ class ModelImpl(object):
         if params.galaxy.starVelocityParams and isinstance(self.__Engine,Engine_Grid):
             pass
 #            self.__Engine = Engine_Brute()
-        elif not params.galaxy.starVelocityParams and isinstance(self.__Engine,Engine_Brute):
+        elif not params.galaxy.starVelocityParams:# and isinstance(self.__Engine,Engine_Brute):
             self.__Engine = Engine_Grid()
         if self.parameters:
             if self.parameters.time != 0.0:
