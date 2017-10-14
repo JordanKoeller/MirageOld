@@ -16,13 +16,6 @@ NC='\033[0m' # No Color
 
 cd src/app
 python setup.py build_ext --inplace
-if [ ! -f ../../.custom_preferences.json ]; then
-    echo "THINKS THERE IS CUSTOMPREF"
-    cd ../..
-    ./.custom_compile
-    cd src/app
-    python setup.py build_ext --inplace
-fi
 cd ../..
 echo "\n\n\n${GREEN}Build Done${NC}\n"
 
