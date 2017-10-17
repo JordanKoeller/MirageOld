@@ -53,7 +53,9 @@ class ParametersJSONDecoder(object):
 			galaxy = gd.decode(js['galaxy'])
 			quasar = qd.decode(js['quasar'])
 			canvasDim = js['canvasDim']
+			# print(canvasDim)
 			dTheta = qDecode.decode(js['dTheta'])
+			# print(str(dTheta)+str("DTHETA HERE"))
 			parameters = Parameters(galaxy,quasar,dTheta,canvasDim)
 			if js['extraParameters']:
 				decoder = ExperimentParamsJSONDecoder()

@@ -67,7 +67,7 @@
         "canvasDim": 1000,
         "dTheta": {
             "unit": "rad",
-            "value": 1.1922069102404203e-12
+            "value": 1.1922069102404203e-8
         },
         "extraParameters": {
             "name": "ImageC_TestParams_10000",

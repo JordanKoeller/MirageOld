@@ -43,4 +43,5 @@ cdef class Engine:
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil
 	cdef ray_trace_cpu(self)
 	cpdef makeMagMap(self, object center, object dims, object resolution, object signal, object signalMax) #######Possibly slow implementation. Temporary
+	# cpdef windowed_magMap(self, object center, object dims, object resolution, object signal, object signalMax,numChunk=*) #######Possibly slow implementation. Temporary
 # 	cdef int getColorCode(self, double x, double y)

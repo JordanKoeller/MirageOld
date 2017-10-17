@@ -408,6 +408,8 @@ cdef class Engine:
 			for j in range(0,resy):
 				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0-stepY*j,radius))/trueLuminosity
 		return retArr
+
+		
 		
 
 	cpdef visualize(self):
@@ -440,6 +442,7 @@ cdef class Engine:
 		"""Provides an interface for updating the parameters describing the lensed system to be modeled.
 
 		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
+
 		if self.__parameters is None:
 			self.__parameters = parameters
 			if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
