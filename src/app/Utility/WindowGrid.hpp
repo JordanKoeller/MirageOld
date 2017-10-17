@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <cmath>
 #include <cfloat>
+#include <iostream>
+
+
 #include "SpatialGrid.hpp"
 
 #ifndef WINDOWGRID
@@ -39,7 +42,7 @@ private:
 
 	static inline void printPair(const XYPair & i)
 	{
-//		//cout << get<0>(i) << "," << get<1>(i) << "\n";
+//		cout << get<0>(i) << "," << get<1>(i) << "\n";
 	}
 
 
@@ -126,11 +129,9 @@ private:
 		}
 		relX.shrink_to_fit();
 		relY.shrink_to_fit();
-		//cout << "Inserting " << relX.size() << " Elements into the grid. The rest are contiguous\n";
 		double scaleNum = get<0>(windowHW)/get<0>(datasetHW)*get<1>(windowHW)/get<1>(datasetHW);
-		printPair(windowHW);
-		printPair(datasetHW);
-		//cout << "Scaling factor of " << scaleNum << " \n";
+//		cout << "Scale num " << (unsigned long) scaleNum << "\n";
+//		cout << "Wants to allocate " << 2*relX.size() << " and " << node_count*scaleNum << " \n";
 		grid = Grid(relX.data(),relY.data(),relX.size(),1,2,node_count*scaleNum);
 	}
 
@@ -176,12 +177,52 @@ public:
 		localize_data(xx,yy,hh,ww);
 		node_count = node_cnt;
 		auto dSetDims = make_pair(get<0>(datasetBR)-get<0>(datasetTL), get<1>(datasetTL) - get<1>(datasetBR));
-		printPair(datasetBR);
-		printPair(datasetTL);
 		auto windowDims = make_pair(get<0>(dSetDims)*DEFAULT_DIMENSIONS,get<1>(dSetDims)*DEFAULT_DIMENSIONS);
 		// translate_window_to(datasetTL);
 		// translate_window_to(make_pair(0,0));
 		// reshape_window_to(windowDims); //Can optimize with lazy evaluation
+	}
+
+	WindowGrid(const WindowGrid<Grid> &other)
+	{
+		datasetBR = other.datasetBR;
+		datasetTL = other.datasetTL;
+		windowTL = other.windowTL;
+		windowBR = other.windowBR;
+		node_count = other.node_count;
+		windowHW = other.windowHW;
+		datasetHW = other.dataset.HW;
+		w = other.w;
+		h = other.h;
+		sz = other.sz;
+		delete [] rawData;
+		rawData = new double[w*h*2];
+		for (int i=0; i < w*h*2; ++i)
+		{
+			rawData[i] = other.rawData[i];
+		}
+//		window_into(windowTL,windowBR);
+	}
+	WindowGrid<Grid> &operator=(const WindowGrid<Grid> &other)
+	{
+		datasetBR = other.datasetBR;
+		datasetTL = other.datasetTL;
+		windowTL = other.windowTL;
+		windowBR = other.windowBR;
+		node_count = other.node_count;
+		windowHW = other.windowHW;
+		datasetHW = other.datasetHW;
+		w = other.w;
+		h = other.h;
+		sz = other.sz;
+		delete [] rawData;
+		rawData = new double[w*h*2];
+		for (int i=0; i < w*h*2; ++i)
+		{
+			rawData[i] = other.rawData[i];
+		}
+//		window_into(windowTL,windowBR);
+		return *this;
 	}
 
 	~WindowGrid() 
@@ -200,17 +241,17 @@ public:
 	{
 		if (r > get<0>(windowHW))
 		{
-			//cout << "Radius too large. Have to rescale window\n";
+		//	cout << "Radius too large. Have to rescale window\n";
 			reshape_window_to(make_pair(2*r,get<1>(windowHW)));
 		}
 		if (r > get<1>(windowHW))
 		{
-			//cout << "Radius too large in Y. Have to rescale window\n";
+		//	cout << "Radius too large in Y. Have to rescale window\n";
 			reshape_window_to(make_pair(get<0>(windowHW),2*r));
 		}
 		if (!check_overlap(windowTL,windowBR,x,y,r))
 		{
-			//cout << "Need to shift window\n";
+		//	cout << "Need to shift window\n";
 			translate_window_to(make_pair(x,y));
 		}
 		return grid.find_within_count(x,y,r);
