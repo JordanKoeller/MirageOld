@@ -233,7 +233,7 @@ public:
 	// XYPair windowTL;
 	// XYPair windowBR;
 
-	// XYPair datasetTL;
+	// XYPair datasetTt;
 	// XYPair datasetBR;
 
 
