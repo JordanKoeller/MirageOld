@@ -241,17 +241,17 @@ public:
 	{
 		if (r > get<0>(windowHW))
 		{
-		//	cout << "Radius too large. Have to rescale window\n";
+			cout << "Radius too large. Have to rescale window\n";
 			reshape_window_to(make_pair(2*r,get<1>(windowHW)));
 		}
 		if (r > get<1>(windowHW))
 		{
-		//	cout << "Radius too large in Y. Have to rescale window\n";
+			cout << "Radius too large in Y. Have to rescale window\n";
 			reshape_window_to(make_pair(get<0>(windowHW),2*r));
 		}
 		if (!check_overlap(windowTL,windowBR,x,y,r))
 		{
-		//	cout << "Need to shift window\n";
+			cout << "Need to shift window\n";
 			translate_window_to(make_pair(x,y));
 		}
 		return grid.find_within_count(x,y,r);

@@ -134,16 +134,20 @@ cdef class Engine_Windowed(Engine):
 		cdef double y0 = start.to('rad').y+dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
-		# with nogil:
+
 		for chunkX in range(0,resx,rootChunk):
 			print("ChunkX = "+str(chunkX))
-			# signal.emit(chunkX)
 			for chunkY in range(0,resy,rootChunk):
 				print("ChunkY = "+str(chunkY))
 				tl = pair[double,double](x0+chunkX*stepX-2*radius,y0+(chunkY+chunkXStep)*stepY+2*radius)
 				br = pair[double,double](x0+(chunkX+chunkYStep)*stepX+2*radius,y0+chunkY*stepY-2*radius)
+				print("Setting Corners")
 				self.__grid.set_corners(tl,br)
-				for i in prange(chunkX,chunkX+chunkXStep,nogil=True,schedule='guided',num_threads=self.core_count):
+#				for i in prange(chunkX,chunkX+chunkXStep,nogil=True,schedule='guided',num_threads=self.core_count):
+				for i in range(chunkX,chunkX+chunkXStep):
 					for j in range(chunkY,chunkY+chunkYStep):
+#						with gil:
+						print("xstep "+str(i))
+						print("ystep "+str(j))
 						retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0-stepY*j,radius))/trueLuminosity
 		return retArr
