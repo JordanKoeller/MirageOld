@@ -143,11 +143,11 @@ cdef class Engine_Windowed(Engine):
 				br = pair[double,double](x0+(chunkX+chunkYStep)*stepX+2*radius,y0+chunkY*stepY-2*radius)
 				print("Setting Corners")
 				self.__grid.set_corners(tl,br)
-#				for i in prange(chunkX,chunkX+chunkXStep,nogil=True,schedule='guided',num_threads=self.core_count):
-				for i in range(chunkX,chunkX+chunkXStep):
+				for i in prange(chunkX,chunkX+chunkXStep,nogil=True,schedule='guided',num_threads=self.core_count):
+				# for i in range(chunkX,chunkX+chunkXStep):
 					for j in range(chunkY,chunkY+chunkYStep):
-#						with gil:
-						print("xstep "+str(i))
-						print("ystep "+str(j))
+						with gil:
+							print("xstep "+str(i))
+							print("ystep "+str(j))
 						retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0-stepY*j,radius))/trueLuminosity
 		return retArr
