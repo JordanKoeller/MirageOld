@@ -42,7 +42,7 @@ private:
 
 	static inline void printPair(const XYPair & i)
 	{
-//		cout << get<0>(i) << "," << get<1>(i) << "\n";
+		cout << get<0>(i) << "," << get<1>(i) << "\n";
 	}
 
 
@@ -108,8 +108,10 @@ private:
 		windowTL = get<0>(windowCorners);
 		windowBR = get<1>(windowCorners);
 		windowHW = make_pair(get<0>(windowBR)-get<0>(windowTL),get<1>(windowTL)-get<1>(windowBR));
+		cout << "WINDOW DIMENSIONS\n";
 		printPair(windowTL);
 		printPair(windowBR);
+		cout << "WINDOW DIMENSIONS\n";
 		vector<double> relX;
 		vector<double> relY;
 		for (int x = 0; x < w; ++x)
@@ -120,24 +122,20 @@ private:
 				XYPair pt = make_pair(rawData[i],rawData[i+1]);
 				if (pt_within_box(pt,windowTL,windowBR))
 				{
-					relX.push_back(get<0>(pt));
-					relY.push_back(get<1>(pt));
-				}
-				else {
+					relX.push_back(rawData[i]);
+					relY.push_back(rawData[i+1]);
 				}
 			}
 		}
 		relX.shrink_to_fit();
 		relY.shrink_to_fit();
 		double scaleNum = get<0>(windowHW)/get<0>(datasetHW)*get<1>(windowHW)/get<1>(datasetHW);
-//		cout << "Scale num " << (unsigned long) scaleNum << "\n";
-//		cout << "Wants to allocate " << 2*relX.size() << " and " << node_count*scaleNum << " \n";
 		grid = Grid(relX.data(),relY.data(),relX.size(),1,2,node_count*scaleNum);
 	}
 
 
 	/**********************************************************************
-        *******							    ***********
+    *******							                            ***********
 	******* Some Helper functions for checking is within window ***********
 	*******                                                     ***********
 	**********************************************************************/
@@ -149,10 +147,10 @@ private:
     static bool check_overlap(XYPair &tl, XYPair &br,
 	double x, double y, double r)
 	{
-		return (x - get<0>(tl) >= r &&
-				get<0>(br) - x >=r &&
-				get<1>(tl) - y >= r && 
-				y - get<1>(br) >= r);
+		return (x - r >= get<0>(tl) &&
+				x + r <= get<0>(br) &&
+				y + r <= get<1>(tl) && 
+				y - r >= get<1>(br));
 	}
 
 public:
@@ -178,6 +176,10 @@ public:
 		node_count = node_cnt;
 		auto dSetDims = make_pair(get<0>(datasetBR)-get<0>(datasetTL), get<1>(datasetTL) - get<1>(datasetBR));
 		auto windowDims = make_pair(get<0>(dSetDims)*DEFAULT_DIMENSIONS,get<1>(dSetDims)*DEFAULT_DIMENSIONS);
+		cout << "DATASET DIMENSIONS \n";
+		printPair(datasetTL);
+		printPair(datasetBR);
+		cout << "DATASET DIMENSIONS \n";
 		// translate_window_to(datasetTL);
 		// translate_window_to(make_pair(0,0));
 		// reshape_window_to(windowDims); //Can optimize with lazy evaluation
@@ -232,7 +234,7 @@ public:
 
     virtual vector<pair<int,int>> find_within( double &x, double &y, double &r)
 	{
-		// cout << "WARNING: \nWARNING: DEPERECATED FUNCTION CALL\nWARNING: \n";
+		cout << "WARNING: \nWARNING: DEPERECATED FUNCTION CALL\nWARNING: \n";
 		vector<pair<int,int>> ret;
 		return ret;
 	}
@@ -254,7 +256,9 @@ public:
 			cout << "Need to shift window\n";
 			translate_window_to(make_pair(x,y));
 		}
-		return grid.find_within_count(x,y,r);
+		unsigned int ret = grid.find_within_count(x,y,r);
+		// cout << "Found " << ret << "\n";
+		return ret;
 	}
 
     virtual bool clear()
@@ -296,19 +300,17 @@ public:
 		windowHW = dimensions;
 		double cx = (get<0>(windowBR)+get<0>(windowTL))/2.0;
 		double cy = (get<1>(windowBR)+get<1>(windowTL))/2.0;
-		printPair(dimensions);
+		// printPair(dimensions);
 		windowTL = make_pair(cx-get<0>(dimensions)/2.0,cy+get<1>(dimensions)/2.0);
 		windowBR = make_pair(cx+get<0>(dimensions)/2.0,cy-get<1>(dimensions)/2.0);
-		printPair(windowTL);
-		printPair(windowBR);
+		// printPair(windowTL);
+		// printPair(windowBR);
 		window_into(windowTL,windowBR);
 		return true;
 	}
 
 	bool set_corners(const XYPair &tl, const XYPair &br) {
-		windowTL = tl;
-		windowBR = br;
-		window_into(windowTL,windowBR);
+		window_into(tl,br);
 		return true;
 	}
 };

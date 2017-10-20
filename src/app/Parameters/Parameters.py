@@ -49,7 +49,8 @@ class ParametersJSONDecoder(object):
 		gd = GalaxyJSONDecoder()
 		qd = QuasarJSONDecoder()
 		qDecode = QuantityJSONDecoder()
-		with u.add_enabled_units(Parameters.calculateAvgMassEinsteinRadius(js['galaxy']['redshift'],js['quasar']['redshift'])):
+		qmass = qDecode.decode(js['quasar']['mass'])
+		with u.add_enabled_units([Parameters.calculateAvgMassEinsteinRadius(js['galaxy']['redshift'],js['quasar']['redshift']),Parameters.calculateGravRad(qmass,js['quasar']['redshift'])]):
 			galaxy = gd.decode(js['galaxy'])
 			quasar = qd.decode(js['quasar'])
 			canvasDim = js['canvasDim']
@@ -211,7 +212,8 @@ class Quasar:<br>
 	def regenerateStars(self):
 		print("Regenerating stars now.")
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
-		generator = Evolved_IMF()
+		generator = Kroupa_2001()
+		# generator = Evolved_IMF()
 		m_stars = m_stars.value
 		if m_stars < 1.0:
 			print("NOT ENOUGH MASS FOR STAR FIELD. GENERATION TERMINATED")
@@ -287,7 +289,8 @@ class Quasar:<br>
 
 	@staticmethod
 	def calculateAvgMassEinsteinRadius(gz,qz):
-		avgMass = 0.20358470458734301
+		avgMass = 0.247
+		# avgMass = 0.20358470458734301
 		dL = cosmo.angular_diameter_distance(gz).to('m')
 		dS = cosmo.angular_diameter_distance(qz).to('m')
 		dLS = cosmo.angular_diameter_distance_z1z2(gz,qz).to('m')

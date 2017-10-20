@@ -15,7 +15,7 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 cd src/app
-python setup.py build_ext --inplace
+python setup.py build_ext --inplace $@
 cd ../..
 echo "\n\n\n${GREEN}Build Done${NC}\n"
 

@@ -25,3 +25,4 @@ cdef class Engine_Windowed(Engine):
 	cpdef getFrame(self,object x=*,object y=*,object r=*)
 	cdef unsigned int query_data_length(self, double x, double y, double radius) nogil
 	cpdef windowed_magMap(self, object center, object dims, object resolution, object signal, object signalMax, numChunk=*)
+	cdef int _noGILMin(self,int i, int j) nogil

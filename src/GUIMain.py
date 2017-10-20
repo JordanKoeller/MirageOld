@@ -188,7 +188,7 @@ def _findControllerHelper(kind):
     if len(ret) == 1:
         ret = ret[0]
     elif len(ret) == 0:
-        ret = None
+        ret = []
     else:
         model = QInputDialog.getItem(None, "Select Model",
             "Please Select a Model to save.",
@@ -196,6 +196,6 @@ def _findControllerHelper(kind):
         if model[1]:
             ret = next(filter(lambda i:i.modelID == model[0], modelControllers()))
         else:
-            ret = None
+            ret = []
     return ret
 

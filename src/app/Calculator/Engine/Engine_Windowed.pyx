@@ -107,11 +107,15 @@ cdef class Engine_Windowed(Engine):
 			for i in range(0, retf):
 				fret[i,0] = <int> ret[i].first
 				fret[i,1] = <int> ret[i].second
-# 		print(1/(time.clock()-begin))
 		return fret
 
 	cpdef makeMagMap(self, object center, object dims, object resolution, object signal, object signalMax):
-		self.windowed_magMap(center,dims,resolution,signal,signalMax,25)
+		return self.windowed_magMap(center,dims,resolution,signal,signalMax,25)
+
+
+	cdef int _noGILMin(self,int i, int j) nogil:
+		if i < j: return i
+		if j < i: return j
 
 
 	cpdef windowed_magMap(self, object center, object dims, object resolution, object signal, object signalMax, numChunk = 25):
@@ -127,27 +131,25 @@ cdef class Engine_Windowed(Engine):
 		cdef int chunkYStep = int(resy/rootChunk)
 		cdef double x = 0
 		cdef double y = 0
-		cdef int chunkY = int(resy/rootChunk)
-		cdef int chunkX = int(resx/rootChunk)
+		cdef int chunkY = 0
+		cdef int chunkX = 0
 		start = center - dims/2
 		cdef double x0 = start.to('rad').x
 		cdef double y0 = start.to('rad').y+dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double trueLuminosity = self.trueLuminosity
-
-		for chunkX in range(0,resx,rootChunk):
-			print("ChunkX = "+str(chunkX))
-			for chunkY in range(0,resy,rootChunk):
-				print("ChunkY = "+str(chunkY))
-				tl = pair[double,double](x0+chunkX*stepX-2*radius,y0+(chunkY+chunkXStep)*stepY+2*radius)
-				br = pair[double,double](x0+(chunkX+chunkYStep)*stepX+2*radius,y0+chunkY*stepY-2*radius)
-				print("Setting Corners")
-				self.__grid.set_corners(tl,br)
-				for i in prange(chunkX,chunkX+chunkXStep,nogil=True,schedule='guided',num_threads=self.core_count):
-				# for i in range(chunkX,chunkX+chunkXStep):
-					for j in range(chunkY,chunkY+chunkYStep):
-						with gil:
-							print("xstep "+str(i))
-							print("ystep "+str(j))
+		tl = pair[double,double](x0-2*radius,y0+2*radius)
+		br = pair[double,double](x0+dims.to('rad').x+2*radius,y0-dims.to('rad').y-2*radius)
+		self.__grid.set_corners(tl,br)
+		print("Now onto for looping")
+		for chunkX in range(0,resx,chunkXStep):
+			for chunkY in range(0,resy,chunkYStep):
+				tl = pair[double,double](x0+chunkX*stepX-2*radius,y0-(chunkY+chunkYStep)*stepY-2*radius)
+				br = pair[double,double](x0+(chunkX+chunkXStep)*stepX+2*radius,y0-chunkY*stepY+2*radius)
+				for i in prange(chunkX,self._noGILMin(chunkX+chunkXStep,resx),nogil=True,schedule='guided',num_threads=self.core_count):
+				# for i in range(chunkX,self._noGILMin(chunkX+chunkXStep,resx)):
+					for j in range(chunkY,self._noGILMin(chunkY+chunkYStep,resy)):
+						# print(str(x0+i*stepX)+","+str(y0-stepY*j))
 						retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0-stepY*j,radius))/trueLuminosity
+		print(retArr.max())
 		return retArr
