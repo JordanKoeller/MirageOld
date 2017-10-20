@@ -130,6 +130,7 @@ def _addParametersPane(window):
       window.modelControllers.append(controller)
 
 def _addTablePane(window, parametersController=None):
+  print(window.modelControllers)
   tv = TableView()
   pc = _findControllerHelper(ParametersController)
   # Will need refactoring. TableControllerFactory is outdated
@@ -148,12 +149,13 @@ def _toggleRecording(window):
 
 def _showVisSetup(window):
       window.layout.clear()
-      _addParametersPane(window)
       _addCurvePane(window)
       _addImgPane(window)
+      _addParametersPane(window)
 
 def _showTableSetup(window):
       window.layout.clear()
+      _addParametersPane(window)
       _addTablePane(window)
 
 def _showTracerSetup(window):
@@ -167,6 +169,7 @@ def _openModelDialog(window):
     dialog.accepted.connect(lambda: _configureControllers(dialog.exportModel()))
 
 def _configureControllers(models):
+    print(models)
     for id,model in models.items():
         relevantControllers = filter(lambda x: isinstance(x,ParametersController) and x.modelID == id,modelControllers())
         for i in relevantControllers:
