@@ -227,7 +227,7 @@ cdef class Engine:
 					if r != 0.0:
 						result_nparray_x[x,y] += deltaR_x*stars_mass[i]*point_constant/r;
 						result_nparray_y[x,y] += deltaR_y*stars_mass[i]*point_constant/r;				
-				
+# 				
 				#SIS
 				deltaR_x = incident_angle_x - centerX
 				deltaR_y = incident_angle_y - centerY
@@ -241,7 +241,10 @@ cdef class Engine:
 				result_nparray_x[x,y] += shearMag*r*CMATH.cos(phi)
 				result_nparray_y[x,y] += shearMag*r*CMATH.sin(phi)
 				result_nparray_x[x,y] = deltaR_x - result_nparray_x[x,y]
-				result_nparray_y[x,y] = deltaR_y - result_nparray_y[x,y]	
+				result_nparray_y[x,y] = deltaR_y - result_nparray_y[x,y]
+		
+		
+				
 		print("Time Ray-Tracing = " + str(time.clock() - begin))			
 		return (result_nparray_x,result_nparray_y)
 	
@@ -405,6 +408,7 @@ cdef class Engine:
 			if i % 10 == 0:
 				with gil:
 					signal.emit(i)
+					print(i)
 			for j in range(0,resy):
 				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0-stepY*j,radius))/trueLuminosity
 		return retArr
@@ -435,6 +439,16 @@ cdef class Engine:
 			for j in range(0, endY):
 				img[ < int > x[i, j], < int > y[i, j]] += 1
 		return img
+	
+	def rawMagnification(self,x,y):
+		import copy
+		rawP = copy.deepcopy(self.parameters)
+		oldP = self.parameters
+		rawP.galaxy.update(percentStars = 0)
+		self.updateParameters(rawP)
+		rawMag = self.query_data_length(x,y,rawP.queryQuasarRadius)/self.trueLuminosity
+		print("RawMag = "+str(rawMag))
+		return rawMag
 
 
 

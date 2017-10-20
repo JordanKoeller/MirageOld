@@ -11,7 +11,7 @@ from .ExperimentParams import ExperimentParams
 import numpy as np 
 import random as rand 
 
-from ..Calculator.InitialMassFunction import Evolved_IMF
+from ..Calculator.InitialMassFunction import Evolved_IMF, Kroupa_2001
 from ..Utility import Vector2D
 from ..Utility.ParametersError import ParametersError
 from .Stellar import Galaxy, Quasar, GalaxyJSONDecoder, QuasarJSONDecoder

@@ -1,6 +1,6 @@
 Properly closing file dialogs with the "cancel" option.
     Done for ModelDialog
-    
+
 Having two Models from scratch.
 Bridging views when it shouldn't.
 Pulling apart bridged views.

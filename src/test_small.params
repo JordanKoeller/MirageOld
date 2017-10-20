@@ -33,7 +33,7 @@
                     "value": 0.0
                 }
             },
-            "pcntStars": 100,
+            "pcntStars": 10,
             "colorKey": 4,
             "avgStarMass": 0.5
         },
@@ -64,7 +64,7 @@
             "redshift": 1.69,
             "colorKey": 3
         },
-        "canvasDim": 1000,
+        "canvasDim": 500,
         "dTheta": {
             "unit": "rad",
             "value": 1.1922069102404203e-9

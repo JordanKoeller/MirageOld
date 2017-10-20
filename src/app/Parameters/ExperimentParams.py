@@ -164,7 +164,8 @@ class MagMapJSONDecoder(object):
         center = vd.decode(data['center'])
         dims = vd.decode(data['dimensions'])
         res = vd.decode(data['resolution'])
-        return MagMapParameters(center,dims,res)
+        ret = MagMapParameters(center,dims,res)
+        return ret
 
 class MagMapParameters(object):
     
