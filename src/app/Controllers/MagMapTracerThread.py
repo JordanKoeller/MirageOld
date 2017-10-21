@@ -9,7 +9,7 @@ from ...Utility.NullSignal import NullSignal
 from ...Utility.Vec2D import Vector2D
 from ...Views.Drawer.CompositeDrawerFactory import MagTracerComposite
 
-
+print("Loaded MagMapTracerThread")
 class MagMapTracerThread(QtCore.QThread):
     def __init__(self,signals=NullSignal,pixels = [],numFrames = -1,recording=False):
         QtCore.QThread.__init__(self)

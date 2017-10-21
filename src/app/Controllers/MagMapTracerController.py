@@ -36,4 +36,6 @@ class MagMapTracerController(GUIController):
             self.tracerView.setMagMap(array)
             ModelImpl.updateParameters(params)
 
-    
+#     def bindFields(self, *args, **kwargs):
+#          
+#      

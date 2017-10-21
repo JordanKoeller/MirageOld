@@ -46,7 +46,7 @@ class View(GraphicsLayoutWidget):
     #     self.__enabled = True
 
     def bridgeTo(self,view):
-        self._bridge = bridge
+        self._bridge = view
 
 class ControllerView(View):
     """abstract view with methods to get user data out of the view."""

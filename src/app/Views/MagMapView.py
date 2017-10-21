@@ -5,7 +5,7 @@ Created on Jul 25, 2017
 '''
 from PyQt5 import uic, QtCore
 
-import numpy as np
+# import numpy as np
 from pyqtgraph.graphicsItems.MagMapImageItem import MagMapImageItem
 from pyqtgraph.graphicsItems.ROI import LineSegmentROI
 from pyqtgraph.widgets.GradientWidget import GradientWidget
@@ -47,7 +47,7 @@ class MagMapView(CanvasView):
         gradient = self.gradientWidget.getLookupTable(500,alpha=False)
         self._imgItem.setLookupTable(gradient,True)
         
-    def setMagMap(self,img,baseMag):
+    def setMagMap(self,img,baseMag=0):
         self._imgStatic = img.copy()
         self._imgItem.setImage(self._imgStatic)
         self.gradientWidget.restoreState(self._getCenteredGradient(baseMag))

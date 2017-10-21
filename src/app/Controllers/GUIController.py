@@ -34,6 +34,9 @@ class GUIController(QtCore.QObject):
     def hide(self):
         pass
     
+    def bindFields(self,*args,**kwargs):
+        pass
+    
 #     @property
 #     def signals(self):
 #         '''

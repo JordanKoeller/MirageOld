@@ -1,23 +1,25 @@
-from PyQt5.Qt import QObject
 from PyQt5 import QtCore
+from PyQt5.Qt import QObject
+from PyQt5.QtWidgets import QInputDialog
 
-from app.Controllers import ControllerFactory, ExportFactory
-from app.Models import Model
-from app.Controllers.FileManagerImpl import ParametersFileManager, RecordingFileManager
+from app.Controllers import ControllerFactory  # , ExportFactory
 from app.Controllers.ParametersController import ParametersController
-from app.Controllers.QueueController import QueueController
-# from app.Controllers import GlobalsController
-from app.Models.MagnificationMapModel import MagnificationMapModel
+from app.Models import Model
 from app.Views.LensedImageView import LensedImageView
 from app.Views.LightCurvePlotView import LightCurvePlotView
 from app.Views.MagMapView import MagMapView
 from app.Views.ModelDialog import ModelDialog
 from app.Views.ParametersView import ParametersView
 from app.Views.TableView import TableView
-from app.Views.ViewLayout import ViewLayout
-from app.Views.WindowFrame import WindowFrame
 import factory
 
+
+# from app.Controllers.FileManagerImpl import ParametersFileManager, RecordingFileManager
+# from app.Controllers.QueueController import QueueController
+# from app.Controllers import GlobalsController
+from app.Models.MagnificationMapModel import MagnificationMapModel
+# from app.Views.ViewLayout import ViewLayout
+# from app.Views.WindowFrame import WindowFrame
 class _UISignals(QObject):
     playSignal = QtCore.pyqtSignal()
     pauseSignal = QtCore.pyqtSignal()
@@ -110,33 +112,34 @@ def _resetHelper(window):
 #       pass
 
 def _addCurvePane(window):
-      plCanvas = LightCurvePlotView()
-      window.addView(plCanvas)
+        plCanvas = LightCurvePlotView()
+        window.addView(plCanvas)
 
 def _addImgPane(window):
-      view = LensedImageView()
-      controller = factory.LensedImageControllerFactory(view)
-      window.addView(view)
-      window.modelControllers.append(controller)
+        view = LensedImageView()
+        controller = factory.LensedImageControllerFactory(view)
+        window.addView(view)
+        window.modelControllers.append(controller)
 
 def _addMagPane(window):
-      view = MagMapView()
-      window.addView(view)
+        view = MagMapView()
+#       controller = factory.TracerController(view)
+        window.addView(view)
+#       window.modelControllers.append(controller)
 
 def _addParametersPane(window):
-      view = ParametersView()
-      controller = factory.ParametersControllerFactory(view)
-      window.addView(view)
-      window.modelControllers.append(controller)
+        view = ParametersView()
+        controller = factory.ParametersControllerFactory(view)
+        window.addView(view)
+        window.modelControllers.append(controller)
 
-def _addTablePane(window, parametersController=None):
-  print(window.modelControllers)
-  tv = TableView()
-  pc = _findControllerHelper(ParametersController)
-  # Will need refactoring. TableControllerFactory is outdated
-  tableViewController = factory.TableControllerFactory(tv, pc)
-  window.addView(tv)
-  window.modelControllers.append(tableViewController)
+def _addTablePane(window):
+    tv = TableView()
+    pc = _findControllerHelper(ParametersController)
+    # Will need refactoring. TableControllerFactory is outdated
+    tableViewController = factory.TableControllerFactory(tv, pc)
+    window.addView(tv)
+    window.modelControllers.append(tableViewController)
 
 # def _saveSetup(window):
 #       pass
@@ -145,41 +148,44 @@ def _addTablePane(window, parametersController=None):
 #       pass
 
 def _toggleRecording(window):
-      pass
+        pass
 
 def _showVisSetup(window):
-      window.layout.clear()
-      _addCurvePane(window)
-      _addImgPane(window)
-      _addParametersPane(window)
+        window.layout.clear()
+        _addCurvePane(window)
+        _addImgPane(window)
+        _addParametersPane(window)
 
 def _showTableSetup(window):
-      window.layout.clear()
-      _addParametersPane(window)
-      _addTablePane(window)
+        window.layout.clear()
+        _addParametersPane(window)
+        _addTablePane(window)
 
 def _showTracerSetup(window):
-      window.layout.clear()
-      _addCurvePane(window)
-      _addMagPane(window)
-
+        window.layout.clear()
+        _addCurvePane(window)
+        _addMagPane(window)
+        
 def _openModelDialog(window):
     dialog = ModelDialog(canvasViews() + [i.view for i in modelControllers()], window)
     dialog.show()
     dialog.accepted.connect(lambda: _configureControllers(dialog.exportModel()))
 
 def _configureControllers(models):
-    print(models)
-    for id,model in models.items():
-        relevantControllers = filter(lambda x: isinstance(x,ParametersController) and x.modelID == id,modelControllers())
+    for id, model in models.items():
+        relevantControllers = filter(lambda x: x.modelID == id, modelControllers())
         for i in relevantControllers:
             i.bindFields(model.parameters)
+        if isinstance(model,MagnificationMapModel):
+            for i in canvasViews():
+                if isinstance(i,MagMapView):
+                    i.setMagMap(model.magMapArray)
 
 def _exportLightCurves(window):
-      pass
+        pass
 
 def _recordWindow(window):
-      pass
+        pass
   
   
   
