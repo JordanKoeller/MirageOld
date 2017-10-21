@@ -30,7 +30,7 @@ shapedrawer = Extension("Views/Drawer/ShapeDrawer", sources = ["Views/Drawer/Sha
 shapedrawer = Extension("Views/Drawer/ShapeDrawer", sources = ["Views/Drawer/ShapeDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 
 setup(
-	ext_modules =cythonize([tree,
+	ext_modules = cythonize([tree,
 							grid,
 							engine,
 							ptrgrid,

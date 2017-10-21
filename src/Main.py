@@ -43,7 +43,7 @@ if __name__ == "__main__" and isMainProcess():
     
 
     if args.run:
-        #sys.stdout = open(os.devnull,'w')
+        sys.stdout = open(os.devnull,'w')
         from app.Controllers.ExperimentTableRunner import ExperimentTableRunner as QueueThread
         from app.Controllers.FileManagerImpl import TableFileReader, ExperimentDataFileWriter
         infile = args.run[0]
@@ -65,7 +65,6 @@ if __name__ == "__main__" and isMainProcess():
         import GUIMain 
         app = QtWidgets.QApplication(sys.argv)
         ui = GUIManager()
-#         ui.initVisCanvas()
         GUIMain.bindWindow(ui)
         GUIMain._showVisSetup(ui)
         if args.queue:

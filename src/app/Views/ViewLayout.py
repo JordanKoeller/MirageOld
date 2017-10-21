@@ -23,8 +23,7 @@ class ViewLayout(QFrame):
         layout.setContentsMargins(0,0,0,0)
         layout.setSpacing(0)
         self._layout = DockArea()
-        self._canvasViews = []
-        self._modelViews = []
+        self._views = []
         layout.addWidget(self._layout)
         self.setLayout(layout)
         self.mergeSignal.connect(self.mergeViews)
@@ -34,44 +33,29 @@ class ViewLayout(QFrame):
         dock.addWidget(view)
         view.sigTitleChanged.connect(dock.setTitle)
         self._layout.addDock(dock,position='right')
-        dock.sigClosed.connect(self.removeView)
-        if isinstance(view,CanvasView):
-            self._canvasViews.append(view)
-        elif isinstance(view,ControllerView):
-            self._modelViews.append(view)
+        dock.sigClosed.connect(lambda: self.removeView(view))
+        self._views.append(view)
 
     def clear(self):
-        self._layout.clear()
+        # self._layout.clear()
+        while self._views != []:
+            self._views.remove(self._views[0])
 
     def removeView(self,view):
-        for widget in view.widgets:
-            if widget in self._canvasViews:
-                self._canvasViews.remove(widget)
-            elif isinstance(widget,ControllerView):
-                self.sigModelDestroyed.emit(widget)
+        self._views.remove(view)
+        view.destroy()
+        
 
-    def _removeCanvasView(self,view):
-        if view in self._canvasViews:
-            self._canvasViews.remove(view)
 
     @property
-    def canvasViews(self):
-        return self._canvasViews
+    def views(self):
+        return self._views
 
     def mergeViews(self,view1,view2):
-        # if isinstance(view1,CompositeView):
-        #     view1.addView(view2)
-        # if isinstance(view2,CompositeView):
-        #     view2.addView(view1)
         if type(view1) == type(view2) and isinstance(view1,LightCurvePlotView):
             view1.bridgeTo(view2)
-            # self._removeCanvasView(view1)
-            # self._canvasViews.append(composite)
         elif type(view1) == type(view2) and isinstance(view1,MagMapView):
             view2.bridgeTo(view1)
-            # self._removeCanvasView(view1)
-            # composite = CompositeMagMap(view1,view2)
-            # self._canvasViews.append(composite)
     
         
         

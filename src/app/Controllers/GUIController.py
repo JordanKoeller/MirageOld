@@ -36,6 +36,10 @@ class GUIController(QtCore.QObject):
     
     def bindFields(self,*args,**kwargs):
         pass
+
+    @property
+    def modelID(self):
+        return self.view.modelID
     
 #     @property
 #     def signals(self):

@@ -8,6 +8,7 @@ class View(GraphicsLayoutWidget):
     Accepts a modelID as an argument."""
     _signalRef = QtCore.pyqtSignal(object)
     sigTitleChanged = QtCore.pyqtSignal(str)
+    sigDestroyed = QtCore.pyqtSignal(object)
 
     def __init__(self, modelID='default',title=None):
         super(View, self).__init__()
@@ -17,6 +18,10 @@ class View(GraphicsLayoutWidget):
         # if title:
         #     self.title = title
         # self.__enabled = True
+
+    def destroy(self):
+        self.sigDestroyed.emit(self)
+        
         
     def setModelID(self,string):
         self._modelID = string

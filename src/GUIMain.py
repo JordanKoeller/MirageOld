@@ -11,15 +11,13 @@ from app.Views.MagMapView import MagMapView
 from app.Views.ModelDialog import ModelDialog
 from app.Views.ParametersView import ParametersView
 from app.Views.TableView import TableView
+from app.Views.View import CanvasView
 import factory
 
 
-# from app.Controllers.FileManagerImpl import ParametersFileManager, RecordingFileManager
-# from app.Controllers.QueueController import QueueController
-# from app.Controllers import GlobalsController
 from app.Models.MagnificationMapModel import MagnificationMapModel
-# from app.Views.ViewLayout import ViewLayout
-# from app.Views.WindowFrame import WindowFrame
+
+
 class _UISignals(QObject):
     playSignal = QtCore.pyqtSignal()
     pauseSignal = QtCore.pyqtSignal()
@@ -32,32 +30,33 @@ class _UISignals(QObject):
     def __init__(self):
         QObject.__init__(self)
 
-
-
 __boundWindows = []
 
+__controllers = []
 
 __UISignals = _UISignals()
 
 
-def modelControllers():
-    cvs = []
-    for window in __boundWindows:
-        for cv in window.modelControllers:
-            cvs.append(cv)
-    return cvs
 
+
+def modelControllers():
+    return __controllers
+
+def views():
+    ret = []
+    for window in __boundWindows:
+        for view in window.views:
+            ret.append(view)
+    return ret
 
 def canvasViews():
     dvs = []
-    for window in __boundWindows:
-        for dv in window.canvasViews:
-            dvs.append(dv)
+    for view in views():
+        if isinstance(view,CanvasView):
+            dvs.append(view)
     return dvs
 
-
 def bindWindow(view):
-#         if isinstance(view, WindowFrame):
         view.playPauseAction.triggered.connect(_playPauseToggle)
         view.resetAction.triggered.connect(_resetHelper)
         view.actionAddCurvePane.triggered.connect(lambda: _addCurvePane(view))
@@ -65,8 +64,6 @@ def bindWindow(view):
         view.actionAddMagPane.triggered.connect(lambda: _addMagPane(view))
         view.actionAddParametersPane.triggered.connect(lambda: _addParametersPane(view))
         view.actionAddTablePane.triggered.connect(lambda: _addTablePane(view))
-#         view.save_setup.triggered.connect(lambda: _saveSetup(view))
-#         view.load_setup.triggered.connect(lambda: _loadSetup(view))
         view.record_button.triggered.connect(lambda: _toggleRecording(view))
         view.visualizerViewSelector.triggered.connect(lambda: _showVisSetup(view))
         view.queueViewSelector.triggered.connect(lambda: _showTableSetup(view))
@@ -75,8 +72,6 @@ def bindWindow(view):
         view.actionExport.triggered.connect(lambda: _exportLightCurves(view))
         view.recordSignal.connect(lambda: _recordWindow(view))
         __boundWindows.append(view)
-#         else:
-#             raise ValueError("window must be a WindowFrame instance")
 
 def _playPauseToggle(window):
     flag = True
@@ -105,12 +100,6 @@ def _resetHelper(window):
     for id, model in Model.items():
         model.reset()
 
-# def _saveTable(window):
-#     pass
-# 
-# def _loadTable(window):
-#       pass
-
 def _addCurvePane(window):
         plCanvas = LightCurvePlotView()
         window.addView(plCanvas)
@@ -119,33 +108,31 @@ def _addImgPane(window):
         view = LensedImageView()
         controller = factory.LensedImageControllerFactory(view)
         window.addView(view)
-        window.modelControllers.append(controller)
+        view.sigDestroyed.connect(_destroyController)
+        __controllers.append(controller)
 
 def _addMagPane(window):
         view = MagMapView()
-#       controller = factory.TracerController(view)
+        controller = factory.MagMapControllerFactory(view)
         window.addView(view)
-#       window.modelControllers.append(controller)
+        view.sigDestroyed.connect(_destroyController)
+        __controllers.append(controller)
 
 def _addParametersPane(window):
         view = ParametersView()
         controller = factory.ParametersControllerFactory(view)
         window.addView(view)
-        window.modelControllers.append(controller)
+        view.sigDestroyed.connect(_destroyController)
+        __controllers.append(controller)
 
 def _addTablePane(window):
     tv = TableView()
+    # pc = window.
     pc = _findControllerHelper(ParametersController)
-    # Will need refactoring. TableControllerFactory is outdated
     tableViewController = factory.TableControllerFactory(tv, pc)
     window.addView(tv)
-    window.modelControllers.append(tableViewController)
-
-# def _saveSetup(window):
-#       pass
-# 
-# def _loadSetup(window):
-#       pass
+    view.sigDestroyed.connect(_destroyController)
+    __controllers.append(tableViewController)
 
 def _toggleRecording(window):
         pass
@@ -176,19 +163,42 @@ def _configureControllers(models):
         relevantControllers = filter(lambda x: x.modelID == id, modelControllers())
         for i in relevantControllers:
             i.bindFields(model.parameters)
-        if isinstance(model,MagnificationMapModel):
-            for i in canvasViews():
-                if isinstance(i,MagMapView):
-                    i.setMagMap(model.magMapArray)
+        # if isinstance(model,MagnificationMapModel):
+        #     for i in canvasViews():
+        #         if isinstance(i,MagMapView):
+        #             i.setMagMap(model.magMapArray)
 
 def _exportLightCurves(window):
         pass
 
 def _recordWindow(window):
         pass
-  
-  
-  
+
+
+
+
+def _findController(modelID,controllerType):
+    ret = []
+    for c in modelControllers():
+        if isinstance(c,controllerType) and c.modelID == modelID:
+            ret.append(c)
+    return ret
+
+def _findView(modelID,windowType):
+    ret = []
+    for v in views():
+        if isinstance(v,windowType) and v.modelID == modelID:
+            ret.append(v)
+    return ret
+
+def _destroyController(view):
+    controller = None
+    for c in modelControllers():
+        if c.view == view:
+            controller = c
+    if controller:
+        modelControllers().remove(controller)
+
 def _findControllerHelper(kind):
     ret = []
     for c in modelControllers():
