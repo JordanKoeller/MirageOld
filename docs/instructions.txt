@@ -1,0 +1,12 @@
+## Instructions
+
+to generate .rst files: 
+$ sphinx-apidocs -o [outfile] [sourcefile]
+
+to generate project:
+$ cd [sourcefile]
+$ sphinx-quickstart
+vi source/conf.py
+    comment out stuff about sys.path, and add path to source module
+
+make html

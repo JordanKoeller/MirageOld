@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = microlensing_simulator
+SPHINXPROJ    = lensing_simulator
 SOURCEDIR     = source
 BUILDDIR      = build
 
