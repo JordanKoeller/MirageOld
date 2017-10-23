@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 
 while getopts ":fd" opt; do
 	  case ${opt} in
-	      d )       sphinx-apidoc -o docs/source src/app/
+	      d )       sphinx-apidoc -o docs/source src/app/ -f
 			cd docs
 			make html
 			echo "Documentation Generated"

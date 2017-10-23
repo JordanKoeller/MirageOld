@@ -10,13 +10,21 @@ import numpy as np
 
 class AbstractFileWrapper(object):
     '''
-    classdocs
+    Abstract class, with methods for interracting with '*.dat' files and directories containing them.
+    Initialize AbstractFileWrapper object.
+    
+    Parameters:
+    
+    - `filepath`: (`str`) path to file or directory of interest
+    - `fileobject`: (file-like object) file object, if file is already opened. Default: `None`
+    - `params`: (`Parameters`) Parameters object instance contained in the file. Passing in offers a slight optimization. Default: `None`
+    - `lookuptable` : (`np.ndarray`) Array with byte shift for each data set present in the file. Passing in offers a slight optimization. Default: `None`
+     
     '''
 
 
     def __init__(self, filepath, fileobject=None, params=None, lookuptable=[]):
         '''
-        Constructor
         '''
         self._filepath = filepath
         if not fileobject or not params:
@@ -38,16 +46,44 @@ class AbstractFileWrapper(object):
 
 
     def _getDataSet(self,trialNo,tableNo):
-            self._fileobject.seek(self._lookupTable[trialNo,tableNo])
-            return np.load(self._fileobject)
+        '''
+        Internal method for retrieving a specific data table from the file. Uses the passed in trialNo and tableNo as row and column indices for the lookup table.
+        
+        Offers a low-level way of getting a numpy array out of a `*.dat` file.
+        
+        
+        Parameters:
+        
+        - `trialNo`: (`int`) Specify the trial number of interest.
+        - `tableNo`: (`int`) Specify which data set collected by the experiment to report.
+        
+        Returns: `np.ndarray`
+        '''
+        self._fileobject.seek(self._lookupTable[trialNo,tableNo])
+        return np.load(self._fileobject)
     
     def prettyPath(self,filename):
+        
+        '''
+        Prints the filename of the passed in string, removing the path and giving only the filename itself.
+        
+        Parameters:
+        
+        - 'filename': (`str`) Filename to clean up and return.
+        
+        Returns: `str`
+        '''
         prettyString = filename
         while prettyString.partition('/')[2] != "":
             prettyString = prettyString.partition('/')[2]
         return prettyString
     
     def has(self,restype):
+        '''
+        Return whether or not the experiment type specified by `restype` is represented in the data file.
+        
+        Returns: 'bool'
+        '''
         return restype in self._exptTypes
 
     @property
