@@ -354,9 +354,12 @@ class FITSFileWriter(FileWriter):
     def open(self,filename = None):
         self._filename = filename or self.getFile()
 
-    def write(self,data):
+    def write(self,data,**headerFields):
         from astropy.io import fits
-        fits.writeto(self._filename,data)
+        header = fits.Header(headerFields)
+        hdu = fits.PrimaryHDU(data,header=header)
+        hdulist = fits.HDUList([hdu])
+        hdulist.writeto(self._filename)
         
     def close(self):
         pass

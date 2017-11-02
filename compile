@@ -15,7 +15,7 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 
-while getopts ":fd" opt; do
+while getopts ":fdc" opt; do
 	  case ${opt} in
 	      d )       sphinx-apidoc -o docs/source src/app/ -f
 			cd docs
@@ -26,8 +26,14 @@ while getopts ":fd" opt; do
 	      f )     cd src/app
 		      python setup.py build_ext --inplace -f
 		      cd ../..
+		      echo "\n\n\n${GREEN}Build Done${NC}\n"
 	            ;;
-	     \? ) echo "Usage: cmd [-h] [-t]"
+	      c )     cd src/app
+		      python setup.py build_ext --inplace
+		      cd ../..
+		      echo "\n\n\n${GREEN}Build Done${NC}\n"
+	            ;;
+	     \? ) echo "Usage: cmd [-d] Docs [-f] Force compile [-c] Regular compile"
 	            ;;
 	  esac
 done
@@ -38,4 +44,3 @@ if [ ! -f .custom_preferences.json ]; then
     echo "${ORANGE}Using default parameters. To edit default, edit '.custom_preferences.json' in the project's root directory${NC}"
     cat .default_preferences.json > .custom_preferences.json
 fi
-echo "\n\n\n${GREEN}Build Done${NC}\n"

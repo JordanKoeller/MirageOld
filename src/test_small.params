@@ -70,7 +70,7 @@
             "value": 1.1922069102404203e-9
         },
         "extraParameters": {
-            "name": "ImageC_TestParams_10000",
+            "name": "test_working",
             "description": "Make sure there's signal, to verify set up correctly",
             "numTrials": 1,
             "trialVariance": "# numpy as np, astropy.units as u, trialNumber are in scope\n###fill in trial variance code here###\nnewParams = copy.deepcopy(oldParams)",

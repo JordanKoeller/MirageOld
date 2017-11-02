@@ -11,12 +11,14 @@ def ControllerFactory(viewers,*signals):
     from .AnimationController import AnimationController
     from .CurveFileExporter import CurveFileExporter
     from .MasterController import MasterController
+
+
     masterController = AnimationController(*signals)
     noImgView = True
     for view in viewers:
         if isinstance(view,LensedImageView):
             noImgView = False
-    if not GlobalPreferences['animate_motion'] and noImgView:
+    if not GlobalPreferences['animate_motion']:
         masterController = MasterController(signals[0])
     modelView = {}
     for view in viewers:

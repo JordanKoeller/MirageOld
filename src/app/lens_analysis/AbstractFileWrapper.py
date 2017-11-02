@@ -96,10 +96,16 @@ class AbstractFileWrapper(object):
     
     @property
     def describe(self):
+        '''
+        Prints the system parameters along with a description of all the data enclosed within the file.
+        '''
         print(str(self))
         
     @property
     def parameters(self):
+        '''
+        Returns an instance of the parameters specified by the file.
+        '''
         return self._params
         
         

@@ -43,12 +43,12 @@ class Trial(AbstractFileWrapper):
     
     
     @requiresDtype(MagMapParameters)
-    def getFitsFile(self,ind,filename = None):
+    def getFitsFile(self,ind,filename = None,**kwargs):
         from ..Controllers.FileManagerImpl import FITSFileWriter
         arr = self._getDataSet(ind)
         fm = FITSFileWriter()
         fm.open(filename)
-        fm.write(arr)
+        fm.write(arr,**kwargs)
         fm.close()
         print("Magnification Map saved")
 
