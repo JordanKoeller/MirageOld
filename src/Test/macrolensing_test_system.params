@@ -2,27 +2,27 @@
     {
         "galaxy": {
             "position": {
-                "x": -1.4808633889490776e-06,
-                "y": 3.537152136007063e-06,
+                "x": 0.0,
+                "y": 0.0,
                 "unit": "rad"
             },
             "velocityDispersion": {
                 "unit": "km / s",
-                "value": 177.95
+                "value": 1500.0
             },
-            "redshift": 0.04,
+            "redshift": 0.5,
             "shearAngle": {
                 "unit": "rad",
-                "value": 1.171115928088195
+                "value": 0.5235987755982988
             },
-            "shearMag": 0.07,
+            "shearMag": 0.306,
             "starMasses": [],
             "starXPos": [],
             "starYPos": [],
             "velocity": {
                 "x": {
                     "unit": "",
-                    "value": 0.0
+                    "value": 1000000000.0
                 },
                 "y": {
                     "unit": "",
@@ -33,7 +33,7 @@
                     "value": 0.0
                 }
             },
-            "pcntStars": 10,
+            "pcntStars": 0.0,
             "colorKey": 4,
             "avgStarMass": 0.5
         },
@@ -48,8 +48,8 @@
                 "value": 1000000000.0
             },
             "velocity": {
-                "x": -3.2717786634279656e-21,
-                "y": 2.626172648024304e-21,
+                "x": -3.5103937772894857e-15,
+                "y": 1.5765211209083518e-14,
                 "unit": "rad"
             },
             "observedPosition": {
@@ -58,32 +58,32 @@
                 "unit": "rad"
             },
             "radius": {
-                "unit": "uas",
-                "value": 1.0
+                "unit": "rad",
+                "value": 4.84813681109536e-06
             },
-            "redshift": 1.69,
+            "redshift": 2.0,
             "colorKey": 3
         },
-        "canvasDim": 500,
+        "canvasDim": 1000,
         "dTheta": {
             "unit": "rad",
-            "value": 1.1922069102404203e-9
+            "value": 0.001454441043328608
         },
         "extraParameters": {
-            "name": "test_working",
-            "description": "Make sure there's signal, to verify set up correctly",
+            "name": "macrolensings_test_data",
+            "description": "Macrolensing system, for testing purposes only.",
             "numTrials": 1,
             "trialVariance": "# numpy as np, astropy.units as u, trialNumber are in scope\n###fill in trial variance code here###\nnewParams = copy.deepcopy(oldParams)",
             "resultList": {
                 "magmap": {
                     "center": {
-                        "x": -6.330435287558283e-08,
-                        "y": 1.5564473225556836e-07,
+                        "x": 0.0,
+                        "y": 0.0,
                         "unit": "rad"
                     },
                     "dimensions": {
-                        "x": 5e-05,
-                        "y": 5e-05,
+                        "x": 50.0,
+                        "y": 50.0,
                         "unit": "arcsec"
                     },
                     "resolution": {

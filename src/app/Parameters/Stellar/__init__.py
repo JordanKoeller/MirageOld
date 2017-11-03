@@ -67,7 +67,7 @@ class GalaxyJSONDecoder(object):
 		vy = qd.decode(js['velocity']['y'])
 		vz = qd.decode(js['velocity']['z'])
 		velocity = CR(vx,vy,vz)
-		pcntStars = js['pcntStars']
+		pcntStars = js['pcntStars'] / 100
 		# skyCoords = #NEED HELP HERE
 		if len(starm) > 0:
 			stars = np.ndarray((len(starm),3))
@@ -444,7 +444,7 @@ class Galaxy(Drawable, Cosmic):
 			self.__velocityDispersion = velocityDispersion or self.__velocityDispersion
 			self.__shear.update(shearMag, shearAngle)
 			if percentStars != None:
-				self.__pcntStar = percentStars
+				self.__pcntStar = percentStars /100
 			if stars != []:
 				self.__stars = stars
 				self.__avgStarMass = sum(stars[:,2])/len(stars)

@@ -104,14 +104,13 @@ private:
 
 	void window_into(XYPair c1, XYPair c2)
 	{
+		cout << "Moving dat window\n";
 		auto windowCorners = getCorners(c1,c2);
-		windowTL = get<0>(windowCorners);
-		windowBR = get<1>(windowCorners);
+		//windowTL = get<0>(windowCorners);
+		windowTL = datasetTL;//get<0>(windowCorners);
+		//windowBR = get<1>(windowCorners);
+		windowBR = datasetBR;//get<1>(windowCorners);
 		windowHW = make_pair(get<0>(windowBR)-get<0>(windowTL),get<1>(windowTL)-get<1>(windowBR));
-		cout << "WINDOW DIMENSIONS\n";
-		printPair(windowTL);
-		printPair(windowBR);
-		cout << "WINDOW DIMENSIONS\n";
 		vector<double> relX;
 		vector<double> relY;
 		for (int x = 0; x < w; ++x)
@@ -130,6 +129,7 @@ private:
 		relX.shrink_to_fit();
 		relY.shrink_to_fit();
 		double scaleNum = get<0>(windowHW)/get<0>(datasetHW)*get<1>(windowHW)/get<1>(datasetHW);
+	//	cout << "Inserted this many elements: " << relX.size() << "\n";
 		grid = Grid(relX.data(),relY.data(),relX.size(),1,2,node_count*scaleNum);
 	}
 
@@ -147,6 +147,9 @@ private:
     static bool check_overlap(XYPair &tl, XYPair &br,
 	double x, double y, double r)
 	{
+		//cout << "Printing\n";
+		//printPair(tl);
+		//printPair(br);
 		return (x - r >= get<0>(tl) &&
 				x + r <= get<0>(br) &&
 				y + r <= get<1>(tl) && 
@@ -176,10 +179,6 @@ public:
 		node_count = node_cnt;
 		auto dSetDims = make_pair(get<0>(datasetBR)-get<0>(datasetTL), get<1>(datasetTL) - get<1>(datasetBR));
 		auto windowDims = make_pair(get<0>(dSetDims)*DEFAULT_DIMENSIONS,get<1>(dSetDims)*DEFAULT_DIMENSIONS);
-		cout << "DATASET DIMENSIONS \n";
-		printPair(datasetTL);
-		printPair(datasetBR);
-		cout << "DATASET DIMENSIONS \n";
 		// translate_window_to(datasetTL);
 		// translate_window_to(make_pair(0,0));
 		// reshape_window_to(windowDims); //Can optimize with lazy evaluation
@@ -240,24 +239,26 @@ public:
 	}
 
     virtual unsigned int find_within_count(double &x, double &y, double &r)
-	{
+	{/*
 		if (r > get<0>(windowHW))
 		{
-			cout << "Radius too large. Have to rescale window\n";
+			cout << "X AXIS IS TOO SMALL\n";
 			reshape_window_to(make_pair(2*r,get<1>(windowHW)));
 		}
 		if (r > get<1>(windowHW))
 		{
-			cout << "Radius too large in Y. Have to rescale window\n";
+			cout << "Y AXIS IS TOO SMALL\n";
 			reshape_window_to(make_pair(get<0>(windowHW),2*r));
 		}
 		if (!check_overlap(windowTL,windowBR,x,y,r))
 		{
-			cout << "Need to shift window\n";
+			cout << "OVERLAP FAILURE\n";
 			translate_window_to(make_pair(x,y));
-		}
+		}*/
 		unsigned int ret = grid.find_within_count(x,y,r);
-		// cout << "Found " << ret << "\n";
+		if (ret != 0) {
+		//	cout << "Found " << ret << "\n";
+		}
 		return ret;
 	}
 

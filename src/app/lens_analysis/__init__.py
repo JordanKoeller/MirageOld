@@ -64,26 +64,34 @@ def describe(filename):
 #     except:
 #         raise EnvironmentError("Must have a Qt event loop running. If you are in ipython, execute the command '%gui qt5' then try again.")
 
-# @requiresGUI
-# def visualizeMagMap(model=None):
-#     '''
-#         Spawns and returns an instance of a `app.Views.MagMapView`. If a model argument is supplied,
-#         will load the supplied model(s) into the view upon initialization.
+@requiresGUI
+def visualizeMagMap(model=None):
+    '''
+        Spawns and returns an instance of a `app.Views.MagMapView`. If a model argument is supplied,
+        will load the supplied model(s) into the view upon initialization.
 
-#         Parameters:
+        Parameters:
 
-#         - `model`: (`lens_analysis.Trial`,`lens_analysis.Experiment`, or `str`) Model(s) to be loaded in upon
-#         initialization of the view. If `model` is a `str`, will assume the string is a filename which
-#         designates a `*.dat` file to load in.
-#     '''
-#     view = ???
-#     if model is None:
-#         return view
-#     elif isinstance(model,Trial): 
-        
-#     elif isinstance(model,Experiment):
-
-#     elif isinstance(model,str):
-
-#     else:
-#         raise ValueError("model must be of type lens_analysis.Trial, lens_analysis.Experiment, or a filename")
+        - `model`: (`lens_analysis.Trial`,`lens_analysis.Experiment`, or `str`) Model(s) to be loaded in upon
+        initialization of the view. If `model` is a `str`, will assume the string is a filename which
+        designates a `*.dat` file to load in.
+    '''
+    from app.Views.MainView import MainView
+    from app.Views.MagMapView import MagMapView
+    view = MainView()
+    mmt = MagMapView(title = "Figure 1")
+    view.addView(mmt)
+    view.show()
+    return view
+    if isinstance(model,Trial): 
+        mm = model.getMagMap()
+        view.setMagMap(mm,0)
+    elif isinstance(model,Experiment):
+        for i in model:
+            mm = i.getMagMap()
+            view.setMagMap(mm,0)
+    elif isinstance(model,str):
+        print("Yeah personal best")
+    else:
+        raise ValueError("model must be of type lens_analysis.Trial, lens_analysis.Experiment, or a filename")
+    return view

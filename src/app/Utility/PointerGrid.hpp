@@ -148,7 +148,7 @@ public:
                 insert(rawData+i);
             }
         }
-        cout << "Inserted " << w*h << " DataPoints\n";
+    //    cout << "Inserted " << w*h << " DataPoints\n";
     }
 
     PointerGrid()

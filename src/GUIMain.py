@@ -131,7 +131,7 @@ def _addTablePane(window):
     pc = _findControllerHelper(ParametersController)
     tableViewController = factory.TableControllerFactory(tv, pc)
     window.addView(tv)
-    view.sigDestroyed.connect(_destroyController)
+    tv.sigDestroyed.connect(_destroyController)
     __controllers.append(tableViewController)
 
 def _toggleRecording(window):

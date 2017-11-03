@@ -11,8 +11,8 @@ from PyQt5 import QtGui
 import numpy as np
 
 #from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brute
-from ..Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Grid
-# from ..Calculator.Engine.Engine_Windowed import Engine_Windowed as Engine_Grid
+# from ..Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Grid
+from ..Calculator.Engine.Engine_Windowed import Engine_Windowed as Engine_Grid
 
 
 # from ..Calculator.Engine.Engine_ShapeGrid import Engine_ShapeGrid as Engine_Grid

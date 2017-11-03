@@ -212,6 +212,8 @@ class Quasar:<br>
 	def regenerateStars(self):
 		print("Regenerating stars now.")
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
+		print("Smooth mass = "+str(self.smoothMassOnScreen))
+		print("Percent Stars mass = "+str(self.__galaxy.percentStars))
 		generator = Kroupa_2001()
 		# generator = Evolved_IMF()
 		m_stars = m_stars.value
