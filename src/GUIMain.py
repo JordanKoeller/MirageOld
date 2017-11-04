@@ -110,6 +110,7 @@ def _addImgPane(window):
         window.addView(view)
         view.sigDestroyed.connect(_destroyController)
         __controllers.append(controller)
+        return controller
 
 def _addMagPane(window):
         view = MagMapView()
@@ -117,6 +118,7 @@ def _addMagPane(window):
         window.addView(view)
         view.sigDestroyed.connect(_destroyController)
         __controllers.append(controller)
+        return controller
 
 def _addParametersPane(window):
         view = ParametersView()
@@ -124,6 +126,7 @@ def _addParametersPane(window):
         window.addView(view)
         view.sigDestroyed.connect(_destroyController)
         __controllers.append(controller)
+        return controller
 
 def _addTablePane(window):
     tv = TableView()
@@ -133,23 +136,27 @@ def _addTablePane(window):
     window.addView(tv)
     tv.sigDestroyed.connect(_destroyController)
     __controllers.append(tableViewController)
+    return tableViewController
 
 def _toggleRecording(window):
         pass
 
 def _showVisSetup(window):
-        window.layout.clear()
+        _clearWindow(window)
+        # window.layout.clear()
         _addCurvePane(window)
         _addImgPane(window)
         _addParametersPane(window)
 
 def _showTableSetup(window):
-        window.layout.clear()
+        _clearWindow(window)
+        # window.layout.clear()
         _addParametersPane(window)
         _addTablePane(window)
 
 def _showTracerSetup(window):
-        window.layout.clear()
+        _clearWindow(window)
+        # window.layout.clear()
         _addCurvePane(window)
         _addMagPane(window)
         
@@ -173,6 +180,12 @@ def _exportLightCurves(window):
 
 def _recordWindow(window):
         pass
+
+def _clearWindow(window):
+    global __controllers
+    controllers = filter(lambda c: c.view not in window.layout.views,modelControllers())
+    __controllers = list(controllers)
+    window.layout.clear()
 
 
 
@@ -201,9 +214,13 @@ def _destroyController(view):
 
 def _findControllerHelper(kind):
     ret = []
+    print(modelControllers())
     for c in modelControllers():
         if isinstance(c, kind):
             ret.append(c)
+    print("PRINTING RET")
+    print(ret)
+    print(len(ret))
     if len(ret) == 1:
         ret = ret[0]
     elif len(ret) == 0:

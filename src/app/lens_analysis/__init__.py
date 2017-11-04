@@ -72,26 +72,28 @@ def visualizeMagMap(model=None):
 
         Parameters:
 
-        - `model`: (`lens_analysis.Trial`,`lens_analysis.Experiment`, or `str`) Model(s) to be loaded in upon
+        - `model`: (`<lens_analysis.Trial>`,`<lens_analysis.Experiment>`, or `<str>`) Model(s) to be loaded in upon
         initialization of the view. If `model` is a `str`, will assume the string is a filename which
         designates a `*.dat` file to load in.
     '''
     from app.Views.MainView import MainView
-    from app.Views.MagMapView import MagMapView
-    view = MainView()
-    mmt = MagMapView(title = "Figure 1")
-    view.addView(mmt)
-    view.show()
-    return view
-    if isinstance(model,Trial): 
-        mm = model.getMagMap()
-        view.setMagMap(mm,0)
-    elif isinstance(model,Experiment):
-        for i in model:
-            mm = i.getMagMap()
-            view.setMagMap(mm,0)
-    elif isinstance(model,str):
-        print("Yeah personal best")
-    else:
-        raise ValueError("model must be of type lens_analysis.Trial, lens_analysis.Experiment, or a filename")
-    return view
+    import GUIMain
+    ui = MainView()
+    GUIMain.bindWindow(ui)
+    magMapViewController = GUIMain._addMagPane(ui)
+    ui.show()
+    if model:
+        magMapViewController.setModel(model)
+    return magMapViewController
+    # if isinstance(model,Trial): 
+    #     mm = model.getMagMap()
+    #     view.setMagMap(mm,0)
+    # elif isinstance(model,Experiment):
+    #     for i in model:
+    #         mm = i.getMagMap()
+    #         view.setMagMap(mm,0)
+    # elif isinstance(model,str):
+    #     print("Yeah personal best")
+    # else:
+    #     raise ValueError("model must be of type lens_analysis.Trial, lens_analysis.Experiment, or a filename")
+    # return view

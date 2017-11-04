@@ -15,10 +15,10 @@ class AbstractFileWrapper(object):
     
     Parameters:
     
-    - `filepath`: (`str`) path to file or directory of interest
-    - `fileobject`: (file-like object) file object, if file is already opened. Default: `None`
-    - `params`: (`Parameters`) Parameters object instance contained in the file. Passing in offers a slight optimization. Default: `None`
-    - `lookuptable` : (`np.ndarray`) Array with byte shift for each data set present in the file. Passing in offers a slight optimization. Default: `None`
+    - `filepath`: (:class:`str`) path to file or directory of interest
+    - `fileobject`: (file-like object) file object, if file is already opened. Default: :class:`None`
+    - `params`: (:class:`Parameters`) Parameters object instance contained in the file. Passing in offers a slight optimization. Default: :class:`None`
+    - `lookuptable` : (:class:`np.ndarray`) Array with byte shift for each data set present in the file. Passing in offers a slight optimization. Default: :class:`None`
      
     '''
 
@@ -54,10 +54,10 @@ class AbstractFileWrapper(object):
         
         Parameters:
         
-        - `trialNo`: (`int`) Specify the trial number of interest.
-        - `tableNo`: (`int`) Specify which data set collected by the experiment to report.
+        - `trialNo`: (`<int>`) Specify the trial number of interest.
+        - `tableNo`: (`<int>`) Specify which data set collected by the experiment to report.
         
-        Returns: `np.ndarray`
+        Returns: :class:`<np.ndarray>`
         '''
         self._fileobject.seek(self._lookupTable[trialNo,tableNo])
         return np.load(self._fileobject)
@@ -69,7 +69,7 @@ class AbstractFileWrapper(object):
         
         Parameters:
         
-        - 'filename': (`str`) Filename to clean up and return.
+        - 'filename': (:class:`str`) Filename to clean up and return.
         
         Returns: `str`
         '''
@@ -82,7 +82,7 @@ class AbstractFileWrapper(object):
         '''
         Return whether or not the experiment type specified by `restype` is represented in the data file.
         
-        Returns: 'bool'
+        Returns: :class:'bool'
         '''
         return restype in self._exptTypes
 

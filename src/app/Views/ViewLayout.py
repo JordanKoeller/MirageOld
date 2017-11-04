@@ -38,12 +38,15 @@ class ViewLayout(QFrame):
 
     def clear(self):
         # self._layout.clear()
-        while self._views != []:
-            self._views.remove(self._views[0])
+        self._layout.clear()
 
     def removeView(self,view):
-        self._views.remove(view)
-        view.destroy()
+        if view in self._views:
+            self._views.remove(view)
+            view.destroy()
+
+    # def __next__(self):
+
         
 
 
