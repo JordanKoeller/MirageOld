@@ -11,6 +11,13 @@ from ._environ import requiresGUI
 
 
 def load(filename='Untitled.dat'):
+    '''
+    Given a filename, returns a :class:`la.Experiment` (if a `.dat` file is provided) or a :class:`la.DirectoryMap`
+    (if a directory name is provided) instance generated from the specified file. If filename is None, and a Qt event loop 
+    is running, opens a file dialog to specify the file.
+
+    Parameters: `filename` (:class:`str`) : Filename to look up. Defaults to '`Untitled.dat`'. If None is passed in, opens a dialog to specify the file.
+    '''
     if filename is None:
         from PyQt5 import QtWidgets
         filename = QtWidgets.QFileDialog.getOpenFileName(filter='*.dat')[0]
@@ -22,8 +29,20 @@ def load(filename='Untitled.dat'):
             return DirectoryMap(filename)
     else:
         return None
+
 def describe(filename):
-    if isinstance(filename, str):
+    '''
+    Convenience function for getting information about a file.
+
+    Given a `.dat` filename, prints the file's description. This method is equivalent to calling:
+
+    >>> import lens_analysis as la
+    >>> data_to_describe = la.load('file.dat')
+    >>> data_to_describe.describe
+
+    Parameters: `filename` (:class:`str`) : The data file to describe. Must have a `.dat` extension. Also accepts any subtype of :class:`la.AbstractFileWrapper`.
+    '''
+    if isinstance(filename, str) and filename[len(filename)-4::] == '.dat':
         tmp = load(filename)
         tmp.describe
     elif isinstance(filename, AbstractFileWrapper):
@@ -67,12 +86,12 @@ def describe(filename):
 @requiresGUI
 def visualizeMagMap(model=None):
     '''
-        Spawns and returns an instance of a `app.Views.MagMapView`. If a model argument is supplied,
+        Spawns and returns an instance of a :class:`app.Views.MagMapView`. If a model argument is supplied,
         will load the supplied model(s) into the view upon initialization.
 
         Parameters:
 
-        - `model`: (`<lens_analysis.Trial>`,`<lens_analysis.Experiment>`, or `<str>`) Model(s) to be loaded in upon
+        - `model`: (:class:`la.Trial`,:class:`la.Experiment`, or :class:`str`) Model(s) to be loaded in upon
         initialization of the view. If `model` is a `str`, will assume the string is a filename which
         designates a `*.dat` file to load in.
     '''

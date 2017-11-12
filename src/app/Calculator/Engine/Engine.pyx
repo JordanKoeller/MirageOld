@@ -8,7 +8,6 @@ import random
 import time
 import math
 
-from PyQt5 import QtGui, QtCore
 from astropy import constants as const
 from astropy import units as u
 from astropy.cosmology import WMAP7 as cosmo

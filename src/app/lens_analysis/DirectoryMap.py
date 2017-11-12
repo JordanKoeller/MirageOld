@@ -14,7 +14,7 @@ from .Experiment import Experiment
 
 class DirectoryMap(object):
     '''
-    classdocs
+    Classdocs
     '''
 
 
