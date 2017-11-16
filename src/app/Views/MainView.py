@@ -1,26 +1,27 @@
 
-from PyQt5 import uic, QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QProgressDialog, QInputDialog
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtWidgets import QInputDialog
 
 from app.Models import Model
-import factory
+# import factory
 
-from .. import mainUIFile
-from ..Controllers import ControllerFactory, ExportFactory
-from ..Controllers.FileManagerImpl import ParametersFileManager, RecordingFileManager, ParametersFileReader
+# from .. import mainUIFile
+# from ..Controllers import ControllerFactory, ExportFactory
+from ..Controllers.FileManagerImpl import ParametersFileManager, ParametersFileReader
 from ..Controllers.ParametersController import ParametersController
 from ..Controllers.QueueController import QueueController
-# from ..Controllers import GlobalsController
-from ..Models.MagnificationMapModel import MagnificationMapModel
-from .LensedImageView import LensedImageView
-from .LightCurvePlotView import LightCurvePlotView
-from .MagMapView import MagMapView
-from .ModelDialog import ModelDialog
-from .ParametersView import ParametersView
-from .TableView import TableView
+# from ..Models.MagnificationMapModel import MagnificationMapModel
+# from .LensedImageView import LensedImageView
+# from .LightCurvePlotView import LightCurvePlotView
+# from .MagMapView import MagMapView
+# from .ModelDialog import ModelDialog
+# from .ParametersView import ParametersView
+# from .TableView import TableView
 from .ViewLayout import ViewLayout
 from .WindowFrame import WindowFrame
 
+
+# from ..Controllers import GlobalsController
 class MainView(WindowFrame):
 	"""
 

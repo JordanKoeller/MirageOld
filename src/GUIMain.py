@@ -15,7 +15,7 @@ from app.Views.View import CanvasView
 import factory
 
 
-from app.Models.MagnificationMapModel import MagnificationMapModel
+# from app.Models.MagnificationMapModel import MagnificationMapModel
 
 
 class _UISignals(QObject):
