@@ -402,7 +402,7 @@ cdef class Engine:
 		cdef double x0 = start.to('rad').x
 		cdef double y0 = start.to('rad').y+dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
-		cdef double trueLuminosity = self.rawMagnification(center.x,center.y,radius)
+		cdef double trueLuminosity = self.rawMagnification(center.x,center.y)
 		for i in prange(0,resx,nogil=True,schedule='guided',num_threads=self.core_count):
 			if i % 10 == 0:
 				with gil:
