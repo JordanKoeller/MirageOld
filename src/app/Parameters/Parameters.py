@@ -214,7 +214,7 @@ class Quasar:<br>
 		print("Smooth mass = "+str(self.smoothMassOnScreen))
 		print("Percent Stars mass = "+str(self.__galaxy.percentStars))
 		# generator = Kroupa_2001()
-		# generator = Kroupa_2001_Modified()
+		generator = Kroupa_2001_Modified()
 		# generator = Evolved_IMF()
 		m_stars = m_stars.value
 		if m_stars < 1.0:
