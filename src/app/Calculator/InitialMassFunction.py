@@ -581,6 +581,14 @@ class Kroupa_2001(IMF_broken_powerlaw):
         IMF_broken_powerlaw.__init__(self, massLimits, powers,
                                      multiplicity=multiplicity)
 
+class Kroupa_2001_Modified(IMF_broken_powerlaw):
+    def __init__(self, multiplicity=None):
+        massLimits = np.array([0.08,0.5,1.5])
+        powers = np.array([-1.3,-2.7])
+
+        IMF_broken_powerlaw.__init__(self, massLimits, powers,
+                                     multiplicity=multiplicity)
+
 class Weidner_Kroupa_2004(IMF_broken_powerlaw):
     def __init__(self, multiplicity=None):
         massLimits = np.array([0.01, 0.08, 0.5, 1, np.inf])
