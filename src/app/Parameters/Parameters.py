@@ -210,12 +210,11 @@ class Quasar:<br>
 			self.dt = dt
 
 	def regenerateStars(self):
-		print("Regenerating stars now.")
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
 		print("Smooth mass = "+str(self.smoothMassOnScreen))
 		print("Percent Stars mass = "+str(self.__galaxy.percentStars))
-		generator = Kroupa_2001()
-		# generator = Evolved_IMF()
+		# generator = Kroupa_2001()
+		generator = Evolved_IMF()
 		m_stars = m_stars.value
 		if m_stars < 1.0:
 			print("NOT ENOUGH MASS FOR STAR FIELD. GENERATION TERMINATED")

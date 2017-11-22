@@ -630,10 +630,8 @@ class Evolved_IMF(object):
         """
         retArr = []
         massCounter = 0.0
-        tolerance = 2.0
+        tolerance = 3.0
         while (totalMass - massCounter > tolerance):
-            # print("Looping")
-            # print("Generating on " + str(totalMass-massCounter))
             rawMasses = self.IMF.generate_cluster(totalMass-massCounter)[0]
             for mass in rawMasses:
                 if mass < self.__conversions[0][0]:
@@ -646,7 +644,6 @@ class Evolved_IMF(object):
                     retArr.append(self.__conversions[max(index-1,0)][1])
                     massCounter += self.__conversions[max(index-1,0)][1]
         ret = np.ascontiguousarray(retArr)
-        print("Done Making masses")
         return (ret,'formatting')
 
 
