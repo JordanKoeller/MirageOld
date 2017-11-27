@@ -165,6 +165,7 @@ public:
 	}
 	Grid()=default;
 
+
 	Grid(const double* xx, const double *yy, int h, int w, const int &node_count)
 	{
 		double minX = DBL_MAX;

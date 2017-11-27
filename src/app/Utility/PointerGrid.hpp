@@ -167,7 +167,6 @@ public:
         sz = other.sz;
         width = other.width;
         height = other.height;
-	//cout << "Allocated " << width*height*2 << " \n";
         data = other.data;
         delete[] rawData;
         rawData = new double[width*height*2];
@@ -369,6 +368,8 @@ public:
     }
 
     unsigned int size() override {return sz;}
+
+
 };
 
 #endif

@@ -11,8 +11,12 @@ from PyQt5 import QtGui
 import numpy as np
 
 #from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brute
-from ..Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Grid
+from ..Calculator.Engine.Engine_SparkPy import Engine_Spark as Engine_Grid
+#from ..Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Grid
 # from ..Calculator.Engine.Engine_Windowed import Engine_Windowed as Engine_Grid
+from ..Utility.Partitioner.ColumnPartitioner import ColumnPartitioner
+from ..Utility.Partitioner.RDDGrid import RDDGrid
+from ..Utility.GridWrapper import construct as PointerGridWrapper
 
 
 # from ..Calculator.Engine.Engine_ShapeGrid import Engine_ShapeGrid as Engine_Grid
@@ -30,11 +34,12 @@ class ModelImpl(object):
     
 
     def __init__(self,parameters=None):
-        self.__Engine = Engine_Grid()
+        rddGrid = RDDGrid(ColumnPartitioner(),PointerGridWrapper)
+        self.__Engine = Engine_Grid(rddGrid)
         self.dynamic = False
         if parameters:
             self.updateParameters(parameters)
-            
+        
     def updateParameters(self, params=None,*args,**kwargs):
         if not params:
             self.parameters.update(*args,**kwargs)
@@ -43,7 +48,8 @@ class ModelImpl(object):
             pass
 #            self.__Engine = Engine_Brute()
         elif not params.galaxy.starVelocityParams:# and isinstance(self.__Engine,Engine_Brute):
-            self.__Engine = Engine_Grid()
+            rddGrid = RDDGrid(ColumnPartitioner(),PointerGridWrapper)
+            self.__Engine = Engine_Grid(rddGrid)
         if self.parameters:
             if self.parameters.time != 0.0:
                 params.setTime(self.parameters.time)
