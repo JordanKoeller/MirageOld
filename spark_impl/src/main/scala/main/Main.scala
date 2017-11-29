@@ -52,7 +52,7 @@ object Main {
     rddGrid = new RDDGrid(mappedPixels, partitioner)
   }
 
-  def queryPoints(pts: RDD[((Int, Int), (Double, Double))], radius: Double) = {
+  def queryPoints(pts: RDD[((Int, Int), (Double, Double))], radius: Double):RDD[(Int,Int,Double)] = {
     val ptsFormatted = pts.collect()
     val minMax = ptsFormatted.aggregate(MinMax2D())((lastExtremes, elem) => {
       val x = elem._1._1

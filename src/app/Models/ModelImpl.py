@@ -12,7 +12,7 @@ import numpy as np
 
 #from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brute
 if __name__ == '__main__':
-    from ..Calculator.Engine.Engine_SparkPy import Engine_Spark as Engine_Grid
+    from ..Calculator.Engine.Engine_ScalaSpark import Engine_Spark as Engine_Grid
 else:
     from ..Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Grid
 # from ..Calculator.Engine.Engine_Windowed import Engine_Windowed as Engine_Grid

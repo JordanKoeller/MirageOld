@@ -51,4 +51,4 @@ class __Model(dict):
 
 
 # if __name__ == '__main__':
-Model = None #__Model()
+Model = __Model()
