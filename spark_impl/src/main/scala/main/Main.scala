@@ -2,6 +2,7 @@ package main
 
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
+import org.apache.spark.api.java.JavaRDD
 
 import lensing.RayParameters
 import lensing.RayTracer
@@ -18,7 +19,7 @@ object Main {
   private var rddGrid: RDDGrid = _
 
   def createRDDGrid(
-    stars: RDD[(Double, Double, Double)],
+    stars: JavaRDD[(Double, Double, Double)],
     pointConstant: Double,
     sisConstant: Double,
     shearMag: Double,
@@ -52,8 +53,8 @@ object Main {
     rddGrid = new RDDGrid(mappedPixels, partitioner)
   }
 
-  def queryPoints(pts: RDD[((Int, Int), (Double, Double))], radius: Double):RDD[(Int,Int,Double)] = {
-    val ptsFormatted = pts.collect()
+  def queryPoints(pts: JavaRDD[((Int, Int), (Double, Double))], radius: Double):JavaRDD[(Int,Int,Double)] = {
+    val ptsFormatted = pts.rdd.collect()
     val minMax = ptsFormatted.aggregate(MinMax2D())((lastExtremes, elem) => {
       val x = elem._1._1
       val y = elem._1._2
