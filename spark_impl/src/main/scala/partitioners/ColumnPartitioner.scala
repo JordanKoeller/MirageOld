@@ -1,5 +1,0 @@
-package partitioners
-
-class ColumnPartitioner {
-  
-}

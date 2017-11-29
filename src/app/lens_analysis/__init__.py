@@ -34,7 +34,7 @@ import sys
 from app.Parameters.ExperimentParams import LightCurveParameters, \
     MagMapParameters, StarFieldData
 import numpy as np
-
+from app.Calculator.ExperimentResultCalculator import varyTrial
 
 sys.path.append(os.path.abspath('.'))
 
@@ -428,18 +428,25 @@ class Trial(AbstractFileWrapper):
     #     img.save(destination)
     #     print("Superimposed image saved as "+destination)
 
-        
     @_requiresDtype(StarFieldData)
     def regenerateParameters(self,ind):
         '''
         Constructs and returns a :class:`app.Parameters` instance, exactly as it was when the :class:`Trial` was calculated.
         '''
+        params = copy.deepcopy(self.parameters)
+        stars = self.getStars()
+        params.setStars(stars)
+        return params    
+    @property
+    def parameters(self):
         params = copy.deepcopy(self._params)
+        params =  varyTrial(params,self.trialNumber)
         stars = self.getStars()
         params.setStars(stars)
         return params
-    
-    def histogram(self,numBuckets=100):
+        
+
+    def histogram(self,numBuckets=100,fn='linear'):
         '''
         Constructs a histogram from the :class:`Trial`'s data. Requires the instance contain Magnification map data.
         
@@ -450,6 +457,8 @@ class Trial(AbstractFileWrapper):
             Tuple of the counts calculated and buckets used (`counts,buckets`). 
         '''
         mm = self.magMap
+        if fn == 'log10':
+            mm = np.log10(mm+0.0000000001)
         ret = np.histogram(mm,numBuckets+1)
         return (ret[0],ret[1][1:])
         
@@ -480,15 +489,15 @@ class Trial(AbstractFileWrapper):
         '''
         return self.__trialNo
 
-    @property
-    def parameters(self):
-        '''
-        See :class:`regenerateParameters`
-        '''
-        try:
-            return self.regenerateParameters()
-        except AttributeError:
-            return AbstractFileWrapper.parameters
+#    @property
+#    def parameters(self):
+#        '''
+#        See :class:`regenerateParameters`
+#        '''
+#        try:
+#            return self.regenerateParameters()
+#        except AttributeError:
+#            return AbstractFileWrapper.parameters
 
     
     

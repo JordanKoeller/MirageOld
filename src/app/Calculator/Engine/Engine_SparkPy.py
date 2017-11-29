@@ -6,13 +6,14 @@ import math as CMATH
 from .Engine import Engine
 from astropy import constants as const
 
-conf = SparkConf().setAppName("App")
-conf = (conf.setMaster('local[*]')
-        .set('spark.executor.memory', '4G')
-        .set('spark.driver.memory', '4G')
-        .set('spark.driver.maxResultSize', '4G'))
-sc = SparkContext(conf=conf)
-sc.setLogLevel('WARN')
+if __name__ == '__main__':
+    conf = SparkConf().setAppName("App")
+    conf = (conf.setMaster('local[*]')
+            .set('spark.executor.memory', '4G')
+            .set('spark.driver.memory', '4G')
+            .set('spark.driver.maxResultSize', '4G'))
+    sc = SparkContext(conf=conf)
+    sc.setLogLevel('WARN')
 
 
 def _ray_trace_helper(pixels, #MAY NEED TO BE A CPDEF, BUT TRY THIS FIRST
@@ -48,9 +49,9 @@ def _ray_trace_helper(pixels, #MAY NEED TO BE A CPDEF, BUT TRY THIS FIRST
         deltaR_x = incident_angle_x - centerX
         deltaR_y = incident_angle_y - centerY
         r = CMATH.sqrt(deltaR_x*deltaR_x+deltaR_y*deltaR_y)
-#        if r != 0.0:
-#            result_array[i,0] += deltaR_x*sis_constant/r 
-#            result_array[i,1] += deltaR_y*sis_constant/r
+#         if r != 0.0:
+#             result_array[i,0] += deltaR_x*sis_constant/r 
+#             result_array[i,1] += deltaR_y*sis_constant/r
 
         #Shear
         phi = 2*(pi2 - shear_angle )-CMATH.atan2(deltaR_y,deltaR_x)

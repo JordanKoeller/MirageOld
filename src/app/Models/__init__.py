@@ -50,5 +50,5 @@ class __Model(dict):
         return "default"
 
 
-
-Model = __Model()
+# if __name__ == '__main__':
+Model = None #__Model()
