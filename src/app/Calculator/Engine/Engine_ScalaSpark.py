@@ -7,11 +7,7 @@ from .Engine import Engine
 from astropy import constants as const
 
 if __name__ == '__main__':
-    conf = SparkConf().setAppName("App")
-    conf = (conf.setMaster('local[*]')
-            .set('spark.executor.memory', '4G')
-            .set('spark.driver.memory', '4G')
-            .set('spark.driver.maxResultSize', '4G'))
+    conf = SparkConf().setAppName("Lensing Simulation")
     sc = SparkContext(conf=conf)
     sc.setLogLevel('WARN')
 
@@ -66,15 +62,9 @@ class Engine_Spark(Engine):
                 _width,
                 _height
                 )
-        # _b = sc.broadcast(args) #Broadcasted arguments
-        # ray_traced_RDD = rayList_RDD.map(lambda pixels: _ray_trace_helper(pixels,*(_b.value)))
-        
-        # ray_traced_RDD.collect()
         sc._jvm.main.Main.createRDDGrid(*args)
-        # self._grid = self._rdd_grid.construct(ray_traced_RDD)
         print("FINSIHED RAY TRACING AND MAPPING")
         
-    def makeMagMap(self, center, dims, resolution,*args,**kwargs):
         '''
         Calulates and returns a 2D magnification map of the magnification coefficients 
         of a quasar placed around the point center. dims specifies the width and height of the magnification
@@ -83,6 +73,21 @@ class Engine_Spark(Engine):
         causing the calulation to go slightly faster. If a NullSignal is supplied, progress updates are sent 
         to the standard output.
         '''
+    def makeMagMap(self, center, dims, resolution,*args,**kwargs):
+        """[summary]
+        
+        [description]
+        
+        Arguments:
+            center {Vector2D} -- Center coordinates of the magnification map, in units of arc.
+            dims {Vector2D} -- Width and height in units of arc for the canvas.
+            resolution {Vector2D} -- Number of pixels for the maginfication map, in the x and y directions.
+            *args {} -- To prevent optional signals passed in from raising an exception.
+            **kwargs {} -- To prevent optional signals passed in from raising an exception.
+        
+        Returns:
+            np.ndarray[shape=resolution, dtype=int] -- An array of the ratio of the magnification of the image, with and without microlensing.
+        """
         resx = resolution.x
         resy = resolution.y
         stepX = dims.to('rad').x/resx   

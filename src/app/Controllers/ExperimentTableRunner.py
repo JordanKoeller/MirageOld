@@ -29,17 +29,18 @@ class ExperimentTableRunner(object):
 
     def run(self):
         ctr = 0
+        self.signals['progressLabel'].emit("Calculation starting ...")
         for params in self.experimentQueue:
             ctr += 1
+            # self.signals['progressLabel'].emit("Experiment "+str(ctr-1)+" of "+len(self.experimentQueue) " finished.")
             numTrials = params.extras.numTrials 
             self.filemanager.newExperiment(params) #NEED TO IMPLIMENT
             exptRunner = ExperimentResultCalculator(params,self.signals)
             for expt in range(0,numTrials):
-                self.signals['progressBar'].emit(expt+1)
-                self.signals['progressLabel'].emit("Processing trial "+str(expt+1) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)))
                 newP = varyTrial(params,expt) #NEED TO IMPLIMENT
                 Model.updateModel('exptModel',newP)
                 data = exptRunner.runExperiment() #NEED TO IMPLIMENT
+                self.signals['progressLabel'].emit("Trial "+str(expt) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)) +" finished")
                 self.filemanager.write(data)
             self.filemanager.closeExperiment()
         self.filemanager.flush()
