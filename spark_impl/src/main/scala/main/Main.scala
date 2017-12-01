@@ -11,15 +11,19 @@ import spatialrdd.RDDGrid
 import spatialrdd.XYDoublePair
 import spatialrdd.XYIntPair
 import spatialrdd.partitioners.ColumnPartitioner
+import scala.collection.JavaConverters._
 
-object Main {
+object Main extends App {
 
-  val sc = SparkContext.getOrCreate()
 
   private var rddGrid: RDDGrid = _
 
+  def helloWorld() = {
+    println("Hello world!")
+  }
+
   def createRDDGrid(
-    stars: JavaRDD[(Double, Double, Double)],
+    starsArr: java.util.ArrayList[java.util.ArrayList[Double]],
     pointConstant: Double,
     sisConstant: Double,
     shearMag: Double,
@@ -27,9 +31,22 @@ object Main {
     dTheta: Double,
     centerX: Double,
     centerY: Double,
-    width: Double,
-    height: Double): Unit = {
-
+    width: Int,
+    height: Int,
+    ctx:JavaRDD[Int]): Unit = {
+    val sc = ctx.context
+    println(starsArr.size())
+    val starsS = collection.mutable.Buffer[(Double,Double,Double)]()
+    if (starsArr.size() > 0) {
+	println(starsArr.get(0).get(0).getClass())
+      for (i <- 0 until starsArr.size()) {
+        val star = starsArr.get(i)
+        val starT = (star.get(0),star.get(1),star.get(2))
+        starsS += starT
+      }
+    }
+   val stars = starsS//.toArray
+    
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
     val pixels = sc.range(0, (width * height).toLong, 1)
@@ -41,10 +58,10 @@ object Main {
       dTheta,
       centerX,
       centerY,
-      width,
-      height)
+      width.toDouble,
+      height.toDouble)
     val formattedPixels = pixels.map { long =>
-      new XYIntPair(long.toInt / width.toInt, long.toInt % width.toInt)
+      new XYIntPair(long.toInt / width, long.toInt % width)
     }
     val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters))
 
@@ -53,8 +70,9 @@ object Main {
     rddGrid = new RDDGrid(mappedPixels, partitioner)
   }
 
-  def queryPoints(pts: JavaRDD[((Int, Int), (Double, Double))], radius: Double):JavaRDD[(Int,Int,Double)] = {
-    val ptsFormatted = pts.rdd.collect()
+  def queryPoints(pts: java.util.ArrayList[((Int, Int), (Double, Double))], radius: Double,ctx:JavaRDD[Int]):java.util.ArrayList[(Int,Int,Double)] = {
+    val ptsFormatted = pts.iterator().asScala.toArray
+    val sc = ctx.context
     val minMax = ptsFormatted.aggregate(MinMax2D())((lastExtremes, elem) => {
       val x = elem._1._1
       val y = elem._1._2
@@ -80,6 +98,9 @@ object Main {
     val retSeq = for (i <- 0 until retArr.size;j <- 0 until retArr(0).size) yield {
       new XYIntPair(i,j) -> retArr(i)(j)
     }
-    sc.parallelize(retSeq, 1).map(e => (e._1.x,e._1.y,e._2))
+    val retArr2 = retSeq.map(e => (e._1.x,e._1.y,e._2))
+    val ret = new java.util.ArrayList[(Int,Int,Double)]()
+    for (elem <- retArr2) ret.add(elem)
+    ret
   }
 }

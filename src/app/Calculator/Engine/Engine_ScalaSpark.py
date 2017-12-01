@@ -5,15 +5,14 @@ import numpy as np
 import math as CMATH
 from .Engine import Engine
 from astropy import constants as const
+#import os
 
-if __name__ == '__main__':
-    conf = SparkConf().setAppName("App")
-    conf = (conf.setMaster('local[*]')
-            .set('spark.executor.memory', '4G')
-            .set('spark.driver.memory', '4G')
-            .set('spark.driver.maxResultSize', '4G'))
-    sc = SparkContext(conf=conf)
-    sc.setLogLevel('WARN')
+#os.environ["PYSPARK_DRIVER_PYTHON"] = "/users/jkoeller/miniconda3/bin/python"
+#os.environ["PYSPARK_PYTHON"]="/users/jkoeller/miniconda3/bin/python"
+conf = SparkConf().setAppName("If this runs longer than 30 minutes and you need the cluster go ahead and kill it. If you don't need the cluster though, please just let it go! \n Thanks, \n -Jordan")
+conf = (conf)
+sc = SparkContext(conf=conf)
+sc.setLogLevel('WARN')
 
 class _Ray(object):
 
@@ -33,6 +32,9 @@ class Engine_Spark(Engine):
     def __init__(self,rdd_grid):
         self._rdd_grid = rdd_grid
 
+    @property
+    def time(self):
+        return 0
     
     def reconfigure(self):
         _width = self.parameters.canvasDim
@@ -54,17 +56,18 @@ class Engine_Spark(Engine):
         dL = self.parameters.galaxy.angDiamDist.to('lyr').value
         dLS = self.parameters.dLS.to('lyr').value
         stars = self.parameters.stars
-        starsLst = map(lambda lst:(lst[0],lst[1],lst[2]),stars)
-        args = (sc.parallelize(starsLst)._jrdd,
-                4*(const.G/const.c/const.c).to('lyr/solMass').value*dLS/dS/dL,
-                4*CMATH.pi*self.parameters.galaxy.velocityDispersion*2*(const.c**-2).to('s2/km2').value*dLS/dS,
+        starsLst = list(map(lambda lst:(lst[0],lst[1],lst[2]),stars))
+        args = (starsLst,
+                (4*(const.G/const.c/const.c).to('lyr/solMass').value*dLS/dS/dL),
+                (4*CMATH.pi*self.parameters.galaxy.velocityDispersion*2*(const.c**-2).to('s2/km2').value*dLS/dS).value,
                 self.parameters.galaxy.shear.magnitude,
                 self.parameters.galaxy.shear.angle.to('rad').value,
                 self.parameters.dTheta.to('rad').value,
                 self.parameters.galaxy.position.to('rad').x,
                 self.parameters.galaxy.position.to('rad').y,
                 _width,
-                _height
+                _height,
+                sc.emptyRDD()._jrdd
                 )
         # _b = sc.broadcast(args) #Broadcasted arguments
         # ray_traced_RDD = rayList_RDD.map(lambda pixels: _ray_trace_helper(pixels,*(_b.value)))
@@ -92,13 +95,11 @@ class Engine_Spark(Engine):
         y0 = start.to('rad').y+dims.to('rad').y
         radius = self.parameters.queryQuasarRadius
         pts = []
-        for i in range(0,resx):
-            for j in range(0,resy):
+        for i in range(0,int(resx)):
+            for j in range(0,int(resy)):
                 pts.append(((i,j),(x0+i*stepX,y0-j*stepY)))
-        ptsJRDD = sc.parallelize(pts,1)._jrdd
-        retRDD = sc._jvm.main.Main.queryPoints(ptsJRDD,radius)
+        retLst = sc._jvm.main.Main.queryPoints(pts,radius,sc.emptyRDD()._jrdd)
         ret = np.ndarray((res,resy))
-        retLst = retRDD.collect()
         for elem in retLst:
             ret[elem[0],elem[1]] = elem[2]
         return ret
