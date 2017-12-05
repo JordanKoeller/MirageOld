@@ -35,7 +35,6 @@ object Main extends App {
     height: Int,
     ctx:JavaRDD[Int]): Unit = {
     val sc = ctx.context
-    println(starsArr.size())
     val starsS = collection.mutable.Buffer[(Double,Double,Double)]()
     if (starsArr.size() > 0) {
 	println(starsArr.get(0).get(0).getClass())
@@ -50,6 +49,7 @@ object Main extends App {
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
     val pixels = sc.range(0, (width * height).toLong, 1)
+    println("Initialized pixels variable with size "+pixels.count())
     val parameters = RayParameters(stars,
       pointConstant,
       sisConstant,
@@ -60,14 +60,17 @@ object Main extends App {
       centerY,
       width.toDouble,
       height.toDouble)
-    val formattedPixels = pixels.map { long =>
-      new XYIntPair(long.toInt / width, long.toInt % width)
-    }
-    val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters))
-
+    val formattedPixels = pixels.mapPartitions(longIter => {
+      longIter.map{long => 
+        new XYIntPair(long.toInt / width, long.toInt % width)
+      }
+    },true)
+    val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters)).cache()
     //Now need to construct the grid
     val partitioner = new ColumnPartitioner()
     rddGrid = new RDDGrid(mappedPixels, partitioner)
+    mappedPixels.unpersist()
+    println("called new RDDGrid")
   }
 
   def queryPoints(pts: java.util.ArrayList[((Int, Int), (Double, Double))], radius: Double,ctx:JavaRDD[Int]):java.util.ArrayList[(Int,Int,Double)] = {

@@ -5,7 +5,15 @@ import org.apache.spark.rdd.RDD
 import spatialrdd.partitioners.SpatialPartitioning
 
 class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) {
-  private val rdd = partitioner.profileData(data).partitionBy(partitioner).glom().map(arr => SpatialGrid(arr)).cache()
+  private val rdd = _init(data,partitioner) 
+  def _init(data:RDD[XYDoublePair], partitioner:SpatialPartitioning) = {
+    val rddTraced = partitioner.profileData(data).partitionBy(partitioner)
+    println("RDD TRACED")
+    val ret = rddTraced.glom().mapPartitions(arrr => arrr.map(arr => SpatialGrid(arr))).cache()
+  println("Cached")
+  ret
+
+  }
 
   def queryPoints(pts: Array[Array[XYDoublePair]], radius: Double, sc: SparkContext): Array[Array[Double]] = {
     val groupings = collection.mutable.Map[Int, List[(XYIntPair, XYDoublePair)]]()
