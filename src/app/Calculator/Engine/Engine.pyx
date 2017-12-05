@@ -403,10 +403,6 @@ cdef class Engine:
 		cdef double y0 = start.to('rad').y+dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
 		for i in prange(0,resx,nogil=True,schedule='guided',num_threads=self.core_count):
-			if i % 10 == 0:
-				with gil:
-					signal.emit(i)
-					print(i)
 			for j in range(0,resy):
 				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0-stepY*j,radius))
 		trueLuminosity = self.rawMagnification(center.to('rad').x,center.to('rad').y)

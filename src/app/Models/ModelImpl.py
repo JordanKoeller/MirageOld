@@ -11,7 +11,16 @@ from PyQt5 import QtGui
 import numpy as np
 
 #from ..Calculator.Engine.Engine_BruteForce import Engine_BruteForce as Engine_Brute
+<<<<<<< HEAD
 from ..Calculator.Engine.Engine_ScalaSpark import Engine_Spark as Engine_Grid
+=======
+# if __name__ == '__main__':
+#     # from ..Calculator.Engine.Engine_ScalaSpark import Engine_Spark as Engine_Grid
+# else:
+#     from ..Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Grid
+from ..Calculator.Engine.Engine_PointerGrid import Engine_PointerGrid as Engine_Grid
+    
+>>>>>>> 1c33bfba87ea6ba14d111255c64b1892746c3cd4
 # from ..Calculator.Engine.Engine_Windowed import Engine_Windowed as Engine_Grid
 from ..Utility.Partitioner.ColumnPartitioner import ColumnPartitioner
 from ..Utility.Partitioner.RDDGrid import RDDGrid
@@ -34,7 +43,7 @@ class ModelImpl(object):
 
     def __init__(self,parameters=None):
         rddGrid = RDDGrid(ColumnPartitioner(),PointerGridWrapper)
-        self.__Engine = Engine_Grid(rddGrid)
+        self.__Engine = Engine_Grid()
         self.dynamic = False
         if parameters:
             self.updateParameters(parameters)

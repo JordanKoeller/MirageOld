@@ -7,43 +7,34 @@ import os
 import sys
 
 import argparse
+from datetime import datetime as DT
 
-def usingMPI():
-    try:
-        from mpi4py import MPI
-        
-        comm = MPI.COMM_WORLD
-        sz = comm.Get_size()
-        return sz > 0
-    except:
-        return False
-    
-def isMainProcess():
-    if not usingMPI():
-        return True
-    else:
-        try:
-            from mpi4py import MPI
-            comm = MPI.COMM_WORLD
-            return comm.Get_rank() == 0
-        except:
-            return False
-    
-processPool = []
+import logging
 
-if __name__ == "__main__" and isMainProcess():
+
+
+if __name__ == "__main__":
+    print("Program initialized.")
     print('____________________________ \n\n'+"Process ID = " + str(os.getpid())+'\n\n____________________________')
+    logging.basicConfig(filename='progress.log',level=logging.INFO)
+    starttime = DT.now()
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--load",nargs='?', type=str, help='Follow with a .param file to load in as parameters.')
     parser.add_argument("--run",nargs='+', type=str, help='Follow with a .params infile and outdirectory to save data to.')
+    parser.add_argument("--log",nargs='+', type=str, help='File to dump logging info to. Defaults to a file named after the date and time the program was initialized.')
     parser.add_argument("-v","--visualize",action='store_true',help='Launch program in visualization perspective.')
     parser.add_argument("-q","--queue",action='store_true',help='Launch program in experiment queue perspective.')
     args = parser.parse_args()
     
+    if args.log:
+        logging.basicConfig(filename=args.log[0],level=logging.INFO)
+    else:
+        logging.basicConfig(filename=str(starttime.isoformat())+".log",level=logging.INFO)
+
 
     if args.run:
-#        sys.stdout = open(os.devnull,'w')
+        sys.stdout = open(os.devnull,'w')
         from app.Controllers.ExperimentTableRunner import ExperimentTableRunner as QueueThread
         from app.Controllers.FileManagerImpl import TableFileReader, ExperimentDataFileWriter
         infile = args.run[0]
@@ -57,7 +48,13 @@ if __name__ == "__main__" and isMainProcess():
         fileWriter.open(outfile)
         queueThread.bindExperiments(table,fileWriter)
         queueThread.run()
-        print('____________________________ \n\n Caluations Finished \n\n____________________________')
+        endTime = DT.now()
+        dSec = (endTime - beginTime).seconds
+        hrs = dSec // 3600
+        mins = (dSec // 60) % 60
+        secs = dSec % 60
+        timeString = str(hrs)+" hr, " + str(mins) + " min, " + str(secs)
+        logging.log('____________________________ \n\n Caluations Finished in' + timeString + ' . \n\n____________________________')
         sys.exit()
     else:
         from PyQt5 import QtWidgets
@@ -66,12 +63,7 @@ if __name__ == "__main__" and isMainProcess():
         app = QtWidgets.QApplication(sys.argv)
         ui = GUIManager()
         GUIMain.bindWindow(ui)
-        GUIMain._showTableSetup(ui)
-        if args.queue:
-            ui.switchToQueue()
-        else:
-            pass
-            # ui.switchToVisualizing()
+        GUIMain._showVisSetup(ui)
         ui.show()
         if args.load:
             from app.Controllers.FileManagerImpl import ParametersFileReader
@@ -82,26 +74,6 @@ if __name__ == "__main__" and isMainProcess():
             ui.switchToVisualizing()
             ui.bindFields(params)
     sys.exit(app.exec_())
-    
-else:
-    #Add subprocesses to processPool
-    from mpi4py import MPI
-    comm = MPI.COMM_WORLD
-    print("Adding process "+str(comm.Get_rank()) + " To the Pool.")
-#     processPool.append(comm)
-    fn = None
-    data = comm.recv(source=0,tag=11)
-    print(data)
-#     print("Accepting")
-    if type(isinstance(data,list)):
-        fn = data[0]
-        try:
-            fn(data[1])
-        except:
-            pass
-    else:
-        fn(data)
-    
 
 
 

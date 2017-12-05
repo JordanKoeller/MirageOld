@@ -243,13 +243,7 @@ class ExperimentDataFileWriter(FileWriter):
         np.save(self.exptFile,self.dataSizeArray)
 
     def closeExperiment(self):
-        self.exptFile.flush()
-        tmploc = self.exptFile.tell()
-        self.exptFile.seek(self.parametersEndLoc,0)
-        np.save(self.exptFile,self.dataSizeArray)
-        #Stream cleanup
-        self.exptFile.flush()
-        self.exptFile.seek(tmploc,0)
+        self._updateDataSizeArray()
         self.exptFile.flush()
         self.exptFile.close()
         #Class data cleanup
@@ -266,10 +260,21 @@ class ExperimentDataFileWriter(FileWriter):
         ret = np.zeros((numtrials,numDataPoints),dtype=np.int64)
         return ret
 
+    def _updateDataSizeArray(self):
+        self.exptFile.flush()
+        tmploc = self.exptFile.tell()
+        self.exptFile.seek(self.parametersEndLoc,0)
+        np.save(self.exptFile,self.dataSizeArray)
+        #Stream cleanup
+        self.exptFile.flush()
+        self.exptFile.seek(tmploc,0)
+
+
     def write(self,data):
         for i in range(0,len(data)):
             self.dataSizeArray[self.trialCount,i] = self.exptFile.tell() - self.parametersEndLoc
             np.save(self.exptFile,data[i])
+        self._updateDataSizeArray()
         self.trialCount += 1
 
     def getPretty(self,string):
