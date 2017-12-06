@@ -13,6 +13,9 @@ import spatialrdd.XYIntPair
 import spatialrdd.partitioners.ColumnPartitioner
 import scala.collection.JavaConverters._
 
+
+import java.util.ArrayList
+
 object Main extends App {
 
 
@@ -23,7 +26,7 @@ object Main extends App {
   }
 
   def createRDDGrid(
-    starsArr: java.util.ArrayList[java.util.ArrayList[Double]],
+    starsArr: ArrayList[ArrayList[Double]],
     pointConstant: Double,
     sisConstant: Double,
     shearMag: Double,
@@ -73,11 +76,11 @@ object Main extends App {
     println("called new RDDGrid")
   }
 
-  def queryPoints(pts: java.util.ArrayList[((Int, Int), (Double, Double))], radius: Double,ctx:JavaRDD[Int]):java.util.ArrayList[(Int,Int,Double)] = {
-    val ptsFormatted = pts.iterator().asScala.toArray
+  def queryPoints(pts: ArrayList[ArrayList[Double]], radius: Double,ctx:JavaRDD[Int]):ArrayList[ArrayList[Double]] = {
+    val ptsFormatted = pts.iterator().asScala.toArray.map(lst => ((lst.get(0).toInt,lst.get(1).toInt),(lst.get(2).toDouble,lst.get(3).toDouble)))
     val sc = ctx.context
     val minMax = ptsFormatted.aggregate(MinMax2D())((lastExtremes, elem) => {
-      val x = elem._1._1
+      val x = elem._1._2
       val y = elem._1._2
       if (x > lastExtremes.xMax) lastExtremes.xMax = x
       if (y > lastExtremes.yMax) lastExtremes.yMax = y
@@ -101,8 +104,14 @@ object Main extends App {
     val retSeq = for (i <- 0 until retArr.size;j <- 0 until retArr(0).size) yield {
       new XYIntPair(i,j) -> retArr(i)(j)
     }
-    val retArr2 = retSeq.map(e => (e._1.x,e._1.y,e._2))
-    val ret = new java.util.ArrayList[(Int,Int,Double)]()
+    val retArr2 = retSeq.map{e =>
+      val arr = new ArrayList[Double]()
+      arr.add(e._1.x.toDouble)
+      arr.add(e._1.y.toDouble)
+      arr.add(e._2)
+      arr
+    }
+    val ret = new java.util.ArrayList[ArrayList[Double]]()
     for (elem <- retArr2) ret.add(elem)
     ret
   }
