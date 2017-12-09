@@ -2,9 +2,10 @@ package spatialrdd
 import scala.collection.mutable
 
 class SpatialGrid(data: IndexedSeq[XYDoublePair], bucketFactor: Int = 1) extends Serializable {
-  private val _buckets: mutable.HashMap[Int, Map[Int, mutable.Set[Int]]] = collection.mutable.HashMap()
-  private val _hashX = equalHashing(data, (l: XYDoublePair) => l.x, data.size * 7)
-  private val _hashY = equalHashing(data, (l: XYDoublePair) => l.y, data.size * 7)
+  private val _buckets: mutable.HashMap[Int, mutable.HashMap[Int, mutable.Set[Int]]] = collection.mutable.HashMap()
+  private val _hashX = equalHashing(data, (l: XYDoublePair) => l.x, (math.sqrt(data.size)*bucketFactor).toInt)
+  private val _hashY = equalHashing(data, (l: XYDoublePair) => l.y, (math.sqrt(data.size)*bucketFactor).toInt)
+  for (i <- 0 until data.size) _insert_pt(i)
 
   private def _hashFunction(xx: Double, yy: Double): XYIntPair = {
     val x = _hashX(xx)
@@ -12,10 +13,11 @@ class SpatialGrid(data: IndexedSeq[XYDoublePair], bucketFactor: Int = 1) extends
     new XYIntPair(x, y)
   }
 
-  for (i <- 0 until data.size) _insert_pt(i)
 
   private def _insert_pt(index: Int): Unit = {
     val coords = _hashFunction(data(index).x, data(index).y)
+    if (!_buckets.contains(coords.x)) _buckets(coords.x) = mutable.HashMap[Int,mutable.Set[Int]]()
+    if (!_buckets(coords.x).contains(coords.y)) _buckets(coords.x)(coords.y) = mutable.Set[Int]()
     _buckets(coords.x)(coords.y) += index
   }
 
@@ -54,6 +56,9 @@ object SpatialGrid {
   val bucketFactor = 7
 
   def apply(data: IndexedSeq[(Double, Double)]): SpatialGrid = {
-    new SpatialGrid(data.map(pt => new XYDoublePair(pt._1, pt._2)), bucketFactor)
+    println("Calling new SpatialGrid")
+    val ret = new SpatialGrid(data.map(pt => new XYDoublePair(pt._1, pt._2)), bucketFactor)
+    println("Finished calling new SpatialGrid")
+    ret
   }
 }

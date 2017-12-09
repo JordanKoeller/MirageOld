@@ -1,0 +1,1 @@
+spark-submit --executor-memory 8g --driver-memory 8g --jars ../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar --master local --verbose Main.py --run ../../Test/imageC_hexDec_sweepthrough_aged.params ../../Test/

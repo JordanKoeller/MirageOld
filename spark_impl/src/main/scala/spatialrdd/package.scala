@@ -2,8 +2,8 @@ import org.apache.spark.rdd.RDD
 
 package object spatialrdd {
   sealed case class XYPair[T](val x: T, val y: T)
-  case class MinMax2D(var xMin: Double = Double.MaxValue, var yMin: Double = Double.MaxValue, var xMax: Double = Double.MinValue, var yMax: Double = Double.MinValue)
-  case class MinMax(var min: Double = Double.MaxValue, var max: Double = Double.MinValue)
+  case class MinMax2D(var xMin: Double = Double.MaxValue, var yMin: Double = Double.MaxValue, var xMax: Double = -Double.MaxValue, var yMax: Double = -Double.MaxValue)
+  case class MinMax(var min: Double = Double.MaxValue, var max: Double = -Double.MaxValue)
   class XYIntPair(override val x: Int, override val y: Int) extends XYPair[Int](x, y)
   class XYDoublePair(override val x: Double, override val y: Double) extends XYPair[Double](x, y)
 
@@ -19,7 +19,7 @@ package object spatialrdd {
       if (mm1.max > mm2.max) ret.max = mm1.max else ret.max = mm2.max
       ret
     })
-    val div = (minMax.max - minMax.min) / buckets.toDouble
+    val div = (minMax.max - minMax.min) / math.sqrt(buckets)
     (x: Double) => ((x - minMax.min) / div).toInt
   }
 
@@ -56,8 +56,8 @@ package object spatialrdd {
       if (mm1.yMax > mm2.yMax) ret.yMax = mm1.yMax else ret.yMax = mm2.yMax
       ret
     })
-    val divX = (minMax.xMax - minMax.xMin) / buckets.toDouble
-    val divY = (minMax.yMax - minMax.yMin) / buckets.toDouble
+    val divX = (minMax.xMax - minMax.xMin) / buckets
+    val divY = (minMax.yMax - minMax.yMin) / buckets
     (pt: XYDoublePair) => new XYIntPair(((pt.x - minMax.xMin) / divX).toInt, ((pt.y - minMax.yMin) / divY).toInt)
   }
 

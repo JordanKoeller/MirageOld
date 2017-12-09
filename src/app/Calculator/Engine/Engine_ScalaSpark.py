@@ -37,6 +37,14 @@ class Engine_Spark(Engine):
         return 0
     
     def reconfigure(self):
+        '''
+        Calulates and returns a 2D magnification map of the magnification coefficients 
+        of a quasar placed around the point center. dims specifies the width and height of the magnification
+        map in units of arc. resolution specifies the dimensions of the magnification map.
+        The signals allow for feedback on progress of the calculation. If none are supplied, output is silenced, 
+        causing the calulation to go slightly faster. If a NullSignal is supplied, progress updates are sent 
+        to the standard output.
+        '''
         _width = self.parameters.canvasDim
         _height = self.parameters.canvasDim
         #First, set up some functions for mapping over:
@@ -59,7 +67,7 @@ class Engine_Spark(Engine):
         starsLst = list(map(lambda lst:(lst[0],lst[1],lst[2]),stars))
         args = (starsLst,
                 (4*(const.G/const.c/const.c).to('lyr/solMass').value*dLS/dS/dL),
-                (4*CMATH.pi*self.parameters.galaxy.velocityDispersion*2*(const.c**-2).to('s2/km2').value*dLS/dS).value,
+                (4*CMATH.pi*self.parameters.galaxy.velocityDispersion**2*(const.c**-2).to('s2/km2').value*dLS/dS).value,
                 self.parameters.galaxy.shear.magnitude,
                 self.parameters.galaxy.shear.angle.to('rad').value,
                 self.parameters.dTheta.to('rad').value,
@@ -69,17 +77,11 @@ class Engine_Spark(Engine):
                 _height,
                 sc.emptyRDD()._jrdd
                 )
+        print(self.parameters)
+        print("Calling JVM to ray-trace")
         sc._jvm.main.Main.createRDDGrid(*args)
         print("FINSIHED RAY TRACING AND MAPPING")
         
-        '''
-        Calulates and returns a 2D magnification map of the magnification coefficients 
-        of a quasar placed around the point center. dims specifies the width and height of the magnification
-        map in units of arc. resolution specifies the dimensions of the magnification map.
-        The signals allow for feedback on progress of the calculation. If none are supplied, output is silenced, 
-        causing the calulation to go slightly faster. If a NullSignal is supplied, progress updates are sent 
-        to the standard output.
-        '''
     def makeMagMap(self, center, dims, resolution,*args,**kwargs):
         """[summary]
         
@@ -95,6 +97,7 @@ class Engine_Spark(Engine):
         Returns:
             np.ndarray[shape=resolution, dtype=int] -- An array of the ratio of the magnification of the image, with and without microlensing.
         """
+        print("MAKING MAG MAP")
         resx = resolution.x
         resy = resolution.y
         stepX = dims.to('rad').x/resx   
@@ -102,12 +105,12 @@ class Engine_Spark(Engine):
         start = center - dims/2
         x0 = start.to('rad').x
         y0 = start.to('rad').y+dims.to('rad').y
+        print(start.to('rad'))
+        print(dims.to('rad'))
         radius = self.parameters.queryQuasarRadius
-        pts = []
-        for i in range(0,int(resx)):
-            for j in range(0,int(resy)):
-                pts.append(((i,j),(x0+i*stepX,y0-j*stepY)))
-        retLst = sc._jvm.main.Main.queryPoints(pts,radius,sc.emptyRDD()._jrdd)
+        ctx = sc.emptyRDD()._jrdd
+        print("CALLING JVM")
+        retLst = sc._jvm.main.Main.queryPoints(x0,y0,x0+dims.to('rad').x,y0+dims.to('rad').y,int(resx),int(resy),radius,ctx)
         ret = np.ndarray((res,resy))
         for elem in retLst:
             ret[elem[0],elem[1]] = elem[2]

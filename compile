@@ -34,6 +34,7 @@ while getopts ":fdc" opt; do
 		      python setup.py build_ext --inplace
 		      cd ../../spark_impl
 		      sbt assembly
+                      cd ../..
 		      echo "\n\n\n${GREEN}Build Done${NC}\n"
 	            ;;
 	     \? ) echo "Usage: cmd [-d] Docs [-f] Force compile [-c] Regular compile"

@@ -23,6 +23,7 @@ object Main extends App {
 
   def helloWorld() = {
     println("Hello world!")
+    println(rddGrid.count)
   }
 
   def createRDDGrid(
@@ -52,7 +53,6 @@ object Main extends App {
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
     val pixels = sc.range(0, (width * height).toLong, 1)
-    println("Initialized pixels variable with size "+pixels.count())
     val parameters = RayParameters(stars,
       pointConstant,
       sisConstant,
@@ -61,11 +61,11 @@ object Main extends App {
       dTheta,
       centerX,
       centerY,
-      width.toDouble,
-      height.toDouble)
+      width.toDouble/2,
+      height.toDouble/2)
     val formattedPixels = pixels.mapPartitions(longIter => {
       longIter.map{long => 
-        new XYIntPair(long.toInt / width, long.toInt % width)
+        new XYIntPair(long.toInt % width,long.toInt/width)
       }
     },true)
     val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters)).cache()
@@ -73,34 +73,37 @@ object Main extends App {
     val partitioner = new ColumnPartitioner()
     rddGrid = new RDDGrid(mappedPixels, partitioner)
     mappedPixels.unpersist()
-    println("called new RDDGrid")
   }
 
-  def queryPoints(pts: ArrayList[ArrayList[Double]], radius: Double,ctx:JavaRDD[Int]):ArrayList[ArrayList[Double]] = {
-    val ptsFormatted = pts.iterator().asScala.toArray.map(lst => ((lst.get(0).toInt,lst.get(1).toInt),(lst.get(2).toDouble,lst.get(3).toDouble)))
-    val sc = ctx.context
-    val minMax = ptsFormatted.aggregate(MinMax2D())((lastExtremes, elem) => {
-      val x = elem._1._2
-      val y = elem._1._2
-      if (x > lastExtremes.xMax) lastExtremes.xMax = x
-      if (y > lastExtremes.yMax) lastExtremes.yMax = y
-      if (x < lastExtremes.xMin) lastExtremes.xMin = x
-      if (y < lastExtremes.yMin) lastExtremes.yMin = y
-      lastExtremes
-    }, (mm1, mm2) => {
-      val ret = MinMax2D()
-      if (mm1.xMin < mm2.xMin) ret.xMin = mm1.xMin else ret.xMin = mm2.xMin
-      if (mm1.xMax > mm2.xMax) ret.xMax = mm1.xMax else ret.xMax = mm2.xMax
-      if (mm1.yMin < mm2.yMin) ret.yMin = mm1.yMin else ret.yMin = mm2.yMin
-      if (mm1.yMax > mm2.yMax) ret.yMax = mm1.yMax else ret.yMax = mm2.yMax
-      ret
-    })
-
-    val argArr = Array.fill((minMax.xMax - minMax.xMin).toInt, (minMax.yMax - minMax.yMin).toInt)(new XYDoublePair(0, 0))
-    ptsFormatted.map { i =>
-      argArr(i._1._1)(i._1._2) = new XYDoublePair(i._2._1, i._2._1)
+  def mkGrid(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int):Array[Array[(Double,Double)]] = {
+    val ret = Array.fill(xDim)(Array.fill(yDim)((0.0,0.0)))
+    val xStep = (x1 - x0)/(xDim.toDouble)
+    val yStep = (y1 - y0)/(yDim.toDouble)
+    val generator = (x:Double,y:Double) => (x0+xStep*x,y1-yStep*y)
+    for (i <- 0 until xDim; j <- 0 until yDim) {
+      ret(i)(j) = generator(i.toDouble,j.toDouble)
     }
-    val retArr = rddGrid.queryPoints(argArr, radius, sc)
+    ret
+  }
+  def makeGrid(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int) = {
+    val ret = mkGrid(x0,y0,x1,y1,xDim,yDim)
+    for (i <- ret) println(i.mkString(","))
+  }
+
+  def mkGridWithIndex(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int) = {
+    val ret = mkGrid(x0,y0,x1,y1,xDim,yDim)
+    (for (i <- 0 until ret.length) yield {
+      (for (j <- 0 until ret(0).length) yield new XYDoublePair(ret(i)(j)._1,ret(i)(j)._2)).toArray
+    }).toArray
+  }
+
+  def queryPoints(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int,radius: Double,ctx:JavaRDD[Int]):ArrayList[ArrayList[Double]] = {
+    println("Querying Points")
+    val ptsFormatted = mkGridWithIndex(x0,y0,x1,y1,xDim,yDim)
+    val sc = ctx.context
+    println("Made coordinate plane. Now broadcasting to SpatialRDD")
+    val retArr = rddGrid.queryPoints(ptsFormatted, radius, sc)
+    println("Done Querying. Now onto formatting to return.")
     val retSeq = for (i <- 0 until retArr.size;j <- 0 until retArr(0).size) yield {
       new XYIntPair(i,j) -> retArr(i)(j)
     }
@@ -113,6 +116,7 @@ object Main extends App {
     }
     val ret = new java.util.ArrayList[ArrayList[Double]]()
     for (elem <- retArr2) ret.add(elem)
+    println("Done formatting")
     ret
   }
 }

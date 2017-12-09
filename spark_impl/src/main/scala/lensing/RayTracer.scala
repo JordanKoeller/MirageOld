@@ -9,14 +9,12 @@ class RayTracer() {
   
   def apply(pixels:RDD[XYIntPair],p:Broadcast[RayParameters]):RDD[XYDoublePair] = {
     val pi2 = math.Pi/2.0
-    println("Ray Tracing")
-    println("WILL NEED TO RE IMPLIMENT POINT SOURCES")
-    pixels.mapPartitions(pixelIter => {
+    val ret = pixels.mapPartitions(pixelIter => {
       pixelIter.map{pixel => 
         var retX = 0.0
         var retY = 0.0
-        val incidentAngleX = (pixel.x - p.value.width/2.0)*p.value.dTheta
-        val incidentAngleY = (p.value.height/2.0 - pixel.y)*p.value.dTheta
+        val incidentAngleX = (pixel.x - p.value.width)*p.value.dTheta
+        val incidentAngleY = (p.value.height - pixel.y)*p.value.dTheta
       
       // Point sources
       for (star <- p.value.stars) {
@@ -45,5 +43,7 @@ class RayTracer() {
         new XYDoublePair(deltaRX-retX,deltaRY-retY)
       }
     },true)
+    println("Done")
+    ret
   }
 }
