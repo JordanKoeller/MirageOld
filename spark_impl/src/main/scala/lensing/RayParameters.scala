@@ -43,7 +43,6 @@ object RayParameters {
         centerY,
         height,
         width)
-    println(ret)
     ret
   }
 }

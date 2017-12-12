@@ -60,12 +60,18 @@ class Engine_Spark(Engine):
  # 29     width: Double,
  # 30     height: Double): Unit = {
 
+        # sc._jvm.main.Main.TestSuite(sc.emptyRDD()._jrdd)
         dS = self.parameters.quasar.angDiamDist.to('lyr').value
         dL = self.parameters.galaxy.angDiamDist.to('lyr').value
         dLS = self.parameters.dLS.to('lyr').value
         stars = self.parameters.stars
-        starsLst = list(map(lambda lst:(lst[0],lst[1],lst[2]),stars))
-        args = (starsLst,
+        starFile = open("/tmp/stars",'w+')
+        for star in stars:
+            strRow = str(star[0]) + "," + str(star[1]) + "," + str(star[2])
+            starFile.write(strRow)
+            starFile.write("\n")
+        starFile.close()
+        args = ("/tmp/stars",
                 (4*(const.G/const.c/const.c).to('lyr/solMass').value*dLS/dS/dL),
                 (4*CMATH.pi*self.parameters.galaxy.velocityDispersion**2*(const.c**-2).to('s2/km2').value*dLS/dS).value,
                 self.parameters.galaxy.shear.magnitude,
@@ -110,11 +116,24 @@ class Engine_Spark(Engine):
         radius = self.parameters.queryQuasarRadius
         ctx = sc.emptyRDD()._jrdd
         print("CALLING JVM")
-        retLst = sc._jvm.main.Main.queryPoints(x0,y0,x0+dims.to('rad').x,y0+dims.to('rad').y,int(resx),int(resy),radius,ctx)
-        ret = np.ndarray((res,resy))
-        for elem in retLst:
-            ret[elem[0],elem[1]] = elem[2]
-        return ret
+        sc._jvm.main.Main.setFile("/tmp/magData")
+        retLst = sc._jvm.main.Main.queryPoints(x0,y0,x0+dims.to('rad').x,y0+dims.to('rad').y,int(resx),int(resy),radius,ctx,False)
+        with open("/tmp/magData") as file:
+            data = file.read()
+            stringArr = list(map(lambda row: row.split(','), data.split(':')))
+            numArr = [list(map(lambda s:float(s),row)) for row in stringArr]
+            npArr = np.array(numArr,dtype = float)
+            print("Returning")
+            return npArr
+        # print(type(retLst))
+        # ret = np.array(list(retLst))
+        # print(ret)
+        # return ret
+        # ret = np.array)
+        # print(retLst)
+        # for elem in retLst:
+        #     ret[elem[0],elem[1]] = elem[2]
+        # return ret
 
 
 

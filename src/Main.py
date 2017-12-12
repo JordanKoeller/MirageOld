@@ -49,12 +49,12 @@ if __name__ == "__main__":
         queueThread.bindExperiments(table,fileWriter)
         queueThread.run()
         endTime = DT.now()
-        dSec = (endTime - beginTime).seconds
+        dSec = (endTime - starttime).seconds
         hrs = dSec // 3600
         mins = (dSec // 60) % 60
         secs = dSec % 60
         timeString = str(hrs)+" hr, " + str(mins) + " min, " + str(secs)
-        logging.log('____________________________ \n\n Caluations Finished in' + timeString + ' . \n\n____________________________')
+        logging.info('____________________________ \n\n Caluations Finished in' + timeString + ' . \n\n____________________________')
         sys.exit()
     else:
         from PyQt5 import QtWidgets

@@ -1,11 +1,11 @@
 import org.apache.spark.rdd.RDD
 
 package object spatialrdd {
-  sealed case class XYPair[T](val x: T, val y: T)
+  // sealed case class XYPair[T](val x: T, val y: T)
   case class MinMax2D(var xMin: Double = Double.MaxValue, var yMin: Double = Double.MaxValue, var xMax: Double = -Double.MaxValue, var yMax: Double = -Double.MaxValue)
   case class MinMax(var min: Double = Double.MaxValue, var max: Double = -Double.MaxValue)
-  class XYIntPair(override val x: Int, override val y: Int) extends XYPair[Int](x, y)
-  class XYDoublePair(override val x: Double, override val y: Double) extends XYPair[Double](x, y)
+  class XYIntPair(val x: Int, val y: Int) extends Serializable
+  class XYDoublePair(val x: Double, val y: Double) extends Serializable
 
   def equalHashing[T](data: IndexedSeq[T], op: T => Double, buckets: Int): Double => Int = {
     val minMax = data.aggregate(MinMax())((lastExtremes, elem2) => {

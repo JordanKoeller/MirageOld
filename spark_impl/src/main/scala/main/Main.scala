@@ -11,23 +11,44 @@ import spatialrdd.RDDGrid
 import spatialrdd.XYDoublePair
 import spatialrdd.XYIntPair
 import spatialrdd.partitioners.ColumnPartitioner
+import spatialrdd.partitioners.BalancedColumnPartitioner
 import scala.collection.JavaConverters._
-
+import spatialrdd.OptGrid
 
 import java.util.ArrayList
-
+import scala.util.Random
+import java.io._
 object Main extends App {
 
 
   private var rddGrid: RDDGrid = _
+  private var filename:String = "/tmp/lenssim_tmpfile"
 
   def helloWorld() = {
     println("Hello world!")
-    println(rddGrid.count)
+  }
+
+  def TestSuite(ctx:JavaRDD[Int]) = {
+    OptGrid.TestGrid()
+    TestPixels(ctx)
+  }
+
+  def setFile(fname:String) = filename = fname
+
+  def TestPixels(ctx:JavaRDD[Int]) = {
+    println("Test Pixels")
+    val sc = ctx.context
+    val width = 10000
+    val height = 10000
+    val partitioner = new ColumnPartitioner()
+    val testPixels = sc.range(0,(width*height).toLong,1,256)
+    val testPix2 = testPixels.map(i => new XYDoublePair(Random.nextDouble()*100,Random.nextDouble()*100))
+    rddGrid = new RDDGrid(testPix2, partitioner)
+    queryPoints(25.0,25.0,75.0,75.0,5,5,0.1,ctx,verbose = true)
   }
 
   def createRDDGrid(
-    starsArr: ArrayList[ArrayList[Double]],
+    starsfile: String,
     pointConstant: Double,
     sisConstant: Double,
     shearMag: Double,
@@ -39,16 +60,10 @@ object Main extends App {
     height: Int,
     ctx:JavaRDD[Int]): Unit = {
     val sc = ctx.context
-    val starsS = collection.mutable.Buffer[(Double,Double,Double)]()
-    if (starsArr.size() > 0) {
-	println(starsArr.get(0).get(0).getClass())
-      for (i <- 0 until starsArr.size()) {
-        val star = starsArr.get(i)
-        val starT = (star.get(0),star.get(1),star.get(2))
-        starsS += starT
-      }
+    val stars = scala.io.Source.fromFile(starsfile).getLines().toArray.map{row => 
+      val starInfoArr = row.split(",").map(_.toDouble)
+      (starInfoArr(0),starInfoArr(1),starInfoArr(2))
     }
-   val stars = starsS//.toArray
     
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
@@ -61,18 +76,19 @@ object Main extends App {
       dTheta,
       centerX,
       centerY,
-      width.toDouble/2,
-      height.toDouble/2)
+      width.toDouble,
+      height.toDouble)
     val formattedPixels = pixels.mapPartitions(longIter => {
       longIter.map{long => 
         new XYIntPair(long.toInt % width,long.toInt/width)
       }
     },true)
-    val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters)).cache()
+    val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters))//.cache()
     //Now need to construct the grid
-    val partitioner = new ColumnPartitioner()
+    // val partitioner = new ColumnPartitioner()
+    val partitioner = new BalancedColumnPartitioner
+
     rddGrid = new RDDGrid(mappedPixels, partitioner)
-    mappedPixels.unpersist()
   }
 
   def mkGrid(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int):Array[Array[(Double,Double)]] = {
@@ -97,26 +113,20 @@ object Main extends App {
     }).toArray
   }
 
-  def queryPoints(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int,radius: Double,ctx:JavaRDD[Int]):ArrayList[ArrayList[Double]] = {
+  def queryPoints(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int,radius: Double,ctx:JavaRDD[Int],verbose:Boolean = false) = {
     println("Querying Points")
     val ptsFormatted = mkGridWithIndex(x0,y0,x1,y1,xDim,yDim)
     val sc = ctx.context
     println("Made coordinate plane. Now broadcasting to SpatialRDD")
-    val retArr = rddGrid.queryPoints(ptsFormatted, radius, sc)
+    val retArr = rddGrid.queryPoints(ptsFormatted, radius, sc,verbose = verbose)
     println("Done Querying. Now onto formatting to return.")
-    val retSeq = for (i <- 0 until retArr.size;j <- 0 until retArr(0).size) yield {
-      new XYIntPair(i,j) -> retArr(i)(j)
-    }
-    val retArr2 = retSeq.map{e =>
-      val arr = new ArrayList[Double]()
-      arr.add(e._1.x.toDouble)
-      arr.add(e._1.y.toDouble)
-      arr.add(e._2)
-      arr
-    }
-    val ret = new java.util.ArrayList[ArrayList[Double]]()
-    for (elem <- retArr2) ret.add(elem)
-    println("Done formatting")
-    ret
+    writeFile(retArr)
+  }
+
+  private def writeFile(data:Array[Array[Int]]):Unit = {
+    val writer = new PrintWriter(new File(filename))
+    val dString = data.map(_.mkString(",")).mkString(":")
+    writer.write(dString)
+    writer.close()
   }
 }

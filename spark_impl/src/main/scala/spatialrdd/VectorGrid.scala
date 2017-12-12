@@ -2,10 +2,16 @@ package spatialrdd
 import scala.collection.mutable
 import scala.util.Random 
 
-class OptGrid(override protected val data: IndexedSeq[(Double,Double)], bucketFactor: Int = 1) extends SpatialData {
-  private val _buckets: mutable.HashMap[Int, mutable.HashMap[Int, mutable.Set[Int]]] = collection.mutable.HashMap()
+class VectorGrid(override protected val data: IndexedSeq[(Double,Double)], bucketFactor: Int = 1) extends SpatialData{
   private val _hashX = equalHashing(data, (l: (Double,Double)) => l._1, math.sqrt(data.size).toInt * bucketFactor)
   private val _hashY = equalHashing(data, (l: (Double,Double)) => l._2, math.sqrt(data.size).toInt * bucketFactor)
+  private val _buckets = _initBuckets()
+  private def _initBuckets():Array[Array[mutable.ListBuffer[Int]]] = {
+    val numBucs = math.sqrt(data.size).toInt * bucketFactor
+    Array.fill(numBucs)(Array.fill(numBucs)(mutable.ListBuffer[Int]()))
+  }
+
+
   for (i <- 0 until data.size) _insert_pt(i)
 
   private def _hashFunction(xx: Double, yy: Double): XYIntPair = {
@@ -15,12 +21,17 @@ class OptGrid(override protected val data: IndexedSeq[(Double,Double)], bucketFa
   }
 
   private def _fetch_bucket(i:Int,j:Int):Int = {
-    if (_buckets.contains(i) && _buckets(i).contains(j)) _buckets(i)(j).size
-    else 0
+    try {
+      _buckets(i)(j).size
+    }
+    catch {
+      case e:ArrayIndexOutOfBoundsException => 0
+    }
   }
 
   private def _query_bucket(i:Int,j:Int,x:Double,y:Double, r2:Double):Int = {
-    if (_buckets.contains(i) && _buckets(i).contains(j)) {
+        try {
+    if (_buckets(i)(j).size > 0) {
       var counter = 0
       for (k <- _buckets(i)(j)) {
         val pt = data(k)
@@ -31,13 +42,15 @@ class OptGrid(override protected val data: IndexedSeq[(Double,Double)], bucketFa
       counter
     }
     else 0
+    }
+    catch {
+      case e:ArrayIndexOutOfBoundsException => 0
+    }
   }
 
 
-  protected def _insert_pt(index: Int): Unit = {
+  override def _insert_pt(index: Int): Unit = {
     val coords = _hashFunction(data(index)._1, data(index)._2)
-    if (!_buckets.contains(coords.x)) _buckets(coords.x) = mutable.HashMap[Int,mutable.Set[Int]]()
-    if (!_buckets(coords.x).contains(coords.y)) _buckets(coords.x)(coords.y) = mutable.Set[Int]()
     _buckets(coords.x)(coords.y) += index
   }
 
@@ -85,12 +98,12 @@ class OptGrid(override protected val data: IndexedSeq[(Double,Double)], bucketFa
   }
 }
 
-object OptGrid {
+object VectorGrid {
 
-  val bucketFactor = 7
+  val bucketFactor = 1
 
-  def apply(data: IndexedSeq[(Double, Double)]): OptGrid = {
-    val ret = new OptGrid(data, bucketFactor)
+  def apply(data: IndexedSeq[(Double, Double)]): VectorGrid = {
+    val ret = new VectorGrid(data, bucketFactor)
     ret
   }
 
@@ -98,7 +111,7 @@ object OptGrid {
 
   def TestGrid() = {
     val arr = Array.fill(500000)((Random.nextDouble()*100.0,Random.nextDouble()*100.0))
-    val grid = OptGrid(arr)
+    val grid = VectorGrid(arr)
     (for (i <- 25 until 75; j <- 25 until 75) yield grid.query_point_count(i.toDouble,j.toDouble,5.0)).take(20) foreach println
   }
 }
