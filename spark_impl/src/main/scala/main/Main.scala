@@ -88,13 +88,13 @@ object Main extends App {
     },true)
     val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters))//.cache()
     //Now need to construct the grid
-    val partitioner = new ColumnPartitioner()
-    // val partitioner = new BalancedColumnPartitioner
+    // val partitioner = new ColumnPartitioner()
+    val partitioner = new BalancedColumnPartitioner
 
     rddGrid = new RDDGrid(mappedPixels, partitioner)
   }
 
-  def mkGrid(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int):Array[Array[(Double,Double)]] = {
+  private def mkGrid(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int):Array[Array[(Double,Double)]] = {
     val ret = Array.fill(xDim)(Array.fill(yDim)((0.0,0.0)))
     val xStep = (x1 - x0)/(xDim.toDouble)
     val yStep = (y1 - y0)/(yDim.toDouble)
@@ -104,12 +104,12 @@ object Main extends App {
     }
     ret
   }
-  def makeGrid(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int) = {
+  private def makeGrid(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int) = {
     val ret = mkGrid(x0,y0,x1,y1,xDim,yDim)
     for (i <- ret) println(i.mkString(","))
   }
 
-  def mkGridWithIndex(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int) = {
+  private def mkGridWithIndex(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int) = {
     val ret = mkGrid(x0,y0,x1,y1,xDim,yDim)
     (for (i <- 0 until ret.length) yield {
       (for (j <- 0 until ret(0).length) yield new XYDoublePair(ret(i)(j)._1,ret(i)(j)._2)).toArray

@@ -25,3 +25,10 @@ computation is CPU-intensive as well as memory-intensive. Hence, Spark is used t
 calculation up across a cluster of machines.
 
 ## Analysis
+
+Three stages are involved in performing the calculation. The three stages are ray-tracing, 
+repartitioning, and querying. The slowest stage of these three stages is the querying stage.
+
+
+
+
