@@ -8,6 +8,7 @@ import lensing.RayParameters
 import lensing.RayTracer
 import spatialrdd.MinMax2D
 import spatialrdd.RDDGrid
+import spatialrdd.PaddedRDDGrid
 import spatialrdd.XYDoublePair
 import spatialrdd.XYIntPair
 import spatialrdd.partitioners.ColumnPartitioner
@@ -18,10 +19,12 @@ import spatialrdd.OptGrid
 import java.util.ArrayList
 import scala.util.Random
 import java.io._
+import spatialrdd.RDDGridProperty
+
 object Main extends App {
 
 
-  private var rddGrid: RDDGrid = _
+  private var rddGrid: RDDGridProperty = _
   private var filename:String = "/tmp/lenssim_tmpfile"
 
   def helloWorld() = {
@@ -40,7 +43,7 @@ object Main extends App {
     val sc = ctx.context
     val width = 10000
     val height = 10000
-    val partitioner = new ColumnPartitioner()
+    val partitioner = new BalancedColumnPartitioner()
     val testPixels = sc.range(0,(width*height).toLong,1,256)
     val testPix2 = testPixels.map(i => new XYDoublePair(Random.nextDouble()*100,Random.nextDouble()*100))
     rddGrid = new RDDGrid(testPix2, partitioner)
@@ -85,8 +88,8 @@ object Main extends App {
     },true)
     val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters))//.cache()
     //Now need to construct the grid
-    // val partitioner = new ColumnPartitioner()
-    val partitioner = new BalancedColumnPartitioner
+    val partitioner = new ColumnPartitioner()
+    // val partitioner = new BalancedColumnPartitioner
 
     rddGrid = new RDDGrid(mappedPixels, partitioner)
   }

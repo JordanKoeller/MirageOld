@@ -125,17 +125,6 @@ class Engine_Spark(Engine):
             npArr = np.array(numArr,dtype = float)
             print("Returning")
             return npArr
-        # print(type(retLst))
-        # ret = np.array(list(retLst))
-        # print(ret)
-        # return ret
-        # ret = np.array)
-        # print(retLst)
-        # for elem in retLst:
-        #     ret[elem[0],elem[1]] = elem[2]
-        # return ret
-
-
 
 
 

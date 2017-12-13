@@ -26,7 +26,7 @@ class ColumnPartitioner extends SpatialPartitioning {
   }
 
   override def profileData(data: RDD[XYDoublePair]): RDD[(Double, Double)] = {
-    _numPartitions = data.getNumPartitions * 3
+    _numPartitions = data.getNumPartitions
     val hashFunc = equalHashing(data, (l: XYDoublePair) => l.x, numPartitions)
     _hashFunc = (l:Double) => math.min(numPartitions-1,hashFunc(l))
     data.mapPartitions(elemIter => elemIter.map(elem => (elem.x, elem.y)),true)

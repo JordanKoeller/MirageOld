@@ -8,10 +8,7 @@ import spatialrdd.XYDoublePair
 
 trait SpatialPartitioning extends Partitioner {
 
-  type K = Double
-  type V = Double
-
-  def profileData(data: RDD[XYDoublePair]): RDD[(K, V)]
+  def profileData(data: RDD[XYDoublePair]):RDD[(Double,Double)]
 
   def getPartitions(key: XYDoublePair, r: Double): Set[Int]
 

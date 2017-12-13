@@ -72,10 +72,10 @@ class VectorGrid(override protected val data: IndexedSeq[(Double,Double)], bucke
       counter += _fetch_bucket(center.x,center.y+i)
       counter += _fetch_bucket(center.x,center.y-i)
     }
-    counter += _fetch_bucket(center.x,center.y)
-    for (i <- 1 to intR.x) {
+    counter += _query_bucket(center.x,center.y,x,y,r2)
+    for (i <- 1 until intR.x) {
       val intRY = (math.sqrt(hypot2-i*i)+1).toInt
-      for (j <- 1 to intRY) {
+      for (j <- 1 until intRY) {
         if (i < intR.x && j < intRY) {
           counter += _fetch_bucket(center.x+i,center.y+j)
           counter += _fetch_bucket(center.x+i,center.y-j)

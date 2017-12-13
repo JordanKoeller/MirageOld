@@ -6,12 +6,12 @@ import spatialrdd.partitioners.SpatialPartitioning
 // import spatialrdd.SpatialData
 import org.apache.spark.storage.StorageLevel
 
-class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) {
+class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends RDDGridProperty {
   private val rdd = _init(data,partitioner) 
   def _init(data:RDD[XYDoublePair], partitioner:SpatialPartitioning) = {
     val rddProfiled = partitioner.profileData(data)
     val rddTraced = rddProfiled.partitionBy(partitioner)
-    val ret = rddTraced.glom().mapPartitions(arrr => arrr.map(arr => VectorGrid(arr))).persist(StorageLevel.MEMORY_AND_DISK)
+    val ret = rddTraced.glom().mapPartitions(arrr => arrr.map(arr => OptGrid(arr))).persist(StorageLevel.MEMORY_AND_DISK)
     println("Put on " + rddTraced.getNumPartitions + " partitions")
     ret
   }
