@@ -112,3 +112,4 @@ Further optimization may be possible by taking advantage of practices for fast S
 [Phase3Diagram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/phase3_diagram.png
 [MagMap]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/trippymagmap.png
 [MagMapError]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/hiResCropped.png
+[partitionHistogram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/partitioningHistogram.png
