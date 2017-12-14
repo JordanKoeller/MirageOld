@@ -16,7 +16,7 @@ with it.
 By studying gravitationally lensed quasars, astrophysicists have the potential to learn 
 about dark matter distributions in the universe along with the size and composition
 of distant quasars to orders of magnitude of higher precision than through direct
-observation (1). In order to understand these systems, however, we must build a computational
+observation. In order to understand these systems, however, we must build a computational
 model.
 
 To model gravitationally lensed quasars, we ray-trace ~10^8 different paths light can 
@@ -100,7 +100,9 @@ of the two versions, for similarly-sized datasets, the Spark implimentation affo
 Further optimization may be possible by taking advantage of practices for fast Scala code. 
 
 
+## References
 
+see `references.png`
 
 [Phase1Diagram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/phase1_diagram.png
 [Phase3Diagram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/phase3_diagram.png
