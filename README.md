@@ -94,17 +94,13 @@ be ideal for data that needs to communicate with each other, this was not necess
 
 ### Figure 5: Zoom-in of Error in Map Calculation
 ![alt text][MagMapError]
+
 In summary, Spark seems promising for speeding up my simulation by a significant factor. The only reason I say it 
 is not successful yet is because of a slight bug with merging data across partitions, leading to straight lines 
 cutting through magnification maps (Figure 5). Before Spark, I was running
 the program locally, using an implimentation written in C with openmp for parallelization. Comparing the performance
 of the two versions, for similarly-sized datasets, the Spark implimentation affords almost an order of magnitude speedup.
 Further optimization may be possible by taking advantage of practices for fast Scala code. 
-
-## References
-
-
-
 
 
 
