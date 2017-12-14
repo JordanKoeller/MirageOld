@@ -51,11 +51,10 @@ is balanced across the nodes (`BalancedColumnPartitioner`). Performance was best
 Within each partition, the data was then organized in a spatial grid (`VectorGrid`) (Figure 3). From here,
 the `RDDGrid` is cached and control returns to Python.
 
-### Figure 3: Grid Query Code Flow
+### Figure 3: Histogram of Partitions
 ![alt text][partitionHistogram]
 
-### Figure 4: Grid Query Code Flow
-![alt text][Phase3Diagram]
+
 Lastly, in Stage 3 (Figure 4), the `RDDGrid` is queried ~10^6 times to visualize the data. Each query is a 
 query of how many data points are within a specified radius of the point of interest. Hence, the necessity of the 
 spatial grid built in Stage 2. For most query points, this operations is relatively simple. Query points near the 
@@ -65,6 +64,8 @@ for the complete set of relevant data points. To make querying faster, before qu
 were partitioned with the same scheme the data points were partioned by. Hence, partitions do not need to search for
 superflous query points nowhere near that section of the data. However, this partitioning of data points produces
 duplicates of query points for each partition that overlaps with it to prevent the boundary issue described above.
+### Figure 4: Grid Query Code Flow
+![alt text][Phase3Diagram]
 
 After querying is finished, the returned `Array[Array[Int]]` representing monochromatic pixel values for the magnification map
 is written to a temporary file, to be loaded in by Python after the JVM is exited for further processing and scaling of the data.
