@@ -35,6 +35,7 @@ from the observer plane to the source plane based on the gravitational potential
 specified by the parameters. The result of Stage 1 is an `RDD[(XYIntPair), (XYDoublePair)]` where
 the integer pair is the initial pixel location of the ray, and the resultant location of the
 pixel on the source plane after accounting for lensing.
+![alt text][Phase1Diagram]
 
 In Stage 2, the `RDD` produced by Stage 1 is shuffled, such that each partition contains data points that
 are near each other spatially in a data structure I'm calling an `RDDGrid`. This allows for efficient retrieval of
@@ -44,6 +45,7 @@ is balanced across the nodes (`BalancedColumnPartitioner`). Performance was best
 Within each partition, the data was then organized in a spatial grid (`VectorGrid`). From here,
 the `RDDGrid` is cached and control returns to Python.
 
+![alt text][Phase3Diagram]
 Lastly, in Stage 3 (Figure 2), the `RDDGrid` is queried ~10^6 times to visualize the data. Each query is a 
 query of how many data points are within a specified radius of the point of interest. Hence, the necessity of the 
 spatial grid built in Stage 2. For most query points, this operations is relatively simple. Query points near the 
@@ -58,3 +60,5 @@ duplicates of query points for each partition that overlaps with it to prevent t
 
 
 
+[Phase1Diagram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/phase1_diagram.png
+[Phase13Diagram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/phase3_diagram.png
