@@ -48,14 +48,11 @@ are near each other spatially in a data structure I'm calling an `RDDGrid`. This
 data points that are near each other spatially with minimal network traffic. Two partitioning
 schemes were attempted; equally spaced columns (`ColumnPartitioner`), and columns of varying width to ensure the data
 is balanced across the nodes (`BalancedColumnPartitioner`). Performance was best with the `BalancedColumnPartitioner`. 
-Within each partition, the data was then organized in a spatial grid (`VectorGrid`) (Figure 3). From here,
+Within each partition, the data was then organized in a spatial grid (`VectorGrid`) (Figure 2). From here,
 the `RDDGrid` is cached and control returns to Python.
 
-### Figure 3: Histogram of Partitions
-![alt text][partitionHistogram]
 
-
-Lastly, in Stage 3 (Figure 4), the `RDDGrid` is queried ~10^6 times to visualize the data. Each query is a 
+Lastly, in Stage 3 (Figure 3), the `RDDGrid` is queried ~10^6 times to visualize the data. Each query is a 
 query of how many data points are within a specified radius of the point of interest. Hence, the necessity of the 
 spatial grid built in Stage 2. For most query points, this operations is relatively simple. Query points near the 
 boundaries of partitions, however, need to be specially handled. If a search area overlaps with more than one partition,
@@ -97,7 +94,7 @@ be ideal for data that needs to communicate with each other, this was not necess
 
 In summary, Spark seems promising for speeding up my simulation by a significant factor. The only reason I say it 
 is not successful yet is because of a slight bug with merging data across partitions, leading to straight lines 
-cutting through magnification maps (Figure 5). Before Spark, I was running
+cutting through magnification maps (Figure 4). Before Spark, I was running
 the program locally, using an implimentation written in C with openmp for parallelization. Comparing the performance
 of the two versions, for similarly-sized datasets, the Spark implimentation affords almost an order of magnitude speedup.
 Further optimization may be possible by taking advantage of practices for fast Scala code. 
