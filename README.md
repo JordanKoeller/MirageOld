@@ -19,12 +19,15 @@ of distant quasars to orders of magnitude of higher precision than through direc
 observation (1). In order to understand these systems, however, we must build a computational
 model.
 
-To model gravitationally lensed quasars, we ray-trace 10^8 to 10^9 different paths light can 
+To model gravitationally lensed quasars, we ray-trace ~10^8 different paths light can 
 take, travelling from the quasar to the observer. Due to the large number of rays traced, this
 computation is CPU-intensive as well as memory-intensive. Hence Spark is used to break the
 calculation up across a cluster of machines. The final data that we want to produce are magnification
-maps. To calculate these maps, we query the data for the number of data points within a given radius
+maps (Figure 1). To calculate these maps, we query the data for the number of data points within a given radius
 of each pixel. Hence, spatial data structures are crucial to make this operation fast.
+
+### Figure 1: Sample Magnification Map
+![alt text][MagMap]
 
 ## Analysis & Implimentation
 
@@ -37,6 +40,7 @@ from the observer plane to the source plane based on the gravitational potential
 specified by the parameters. The result of Stage 1 is an `RDD[(XYIntPair), (XYDoublePair)]` where
 the integer pair is the initial pixel location of the ray, and the resultant location of the
 pixel on the source plane after accounting for lensing.
+### Figure 2: Grid Query Code Flow
 ![alt text][Phase1Diagram]
 
 In Stage 2, the `RDD` produced by Stage 1 is shuffled, such that each partition contains data points that
@@ -44,11 +48,15 @@ are near each other spatially in a data structure I'm calling an `RDDGrid`. This
 data points that are near each other spatially with minimal network traffic. Two partitioning
 schemes were attempted; equally spaced columns (`ColumnPartitioner`), and columns of varying width to ensure the data
 is balanced across the nodes (`BalancedColumnPartitioner`). Performance was best with the `BalancedColumnPartitioner`. 
-Within each partition, the data was then organized in a spatial grid (`VectorGrid`). From here,
+Within each partition, the data was then organized in a spatial grid (`VectorGrid`) (Figure 3). From here,
 the `RDDGrid` is cached and control returns to Python.
 
+### Figure 3: Grid Query Code Flow
+![alt text][partitionHistogram]
+
+### Figure 4: Grid Query Code Flow
 ![alt text][Phase3Diagram]
-Lastly, in Stage 3 (Figure 2), the `RDDGrid` is queried ~10^6 times to visualize the data. Each query is a 
+Lastly, in Stage 3 (Figure 4), the `RDDGrid` is queried ~10^6 times to visualize the data. Each query is a 
 query of how many data points are within a specified radius of the point of interest. Hence, the necessity of the 
 spatial grid built in Stage 2. For most query points, this operations is relatively simple. Query points near the 
 boundaries of partitions, however, need to be specially handled. If a search area overlaps with more than one partition,
@@ -58,7 +66,7 @@ were partitioned with the same scheme the data points were partioned by. Hence, 
 superflous query points nowhere near that section of the data. However, this partitioning of data points produces
 duplicates of query points for each partition that overlaps with it to prevent the boundary issue described above.
 
-After querying is finished, the returned Array[Array[Int]] representing monochromatic pixel values for the magnification map
+After querying is finished, the returned `Array[Array[Int]]` representing monochromatic pixel values for the magnification map
 is written to a temporary file, to be loaded in by Python after the JVM is exited for further processing and scaling of the data.
 
 ## Discussion
@@ -81,8 +89,20 @@ The second consideration is how to handle queries of data on the boundaries of p
 I decided to pre-process the query points, such that each partition queries any point that overlaps at all with it.
 Finally, the set of data points returned from each query point are aggregated for the final set of returned data points.
 Alternatively, I considered copying the data near each partition boundary onto both sides of the boundary. While this would 
-be ideal for data that needs to communicate with each other, this was not necessary for my data since data points do not need
-to communicate with each other.
+be ideal for data that needs to communicate with each other, this was not necessary for my calculation.
+
+### Figure 5: Zoom-in of Error in Map Calculation
+![alt text][MagMapError]
+In summary, Spark seems promising for speeding up my simulation by a significant factor. The only reason I say it 
+is not successful yet is because of a slight bug with merging data across partitions, leading to straight lines 
+cutting through magnification maps (Figure 5). Before Spark, I was running
+the program locally, using an implimentation written in C with openmp for parallelization. Comparing the performance
+of the two versions, for similarly-sized datasets, the Spark implimentation affords almost an order of magnitude speedup.
+Further optimization may be possible by taking advantage of practices for fast Scala code. 
+
+## References
+
+
 
 
 
@@ -90,3 +110,5 @@ to communicate with each other.
 
 [Phase1Diagram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/phase1_diagram.png
 [Phase3Diagram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/phase3_diagram.png
+[MagMap]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/trippymagmap.png
+[MagMapError]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/hiResCropped.png
