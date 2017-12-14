@@ -16,7 +16,9 @@ class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends
   def _init(data:RDD[XYDoublePair], partitioner:SpatialPartitioning) = {
     val rddProfiled = partitioner.profileData(data)
     val rddTraced = rddProfiled.partitionBy(partitioner)
-    val ret = rddTraced.glom().mapPartitions(arrr => arrr.map(arr => VectorGrid(arr))).persist(StorageLevel.MEMORY_AND_DISK)
+    val glommed = rddTraced.glom()
+    println("[" + glommed.map(_.length).collect().mkString(",") + "]")
+    val ret = glommed.mapPartitions(arrr => arrr.map(arr => VectorGrid(arr))).persist(StorageLevel.MEMORY_AND_DISK)
     println("Put on " + rddTraced.getNumPartitions + " partitions")
     ret
   }

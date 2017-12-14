@@ -21,10 +21,12 @@ model.
 
 To model gravitationally lensed quasars, we ray-trace 10^8 to 10^9 different paths light can 
 take, travelling from the quasar to the observer. Due to the large number of rays traced, this
-computation is CPU-intensive as well as memory-intensive. Hence, Spark is used to break the
-calculation up across a cluster of machines.
+computation is CPU-intensive as well as memory-intensive. Hence Spark is used to break the
+calculation up across a cluster of machines. The final data that we want to produce are magnification
+maps. To calculate these maps, we query the data for the number of data points within a given radius
+of each pixel. Hence, spatial data structures are crucial to make this operation fast.
 
-## Analysis
+## Analysis & Implimentation
 
 Three stages are involved in performing the calculation. The three stages are ray-tracing, 
 repartitioning, and querying. The slowest stage of these three stages is the querying stage.
@@ -56,9 +58,35 @@ were partitioned with the same scheme the data points were partioned by. Hence, 
 superflous query points nowhere near that section of the data. However, this partitioning of data points produces
 duplicates of query points for each partition that overlaps with it to prevent the boundary issue described above.
 
+After querying is finished, the returned Array[Array[Int]] representing monochromatic pixel values for the magnification map
+is written to a temporary file, to be loaded in by Python after the JVM is exited for further processing and scaling of the data.
+
+## Discussion
+
+While analyzing the problem, I quickly realized that the interesting part of breaking spatial data across a cluster has
+to do with partitioning the data, and how to query it. For partitioning the data, there are two primary considerations.
+The first one is how to balance the data across the partitions. To account for different densities in different regions
+of the data, the `BalancedColumnPartitioner` was ideal from a memory standpoint, as it ensures that there is an
+approximately equal amount of data in each partition. However, for the question I am asking, this does have some
+drawbacks. In Stage 3, the points queried are evenly spaced across the dataset. Hence, having partitions of different 
+areas leads to an imbalance in how much work each partition must do. In the future I will be adding some tolerance 
+to imbalance between partitions, to help keep the area covered by each partition more uniform. 
+
+Another partitioner I will be trying in the future is one based on a kD-Tree algorithm. The advantage of this partitioner
+is it allows more fine-grained tuning of the data structure to the densities of the data. Hence, it should allow for faster
+queries of the data with more uniform data density within each partition. When designing this, I may also allow for 
+minor imbalances to form, to help keep the area covered by each partition more uniform.
+
+The second consideration is how to handle queries of data on the boundaries of partitions. To reduce network traffic,
+I decided to pre-process the query points, such that each partition queries any point that overlaps at all with it.
+Finally, the set of data points returned from each query point are aggregated for the final set of returned data points.
+Alternatively, I considered copying the data near each partition boundary onto both sides of the boundary. While this would 
+be ideal for data that needs to communicate with each other, this was not necessary for my data since data points do not need
+to communicate with each other.
+
 
 
 
 
 [Phase1Diagram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/phase1_diagram.png
-[Phase13Diagram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/phase3_diagram.png
+[Phase3Diagram]:https://github.com/JordanKoeller/lensing_simulator/blob/master/diagrams/phase3_diagram.png

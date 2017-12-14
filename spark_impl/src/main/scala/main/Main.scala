@@ -88,8 +88,8 @@ object Main extends App {
     },true)
     val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters))//.cache()
     //Now need to construct the grid
-    // val partitioner = new ColumnPartitioner()
-    val partitioner = new BalancedColumnPartitioner
+    val partitioner = new ColumnPartitioner()
+    // val partitioner = new BalancedColumnPartitioner
 
     rddGrid = new RDDGrid(mappedPixels, partitioner)
   }
