@@ -64,32 +64,51 @@ class VectorGrid(override protected val data: IndexedSeq[(Double,Double)], bucke
     val hypot2 = intR.x*intR.x+intR.y*intR.y
     val r2 = r*r
     var counter = 0
-    for (i <- 1 until intR.x) {
-      counter += _fetch_bucket(center.x+i,center.y)
-      counter += _fetch_bucket(center.x-i,center.y)
+    counter += _query_bucket(center.x,center.y,x,y,r2) //Query center
+
+    for (i <- 1 to intR.x+1) { //Query x - axis
+      // counter += _fetch_bucket(center.x+i,center.y)
+      // counter += _fetch_bucket(center.x-i,center.y)
+      counter += _query_bucket(center.x+i,center.y,x,y,r2)
+      counter += _query_bucket(center.x-i,center.y,x,y,r2)
     }
-    for (i <- 1 until intR.y) {
-      counter += _fetch_bucket(center.x,center.y+i)
-      counter += _fetch_bucket(center.x,center.y-i)
+    for (i <- 1 to intR.y+1) {
+      // counter += _fetch_bucket(center.x,center.y+i)
+      // counter += _fetch_bucket(center.x,center.y-i)
+      counter += _query_bucket(center.x,center.y+i,x,y,r2)
+      counter += _query_bucket(center.x,center.y-i,x,y,r2)
     }
-    counter += _query_bucket(center.x,center.y,x,y,r2)
-    for (i <- 1 until intR.x) {
-      val intRY = (math.sqrt(hypot2-i*i)+1).toInt
-      for (j <- 1 until intRY) {
-        if (i < intR.x && j < intRY) {
-          counter += _fetch_bucket(center.x+i,center.y+j)
-          counter += _fetch_bucket(center.x+i,center.y-j)
-          counter += _fetch_bucket(center.x-i,center.y-j)
-          counter += _fetch_bucket(center.x-i,center.y+j)
-        }
-        else {
+
+    // counter += _query_bucket(center.x+intR.x,center.y,x,y,r2)
+    // counter += _query_bucket(center.x-intR.x,center.y,x,y,r2)
+    // counter += _query_bucket(center.x,center.y+intR.y,x,y,r2)
+    // counter += _query_bucket(center.x,center.y-intR.y,x,y,r2)
+
+    for (i <- 1 to intR.x+1) {
+      val intRY = (math.sqrt(hypot2-i*i)).toInt
+      for (j <- 1 to intRY+1) {
+        // if (i < intR.x - 3 && j < intRY - 3) {
+        //   counter += _fetch_bucket(center.x+i,center.y+j)
+        //   counter += _fetch_bucket(center.x+i,center.y-j)
+        //   counter += _fetch_bucket(center.x-i,center.y-j)
+        //   counter += _fetch_bucket(center.x-i,center.y+j)
+        //   // counter += _query_bucket(center.x+i,center.y+j,x,y,r2)
+        //   // counter += _query_bucket(center.x+i,center.y-j,x,y,r2)
+        //   // counter += _query_bucket(center.x-i,center.y+j,x,y,r2)
+        //   // counter += _query_bucket(center.x-i,center.y-j,x,y,r2)
+        // }
+        // else {
           counter += _query_bucket(center.x+i,center.y+j,x,y,r2)
           counter += _query_bucket(center.x+i,center.y-j,x,y,r2)
           counter += _query_bucket(center.x-i,center.y+j,x,y,r2)
           counter += _query_bucket(center.x-i,center.y-j,x,y,r2)
-        }
+        // }
       }
     }
+
+    // for (i <- left.x-1 to right.x+1 ;j <- left.y-1 to right.y+1) {
+    //   counter += _query_bucket(i,j, x ,y ,r2)
+    // }
     counter 
   }
 
