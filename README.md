@@ -34,10 +34,10 @@ of each pixel. Hence, spatial data structures are crucial to make this operation
 Three stages are involved in performing the calculation. The three stages are ray-tracing, 
 repartitioning, and querying. The slowest stage of these three stages is the querying stage.
 
-In Stage 1 (Figure 1), Python hands off the parameters of the system (things like distances, 
+In Stage 1 (Figure 2), Python hands off the parameters of the system (things like distances, 
 masses, positions, etc) to the JVM. Spark then builds an `RDD` of rays to trace, and transforms it
 from the observer plane to the source plane based on the gravitational potential of the system,
-specified by the parameters. The result of Stage 1 is an `RDD[(XYIntPair), (XYDoublePair)]` where
+specified by the parameters. The result of Stage 1 is an `RDD[(XYIntPair,XYDoublePair)]` where
 the integer pair is the initial pixel location of the ray, and the resultant location of the
 pixel on the source plane after accounting for lensing.
 ### Figure 2: Grid Query Code Flow
@@ -61,7 +61,7 @@ for the complete set of relevant data points. To make querying faster, before qu
 were partitioned with the same scheme the data points were partioned by. Hence, partitions do not need to search for
 superflous query points nowhere near that section of the data. However, this partitioning of data points produces
 duplicates of query points for each partition that overlaps with it to prevent the boundary issue described above.
-### Figure 4: Grid Query Code Flow
+### Figure 3: Grid Query Code Flow
 ![alt text][Phase3Diagram]
 
 After querying is finished, the returned `Array[Array[Int]]` representing monochromatic pixel values for the magnification map
@@ -89,7 +89,7 @@ Finally, the set of data points returned from each query point are aggregated fo
 Alternatively, I considered copying the data near each partition boundary onto both sides of the boundary. While this would 
 be ideal for data that needs to communicate with each other, this was not necessary for my calculation.
 
-### Figure 5: Zoom-in of Error in Map Calculation
+### Figure 4: Zoom-in of Error in Map Calculation
 ![alt text][MagMapError]
 
 In summary, Spark seems promising for speeding up my simulation by a significant factor. The only reason I say it 
