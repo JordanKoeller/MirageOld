@@ -16,6 +16,9 @@ References for Physics help.
 References for Computational Geometry help.
 Paned spatial grid implimentation to save memory/speed.
 Click-and-drag on imagePane to center image
+Horizontal bars on RDDGrid in spark_impl
+Red text when generating sphinx-docs
+
 
 URGENT:
 Error with changing CanvasDim leads to different amount of mass in stars

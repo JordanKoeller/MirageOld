@@ -3,8 +3,7 @@ Module for analyzing data produced by lensing_simulator.
 
 Contains decorator classes for file objects for fetching data.
 
-The class :class:`Trial` contains most of the functionality for fetching
-data from a trial. Features include:
+The class :class:`Trial` contains most of the functionality for fetching data from a trial. Features include:
   - Fetching of a :class:`Parameters <app.Parameters.Parameters>` instance for how the simulation was set up.
   - Plotting of a magnification map with a :class:`MagMapView <app.Views.MagMapView.MagMapView>` view.
   - Fetching a light curve from the simulation or magnification map data.
@@ -31,10 +30,10 @@ import os
 import pickle
 import sys
 
-from app.Parameters.ExperimentParams import LightCurveParameters, \
+from .Parameters.ExperimentParams import LightCurveParameters, \
     MagMapParameters, StarFieldData
 import numpy as np
-from app.Calculator.ExperimentResultCalculator import varyTrial
+from .Calculator.ExperimentResultCalculator import varyTrial
 
 sys.path.append(os.path.abspath('.'))
 
@@ -74,7 +73,7 @@ def _requiresDtype(dtype):
 
 class AbstractFileWrapper(object):
     '''
-    Abstract class, with methods for interracting with '*.dat' files and directories containing them.
+    Abstract class, with methods for interracting with 'dat' files and directories containing them.
     Initialize AbstractFileWrapper object.
     
     Parameters:
@@ -92,7 +91,7 @@ class AbstractFileWrapper(object):
         '''
         self._filepath = filepath
         if not fileobject or not params:
-            from ..Controllers.FileManagerImpl import ExperimentDataFileReader
+            from .Controllers.FileManagerImpl import ExperimentDataFileReader
             reader = ExperimentDataFileReader()
             reader.open(self._filepath)
             self._params, self._fileobject = reader.load()
@@ -352,7 +351,7 @@ class Trial(AbstractFileWrapper):
     This is the workhorse class of the :class:`lens_analysis` module. Provides the methods for accessing data, getting statistical info, 
     etc.
 
-    Can be constructed directly, but recommended to construct by indexing a :class:`la.Experiment' instance.
+    Can be constructed directly, but recommended to construct by indexing a :class:`la.Experiment` instance.
     '''
     def __init__(self,filepath,trialno,fileobject=None,params=None,lookuptable=[]):
         AbstractFileWrapper.__init__(self, filepath, fileobject, params, lookuptable)    
@@ -388,7 +387,7 @@ class Trial(AbstractFileWrapper):
         Additional arguments passed in will be inserted into the FITS file's header. The keyword supplied becomes a new field in the 
         header, and the argument is converted to a string and given as that field's body.
         '''
-        from ..Controllers.FileManagerImpl import FITSFileWriter
+        from .Controllers.FileManagerImpl import FITSFileWriter
         arr = self._getDataSet(ind)
         fm = FITSFileWriter()
         fm.open(filename)
@@ -614,16 +613,13 @@ def describe(filename):
 @_requiresGUI
 def visualizeMagMap(model=None):
     '''
-        Spawns and returns an instance of a :class:`app.Views.MagMapView`. If a model argument is supplied,
-        will load the supplied model(s) into the view upon initialization.
-
+        Spawns and returns an instance of a :class:`app.Views.MagMapView`. If a model argument is supplied, will load the supplied model(s) into the view upon initialization.
         Parameters:
 
-        - `model`: (:class:`la.Trial`,:class:`la.Experiment`, or :class:`str`) Model(s) to be loaded in upon
-        initialization of the view. If `model` is a `str`, will assume the string is a filename which
-        designates a `*.dat` file to load in.
+        - `model`: (:class:`la.Trial`,:class:`la.Experiment`, or :class:`str`) Model(s) to be loaded in upon initialization of the view. If `model` is a `str`, will assume the string is a filename which designates a `*.dat` file to load in.
+
     '''
-    from ..Views.MainView import MainView
+    from .Views.MainView import MainView
     import GUIMain
     ui = MainView()
     GUIMain.bindWindow(ui)

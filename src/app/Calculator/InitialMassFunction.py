@@ -49,19 +49,16 @@ class IMF(object):
         total cluster mass break point.
         Primary stars are sampled from the IMF, companions are generated
         based on the multiplicity properties provided.
-        Parameters
-        ----------
-        totalMass : float
-            The total mass of the cluster (including companions) in solar masses.
-        Return
-        ------
-        masses : numpy float array
-            List of primary star masses.
-        isMultiple : numpy boolean array
-            List of booleans with True for each primary star that is in a multiple
-            system and False for each single star.
-        companionMasses : numpy float array
-            List of 
+
+        Parameters:
+        
+	- totalMass (`float`) : The total mass of the cluster (including companions) in solar masses.
+
+        Return:
+        
+	- masses (:class:`numpy.ndarray`) : List of primary star masses.
+        - isMultiple (:class:'numpy.ndarray`) : List of booleans with True for each primary star that is in a multiple system and False for each single star.
+	-  companionMasses (:class:`numpy.ndarray`) : List of companion masses.
         
         """
 
@@ -251,16 +248,12 @@ class IMF_broken_powerlaw(IMF):
         """
         Initialze a multi-part power-law with N parts. Each part of the
         power-law is described with a probability density function:
-            `P(m) \propto m ** power[n]`  
+        >>> P(m) \propto m ** power[n]
         for mass_limits[n] < m <= mass_limits[n+1].
-        Parameters
-        ----------
-        mass_limits : numpy array
-            Array of length (N + 1) with lower and upper limits of 
-            the power-law segments.
-        coefficients : numpy array
-            Array of length N that contains the powers for each
-            power-law segment.
+        Parameters:
+        
+	mass_limits (:class:`np.ndarray`) : Array of length (N + 1) with lower and upper limits of the power-law segments.
+        coefficients (:class:`np.ndarray`) :Array of length N that contains the powers for each power-law segment.
         """
         if len(mass_limits) != len(powers) + 1:
             msg = 'Incorrect specification of multi-part powerlaw.\n'
@@ -582,6 +575,9 @@ class Kroupa_2001(IMF_broken_powerlaw):
                                      multiplicity=multiplicity)
 
 class Kroupa_2001_Modified(IMF_broken_powerlaw):
+    """"
+	Modified version of the IMF described by Kroupa_2001. Has the cutoffs described in Pooley_2012.
+    """
     def __init__(self, multiplicity=None):
         massLimits = np.array([0.08,0.5,1.5])
         powers = np.array([-1.3,-2.7])
@@ -600,13 +596,12 @@ class Weidner_Kroupa_2004(IMF_broken_powerlaw):
 class Evolved_IMF(object):
     def __init__(self,distro = Kroupa_2001(),conversions={0.8:0.6,8:1.4,30:10}):
         """
-        Generates masses based on the Kropa_2001 IMF, then simulates an aging galaxy by applying conversions.
+        Generates masses based on the provided IMF, then provides conversions to simulate an aging galaxy like large-mass stars replaced with masses of back holes, neutron stars, etc.
         
-        Arguments:
-        ================
-        distro (default Kroupa_2001): IMF Mass Distribution to start with. Can swap in an instance of another IMF to start with a different model.
+        Parameters:
         
-        Conversions: dict, where the key is the lower limit of the star mass, value is what those masses get converted to."""
+	- distro (Kroupa_2001): IMF Mass Distribution to start with. Can swap in an instance of another IMF to start with a different model.
+        - Conversions: dict, where the key is the lower limit of the star mass, value is what those masses get converted to."""
         self.IMF = distro
         self.__conversions = []
         for k,v in conversions.items():
@@ -625,15 +620,15 @@ class Evolved_IMF(object):
         total cluster mass break point.
         Primary stars are sampled from the IMF, companions are generated
         based on the multiplicity properties provided.
-        Parameters
-        ----------
-        totalMass : float
-            The total mass of the cluster (including companions) in solar masses.
-        Return
-        ------
-        masses : numpy float array
-            List of primary star masses.
-        format : string so return type matches other generators as a tuple.
+
+        Parameters:
+        
+	- totalMass (`float`) : The total mass of the cluster (including companions) in solar masses.
+
+        Return:
+        
+	- masses (:class:`np.ndarray`) : List of primary star masses.
+        - format : string so return type matches other generators as a tuple.
         
         """
         retArr = []

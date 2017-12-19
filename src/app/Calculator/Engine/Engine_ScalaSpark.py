@@ -9,10 +9,10 @@ from astropy import constants as const
 
 #os.environ["PYSPARK_DRIVER_PYTHON"] = "/users/jkoeller/miniconda3/bin/python"
 #os.environ["PYSPARK_PYTHON"]="/users/jkoeller/miniconda3/bin/python"
-conf = SparkConf().setAppName("If this runs longer than 30 minutes and you need the cluster go ahead and kill it. If you don't need the cluster though, please just let it go! \n Thanks, \n -Jordan")
+conf = None#SparkConf().setAppName("If this runs longer than 30 minutes and you need the cluster go ahead and kill it. If you don't need the cluster though, please just let it go! \n Thanks, \n -Jordan")
 conf = (conf)
-sc = SparkContext(conf=conf)
-sc.setLogLevel('WARN')
+sc = None#SparkContext(conf=conf)
+#sc.setLogLevel('WARN')
 
 class _Ray(object):
 

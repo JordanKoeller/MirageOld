@@ -66,29 +66,24 @@ class ParametersJSONDecoder(object):
 
 class Parameters(object):
 	"""
-class Parameters:<br>
------------------------------------<br>
-	ATTRIBUTES:<br>
-	----------------<br>
-		galaxy - information about the lensing system<br>
-		quasar - information about the source object<br>
-		dTheta - stores the width per pixel, measured in angular units<br>
-		shear - stores information describing the shear of the system<br>
-		canvasDim - size of the canvas being calculated, in terms of number of pixels across the square canvas<br>
-		einsteinRadius - Einstein radius of the system, in units of angle<br>
-		gravitationalRadius - gravitational radius of the quasar, dependent on its mass. Measured in units of angle<br>
-		specialUnits - astropy.units.Quantity definition for units of angle to einstein radius, or gravitational radius<br>
-		avgMassEinsteinRadius - einstein radius of a 1/2 solar mass point mass, measured in units of angle<br>
-		stars - numpy array of masses, positions, and velocities of stars modeled by the galaxy<br>
-		relativeShearAngle - angle between the trajectory of the quasar and external shear<br>
-		dLS - angular diameter distance between the galaxy and source objects, measured in linear distance units<br>
-		smoothMassOnScreen - amount of mass enclosed within the canvas as described by the SIS distribution. Measured in solar masses<br>
-		queryQuasarX - x coordinate of the quasar in units of radians, linearly shifted to accomodate for a shifted center of galaxy<br>
-		queryQuasarY - y coordinate of the quasar in units of radians, linearly shifted to accomodate for a shifted center of galaxy<br>
-		queryQuasarRadius - radius of the quasar, measured in radians.<br>
-		extras - extra parameters to describe a specific scenario. Examples include rendering settings for visualization, or trial variance information for batch runs.<br>
-<br>
-	METHODS:<br>
+	galaxy - information about the lensing system
+	quasar - information about the source object
+	dTheta - stores the width per pixel, measured in angular units
+	shear - stores information describing the shear of the system
+	canvasDim - size of the canvas being calculated, in terms of number of pixels across the square canvas
+	einsteinRadius - Einstein radius of the system, in units of angle
+	gravitationalRadius - gravitational radius of the quasar, dependent on its mass. Measured in units of angle
+	specialUnits - astropy.units.Quantity definition for units of angle to einstein radius, or gravitational radius
+	avgMassEinsteinRadius - einstein radius of a 1/2 solar mass point mass, measured in units of angle
+	stars - numpy array of masses, positions, and velocities of stars modeled by the galaxy
+	relativeShearAngle - angle between the trajectory of the quasar and external shear
+	dLS - angular diameter distance between the galaxy and source objects, measured in linear distance units
+	smoothMassOnScreen - amount of mass enclosed within the canvas as described by the SIS distribution. Measured in solar masses
+	queryQuasarX - x coordinate of the quasar in units of radians, linearly shifted to accomodate for a shifted center of galaxy
+	queryQuasarY - y coordinate of the quasar in units of radians, linearly shifted to accomodate for a shifted center of galaxy
+	queryQuasarRadius - radius of the quasar, measured in radians.
+	extras - extra parameters to describe a specific scenario. Examples include rendering settings for visualization, or trial variance information for batch runs.
+	METHODS:
 	----------------<br>
 		isSimilar(parameters):Boolean<br>
 			Compares this Parameters instance with a passed in Parameters instance, determines whether or not they are different enough<br>
