@@ -17,7 +17,6 @@ class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends
     val rddProfiled = partitioner.profileData(data)
     val rddTraced = rddProfiled.partitionBy(partitioner)
     val glommed = rddTraced.glom()
-    println("[" + glommed.map(_.length).collect().mkString(",") + "]")
     val ret = glommed.mapPartitions(arrr => arrr.map(arr => VectorGrid(arr))).persist(StorageLevel.MEMORY_AND_DISK)
     println("Put on " + rddTraced.getNumPartitions + " partitions")
     ret
@@ -56,41 +55,40 @@ class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends
 
 }
 
-object RDDGrid {
-    // val conf = new SparkConf().setAppName("RDDGrid Test").setMaster("local[*]")
-    // val sc = new SparkContext(conf)
-    // sc.setLogLevel("WARN")
-  // def Test(np:Int):Unit =  {
+object RDDGrid extends App {
+     val conf = new SparkConf().setAppName("RDDGrid Test").setMaster("local[*]")
+     val sc = new SparkContext(conf)
+     sc.setLogLevel("WARN")
+  def Test(np:Int):Unit =  {
 
-  //   val h = 1000
-  //   val w = 1000
-  //   val data = sc.range(0,h*w,1,np)
-  //   val gridData = data.map(elem => new XYDoublePair(math.sin((elem%w).toDouble),math.sin((elem/w).toDouble)))
-  //   val data2 = gridData.sortBy(_.x)
-  //   // val partitioner = new ColumnPartitioner()
-  //   val partitioner = new BalancedColumnPartitioner()
+     val h = 1000
+     val w = 1000
+     val data = sc.range(0,h*w,1,np)
+     val gridData = data.map(elem => new XYDoublePair(math.sin((elem%w).toDouble)-math.random*3,math.sin((elem/w).toDouble)+math.random*2))
+     val data2 = gridData.sortBy(_.x)
+     // val partitioner = new ColumnPartitioner()
+     val partitioner = new BalancedColumnPartitioner()
+    val rddgrid = new RDDGrid(data2,partitioner)
+     val radius = 0.1
+     val queryPts = Array.fill(5)(Array.fill(5)(new XYDoublePair(50.0,60.0)))
+     for (i <- 0 until 5;j <- 0 until 5) queryPts(i)(j) = new XYDoublePair(i.toDouble/math.Pi,j.toDouble/math.Pi)
+     val ret = rddgrid.queryPoints(queryPts,radius,sc,true)
+     ret.map(_.mkString(",")) foreach println
+   }
 
-  //   val rddgrid = new RDDGrid(data2,partitioner)
-  //   val radius = 0.1
-  //   val queryPts = Array.fill(5)(Array.fill(5)(new XYDoublePair(50.0,60.0)))
-  //   for (i <- 0 until 5;j <- 0 until 5) queryPts(i)(j) = new XYDoublePair(i.toDouble/math.Pi,j.toDouble/math.Pi)
-  //   val ret = rddgrid.queryPoints(queryPts,radius,sc,true)
-  //   ret.map(_.mkString(",")) foreach println
-  // }
-
-  // def RangeTest() = {
-  //   val conf = new SparkConf().setAppName("RDDGrid Test").setMaster("local[*]")
-  //   val sc = new SparkContext(conf)
-  //   sc.setLogLevel("WARN")
-  //   val data2 = sc.range(0,100,1,10)
-  //   val data = data2.map(i => (math.sin(math.Pi*i*2.0/100.0),i))
-  //   val partitioner = new RangePartitioner(10,data)
-  //   data.partitionBy(partitioner).glom().collect.foreach(i =>println(i.map(_._1).mkString(",")))
-  // }
+   def RangeTest() = {
+     val conf = new SparkConf().setAppName("RDDGrid Test").setMaster("local[*]")
+     val sc = new SparkContext(conf)
+     sc.setLogLevel("WARN")
+     val data2 = sc.range(0,100,1,10)
+     val data = data2.map(i => (math.sin(math.Pi*i*2.0/100.0),i))
+     val partitioner = new RangePartitioner(10,data)
+     data.partitionBy(partitioner).glom().collect.foreach(i =>println(i.map(_._1).mkString(",")))
+   }
 
 // RangeTest()
-  // Test(1)
-  // Test(100)
+   Test(1)
+   Test(70)
 
-  // sc.stop()
+   sc.stop()
 }

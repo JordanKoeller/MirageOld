@@ -7,12 +7,10 @@ from .Engine import Engine
 from astropy import constants as const
 #import os
 
-#os.environ["PYSPARK_DRIVER_PYTHON"] = "/users/jkoeller/miniconda3/bin/python"
-#os.environ["PYSPARK_PYTHON"]="/users/jkoeller/miniconda3/bin/python"
-conf = None#SparkConf().setAppName("If this runs longer than 30 minutes and you need the cluster go ahead and kill it. If you don't need the cluster though, please just let it go! \n Thanks, \n -Jordan")
+conf = SparkConf().setAppName("lensing_simulator")
 conf = (conf)
-sc = None#SparkContext(conf=conf)
-#sc.setLogLevel('WARN')
+sc = SparkContext(conf=conf)
+sc.setLogLevel('WARN')
 
 class _Ray(object):
 

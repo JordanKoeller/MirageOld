@@ -2,27 +2,27 @@
     {
         "galaxy": {
             "position": {
-                "x": 0.0,
-                "y": 0.0,
+                "x": -1.4808633889490776e-06,
+                "y": 3.537152136007063e-06,
                 "unit": "rad"
             },
             "velocityDispersion": {
                 "unit": "km / s",
-                "value": 1500.0
+                "value": 177.95
             },
-            "redshift": 0.5,
+            "redshift": 0.04,
             "shearAngle": {
                 "unit": "rad",
-                "value": 0.5235987755982988
+                "value": 1.171115928088195
             },
-            "shearMag": 0.306,
+            "shearMag": 0.07,
             "starMasses": [],
             "starXPos": [],
             "starYPos": [],
             "velocity": {
                 "x": {
                     "unit": "",
-                    "value": 1000000000.0
+                    "value": 0.0
                 },
                 "y": {
                     "unit": "",
@@ -33,7 +33,7 @@
                     "value": 0.0
                 }
             },
-            "pcntStars": 0.0,
+            "pcntStars": 42,
             "colorKey": 4,
             "avgStarMass": 0.5
         },
@@ -48,8 +48,8 @@
                 "value": 1000000000.0
             },
             "velocity": {
-                "x": -3.5103937772894857e-15,
-                "y": 1.5765211209083518e-14,
+                "x": -3.2717786634279656e-21,
+                "y": 2.626172648024304e-21,
                 "unit": "rad"
             },
             "observedPosition": {
@@ -58,37 +58,37 @@
                 "unit": "rad"
             },
             "radius": {
-                "unit": "rad",
-                "value": 4.84813681109536e-06
+                "unit": "r_g",
+                "value": 80.0
             },
-            "redshift": 2.0,
+            "redshift": 1.69,
             "colorKey": 3
         },
-        "canvasDim": 1000,
+        "canvasDim": 2000,
         "dTheta": {
-            "unit": "rad",
-            "value": 1.454441043328608e-06
+            "unit": "theta_E",
+            "value": 200.0
         },
         "extraParameters": {
-            "name": "Macro_Test",
-            "description": "Description",
+            "name": "2237_imageC_10pcnt_test_small",
+            "description": "imageC 2237 run at 10% of mass in stars. Set up to be the same dimensions of those specified in Pooley et al. 10,000^2 canvas, drawing to a 2000x2000 magnification map.",
             "numTrials": 1,
-            "trialVariance": "# numpy as np, astropy.units as u, trialNumber are in scope\n###fill in trial variance code here###\nnewParams = copy.deepcopy(oldParams)",
+            "trialVariance": "newParams = copy.deepcopy(oldParams)\nnewParams.galaxy.update(percentStars=10.0)",
             "resultList": {
                 "magmap": {
                     "center": {
-                        "x": 0.0,
-                        "y": 0.0,
+                        "x": -6.330435287558283e-08,
+                        "y": 1.5564473225556836e-07,
                         "unit": "rad"
                     },
                     "dimensions": {
-                        "x": 100.0,
-                        "y": 100.0,
-                        "unit": "arcsec"
+                        "x": 20.0,
+                        "y": 20.0,
+                        "unit": "theta_E"
                     },
                     "resolution": {
-                        "x": 1024.0,
-                        "y": 1024.0,
+                        "x": 500.0,
+                        "y": 500.0,
                         "unit": ""
                     }
                 },
