@@ -25,15 +25,13 @@ Below is an example of how to use the module for getting a magnification map as 
 
 import copy
 import glob
-import math
 import os
-import pickle
 import sys
 
-from .Parameters.ExperimentParams import LightCurveParameters, \
+from .parameters.ExperimentParams import LightCurveParameters, \
     MagMapParameters, StarFieldData
 import numpy as np
-from .Calculator.ExperimentResultCalculator import varyTrial
+from .calculator.ExperimentResultCalculator import varyTrial
 
 sys.path.append(os.path.abspath('.'))
 
@@ -543,7 +541,9 @@ def load(filename='Untitled.dat'):
     (if a directory name is provided) instance generated from the specified file. If filename is None, and a Qt event loop 
     is running, opens a file dialog to specify the file.
 
-    Parameters: `filename` (:class:`str`) : Filename to look up. Defaults to '`Untitled.dat`'. If None is passed in, opens a dialog to specify the file.
+    Parameters:
+    
+    - `filename` (:class:`str`) : Filename to look up. Defaults to '`Untitled.dat`'. If None is passed in, opens a dialog to specify the file.
     '''
     if filename is None:
         from PyQt5 import QtWidgets

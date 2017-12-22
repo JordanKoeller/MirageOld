@@ -1,0 +1,35 @@
+'''
+
+    First things first: I need to define some architectural things.
+    For this version, I will use an MVC - based implimentation, but altered from prior ones.
+    
+    To start with, views will perform method calls via SIGNAL ONLY - this will bring coupling down.
+    Controllers will mediate between the Model and the Views.
+    Model will no longer be a global variable - it will be instantiated by the main. That way, 
+        different roles of the code may have different models.
+    Controllers will communicate with the views by SIGNAL ONLY - in fact, to keep coupling as low as possible,
+    I will never give a controller a reference to a view, and vice versa. They will instead pass around 
+    instances of SignalRepo objects to facilitate bridging between models, views, and controllers.
+    
+    Now, in terms of relations (This is where I got all jumbled last time)
+    
+    Model - singleton
+    View - Many views, but only one of each type.
+    Controller - many controllers, but only one of each type.
+    
+    What is the advantage of segregating view and controller?
+        - keeps cohesion high.
+        - Allows for more configurable views - things like different ways of drawing a curve, etc.
+        - This allows for controllers to have access to the model - the advantage of this is that I don't have to use signals. Hence, will not need PyQt 
+        for calculations - only numpy, scipy, astropy, cython - fewer dependencies means more fun!
+        
+        
+        
+    NOTE: These controllers are SEPARATE from the engine. The engine is more of a master-level controller.
+    Have different master controllers for different functions - like drawing images versus handling magmaps
+    versus animating versus stills, etc.
+    
+    With that in mind... here we go!
+'''
+
+

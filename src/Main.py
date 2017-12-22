@@ -58,7 +58,7 @@ if __name__ == "__main__":
         sys.exit()
     else:
         from PyQt5 import QtWidgets
-        from app.Views.MainView import MainView as GUIManager
+        from app.views.MainView import MainView as GUIManager
         import GUIMain 
         app = QtWidgets.QApplication(sys.argv)
         ui = GUIManager()

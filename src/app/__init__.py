@@ -11,3 +11,15 @@ tableUIFile = abspath+'Resources/GUIViews/BatchTableView/batchtableview.ui'
 magmapUIFile = abspath+'Resources/GUIViews/MagnificationMapView/magnificationmapview.ui'
 modeldialogUIFile = abspath+'Resources/GUIViews/ConfigureModelsDialog/configuremodelsdialog.ui'
 
+
+# __model = None
+# 
+# @property
+# def Model():
+#     assert __model is not None, "Must set the model before can interract with it."
+#     return __model
+# 
+# def setModel(model):
+#     from .model import _AbstractModel
+#     assert isinstance(model,_AbstractModel)
+#     __model = model

@@ -1,7 +1,5 @@
 import numpy as np
-from matplotlib import pyplot as pl
 import math
-from random import random
 
 class Rectangle(object):
 	"""Class used to describe a rectangular source object.

@@ -2,17 +2,17 @@ from PyQt5 import QtCore
 from PyQt5.Qt import QObject
 from PyQt5.QtWidgets import QInputDialog
 
-from app.Controllers import ControllerFactory  # , ExportFactory
-from app.Controllers.ParametersController import ParametersController
-from app.Models import Model
-from app.Views.LensedImageView import LensedImageView
-from app.Views.LightCurvePlotView import LightCurvePlotView
-from app.Views.MagMapView import MagMapView
-from app.Views.ModelDialog import ModelDialog
-from app.Views.ParametersView import ParametersView
-from app.Views.TableView import TableView
-from app.Views.View import CanvasView
-import factory
+# from app.Controllers import ControllerFactory  # , ExportFactory
+# from app.Controllers.ParametersController import ParametersController
+# from app.Models import Model
+# from app.Views.LensedImageView import LensedImageView
+# from app.Views.LightCurvePlotView import LightCurvePlotView
+# from app.Views.MagMapView import MagMapView
+# from app.Views.ModelDialog import ModelDialog
+# from app.Views.ParametersView import ParametersView
+# from app.Views.TableView import TableView
+# from app.Views.View import CanvasView
+# import factory
 
 
 # from app.Models.MagnificationMapModel import MagnificationMapModel

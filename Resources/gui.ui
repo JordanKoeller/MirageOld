@@ -58,23 +58,21 @@
        <property name="title">
         <string>View</string>
        </property>
-       <addaction name="queueViewSelector"/>
-       <addaction name="visualizerViewSelector"/>
-       <addaction name="tracerViewSelector"/>
+       <addaction name="actionTablePerspective"/>
+       <addaction name="actionExplorePerspective"/>
+       <addaction name="actionAnalysisPerspective"/>
        <addaction name="separator"/>
-       <addaction name="actionAddCurvePane"/>
-       <addaction name="actionAddImgPane"/>
-       <addaction name="actionAddMagPane"/>
-       <addaction name="separator"/>
-       <addaction name="actionAddParametersPane"/>
-       <addaction name="actionAddTablePane"/>
+       <addaction name="actionPlotPane"/>
+       <addaction name="actionImagePane"/>
+       <addaction name="actionMagMapPane"/>
+       <addaction name="actionParametersPane"/>
       </widget>
       <widget class="QMenu" name="menuModel">
        <property name="title">
-        <string>Model</string>
+        <string>Perspective</string>
        </property>
-       <addaction name="actionConfigure_Models"/>
        <addaction name="separator"/>
+       <addaction name="actionDEPRECATED"/>
       </widget>
       <addaction name="menuFile"/>
       <addaction name="menuView"/>
@@ -142,7 +140,7 @@
     </property>
    </action>
    <actiongroup name="perspectivegroup">
-    <action name="visualizerViewSelector">
+    <action name="actionExplorePerspective">
      <property name="checkable">
       <bool>true</bool>
      </property>
@@ -150,18 +148,18 @@
       <bool>true</bool>
      </property>
      <property name="text">
-      <string>Visualization View</string>
+      <string>Explore Perspective</string>
      </property>
      <property name="shortcut">
-      <string>Ctrl+Shift+V</string>
+      <string>Ctrl+E</string>
      </property>
     </action>
-    <action name="queueViewSelector">
+    <action name="actionTablePerspective">
      <property name="checkable">
       <bool>true</bool>
      </property>
      <property name="text">
-      <string>Batch Table View</string>
+      <string>Table Perspective</string>
      </property>
      <property name="shortcut">
       <string>Ctrl+T</string>
@@ -210,60 +208,59 @@
     <string>Parameters Variance</string>
    </property>
   </action>
-  <action name="actionAddCurvePane">
+  <action name="actionPlotPane">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Add Plot Pane</string>
+    <string>Plot Pane</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+C</string>
    </property>
   </action>
-  <action name="actionAddImgPane">
+  <action name="actionImagePane">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Add Image Pane</string>
+    <string>Image Pane</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+I</string>
    </property>
   </action>
-  <action name="actionAddMagPane">
+  <action name="actionMagMapPane">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Add MagMap Pane</string>
+    <string>Magnification Map Pane</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+M</string>
    </property>
   </action>
-  <action name="actionConfigure_Models">
-   <property name="text">
-    <string>Configure Models</string>
-   </property>
-  </action>
-  <action name="tracerViewSelector">
+  <action name="actionAnalysisPerspective">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Magnification Map View</string>
+    <string>Analysis Perspective</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+F</string>
+    <string>Ctrl+A</string>
    </property>
   </action>
-  <action name="actionAddParametersPane">
+  <action name="actionParametersPane">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Add Parameters Pane</string>
+    <string>Parameters Pane</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
-   </property>
-  </action>
-  <action name="actionAddTablePane">
-   <property name="text">
-    <string>Add Table Pane</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+T</string>
    </property>
   </action>
   <action name="actionExport">
@@ -271,7 +268,12 @@
     <string>Export</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+E</string>
+    <string>Ctrl+Shift+E</string>
+   </property>
+  </action>
+  <action name="actionDEPRECATED">
+   <property name="text">
+    <string>DEPRECATED</string>
    </property>
   </action>
  </widget>
