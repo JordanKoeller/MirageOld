@@ -4,7 +4,7 @@ from astropy.io import fits
 import numpy as np 
 from pyqtgraph import QtCore, QtGui
 
-from ...Utility.NullSignal import NullSignal
+from app.utility.NullSignal import NullSignal
 
 
 cimport numpy as np 

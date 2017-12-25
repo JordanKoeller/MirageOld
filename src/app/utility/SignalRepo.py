@@ -14,13 +14,12 @@ class SignalRepo(object):
     classdocs
     '''
 
-    __signals = SignalObject()
 
-    def __init__(self,*args,**kwargs):
+    def __init__(self):
         '''
         Constructor
         '''
-        pass
+        self.__signals = {}
         
         
     def removeSignals(self,args):

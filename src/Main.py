@@ -3,14 +3,11 @@ Created on May 31, 2017
 
 @author: jkoeller
 '''
-import os
-import sys
-
 import argparse
 from datetime import datetime as DT
-
 import logging
-
+import os
+import sys
 
 
 if __name__ == "__main__":
@@ -58,21 +55,18 @@ if __name__ == "__main__":
         sys.exit()
     else:
         from PyQt5 import QtWidgets
-        from app.views.MainView import MainView as GUIManager
-        import GUIMain 
+        from app.views import WindowView
+        from app.controllers import MasterController
+        from app.model import ParametersModel
         app = QtWidgets.QApplication(sys.argv)
-        ui = GUIManager()
-        GUIMain.bindWindow(ui)
-        GUIMain._showVisSetup(ui)
-        ui.show()
-        if args.load:
-            from app.Controllers.FileManagerImpl import ParametersFileReader
-            paramLoader = ParametersFileReader()
-            paramLoader.open(args.load)
-            params = paramLoader.load()
-            paramLoader.close()
-            ui.switchToVisualizing()
-            ui.bindFields(params)
+        model = ParametersModel()
+        view = WindowView()
+        controller = MasterController()
+        
+        controller.bind_to_model(model)
+        controller.bind_view_signals(view)
+        view.show()
+        
     sys.exit(app.exec_())
 
 

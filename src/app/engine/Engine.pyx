@@ -15,12 +15,11 @@ import cython
 from cython.parallel import prange
 from scipy import interpolate
 
-from ...Utility import Vector2D
-from ...Utility import zeroVector
-from app.Preferences import GlobalPreferences
+from app.utility import Vector2D
+from app.utility import zeroVector
+from app.preferences import GlobalPreferences
 import numpy as np
 
-from .. import gpu_kernel, currDir
 
 cimport numpy as np
 from libcpp.vector cimport vector
@@ -63,6 +62,7 @@ cdef class Engine:
 		
 			Requires openCL. Must call reconfigure() before this function.
 		'''
+		from .. import gpu_kernel, currDir
 		import pyopencl.tools
 		import pyopencl as cl
 		begin = time.clock()
@@ -128,6 +128,7 @@ cdef class Engine:
 		begin = time.clock()
 		import pyopencl.tools
 		import pyopencl as cl
+		from .. import gpu_kernel, currDir
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
 		cdef double dTheta = self.__parameters.dTheta.value

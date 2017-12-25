@@ -11,7 +11,7 @@ cimport numpy as np
 from libcpp.vector cimport vector
 from libcpp cimport bool
 from libcpp.pair cimport pair
-from ...Utility.PointerGrid cimport PointerGrid
+from app.utility.PointerGrid cimport PointerGrid
 # from Utility.Grid cimport Pixel
 from .Engine cimport Engine
 

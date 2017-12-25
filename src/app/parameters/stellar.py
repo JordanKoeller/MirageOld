@@ -13,11 +13,11 @@ from astropy.cosmology import WMAP7 as cosmo
 import numpy as np
 
 
-from ..Calculator import Conversions
-from ..Utility.ParametersError import ParametersError
-from ..Utility.Vec2D import zeroVector, Vector2D, Vector2DJSONDecoder
-from ..Views.Drawer.ShapeDrawer import drawPointLensers, drawCircle, drawSolidCircle, drawSquare
-from ..Utility.QuantityJSONEncoder import QuantityJSONEncoder, QuantityJSONDecoder
+from ..calculator import Conversions
+from ..utility.ParametersError import ParametersError
+from ..utility import zeroVector, Vector2D, Vector2DJSONDecoder
+from ..drawer.ShapeDrawer import drawPointLensers, drawCircle, drawSolidCircle, drawSquare
+from ..utility import QuantityJSONEncoder, QuantityJSONDecoder
 
 EarthVelocity = SR(u.Quantity(265,'degree'),u.Quantity(48,'degree'),365)
 
@@ -47,7 +47,6 @@ class GalaxyJSONEncoder(object):
             res['velocity'] = {'x':x,'y':y,'z':z}
             res['pcntStars'] = o.percentStars
             # res['skyCoords'] = o.skyCoords #WILL NEED HELP HERE
-            res['colorKey'] = o.colorKey
             res['avgStarMass'] = o.averageStarMass
             return res
         else:
@@ -289,7 +288,8 @@ class Quasar(Movable,Cosmic):
 
 
 
-    def __init__(self,redshift = 2,radius = u.Quantity(1e6,'uas'),position = Vector2D(0,0,'rad'),velocity = Vector2D(0,0,'km/s'), mass = u.Quantity(1e9,'solMass')):
+    def __init__(self,redshift = 2,radius = u.Quantity(1e6,'uas'),position = Vector2D(0,0,'rad'),
+                 mass = u.Quantity(1e9,'solMass'), velocity = Vector2D(0,0,'km/s')):
         self.__radius = radius
         self.updateCosmic(redshift = redshift)
         normVel = velocity.to('km/s')/self.angDiamDist.to('km').value
@@ -390,7 +390,10 @@ class Galaxy(Drawable, Cosmic):
     __shear = None
     __stars = []
 
-    def __init__(self, redshift=0.5, velocityDispersion=u.Quantity(1500, 'km/s'), shearMag=0.306, shearAngle=u.Quantity(30,'degree'), percentStars=0.0, center=zeroVector.setUnit('rad'), starVelocityParams = None, skyCoords= None, velocity=u.Quantity(0,'km/s'),stars = []):
+    def __init__(self, redshift=0.5, velocityDispersion=u.Quantity(1500, 'km/s'), shearMag=0.306,
+                 shearAngle=u.Quantity(30,'degree'), percentStars=0.0,
+                 center=zeroVector.setUnit('rad'), velocity=u.Quantity(0,'km/s'),
+                 starVelocityParams = None, skyCoords= None, stars = []):
         Drawable.__init__(self)
         Cosmic.__init__(self)
         self.__velocityDispersion = velocityDispersion

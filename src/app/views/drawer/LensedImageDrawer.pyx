@@ -8,8 +8,8 @@ from scipy.cluster.vq import vq, kmeans, whiten
 import numpy as np
 import pyqtgraph as pg 
 
-from ...Utility import Vector2D
-from ...Utility.NullSignal import NullSignal
+from app.utility import Vector2D
+from app.utility.NullSignal import NullSignal
 
 
 cimport numpy as np

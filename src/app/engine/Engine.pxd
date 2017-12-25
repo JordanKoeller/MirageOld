@@ -15,8 +15,8 @@ from scipy import interpolate
 
 import pyopencl as cl
 
-from ...Utility import Vector2D
-from ...Utility import zeroVector
+from app.utility import Vector2D
+from app.utility import zeroVector
 
 
 from libcpp.vector cimport vector

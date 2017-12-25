@@ -1,9 +1,8 @@
 from pyqtgraph import QtCore, QtGui
-from ...Utility.NullSignal import NullSignal
+from app.utility.NullSignal import NullSignal
 cimport numpy as np
 import numpy as np
 import math 
-from ...Models import Model
 
 cdef class Drawer(object):
 	def __init__(self,signal):

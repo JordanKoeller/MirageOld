@@ -1,5 +1,5 @@
 
-from app.engine import Engine, Engine_PointerGrid, Engine_MagMap
+from app.engine import Engine, Engine_PointerGrid#, Engine_MagMap
 from app.parameters import Parameters, DefaultParameters
 
 
@@ -15,9 +15,11 @@ class _AbstractModel(object):
         self._engine = engine
         
         
-    def setParameters(self,parameters):
+    def set_parameters(self,parameters):
         assert isinstance(parameters, Parameters)
         self._parameters = parameters
+        
+    def bind_parameters(self):
         self._engine.updateParameters(self._parameters)
     
     @property
@@ -44,7 +46,7 @@ class ParametersModel(_AbstractModel):
     '''
 
 
-    def __init__(self, parameters = DefaultParameters, engine = Engine_PointerGrid()):
+    def __init__(self, parameters = DefaultParameters(), engine = Engine_PointerGrid()):
         '''
         Constructor
         '''

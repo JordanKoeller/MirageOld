@@ -15,14 +15,14 @@ from astropy.cosmology import WMAP7 as cosmo
 import cython
 from scipy import interpolate
 
-from ...Utility import Vector2D
-from ...Utility import zeroVector
+from app.utility import Vector2D
+from app.utility import zeroVector
 import numpy as np
 cimport numpy as np
 from libcpp.vector cimport vector
 from libc.math cimport sin, cos, atan2, sqrt
 from libcpp.pair cimport pair
-from ...Utility.PointerGrid cimport PointerGrid
+from app.utility.PointerGrid cimport PointerGrid
 from .Engine cimport Engine
 from libcpp cimport bool
 from libc.stdlib cimport malloc, free

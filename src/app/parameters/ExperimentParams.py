@@ -5,7 +5,7 @@ Created on Jun 4, 2017
 '''
 import numpy as np
 
-from ..Utility.Vec2D import Vector2D, Vector2DJSONDecoder
+from ..utility import Vector2D, Vector2DJSONDecoder
 
 
 class ExperimentParamsJSONEncoder(object):

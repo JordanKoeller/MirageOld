@@ -11,11 +11,11 @@ from .ExperimentParams import ExperimentParams
 import numpy as np 
 import random as rand 
 
-from ..Calculator.InitialMassFunction import Evolved_IMF, Kroupa_2001, Kroupa_2001_Modified
-from ..Utility import Vector2D
-from ..Utility.ParametersError import ParametersError
+from ..calculator.InitialMassFunction import Evolved_IMF, Kroupa_2001, Kroupa_2001_Modified
+from ..utility import Vector2D
+from ..utility.ParametersError import ParametersError
 from .stellar import Galaxy, Quasar, GalaxyJSONDecoder, QuasarJSONDecoder
-from ..Utility.QuantityJSONEncoder import QuantityJSONEncoder, QuantityJSONDecoder
+from ..utility.QuantityJSONEncoder import QuantityJSONEncoder, QuantityJSONDecoder
 from .ExperimentParams import ExperimentParamsJSONDecoder
 
 
@@ -163,16 +163,13 @@ class Quasar:<br>
 		super(ParametersJSONDecoder, self).__init__()
 	"""
 		
-	def __init__(self, galaxy = Galaxy(), quasar = Quasar(), dTheta = u.Quantity(4/20,'arcsec'), canvasDim = 2000, showGalaxy = True, showQuasar = True, starMassTolerance = 0.05, starMassVariation = None,numStars = 0):
+	def __init__(self, galaxy = Galaxy(), quasar = Quasar(), dTheta = u.Quantity(4/20,'arcsec'),
+				canvasDim = 2000, numStars = 0):
 		self.__galaxy = galaxy
 		self.__quasar = quasar
 		self.__dTheta = u.Quantity(dTheta/canvasDim,'rad')
 		self.__canvasDim = canvasDim
-		self.showGalaxy = showGalaxy
-		self.showQuasar = showQuasar
 		self.numStars = numStars
-		self.__starMassTolerance = starMassTolerance
-		self.__starMassVariation = starMassVariation
 		self.dt = 2.6e7
 		self.time = 0
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
@@ -263,12 +260,6 @@ class Quasar:<br>
 	@property
 	def isMicrolensing(self):
 		return self.__isMicrolensing
-	@property
-	def starMassFunction(self):
-		return self.__starMassFunction
-	@property
-	def starMassVariation(self):
-		return self.__starMassVariation
 
 	@property
 	def einsteinRadius(self):
@@ -306,17 +297,6 @@ class Quasar:<br>
 	def avgMassEinsteinRadius(self):
 		return Parameters.calculateAvgMassEinsteinRadius(self.galaxy.redshift,self.quasar.redshift)
 
-	@property
-	def displayQuasar(self):
-		return self.showQuasar
-
-	@property
-	def displayGalaxy(self):
-		return self.showGalaxy
-
-	@property
-	def displayStars(self):
-		return self.showGalaxy
 	@property
 	def stars(self):
 		return self.galaxy._Galaxy__stars
@@ -431,10 +411,6 @@ class Quasar:<br>
 		if not self.isSimilar(other):
 			return False
 		if self.quasar != other.quasar:
-			return False
-		if self.showQuasar != other.showQuasar:
-			return False
-		if self.showGalaxy != other.showGalaxy:
 			return False
 		return True
 
