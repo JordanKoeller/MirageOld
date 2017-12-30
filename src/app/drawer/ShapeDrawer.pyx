@@ -2,6 +2,7 @@ cimport numpy as np
 from libc cimport math
 from libc.math cimport fabs
 import cython
+from app.preferences import ColorMap
 
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
@@ -11,7 +12,7 @@ cpdef void drawCircle(int x0, int y0, int r, np.ndarray[np.uint8_t, ndim=3] canv
     cdef int y = 0
     cdef int err = 0
     cdef int canvasDim = canvas.shape[0]
-    color = model.colorMap_arr[color]
+    color = ColorMap[color]
     while x >= y:
         if x0 + x > 0 and y0 + y > 0 and x0 + x < canvasDim and y0 + y < canvasDim:
                 canvas[x0 + x, y0 + y] = color
@@ -41,7 +42,7 @@ cpdef void drawLine(int yIntercept, double slope, int yAx, np.ndarray[np.uint8_t
     cdef int x = yAx
     cdef int y = yIntercept
     cdef int i = 0
-    cdef np.ndarray[np.uint8_t,ndim=1] c = model.colorMap_arr[color]
+    cdef np.ndarray[np.uint8_t,ndim=1] c = ColorMap[color]
     for i in range(0,width):
         y =  (i - yAx)*(<int>slope) + yIntercept 
         if y > -1 and y < height:
@@ -52,7 +53,7 @@ cpdef void drawSolidCircle(int x0, int y0, int r, np.ndarray[np.uint8_t, ndim=3]
     cdef int rSquared = r * r
     cdef int x, y
     cdef int canvasDim = canvas.shape[0]
-    cdef np.ndarray[np.uint8_t,ndim=1] c = model.colorMap_arr[color]  
+    cdef np.ndarray[np.uint8_t,ndim=1] c = ColorMap[color]  
     for x in range(0,r+1):
         for y in range(0,r+1):
             if x*x + y*y <= rSquared:
@@ -69,17 +70,18 @@ cpdef void drawSquare(int x0, int y0, int dim, np.ndarray[np.uint8_t, ndim=3] ca
     cdef int dim2 = <int> dim/2
     cdef int canvasDim = canvas.shape[0]
     cdef int x,y
-    cdef np.ndarray[np.uint8_t,ndim=1] c = model.colorMap_arr[color]
+    cdef np.ndarray[np.uint8_t,ndim=1] c = ColorMap[color]
     for x in range(x0-dim2,x0+dim2):
         for y in range(y0-dim2,y0+dim2):
             if x >= 0 and x < canvasDim and y >= 0 and y < canvasDim:
                 canvas[x,y] = c
+                
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void drawSquare_optimized(int x0, int y0, int dim, np.ndarray[np.uint8_t, ndim=3] canvas, int color, int canvasDim, object model):
     cdef int dim2 = dim/2
     cdef int x,y 
-    cdef np.ndarray[np.uint8_t,ndim=1] c = model.colorMap_arr[color]
+    cdef np.ndarray[np.uint8_t,ndim=1] c = ColorMap[color]
     for x in range(x0-dim2,x0+dim2):
         for y in range(y0-dim2,y0+dim2):
             if x >= 0 and x < canvasDim and y >= 0 and y < canvasDim:

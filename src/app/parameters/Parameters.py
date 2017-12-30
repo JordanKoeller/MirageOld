@@ -394,8 +394,6 @@ class Quasar:<br>
 			return False
 		if self.canvasDim != other.canvasDim:
 			return False
-		if self.starMassVariation != other.starMassVariation:
-			return False
 		if not self.galaxy.isSimilar(other.galaxy):
 			return False
 		if self.quasar.redshift != other.quasar.redshift:

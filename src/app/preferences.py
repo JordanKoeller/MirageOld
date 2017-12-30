@@ -7,6 +7,7 @@ Created on Jul 25, 2017
 import json 
 import multiprocessing
 import os
+import numpy as np
 
 class _PreferencesParser(object):
     '''
@@ -48,8 +49,27 @@ class _GlobalPreferences(_PreferencesParser):
         if self['use_openCL']:
             if self['cl_device'] != 'discover':
                 os.environ['PYOPENCL_CTX'] = str(self['cl_device'])
+        if self['color_scheme']:
+            lookup = {
+                'minimum':1,
+                'saddle_pt':5,
+                'galaxy':4,
+                'star':2,
+                'quasar':3,
+                'background':0
+                }
+            global ColorMap
+            for color in self['color_scheme'].items():
+                c = color[1][1:]
+                c1 = c[0:2]
+                c2 = c[2:4]
+                c3 = c[4:6]
+                r = int(c1,16)
+                g = int(c2,16)
+                b = int(c3,16)
+                ColorMap[lookup[color[0]]] = [r,g,b]
 
 
+
+ColorMap = np.ndarray((6,3), dtype = np.uint8)
 GlobalPreferences = _GlobalPreferences()
-# TracerPreferences = _PreferencesParser(os.environ['projectDir']+'.default_tracer_preferences.json')
-

@@ -16,6 +16,7 @@ cimport numpy as np
 from .Drawer cimport ImageDrawer
 from .ShapeDrawer cimport drawCircle, drawLine
 
+from app.preferences import ColorMap, GlobalPreferences
 
 cdef class LensedImageDrawer(ImageDrawer):
 
@@ -27,12 +28,12 @@ cdef class LensedImageDrawer(ImageDrawer):
         cdef object model = args[0]
         cdef np.ndarray[np.int32_t, ndim=2] pixels = args[1]
         cdef np.ndarray[np.uint8_t, ndim=3] canvas = np.zeros((model.parameters.canvasDim,model.parameters.canvasDim,3), dtype=np.uint8)
-        cdef np.ndarray[np.uint8_t, ndim=2] lookup = model.colorMap_arr
-        if model.parameters.displayGalaxy:
+        cdef np.ndarray[np.uint8_t, ndim=2] lookup = ColorMap
+        if GlobalPreferences['draw_galaxy']:
             model.parameters.galaxy.drawGalaxy(canvas,model)
-        if model.parameters.displayStars:
+        if GlobalPreferences['draw_stars'] and model.parameters.galaxy.numStars > 0:
             model.parameters.galaxy.drawStars(canvas,model)
-        if model.parameters.displayQuasar:
+        if GlobalPreferences['draw_quasar']:
             model.parameters.quasar.draw(canvas,model)
         cdef int pixel = 0
         cdef int end = pixels.shape[0]
@@ -119,7 +120,7 @@ cdef class LensedImageDrawer(ImageDrawer):
     cdef void drawBoundary(self, np.ndarray[np.uint8_t,ndim=3] canvas,model):
         cdef int x,y,xmax, ymax
         ymax = canvas.shape[1]-1
-        cdef np.ndarray[np.uint8_t, ndim=2] lookup = model.colorMap_arr
+        cdef np.ndarray[np.uint8_t, ndim=2] lookup = ColorMap
         xmax = canvas.shape[0]-1
         for x in range(0,xmax+1):
             canvas[x,0] = lookup[2]

@@ -31,3 +31,4 @@ from .PlotView import PlotView
 from .ImageView import ImageView
 from .WindowView import WindowView
 from .ParametersView import ParametersView
+from .TableView import TableView

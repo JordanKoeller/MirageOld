@@ -8,7 +8,7 @@ from PyQt5.QtCore import pyqtSignal
 import numpy as np
 
 from . import Controller
-from ..views.drawer.LensedImageDrawer import LensedImageDrawer
+from ..drawer.LensedImageDrawer import LensedImageDrawer
 
 
 class LensedImageController(Controller):
@@ -41,14 +41,12 @@ class LensedImageController(Controller):
         self._model = model
         
     def setLensedImg(self,model,pixValues):
-        print("Setting Lensed Image")
         assert model is not None, "Must set a model before can draw lensed images"
         img = self._drawer.draw((model,pixValues))
         self.setImage(img)
     
     def setImage(self,img):
         assert isinstance(img, np.ndarray), "img must be a 2D numpy array."
-        print("On this side it is a nparray")
         self.signals['view_update_signal'].emit(img)
     
     def _createROI(self,event):

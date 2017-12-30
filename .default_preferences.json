@@ -15,7 +15,8 @@
 	"color_scheme":{
 		"minimum":"#0000ff",
 		"saddle_pt":"#00ff00",
-		"sis_center":"#ff00ff",
+		"galaxy":"#ff00ff",
+		"quasar":"#ffff00",
 		"star":"#ffffff",
 		"background":"#000000"
 	},
@@ -39,7 +40,11 @@
 
 	"fast_generate_light_curve":false,
 
-	"display_quasar_icon":true,
+	"draw_quasar":true,
+
+	"draw_galaxy":true,
+
+	"draw_stars":true,
 
 	"light_curve_export_resolution":200
 

@@ -33,6 +33,7 @@ class MasterController(Controller):
         self.tableController = TableController()
         self.parametersController = ParametersController()
         self.magMapController = MagMapController()
+        self.tableController.bind_parameters_controller(self.parametersController)
         self.runner = AnimationRunner()
         self.addSignals(add_view_signal = self._addView,
                         update_model_signal = self._updateModel,
@@ -49,7 +50,7 @@ class MasterController(Controller):
         from ..views import WindowView
         assert isinstance(viewSignals,WindowView)
         signals = viewSignals.signals
-        signals['exit_signal'].connect(sys.exit)
+        signals['exit_signal'].connect(self.exit)
         signals['play_signal'].connect(self.playPauseSlot)
         signals['reset_signal'].connect(self.resetSlot)
         signals['save_table'].connect(self.tableController.save)
@@ -61,6 +62,7 @@ class MasterController(Controller):
         signals['mm_pane_signal'].connect(self.toggleMagMapPane)
         signals['param_pane_signal'].connect(self.toggleParamPane)
         signals['image_pane_signal'].connect(self.toggleImagePane)
+        signals['toggle_table_signal'].connect(self.toggleTablePane)
         self.signals['add_view_signal'].connect(viewSignals.addView)
         self.signals['trigger_calculation'].connect(self.runner.trigger)
         self.signals['warning'].connect(self.raise_warning)
@@ -77,6 +79,10 @@ class MasterController(Controller):
         else:
             self.signals['warning'].emit("Error: Could not construct system parameters. Please make sure all values are input correctly.")
             return False
+        
+    def exit(self):
+        self.runner.halt()
+        sys.exit()
         
     def resetSlot(self):
         pass    
@@ -114,6 +120,15 @@ class MasterController(Controller):
         else:
             self.lensedImageController.signals['destroy_view'].emit()
             print("Toggling imagePane off")
+            
+    def toggleTablePane(self,state):
+        from ..views import TableView
+        if state is True:
+            view = TableView()
+            self.tableController.bind_view_signals(view)
+            self.signals['add_view_signal'].emit(view)
+        else:
+            self.tableController.signals['destroy_view'].emit()
             
     def raise_warning(self,warningString):
         QMessageBox.warning(None, "Warning", warningString)

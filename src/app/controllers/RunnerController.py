@@ -17,6 +17,9 @@ class Runner(Controller):
         
     def trigger(self,model,masterController):
         pass
+    
+    def halt(self):
+        pass
 
     
     
@@ -33,20 +36,22 @@ class AnimationRunner(Runner):
         Runner.__init__(self,*args,**kwargs)
         
     def trigger(self,model,masterController):
-        model.bind_parameters()
         if self._runningBool:
             self._runningBool = False
         else:
+            model.bind_parameters()
             self._runningBool = True
             while self._runningBool:
                 frame = model.engine.getFrame()
-                print(type(frame))
 #                 masterController.parametersController.update(model.parameters)
                 masterController.lensedImageController.setLensedImg(model,frame)
-                masterController.lightCurveController.update(frame)
+                masterController.lightCurveController.add_point_and_plot(frame)
 #                 masterController.magMapController.update(model.parameters)
                 model.parameters.incrementTime(model.parameters.dt)
                 QApplication.processEvents()
+                
+    def halt(self):
+        self._runningBool = False
 
 
 class FrameRunner(Runner):

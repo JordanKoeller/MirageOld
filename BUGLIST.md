@@ -33,3 +33,22 @@ File->Export crashes if no LC traced
 File->Save Table Crashes if no table open
 File->Load Table crashes if no table open
 File->Record crashes (MPI Error)
+
+
+
+
+
+
+BUGLIST 2:
+
+unit selection
+regenerate stars does nothing
+replacing stars with those already in hand
+changing star mass distribution with the preferences json file
+click-and-drag functionality on the ImageView
+
+Sphinx-docs has many errors. May be fixed now?
+Horizontal bars on RDDGrid in spark_impl
+Cannot run currently with --run argument.
+No MagMapView/MagMapController yet.
+Memory warning system.

@@ -79,10 +79,22 @@ class GalaxyJSONDecoder(object):
             stars[:0] = starm
             stars[:1] = starx
             stars[:2] = stary
-            return Galaxy(redshift,velD,shearMag,shearAngle,pcntStars,position,velocity=velocity,stars=stars)
+            return Galaxy(redshift=redshift,
+                          velocityDispersion=velD,
+                          shearMag=shearMag,
+                          shearAngle=shearAngle,
+                          percentStars=pcntStars,
+                          center=position,
+                          velocity=velocity,
+                          stars=stars)
         else:
-            return Galaxy(redshift,velD,shearMag,shearAngle,pcntStars,position,velocity=velocity)
-
+            return Galaxy(redshift=redshift,
+                          velocityDispersion=velD,
+                          shearMag=shearMag,
+                          shearAngle=shearAngle,
+                          percentStars=pcntStars,
+                          center=position,
+                          velocity=velocity)
 
 class QuasarJSONEncoder(object):
     """Provides a way to convert a Quasar class instance into a json representation."""
@@ -120,7 +132,11 @@ class QuasarJSONDecoder(object):
         tmpCosmic.updateCosmic(redshift = redshift)
         velocity = (velocity*tmpCosmic.angDiamDist.to('m').value).setUnit('km/s')
         radius = qd.decode(js['radius'])
-        return Quasar(redshift,radius,position,velocity,mass)
+        return Quasar(redshift=redshift,
+                      radius=radius,
+                      position=position,
+                      velocity=velocity,
+                      mass=mass)
 
 
 class Cosmic(object):

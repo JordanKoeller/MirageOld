@@ -1,5 +1,5 @@
 
-from app.engine import Engine, Engine_PointerGrid#, Engine_MagMap
+from app.engine import Engine, Engine_PointerGrid, Engine_ScalaSpark#, Engine_MagMap
 from app.parameters import Parameters, DefaultParameters
 
 
@@ -10,7 +10,7 @@ class _AbstractModel(object):
     
     def __init__(self,parameters,engine):
         assert isinstance(parameters,Parameters)
-        assert isinstance(engine, Engine)
+        assert isinstance(engine, Engine) or isinstance(engine, Engine_ScalaSpark)
         self._parameters = parameters
         self._engine = engine
         
@@ -91,4 +91,12 @@ class TrialModel(_AbstractModel):
         from app import lens_analysis
         trial = lens_analysis.load(filename)
         return cls(trial[trialnumber])
+    
+class ClusterModel(_AbstractModel):
+    
+    def __init__(self,parameters):
+        engine = Engine_ScalaSpark()
+        _AbstractModel.__init__(self, parameters, engine)
+    
+CalculationModel = ClusterModel
         

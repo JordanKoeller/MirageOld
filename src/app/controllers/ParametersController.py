@@ -15,7 +15,7 @@ class ParametersController(Controller):
     _requestP = pyqtSignal()
     _update_signal = pyqtSignal(object)
     _destroy_signal = pyqtSignal()
-
+    _setUnits = pyqtSignal(str)
     def __init__(self):
         '''
         Constructor
@@ -25,7 +25,8 @@ class ParametersController(Controller):
         self._viewType = ParametersView
         self.addSignals(request_parameters = self._requestP)
         self.addSignals(view_update_signal = self._update_signal,
-                        destroy_view = self._destroy_signal)
+                        destroy_view = self._destroy_signal,
+                        set_input_units = self._setUnits)
         
     def bind_view_signals(self, view):
         assert isinstance(view, self._viewType), "view must be a ParametersView instance for ParametersController to bind to it."
@@ -35,6 +36,8 @@ class ParametersController(Controller):
         view.signals['send_parameters'].connect(self.receive_parameters)
         view.signals['regenerate_stars'].connect(self.regenStars)
         view.signals['set_input_units'].connect(self.updateUnits)
+        view.signals['set_input_units'].connect(lambda s: self.signals['set_input_units'].emit(s))
+#         self.addSignals(set_input_units = view.signals['set_input_units'])
         
     def receive_parameters(self,parameters):
         self._parameters = parameters
@@ -54,7 +57,19 @@ class ParametersController(Controller):
         pass
     
     def save(self):
-        pass
+        from app.io import ParametersFileManager
+        data = self.getParameters()
+        if data:
+            filemanager = ParametersFileManager()
+            filemanager.open()
+            filemanager.write(data)
+            filemanager.close()
     
     def load(self):
-        pass
+        from app.io import ParametersFileReader
+        filemanager = ParametersFileReader()
+        filemanager.open()
+        params = filemanager.load()
+        filemanager.close()
+        if params:
+            self.update(params)

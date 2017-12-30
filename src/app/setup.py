@@ -23,13 +23,13 @@ engine_bruteforce = Extension("engine/Engine_BruteForce", sources = ["engine/Eng
 engine_shapegrid = Extension("engine/Engine_ShapeGrid", sources = ["engine/Engine_ShapeGrid.pyx"], language = "c++",    extra_compile_args=["-std=c++11","-fopenmp","-funroll-loops"], extra_link_args=["-std=c++11","-Ofast"], libraries = ["m"])
 engine_quadtree = Extension("engine/Engine_Quadtree", sources = ["engine/Engine_Quadtree.pyx"], language = "c++",    extra_compile_args=["-std=c++11","-fopenmp"], extra_link_args=["-std=c++11","-fopenmp"], libraries = ["m"])
 engine_kdtree = Extension("engine/Engine_KDTree", sources = ["engine/Engine_KDTree.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11","-fopenmp"], libraries = ["m"])
-drawer_supers = Extension("views/drawer/Drawer", sources = ["views/drawer/Drawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
-drawer_curve = Extension("views/drawer/CurveDrawer_Tracer", sources = ["views/drawer/CurveDrawer_Tracer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
-lensedimgdrawer = Extension("views/drawer/LensedImageDrawer", sources = ["views/drawer/LensedImageDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
-lensedimgdrawer = Extension("views/drawer/LensedImageDrawer", sources = ["views/drawer/LensedImageDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
-datavisdrawer = Extension("views/drawer/DataVisualizerDrawer", sources = ["views/drawer/DataVisualizerDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
-shapedrawer = Extension("views/drawer/ShapeDrawer", sources = ["views/drawer/ShapeDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
-shapedrawer = Extension("views/drawer/ShapeDrawer", sources = ["views/drawer/ShapeDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+drawer_supers = Extension("drawer/Drawer", sources = ["drawer/Drawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+drawer_curve = Extension("drawer/CurveDrawer_Tracer", sources = ["drawer/CurveDrawer_Tracer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+lensedimgdrawer = Extension("drawer/LensedImageDrawer", sources = ["drawer/LensedImageDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+lensedimgdrawer = Extension("drawer/LensedImageDrawer", sources = ["drawer/LensedImageDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+datavisdrawer = Extension("drawer/DataVisualizerDrawer", sources = ["drawer/DataVisualizerDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+shapedrawer = Extension("drawer/ShapeDrawer", sources = ["drawer/ShapeDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+shapedrawer = Extension("drawer/ShapeDrawer", sources = ["drawer/ShapeDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 
 setup(
 	ext_modules = cythonize([tree,

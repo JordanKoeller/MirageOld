@@ -65,6 +65,5 @@ class ImageView(View):
 #                 View.mouseMoveEvent(self,ev)
                 
     def setImage(self,img):
-        print(type(img))
         assert isinstance(img,np.ndarray), "ImageView can only display numpy arrays of RGB values"
         self._imgItem.setImage(img)

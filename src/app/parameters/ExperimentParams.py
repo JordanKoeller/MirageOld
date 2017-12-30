@@ -5,7 +5,7 @@ Created on Jun 4, 2017
 '''
 import numpy as np
 
-from ..utility import Vector2D, Vector2DJSONDecoder
+from ..utility import Vector2D, Vector2DJSONDecoder, zeroVector
 
 
 class ExperimentParamsJSONEncoder(object):
@@ -164,13 +164,14 @@ class MagMapJSONDecoder(object):
         center = vd.decode(data['center'])
         dims = vd.decode(data['dimensions'])
         res = vd.decode(data['resolution'])
-        ret = MagMapParameters(center,dims,res)
+        ret = MagMapParameters(dims,res)
+        ret.center = center
         return ret
 
 class MagMapParameters(object):
     
-    def __init__(self, center, dimensions, resolution):
-        self.center = center
+    def __init__(self, dimensions, resolution):
+        self.center = zeroVector
         self.dimensions = dimensions
         self.resolution = resolution
         

@@ -7,9 +7,9 @@ import time
 
 import numpy as np
 
-from ..Utility.NullSignal import NullSignal
-from ..Utility.ParametersError import ParametersError
-from ..Models import Model
+from ..utility.NullSignal import NullSignal
+from ..utility.ParametersError import ParametersError
+# from ..Models import Model
 
 # from Controllers.QueueController import exptModelVariance
 def exptModelVariance(params,trialNo):
@@ -50,7 +50,7 @@ class ExperimentResultCalculator(object):
         signals: (defualt NullSignal) dict. Signals to be emitted upon completions of various calculations. If none are provided, NullSignal is used, sending all text to standard
         output.
         '''
-        from app.Parameters.ExperimentParams import MagMapParameters, LightCurveParameters, StarFieldData
+        from app.parameters.ExperimentParams import MagMapParameters, LightCurveParameters, StarFieldData
         expTypes = parameters.extras.desiredResults
         self.signals = signals
         #Parse expTypes to functions to run.
@@ -64,41 +64,41 @@ class ExperimentResultCalculator(object):
                 self.experimentRunners.append(self.__STARFIELD)
         
         
-    def runExperiment(self):
+    def runExperiment(self,model):
         '''
         Function to call to calculate results. Returns a list of the resultant data.
         '''
         ret = []
         begin = time.clock()
         for exp in range(0,len(self.experimentRunners)):
-            ret.append(self.experimentRunners[exp](exp))
+            ret.append(self.experimentRunners[exp](exp,model))
         print("Experiment Finished in "+str(time.clock()-begin)+" seconds")
         return ret
 
 
     
-    def __LIGHT_CURVE(self,index):
+    def __LIGHT_CURVE(self,index,model):
         '''
         Internal Function. Instructs the engine to make a light curve and returns the data.
         '''
-        special = Model['exptModel'].parameters.extras.desiredResults[index]
+        special = model.parameters.extras.desiredResults[index]
         start,finish = (special.pathStart,special.pathEnd)
         res = special.resolution
-        return Model['exptModel'].engine.makeLightCurve(start,finish,res)
+        return model.engine.makeLightCurve(start,finish,res)
         
-    def __MAGMAP(self,index):
+    def __MAGMAP(self,index,model):
         '''
         Internal Function. Instructs the engine to make a magnification map and returns the data.
 
         '''
-        special = Model['exptModel'].parameters.extras.desiredResults[index]
-        ret = Model['exptModel'].engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
+        special = model.parameters.extras.desiredResults[index]
+        ret = model.engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
 #         rawMag = Model['exptModel'].engine.rawMagnification(special.center.to('rad').x,special.center.to('rad').y)
         return ret
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
 
-    def __STARFIELD(self,index):
-        return Model['exptModel'].parameters.galaxy.stars 
+    def __STARFIELD(self,index,model):
+        return model.parameters.galaxy.stars 
 
     def __VIDEO(self):
         pass################################### MAY IMPLIMENT LATER

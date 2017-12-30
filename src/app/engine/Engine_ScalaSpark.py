@@ -27,9 +27,9 @@ class Engine_Spark(Engine):
     Class for ray-tracing and getting magnification maps from the cluster. Similar to the Engine class but for parallel execution.
     '''
 
-    def __init__(self,rdd_grid):
-        self._rdd_grid = rdd_grid
-
+    def __init__(self):
+        pass
+    
     @property
     def time(self):
         return 0
@@ -45,20 +45,7 @@ class Engine_Spark(Engine):
         '''
         _width = self.parameters.canvasDim
         _height = self.parameters.canvasDim
-        #First, set up some functions for mapping over:
- # 20   def createRDDGrid(
- # 21     stars: RDD[(Double, Double, Double)],
- # 22     pointConstant: Double,
- # 23     sisConstant: Double,
- # 24     shearMag: Double,
- # 25     shearAngle: Double,
- # 26     dTheta: Double,
- # 27     centerX: Double,
- # 28     centerY: Double,
- # 29     width: Double,
- # 30     height: Double): Unit = {
 
-        # sc._jvm.main.Main.TestSuite(sc.emptyRDD()._jrdd)
         dS = self.parameters.quasar.angDiamDist.to('lyr').value
         dL = self.parameters.galaxy.angDiamDist.to('lyr').value
         dLS = self.parameters.dLS.to('lyr').value
@@ -128,4 +115,3 @@ class Engine_Spark(Engine):
 
 
 
- # 55   def queryPoints(pts: RDD[((Int, Int), (Double, Double))], radius: Double):RDD[(Int,Int,Double)] = {

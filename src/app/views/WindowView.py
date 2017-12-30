@@ -26,7 +26,7 @@ class WindowView(QMainWindow, SignalRepo):
     _mm_pane = pyqtSignal(bool)
     _param_pane = pyqtSignal(bool)
     _image_pane = pyqtSignal(bool)
-
+    _table_pane = pyqtSignal(bool)
 
     def __init__(self, *args, **kwargs):
         '''
@@ -56,11 +56,13 @@ class WindowView(QMainWindow, SignalRepo):
                         mm_pane_signal = self._mm_pane,
                         param_pane_signal = self._param_pane,
                         image_pane_signal = self._image_pane,
-                        remove_view = self._removeView)
+                        remove_view = self._removeView,
+                        toggle_table_signal = self._table_pane)
         self.bind_menubar_signals()
         
     def setPerspective(self,Perspective):
         print("Setting Perspective to " + str(Perspective))
+        self.dockArea.clear()
         self.perspective = Perspective(self, auto_configure = True)
         
     def bind_menubar_signals(self):
@@ -223,3 +225,5 @@ class TablePerspectivemanager(PerspectiveManager):
         self.v.parametersEntryHelpAction.setEnabled(True)
         self.v.load_setup.setEnabled(True)
         self.v.actionTablePerspective.setChecked(True)
+        self.v.signals['toggle_table_signal'].emit(True)
+        self.v.signals['param_pane_signal'].emit(True)
