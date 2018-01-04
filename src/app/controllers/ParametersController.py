@@ -16,6 +16,7 @@ class ParametersController(Controller):
     _update_signal = pyqtSignal(object)
     _destroy_signal = pyqtSignal()
     _setUnits = pyqtSignal(str)
+    _modelRegenStars = pyqtSignal()
     def __init__(self):
         '''
         Constructor
@@ -26,7 +27,8 @@ class ParametersController(Controller):
         self.addSignals(request_parameters = self._requestP)
         self.addSignals(view_update_signal = self._update_signal,
                         destroy_view = self._destroy_signal,
-                        set_input_units = self._setUnits)
+                        set_input_units = self._setUnits,
+                        regenerate_stars = self._modelRegenStars)
         
     def bind_view_signals(self, view):
         assert isinstance(view, self._viewType), "view must be a ParametersView instance for ParametersController to bind to it."
@@ -38,6 +40,9 @@ class ParametersController(Controller):
         view.signals['set_input_units'].connect(self.updateUnits)
         view.signals['set_input_units'].connect(lambda s: self.signals['set_input_units'].emit(s))
 #         self.addSignals(set_input_units = view.signals['set_input_units'])
+
+    def bind_to_model(self,model):
+        self.signals['regenerate_stars'].connect(model.regenerate_stars)
         
     def receive_parameters(self,parameters):
         self._parameters = parameters
@@ -51,7 +56,7 @@ class ParametersController(Controller):
         return parameters
     
     def regenStars(self):
-        pass
+        self.signals['regenerate_stars'].emit()
     
     def updateUnits(self):
         pass

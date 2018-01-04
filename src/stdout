@@ -1,0 +1,101 @@
+Using properties file: null
+Parsed arguments:
+  master                  local[*]
+  deployMode              null
+  executorMemory          1g
+  executorCores           null
+  totalExecutorCores      null
+  propertiesFile          null
+  driverMemory            2g
+  driverCores             null
+  driverExtraClassPath    null
+  driverExtraLibraryPath  null
+  driverExtraJavaOptions  null
+  supervise               false
+  queue                   null
+  numExecutors            null
+  files                   null
+  pyFiles                 null
+  archives                null
+  mainClass               null
+  primaryResource         file:/home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/Main.py
+  name                    Main.py
+  childArgs               [--run ../Test/local_spark_test.params ../Test/]
+  jars                    file:/home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar
+  packages                null
+  packagesExclusions      null
+  repositories            null
+  verbose                 true
+
+Spark properties used, including those specified through
+ --conf and those from the properties file null:
+  (spark.driver.memory,2g)
+  (spark.executor.extraJavaOptions,-verbose:gc -Xms10g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+UseG1GC)
+
+    
+Main class:
+org.apache.spark.deploy.PythonRunner
+Arguments:
+file:/home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/Main.py
+null
+--run
+../Test/local_spark_test.params
+../Test/
+System properties:
+(spark.driver.memory,2g)
+(SPARK_SUBMIT,true)
+(spark.executor.extraJavaOptions,-verbose:gc -Xms10g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+UseG1GC)
+(spark.files,file:/home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/Main.py)
+(spark.app.name,Main.py)
+(spark.jars,file:/home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar)
+(spark.submit.deployMode,client)
+(spark.master,local[*])
+Classpath elements:
+file:/home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar
+
+
+Program initialized.
+____________________________ 
+
+Process ID = 19169
+
+____________________________
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
+17/12/30 02:37:01 INFO SparkContext: Running Spark version 2.2.0
+17/12/30 02:37:01 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+17/12/30 02:37:01 INFO SparkContext: Submitted application: lensing_simulator
+17/12/30 02:37:01 INFO SecurityManager: Changing view acls to: jkoeller
+17/12/30 02:37:01 INFO SecurityManager: Changing modify acls to: jkoeller
+17/12/30 02:37:01 INFO SecurityManager: Changing view acls groups to: 
+17/12/30 02:37:01 INFO SecurityManager: Changing modify acls groups to: 
+17/12/30 02:37:01 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(jkoeller); groups with view permissions: Set(); users  with modify permissions: Set(jkoeller); groups with modify permissions: Set()
+17/12/30 02:37:01 INFO Utils: Successfully started service 'sparkDriver' on port 44759.
+17/12/30 02:37:01 INFO SparkEnv: Registering MapOutputTracker
+17/12/30 02:37:01 INFO SparkEnv: Registering BlockManagerMaster
+17/12/30 02:37:01 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+17/12/30 02:37:01 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+17/12/30 02:37:01 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-84ad28cb-5604-4fe9-ae0b-3e79725d3e97
+17/12/30 02:37:01 INFO MemoryStore: MemoryStore started with capacity 912.3 MB
+17/12/30 02:37:01 INFO SparkEnv: Registering OutputCommitCoordinator
+17/12/30 02:37:01 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+17/12/30 02:37:01 INFO SparkUI: Bound SparkUI to 0.0.0.0, and started at http://192.168.10.117:4040
+17/12/30 02:37:01 INFO SparkContext: Added JAR file:/home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar at spark://192.168.10.117:44759/jars/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar with timestamp 1514623021952
+17/12/30 02:37:02 INFO SparkContext: Added file file:/home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/Main.py at file:/home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/Main.py with timestamp 1514623022206
+17/12/30 02:37:02 INFO Utils: Copying /home/jkoeller/Documents/Research/Pooley_Group/lensing_simulator/src/Main.py to /tmp/spark-469d76a7-a2e1-4ebb-ba5f-21f427bf2ba3/userFiles-6622d46c-eace-4ac8-b03e-0cfd3b6df0e3/Main.py
+17/12/30 02:37:02 INFO Executor: Starting executor ID driver on host localhost
+17/12/30 02:37:02 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 36557.
+17/12/30 02:37:02 INFO NettyBlockTransferService: Server created on 192.168.10.117:36557
+17/12/30 02:37:02 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+17/12/30 02:37:02 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, 192.168.10.117, 36557, None)
+17/12/30 02:37:02 INFO BlockManagerMasterEndpoint: Registering block manager 192.168.10.117:36557 with 912.3 MB RAM, BlockManagerId(driver, 192.168.10.117, 36557, None)
+17/12/30 02:37:02 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, 192.168.10.117, 36557, None)
+17/12/30 02:37:02 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, 192.168.10.117, 36557, None)
+Done Ray-Tracing
+Putting on 12
+Put on 12 partitions
+Querying Points
+Made coordinate plane. Now broadcasting to SpatialRDD
+Failed to key in 0 query points
+Now querying the grids
+DONE
+Done Querying. Now onto formatting to return.

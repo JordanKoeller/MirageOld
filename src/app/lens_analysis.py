@@ -89,7 +89,7 @@ class AbstractFileWrapper(object):
         '''
         self._filepath = filepath
         if not fileobject or not params:
-            from .Controllers.FileManagerImpl import ExperimentDataFileReader
+            from app.io import ExperimentDataFileReader
             reader = ExperimentDataFileReader()
             reader.open(self._filepath)
             self._params, self._fileobject = reader.load()
@@ -385,7 +385,7 @@ class Trial(AbstractFileWrapper):
         Additional arguments passed in will be inserted into the FITS file's header. The keyword supplied becomes a new field in the 
         header, and the argument is converted to a string and given as that field's body.
         '''
-        from .Controllers.FileManagerImpl import FITSFileWriter
+        from app.io import FITSFileWriter
         arr = self._getDataSet(ind)
         fm = FITSFileWriter()
         fm.open(filename)
@@ -576,39 +576,6 @@ def describe(filename):
             filename.describe
     else:
         raise ValueError("argument must be a filename or AbstractFileWrapper subtype.")
-
-# def traceQuasar(expt,trialNum=0):
-#     from PyQt5 import QtWidgets
-#     from ..Views.GUI.GUITracerWindow import GUITracerWindow
-#     app = QtWidgets.QApplication(sys.argv)
-#     if isinstance(expt,str):
-#         ui = GUITracerWindow(expt,trialNum=trialNum)
-#         ui.show()
-#     else:
-#         ui = GUITracerWindow(expt.file.name,expt.trialNumber)
-#         ui.show()
-#     app.exec_()
-# 
-# def explore(expt):
-#     params = None
-#     if isinstance(expt,AbstractFileWrapper):
-#         params = expt.parameters
-#     elif isinstance(expt, Parameters):
-#         params = expt
-#     else:
-#         raise ValueError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
-#         return
-#     if not params:
-#         return ValueError("Argument must be an AbstractFileWrapper subtype or Parameters instance")
-#         return
-#     try:
-#         ui = GUIManager()
-#         ui.switchToVisualizing()
-#         ui.bindFields(params)
-#         ui.switchToVisualizing()
-#         ui.show()
-#     except:
-#         raise EnvironmentError("Must have a Qt event loop running. If you are in ipython, execute the command '%gui qt5' then try again.")
 
 @_requiresGUI
 def visualizeMagMap(model=None):

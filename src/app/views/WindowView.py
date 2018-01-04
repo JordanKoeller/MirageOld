@@ -57,7 +57,10 @@ class WindowView(QMainWindow, SignalRepo):
                         param_pane_signal = self._param_pane,
                         image_pane_signal = self._image_pane,
                         remove_view = self._removeView,
-                        toggle_table_signal = self._table_pane)
+                        toggle_table_signal = self._table_pane,
+                        to_analysis_perspective = self.actionAnalysisPerspective.triggered,
+                        to_explore_perspective = self.actionExplorePerspective.triggered,
+                        to_table_perspective = self.actionTablePerspective.triggered)
         self.bind_menubar_signals()
         
     def setPerspective(self,Perspective):

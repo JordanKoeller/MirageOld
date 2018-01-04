@@ -45,6 +45,7 @@ class MasterController(Controller):
     
     def bind_to_model(self,model):
         self.model = model
+        self.parametersController.bind_to_model(self.model)
     
     def bind_view_signals(self,viewSignals):
         from ..views import WindowView
@@ -63,6 +64,9 @@ class MasterController(Controller):
         signals['param_pane_signal'].connect(self.toggleParamPane)
         signals['image_pane_signal'].connect(self.toggleImagePane)
         signals['toggle_table_signal'].connect(self.toggleTablePane)
+        signals['to_analysis_perspective'].connect(self.enableAnalysis)
+        signals['to_explore_perspective'].connect(self.disableAnalysis)
+        signals['to_table_perspective'].connect(self.disableAnalysis)
         self.signals['add_view_signal'].connect(viewSignals.addView)
         self.signals['trigger_calculation'].connect(self.runner.trigger)
         self.signals['warning'].connect(self.raise_warning)
@@ -79,6 +83,12 @@ class MasterController(Controller):
         else:
             self.signals['warning'].emit("Error: Could not construct system parameters. Please make sure all values are input correctly.")
             return False
+        
+    def enableAnalysis(self):
+        pass
+    
+    def disableAnalysis(self):
+        pass
         
     def exit(self):
         self.runner.halt()

@@ -220,10 +220,9 @@ class TableView(View):
         return self.widget.updateExperiment(*args,**kwargs)
     
     def set_input_units(self,unitString):
-        print(unitString)
-#         self.widget.unitLabel_3.setText(unitString)
-#         self.widget.unitLabel_4.setText(unitString)
-#         self.widget.unitLabel_6.setText(unitString)
+        self.widget.unitLabel_3.setText(unitString)
+        self.widget.unitLabel_4.setText(unitString)
+        self.widget.unitLabel_6.setText(unitString)
 
     def update_slot(self,parameters):
         self.widget._bindFieldsHelper(parameters)

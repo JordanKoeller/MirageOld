@@ -6,7 +6,6 @@ Created on Dec 26, 2017
 from app.calculator.ExperimentResultCalculator import ExperimentResultCalculator, varyTrial
 from app.utility import NullSignal
 
-from app.model import CalculationModel
 
 
 class ExperimentTableRunner(object):
@@ -26,6 +25,7 @@ class ExperimentTableRunner(object):
         self.filemanager = filemanager
 
     def run(self):
+        from app.model import CalculationModel
         ctr = 0
         self.signals['progressLabel'].emit("Calculation starting ...")
         for params in self.experimentQueue:

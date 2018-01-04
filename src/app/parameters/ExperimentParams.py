@@ -134,6 +134,17 @@ class LightCurveParameters(object):
     def jsonString(self):
         encoder = LightCurveJSONEncoder()
         return encoder.encode(self)
+    
+    def update(self,start=None,end=None,resolution=None):
+        if start:
+            assert isinstance(start,Vector2D), "Start must be a Vector2D instance."
+            self.pathStart = start
+        if end:
+            assert isinstance(end,Vector2D), "End must be a Vector2D instance."
+            self.pathEnd = end
+        if resolution:
+            assert isinstance(resolution,int) and resolution > 1, "resolution must be an int, greater than 1"
+            self.resolution = resolution
 
 
     def __str__(self):

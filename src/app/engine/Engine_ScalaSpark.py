@@ -68,10 +68,9 @@ class Engine_Spark(Engine):
                 _height,
                 sc.emptyRDD()._jrdd
                 )
-        print(self.parameters)
-        print("Calling JVM to ray-trace")
+        print("Calling JVM to ray-trace.")
         sc._jvm.main.Main.createRDDGrid(*args)
-        print("FINSIHED RAY TRACING AND MAPPING")
+        print("Finished ray-tracing.")
         
     def makeMagMap(self, center, dims, resolution,*args,**kwargs):
         """[summary]
@@ -88,27 +87,22 @@ class Engine_Spark(Engine):
         Returns:
             np.ndarray[shape=resolution, dtype=int] -- An array of the ratio of the magnification of the image, with and without microlensing.
         """
-        print("MAKING MAG MAP")
+        print("Now querying the source plane to calculate the magnification map.")
         resx = resolution.x
         resy = resolution.y
-        stepX = dims.to('rad').x/resx   
-        stepY = dims.to('rad').y/resy
         start = center - dims/2
         x0 = start.to('rad').x
         y0 = start.to('rad').y+dims.to('rad').y
-        print(start.to('rad'))
-        print(dims.to('rad'))
         radius = self.parameters.queryQuasarRadius
         ctx = sc.emptyRDD()._jrdd
-        print("CALLING JVM")
         sc._jvm.main.Main.setFile("/tmp/magData")
-        retLst = sc._jvm.main.Main.queryPoints(x0,y0,x0+dims.to('rad').x,y0+dims.to('rad').y,int(resx),int(resy),radius,ctx,False)
+        sc._jvm.main.Main.queryPoints(x0,y0,x0+dims.to('rad').x,y0+dims.to('rad').y,int(resx),int(resy),radius,ctx,False)
+        print("Done.")
         with open("/tmp/magData") as file:
             data = file.read()
             stringArr = list(map(lambda row: row.split(','), data.split(':')))
             numArr = [list(map(lambda s:float(s),row)) for row in stringArr]
             npArr = np.array(numArr,dtype = float)
-            print("Returning")
             return npArr
 
 

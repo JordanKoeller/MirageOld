@@ -41,14 +41,13 @@ File->Record crashes (MPI Error)
 
 BUGLIST 2:
 
-unit selection
-regenerate stars does nothing
-replacing stars with those already in hand
-changing star mass distribution with the preferences json file
-click-and-drag functionality on the ImageView
-
-Sphinx-docs has many errors. May be fixed now?
-Horizontal bars on RDDGrid in spark_impl
-Cannot run currently with --run argument.
-No MagMapView/MagMapController yet.
-Memory warning system.
+	unit selection DONE, I believe?
+	regenerate stars does nothing DONE, I believe?
+	replacing stars with those already in hand DONE, I believe?
+	click-and-drag functionality on the ImageView
+	
+	Sphinx-docs has many errors. May be fixed now?
+	Horizontal bars on RDDGrid in spark_impl
+	Cannot run currently with --run argument.
+	No MagMapView/MagMapController yet.
+	Memory warning system.

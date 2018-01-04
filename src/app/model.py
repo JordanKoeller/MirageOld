@@ -1,5 +1,5 @@
 
-from app.engine import Engine, Engine_PointerGrid, Engine_ScalaSpark#, Engine_MagMap
+from app.engine import Engine, Engine_PointerGrid, Engine_ScalaSpark  # , Engine_MagMap
 from app.parameters import Parameters, DefaultParameters
 
 
@@ -21,7 +21,14 @@ class _AbstractModel(object):
         
     def bind_parameters(self):
         self._engine.updateParameters(self._parameters)
-    
+        
+    def regenerate_stars(self):
+        try:
+            self._parameters.regenerateStars()
+            self.bind_parameters()
+        except:
+            print("Failed to regenerate stars")
+            
     @property
     def parameters(self):
         return self._parameters
@@ -76,6 +83,7 @@ class TrialModel(_AbstractModel):
         from app.lens_analysis import Trial
         assert isinstance(trial,Trial)
         parameters = trial.parameters
+        self._trial = trial
         engine = Engine_MagMap()
         _AbstractModel.__init__(self, parameters, engine)
         
@@ -92,11 +100,28 @@ class TrialModel(_AbstractModel):
         trial = lens_analysis.load(filename)
         return cls(trial[trialnumber])
     
+    @property
+    def magnification_map(self):
+        return self._trial.magMap
+    
+    def specify_light_curve(self,start,end):
+        extrasIndex = -1
+        for i in range(len(self.parameters.extras)):
+            if self.parameters.extras[i].keyword == "lightcurve":
+                extrasIndex = i
+        if extrasIndex == -1:
+            extrasIndex = len(self.parameters.extras)
+            from app.parameters.ExperimentParams import LightCurveParameters
+            self.parameters.extras.append(LightCurveParameters(start,end,100))
+        self.parameters.extras[extrasIndex].update(start = start, end = end)
+        
+        
+        
 class ClusterModel(_AbstractModel):
     
     def __init__(self,parameters):
         engine = Engine_ScalaSpark()
         _AbstractModel.__init__(self, parameters, engine)
-    
+        
 CalculationModel = ClusterModel
         

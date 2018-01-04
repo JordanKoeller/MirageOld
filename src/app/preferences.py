@@ -68,6 +68,9 @@ class _GlobalPreferences(_PreferencesParser):
                 g = int(c2,16)
                 b = int(c3,16)
                 ColorMap[lookup[color[0]]] = [r,g,b]
+        if self['mass_function']:
+            from app.calculator import setMassFunction
+            setMassFunction(self['mass_function'])
 
 
 

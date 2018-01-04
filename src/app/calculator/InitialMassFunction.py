@@ -605,6 +605,8 @@ class Evolved_IMF(object):
         self.IMF = distro
         self.__conversions = []
         for k,v in conversions.items():
+            if isinstance(k,str):
+                k = float(k)
             self.__conversions.append((k,v))
 
     def generate_cluster(self, totalMass):

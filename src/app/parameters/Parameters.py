@@ -11,7 +11,6 @@ from .ExperimentParams import ExperimentParams
 import numpy as np 
 import random as rand 
 
-from ..calculator.InitialMassFunction import Evolved_IMF, Kroupa_2001, Kroupa_2001_Modified
 from ..utility import Vector2D
 from ..utility.ParametersError import ParametersError
 from .stellar import Galaxy, Quasar, GalaxyJSONDecoder, QuasarJSONDecoder
@@ -205,9 +204,9 @@ class Quasar:<br>
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
 		print("Smooth mass = "+str(self.smoothMassOnScreen))
 		print("Percent Stars mass = "+str(self.__galaxy.percentStars))
-		# generator = Kroupa_2001()
-		generator = Kroupa_2001_Modified()
-		# generator = Evolved_IMF()
+		from app.calculator import MassFunction
+		generator = MassFunction 
+		print("Using the massFunction " + str(MassFunction))
 		m_stars = m_stars.value
 		if m_stars < 1.0:
 			print("NOT ENOUGH MASS FOR STAR FIELD. GENERATION TERMINATED")

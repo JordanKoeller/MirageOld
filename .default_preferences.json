@@ -28,6 +28,8 @@
 		"visualization"
 	],
 
+	"mass_function":"Pooley_2011",
+
 	"auto_normalize_magmap":false,
 
 	"animate_motion":false,

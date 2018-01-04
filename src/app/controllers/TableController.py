@@ -38,6 +38,7 @@ class TableController(Controller):
                         set_update_text = self._setUpdateText,
                         set_enabled_edit = self._setEditEnabled,
                         clear_table = self._clearTable,
+                        set_input_units = self._setUnits,
                         request_table = self._requestTable)
         self.addSignals(view_update_signal = self._updateSignal)
         self._table = None
@@ -49,7 +50,7 @@ class TableController(Controller):
         s['save_table'].connect(self.save)
         s['editing_params'].connect(self.editParams)
         self.signals['add_experiment'].connect(view.addExperiment)
-        s['set_input_units'].connect(view.set_input_units)
+        self.signals['set_input_units'].connect(view.set_input_units)
         s['send_table'].connect(self.receiveTable)
         self.signals['set_update_text'].connect(view.widget.addToQueueButton.setText)
         self.signals['set_enabled_edit'].connect(view.widget.queueEditCancelButton.setEnabled)
