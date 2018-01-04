@@ -47,7 +47,7 @@ BUGLIST 2:
 	click-and-drag functionality on the ImageView
 	
 	Sphinx-docs has many errors. May be fixed now?
-	Horizontal bars on RDDGrid in spark_impl
+	Horizontal bars on RDDGrid in spark_impl perhaps DONE, I believe?
 	Cannot run currently with --run argument.
 	No MagMapView/MagMapController yet.
 	Memory warning system.

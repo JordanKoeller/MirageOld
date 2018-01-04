@@ -27,9 +27,9 @@ class BalancedColumnPartitioner extends SpatialPartitioning {
 
   override def profileData(data: RDD[XYDoublePair]): RDD[(Double, Double)] = {
     _numPartitions = data.getNumPartitions * 3
-    println("Putting on " + _numPartitions)
-    val ret = data.mapPartitions(elemIter => elemIter.map(elem => (elem.x, elem.y)),true) 
-    _ranger = new RangePartitioner(numPartitions, ret)
+    val shuffled = data.repartition(_numPartitions)
+    val ret = shuffled.mapPartitions(elemIter => elemIter.map(elem => (elem.x, elem.y)),true) 
+    _ranger = new RangePartitioner(_numPartitions, ret)
     ret
   }
 }

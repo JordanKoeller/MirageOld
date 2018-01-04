@@ -11,55 +11,23 @@ import numpy as np
 from app.preferences import GlobalPreferences
 from app.utility import asynchronous
 
-class FileWriter(object):
+from abc import ABC, abstractmethod
+
+class FileWriter(ABC):
     '''
-    Provides an interface for exporting data to files.
-    Has three public methods:
-    
-    parameters:
-        fileExtension:
-            string argument specifying the file extension. For example,
-            '.dat', '.fits', '.mp4' are possible extensions.
-            Defaults to emptystring, in which case no extensions is appended
-            to file names.
-        
-        
-    
-    
-    
-    
-    def open(*args,**kwargs):
-        opens a file, either by opening a dialog or with the 
-        supplied name. Must be called before writing any data.
-        
-    def write(*args,**kwargs):
-        Takes in data, and writes to file/buffers it as appropriate.
-        This function handles most of the actual work of the file
-        manager.
-        
-    def close(*args,**kwargs):
-        Closes the file, saving all to disk. Calling this method finalizes
-        all file interraction, until the file manager is used again with
-        a call to the 'open' function.
-        Must be call this method, else risk corrupting data.
-        
-        
-        
-    for subclassing:
-        two additional functions are important:
-        
-        def getFile(fname):
-            checks for a supplied filename. If a supplied filename exists (or the
-            variable self._filename is defined from initialization) then it returns that
-            filename as a string. Otherwise, it opens a Qt.FileChooser dialog, returning the
-            filename specified with proper extension. This method also sets 
-            self._filename to whatever was chosen. By default, this is called by the 
-            'open' method.
-           
-        @property
-        def _fileextension(self):
-            returns a string of the file extension, such as '.mp4' or '.png'.
-            Defaults to empty string. Must be overridden.
+Abstract class providing an interface for exporting data to file. Has two methods that must be overwritten, along with some convenience functions. The abstract methods are:
+
+    - :func:`write`
+    - :func:`close`
+
+Additionally, to give the files an extension, overwrite the :func:`_fileextension` property.
+
+To write the data, the protocol is defined below:
+
+>>> filename = "file.extension"
+>>> filewriter.open(filename) #If no filename is provided, will try to open a QDialog to select a file.
+>>> filewriter.write(data)
+>>> filewriter.close()
     '''
 
 
@@ -70,6 +38,9 @@ class FileWriter(object):
         pass 
 
     def getFile(self,filename=None,*args,**kwargs):
+        '''
+Convenience function for setting the FileWriter's file. If no filename is provided, this function opens a QFileDialog so the user may select a file. The QFileDialog will be restricted in what files to choose by the string returned by the property :func:`_fileextension`.Must be called before calling :func:`write`.
+        '''
         if filename:
             if self._fileextension in filename:
                 self._filename=filename
@@ -82,21 +53,34 @@ class FileWriter(object):
         return self._filename
     
     def open(self, filename=None, *args,**kwargs):
+        '''
+Opens a file with the specified `filename`. If none is supplied, opens a dialog to prompt the user to select a file by calling :func:`getFile`
+        '''
         filename = self.getFile(filename)
         
     @property
     def _fileextension(self):
-        return ''
+      '''
+Override with the file extension the :class:`FileWriter` will write. Defaults to emptystring.
+      '''
+      return ''
         
-        
+    @abstractmethod
     def write(self,*args,**kwargs):
+        '''
+Abstract method. When passed data, writes to file/buffers it as appropriate. This function handles most of the actual work of the file manager. 
+        '''
         pass 
-    
+
+    @abstractmethod
     def close(self,*args,**kwargs):
+        '''
+Closes the file, saving all to disk. Calling this method finalizes all file interraction, until the file manager is used again with a call to the 'open' function. Must call this method, else risk corrupting data.
+        '''
         pass
     
     
-class FileReader(object):
+class FileReader(ABC):
     """
 Provides an interface for loading data from files.
     Has three public methods:
