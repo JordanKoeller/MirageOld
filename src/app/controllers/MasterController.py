@@ -12,6 +12,7 @@ from . import LightCurveController, LensedImageController, MagMapController, Par
 from . import AnimationRunner
 from PyQt5.QtWidgets import QMessageBox
 
+
 class MasterController(Controller):
     '''
     classdocs
@@ -20,7 +21,7 @@ class MasterController(Controller):
     _destroy_signal = pyqtSignal()
     _addView = pyqtSignal(object)
     _updateModel = pyqtSignal(object)
-    _startCalculation = pyqtSignal(object,object)
+    _startCalculation = pyqtSignal(object, object)
     _warningLabel = pyqtSignal(str)
 
     def __init__(self):
@@ -35,21 +36,19 @@ class MasterController(Controller):
         self.magMapController = MagMapController()
         self.tableController.bind_parameters_controller(self.parametersController)
         self.runner = AnimationRunner()
-        self.addSignals(add_view_signal = self._addView,
-                        update_model_signal = self._updateModel,
-                        trigger_calculation = self._startCalculation,
-                        warning = self._warningLabel)
-        self.addSignals(view_update_signal = self._update_signal,
-                        destroy_view = self._destroy_signal)
-        
+        self.addSignals(add_view_signal=self._addView,
+                        update_model_signal=self._updateModel,
+                        warning=self._warningLabel)
+        self.addSignals(view_update_signal=self._update_signal,
+                        destroy_view=self._destroy_signal)
     
-    def bind_to_model(self,model):
+    def bind_to_model(self, model):
         self.model = model
         self.parametersController.bind_to_model(self.model)
     
-    def bind_view_signals(self,viewSignals):
+    def bind_view_signals(self, viewSignals):
         from ..views import WindowView
-        assert isinstance(viewSignals,WindowView)
+        assert isinstance(viewSignals, WindowView)
         signals = viewSignals.signals
         signals['exit_signal'].connect(self.exit)
         signals['play_signal'].connect(self.playPauseSlot)
@@ -68,21 +67,30 @@ class MasterController(Controller):
         signals['to_explore_perspective'].connect(self.disableAnalysis)
         signals['to_table_perspective'].connect(self.disableAnalysis)
         self.signals['add_view_signal'].connect(viewSignals.addView)
-        self.signals['trigger_calculation'].connect(self.runner.trigger)
         self.signals['warning'].connect(self.raise_warning)
         
     def playPauseSlot(self):
         if self.updateModel():
-            self.signals['trigger_calculation'].emit(self.model,self)
+            self.runner.trigger(self.model, self)
+#             self.signals['trigger_calculation'].emit(self.model,self)
         
     def updateModel(self):
         parameters = self.parametersController.getParameters()
         if parameters:
-            self.model.set_parameters(parameters)
+            if parameters != self.model.parameters:
+                self.model.set_parameters(parameters)
+                self.model.bind_parameters()
             return True
         else:
             self.signals['warning'].emit("Error: Could not construct system parameters. Please make sure all values are input correctly.")
             return False
+        
+    def resetSlot(self):
+        parameters = self.parametersController.getParameters()
+        if parameters:
+            self.model.set_parameters(parameters)
+            self.model.bind_parameters()
+            self.runner.reset()
         
     def enableAnalysis(self):
         pass
@@ -93,13 +101,11 @@ class MasterController(Controller):
     def exit(self):
         self.runner.halt()
         sys.exit()
-        
-    def resetSlot(self):
-        pass    
+
     def recordSlot(self):
         pass
     
-    def togglePlotPane(self,state):
+    def togglePlotPane(self, state):
         from ..views import PlotView
         if state is True:
             view = PlotView()
@@ -108,10 +114,10 @@ class MasterController(Controller):
         else:
             self.lightCurveController.signals['destroy_view'].emit()
     
-    def toggleMagMapPane(self,state):
+    def toggleMagMapPane(self, state):
         print("Calling toggleMagMapPane " + str(state))
     
-    def toggleParamPane(self,state):
+    def toggleParamPane(self, state):
         from ..views import ParametersView
         if state is True:
             view = ParametersView()
@@ -121,7 +127,7 @@ class MasterController(Controller):
         else:
             self.parametersController.signals['destroy_view'].emit()
     
-    def toggleImagePane(self,state):
+    def toggleImagePane(self, state):
         from ..views import ImageView
         if state is True:
             view = ImageView()
@@ -131,7 +137,7 @@ class MasterController(Controller):
             self.lensedImageController.signals['destroy_view'].emit()
             print("Toggling imagePane off")
             
-    def toggleTablePane(self,state):
+    def toggleTablePane(self, state):
         from ..views import TableView
         if state is True:
             view = TableView()
@@ -140,5 +146,5 @@ class MasterController(Controller):
         else:
             self.tableController.signals['destroy_view'].emit()
             
-    def raise_warning(self,warningString):
+    def raise_warning(self, warningString):
         QMessageBox.warning(None, "Warning", warningString)

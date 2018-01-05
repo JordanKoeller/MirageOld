@@ -50,6 +50,10 @@ class LightCurveController(Controller):
         self._x = np.arange(0,self._x.size*2)
         self._y = np.append(self._y,np.zeros_like(self._y))
         
+    def reset(self):
+        self._x = np.arange(0,100,dtype=np.uint16)
+        self._y = np.zeros(100,dtype=np.uint16)
+        
         
         
         

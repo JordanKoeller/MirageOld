@@ -24,14 +24,15 @@ from app.utility import Vector2D
 from . import View
 from pyqtgraph.widgets.GraphicsLayoutWidget import GraphicsLayoutWidget
 
+
 class _ParametersViewWidget(GraphicsLayoutWidget):
     
     def __init__(self):
         GraphicsLayoutWidget.__init__(self)
-        uic.loadUi(parametersUIFile,self)
+        uic.loadUi(parametersUIFile, self)
         self._tmpStars = None
         
-    def enableVelocityOptions(self,state=True):
+    def enableVelocityOptions(self, state=True):
         self.qPosLabel.setVisible(state)
         self.qPosUnit.setVisible(state)
         self.vel_label.setVisible(state)
@@ -49,12 +50,12 @@ class _ParametersViewWidget(GraphicsLayoutWidget):
         try:
             gRedshift = float(self.gRedshift.text())
             qRedshift = float(self.qRedshift.text())
-            qBHMass = u.Quantity(float(self.quasarBHMassEntry.text()),'solMass')
-            specials = UnitConverter.generateSpecialUnits(qBHMass,qRedshift,gRedshift)
+            qBHMass = u.Quantity(float(self.quasarBHMassEntry.text()), 'solMass')
+            specials = UnitConverter.generateSpecialUnits(qBHMass, qRedshift, gRedshift)
             with u.add_enabled_units(specials):
-                #Setting units
+                # Setting units
                 inputUnit = self.scaleUnitOption.currentText()
-                #Determination of relative motion
+                # Determination of relative motion
                 gVelocity = self.qVelocity.text()
                 gComponents = gVelocity.strip('()').split(',')
                 gPositionRaDec = self.gPositionEntry.text()
@@ -62,18 +63,17 @@ class _ParametersViewWidget(GraphicsLayoutWidget):
                 if len(gComponents) == 2:
                     apparentV = self.vectorFromQString(self.qVelocity.text())
                 else:
-                    gVelocity = CartesianRepresentation(gComponents[0],gComponents[1],gComponents[2],'')
+                    gVelocity = CartesianRepresentation(gComponents[0], gComponents[1], gComponents[2], '')
     
+                    ra, dec = gPositionRaDec.strip('()').split(',')
+                    gPositionRaDec = SkyCoord(ra, dec, unit=(u.hourangle, u.deg))
+                    apparentV = self.getApparentVelocity(gPositionRaDec, gVelocity)
     
-                    ra,dec = gPositionRaDec.strip('()').split(',')
-                    gPositionRaDec = SkyCoord(ra,dec, unit = (u.hourangle,u.deg))
-                    apparentV = self.getApparentVelocity(gPositionRaDec,gVelocity)
-    
-                #Quasar properties
+                # Quasar properties
                 qPosition = self.vectorFromQString(self.qPosition.text(), unit='arcsec').to('rad')
                 qRadius = u.Quantity(float(self.qRadius.text()), 'uas')
                 
-                #Galaxy properties
+                # Galaxy properties
                 gVelDispersion = u.Quantity(float(self.gVelDispersion.text()), 'km/s')
                 gNumStars = int(self.gNumStars.text())
                 gShearMag = float(self.gShearMag.text())
@@ -84,99 +84,97 @@ class _ParametersViewWidget(GraphicsLayoutWidget):
                 if gNumStars == 0 or gStarStdDev == 0:
                     gStarParams = None
                 else:
-                    gStarParams = (gStarMean,gStarStdDev)
+                    gStarParams = (gStarMean, gStarStdDev)
                 displayCenter = self.vectorFromQString(self.gCenter.text(), unit='arcsec').to('rad')
                 dTheta = u.Quantity(float(self.scaleInput.text()), inputUnit).to('rad').value
                 canvasDim = int(self.dimensionInput.text())
                 if self._tmpStars:
-                    galaxy = Galaxy(redshift = gRedshift,
+                    galaxy = Galaxy(redshift=gRedshift,
                                     velocityDispersion=gVelDispersion,
-                                    shearMag=gShearMag,shearAngle=gShearAngle,
+                                    shearMag=gShearMag, shearAngle=gShearAngle,
                                     center=displayCenter,
                                     starVelocityParams=gStarParams,
-                                    skyCoords = gPositionRaDec,
-                                    velocity = gVelocity,
-                                    stars = self._tmpStars[1])
+                                    skyCoords=gPositionRaDec,
+                                    velocity=gVelocity,
+                                    stars=self._tmpStars[1])
                 else:
                     galaxy = Galaxy(redshift=gRedshift,
                                     velocityDispersion=gVelDispersion,
                                     shearMag=gShearMag, shearAngle=gShearAngle,
                                     center=displayCenter,
                                     starVelocityParams=gStarParams,
-                                    skyCoords = gPositionRaDec,
-                                    velocity = gVelocity)
+                                    skyCoords=gPositionRaDec,
+                                    velocity=gVelocity)
                 quasar = Quasar(redshift=qRedshift,
                                 radius=qRadius,
                                 position=qPosition,
                                 velocity=apparentV,
-                                mass = qBHMass)
+                                mass=qBHMass)
                 params = Parameters(galaxy=galaxy,
                                     quasar=quasar,
                                     dTheta=dTheta,
                                     canvasDim=canvasDim)
                 self._tmpStars = None
                 if self.qRadiusUnitOption.currentIndex() == 1:
-                    absRg = (params.quasar.mass*const.G/const.c/const.c).to('m')
-                    angle = absRg/params.quasar.angDiamDist.to('m')
-                    params.quasar.update(radius = u.Quantity(angle.value*qRadius.value,'rad'))
-                self.pixelAngleLabel_angle.setText(str(self._round_to_n(params.pixelScale_angle.value,4)))
-                self.pixelAngleLabel_thetaE.setText(str(self._round_to_n(params.pixelScale_thetaE,4)))
-                self.pixelAngleLabel_Rg.setText(str(self._round_to_n(params.pixelScale_Rg,4)))
+                    absRg = (params.quasar.mass * const.G / const.c / const.c).to('m')
+                    angle = absRg / params.quasar.angDiamDist.to('m')
+                    params.quasar.update(radius=u.Quantity(angle.value * qRadius.value, 'rad'))
+                self.pixelAngleLabel_angle.setText(str(self._round_to_n(params.pixelScale_angle.value, 4)))
+                self.pixelAngleLabel_thetaE.setText(str(self._round_to_n(params.pixelScale_thetaE, 4)))
+                self.pixelAngleLabel_Rg.setText(str(self._round_to_n(params.pixelScale_Rg, 4)))
                 self.quasarRadiusRGEntry.setText(str(self._round_to_n(params.quasarRadius_rg, 4)))
                 return params
         except:
             print("Tried. Failed to build Parameters Instance")
             return None
-        
     
-    def getApparentVelocity(self,pos,v):
+    def getApparentVelocity(self, pos, v):
         ev = EarthVelocity
         apparentV = ev.to_cartesian() - v
         posInSky = pos.galactic
-        phi,theta = (posInSky.l.to('rad').value,math.pi/2 - posInSky.b.to('rad').value)
-        vx = apparentV.x*math.cos(theta)*math.cos(phi)+apparentV.y*math.cos(theta)*math.sin(phi)-apparentV.z*math.sin(theta)
-        vy = apparentV.y*math.cos(phi)-apparentV.x*math.sin(phi)
-        ret = Vector2D(vx.value,vy.value,'km/s')
-        print(ret)
+        phi, theta = (posInSky.l.to('rad').value, math.pi / 2 - posInSky.b.to('rad').value)
+        vx = apparentV.x * math.cos(theta) * math.cos(phi) + apparentV.y * math.cos(theta) * math.sin(phi) - apparentV.z * math.sin(theta)
+        vy = apparentV.y * math.cos(phi) - apparentV.x * math.sin(phi)
+        ret = Vector2D(vx.value, vy.value, 'km/s')
         return ret
 
-
     def randomizeGVelocity(self):
-        x,y,z = ((random.random() - 0.5)*2,(random.random() - 0.5)*2,(random.random()-0.5)*2)
-        res = (x*x+y*y+z*z)**(0.5)
+        x, y, z = ((random.random() - 0.5) * 2, (random.random() - 0.5) * 2, (random.random() - 0.5) * 2)
+        res = (x * x + y * y + z * z) ** (0.5)
         x /= res
         y /= res
         z /= res
-        vel = np.array([x,y,z])
-        vel = vel*(random.random()*1e9)
-        self.qVelocity.setText('(' + str(int(vel[0])) + ","+ str(int(vel[1])) + "," + str(int(vel[2]))+")")
+        vel = np.array([x, y, z])
+        vel = vel * (random.random() * 1e9)
+        self.qVelocity.setText('(' + str(int(vel[0])) + "," + str(int(vel[1])) + "," + str(int(vel[2])) + ")")
 
-    def _bindFieldsHelper(self,parameters):
+    def _bindFieldsHelper(self, parameters):
         """Sets the User interface's various input fields with the data in the passed-in parameters object."""
         if parameters.stars != []:
-            self._tmpStars = (parameters.galaxy.percentStars,parameters.galaxy.stars)
+            self._tmpStars = (parameters.galaxy.percentStars, parameters.galaxy.stars)
         else:
             self._tmpStars = None
         with u.add_enabled_units(parameters.specialUnits):
-            qV = parameters.quasar.velocity.to('rad').unitless()*parameters.quasar.angDiamDist.to('km').value
+            qV = parameters.quasar.velocity.to('rad').unitless() * parameters.quasar.angDiamDist.to('km').value
             qP = parameters.quasar.position.to(self.qPositionLabel.text()).unitless()
+            oqP = parameters.quasar.observedPosition.to(self.qPositionLabel.text()).unitless()
             gP = parameters.galaxy.position.to('arcsec').unitless()
-            self.qVelocity.setText(qV.asString)
+#             self.qVelocity.setText(qV.asString)
             self.qPosition.setText(qP.asString)
+            self.observedPosLabel.setText(oqP.asString)
             self.gCenter.setText(gP.asString)
             self.qRadius.setText(str(parameters.quasar.radius.to(self.qRadiusUnitOption.currentText()).value))
             self.qRedshift.setText(str(parameters.quasar.redshift))
             self.gRedshift.setText(str(parameters.galaxy.redshift))
             self.gVelDispersion.setText(str(parameters.galaxy.velocityDispersion.value))
-            self.gNumStars.setText(str(int(parameters.galaxy.percentStars*100)))
+            self.gNumStars.setText(str(int(parameters.galaxy.percentStars * 100)))
             self.gShearMag.setText(str(parameters.galaxy.shearMag))
             self.gShearAngle.setText(str(parameters.galaxy.shearAngle.to('degree').value))
             self.scaleInput.setText(str(parameters.dTheta.to(self.scaleUnitOption.currentText()).value * parameters.canvasDim))
             self.dimensionInput.setText(str(parameters.canvasDim))
             self.quasarBHMassEntry.setText(str(parameters.quasar.mass.to('solMass').value))
-
         
-    def _round_to_n(self, x,n = 6):
+    def _round_to_n(self, x, n=6):
         '''
         round x to n many significant figures. Default is 6
         '''
@@ -185,7 +183,7 @@ class _ParametersViewWidget(GraphicsLayoutWidget):
         else:
             return round(float(x), -int(math.floor(math.log10(abs(float(x))))) + (n - 1))
 
-    def vectorFromQString(self, string,unit = None):
+    def vectorFromQString(self, string, unit=None):
         """
         Converts an ordered pair string of the form (x,y) into a Vector2D of x and y.
 
@@ -193,8 +191,7 @@ class _ParametersViewWidget(GraphicsLayoutWidget):
         x, y = (string.strip('()')).split(',')
         if ' ' in y:
             y = y.split(' ')[0]
-        return Vector2D(float(x), float(y),unit)
-    
+        return Vector2D(float(x), float(y), unit)
     
 
 class ParametersView(View):
@@ -203,44 +200,38 @@ class ParametersView(View):
     '''
     
     _sendParameters = pyqtSignal(object)
-    
-
 
     def __init__(self, *args, **kwargs):
         '''
         Constructor
         '''
-        View.__init__(self,*args,**kwargs)
+        View.__init__(self, *args, **kwargs)
         self.widget = _ParametersViewWidget()
         self.addWidget(self.widget)
-        self.addSignals(send_parameters = self._sendParameters,
-                        regenerate_stars = self.widget.regenerateStars.clicked,
-                        set_input_units = self.widget.scaleUnitOption.currentTextChanged)
-        
-    
-        
-
+        self.addSignals(send_parameters=self._sendParameters,
+                        regenerate_stars=self.widget.regenerateStars.clicked,
+                        set_input_units=self.widget.scaleUnitOption.currentTextChanged)
 
     def update_slot(self, parameters):
         assert isinstance(parameters, Parameters)
         self._bindFieldsHelper(parameters)
 
-    def enableVelocityOptions(self,state=True):
+    def enableVelocityOptions(self, state=True):
         return self.widget.enableVelocityOptions(state)
     
-    def vectorFromQString(self,string,unit = None):
+    def vectorFromQString(self, string, unit=None):
         return self.widget.vectorFromQString(string, unit)
     
-    def _bindFieldsHelper(self,parameters):
+    def _bindFieldsHelper(self, parameters):
         return self.widget._bindFieldsHelper(parameters)
         
-    def getApparentVelocity(self,pos,v):
+    def getApparentVelocity(self, pos, v):
         return self.widget.getApparentVelocity(pos, v)
     
     def randomizeGVelocity(self):
         return self.widget.randomizeGVelocity()
     
-    def _round_to_n(self,x,n=6):
+    def _round_to_n(self, x, n=6):
         return self.widget._round_to_n(x, n)
     
     def _buildObjectHelper(self):

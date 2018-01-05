@@ -105,15 +105,11 @@ class TrialModel(_AbstractModel):
         return self._trial.magMap
     
     def specify_light_curve(self,start,end):
-        extrasIndex = -1
-        for i in range(len(self.parameters.extras)):
-            if self.parameters.extras[i].keyword == "lightcurve":
-                extrasIndex = i
-        if extrasIndex == -1:
-            extrasIndex = len(self.parameters.extras)
+        lcp = self.parameters.getExtras('lightcurve')
+        if not lcp:
             from app.parameters.ExperimentParams import LightCurveParameters
             self.parameters.extras.append(LightCurveParameters(start,end,100))
-        self.parameters.extras[extrasIndex].update(start = start, end = end)
+        self.parameters.getExtras('lightcurve').update(start = start, end = end)
         
         
         

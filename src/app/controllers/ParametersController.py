@@ -7,6 +7,7 @@ from . import Controller
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication
 
+
 class ParametersController(Controller):
     '''
     classdocs
@@ -17,6 +18,7 @@ class ParametersController(Controller):
     _destroy_signal = pyqtSignal()
     _setUnits = pyqtSignal(str)
     _modelRegenStars = pyqtSignal()
+
     def __init__(self):
         '''
         Constructor
@@ -24,11 +26,11 @@ class ParametersController(Controller):
         Controller.__init__(self)
         from app.views import ParametersView
         self._viewType = ParametersView
-        self.addSignals(request_parameters = self._requestP)
-        self.addSignals(view_update_signal = self._update_signal,
-                        destroy_view = self._destroy_signal,
-                        set_input_units = self._setUnits,
-                        regenerate_stars = self._modelRegenStars)
+        self.addSignals(request_parameters=self._requestP)
+        self.addSignals(view_update_signal=self._update_signal,
+                        destroy_view=self._destroy_signal,
+                        set_input_units=self._setUnits,
+                        regenerate_stars=self._modelRegenStars)
         
     def bind_view_signals(self, view):
         assert isinstance(view, self._viewType), "view must be a ParametersView instance for ParametersController to bind to it."
@@ -41,17 +43,23 @@ class ParametersController(Controller):
         view.signals['set_input_units'].connect(lambda s: self.signals['set_input_units'].emit(s))
 #         self.addSignals(set_input_units = view.signals['set_input_units'])
 
-    def bind_to_model(self,model):
+    def bind_to_model(self, model):
         self.signals['regenerate_stars'].connect(model.regenerate_stars)
         
-    def receive_parameters(self,parameters):
+    def receive_parameters(self, parameters):
         self._parameters = parameters
     
     def getParameters(self):
+        p1 = self._getPHelper()
+        self.update(p1)
+        p2 = self._getPHelper()
+        return p2
+    
+    def _getPHelper(self):
         self._parameters = None
         self.signals['request_parameters'].emit()
         QApplication.processEvents()
-        parameters =  self._parameters
+        parameters = self._parameters
         self._parameters = None
         return parameters
     

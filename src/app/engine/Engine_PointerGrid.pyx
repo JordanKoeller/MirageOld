@@ -83,14 +83,9 @@ cdef class Engine_PointerGrid(Engine):
 		cdef double qx = 0
 		cdef double qy = 0
 		cdef double qr = 0
-		if x == None:
-			qx = self.__parameters.queryQuasarX
-			qy = self.__parameters.queryQuasarY
-			qr = self.__parameters.queryQuasarRadius
-		else:
-			qx = x
-			qy = y
-			qr = r
+		qx = x or self.__parameters.queryQuasarX
+		qy = y or self.__parameters.queryQuasarY
+		qr = r or self.__parameters.queryQuasarRadius
 		cdef vector[pair[int,int]] ret = self.query_data(qx,qy,qr)
 		cdef int retf = ret.size()
 		cdef int i = 0

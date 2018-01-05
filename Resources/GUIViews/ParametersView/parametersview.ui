@@ -57,8 +57,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>585</width>
-        <height>722</height>
+        <width>572</width>
+        <height>739</height>
        </rect>
       </property>
       <property name="maximumSize">
@@ -215,6 +215,31 @@
              <widget class="QLabel" name="label_37">
               <property name="text">
                <string>R_g</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Current Postion = </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="observedPosLabel">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>arcsec</string>
               </property>
              </widget>
             </item>

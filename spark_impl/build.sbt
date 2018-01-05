@@ -1,4 +1,4 @@
-val spark = "org.apache.spark" % "spark-core_2.11" % "2.2.0" //% "provided"
+val spark = "org.apache.spark" % "spark-core_2.11" % "2.2.0" % "provided"
 lazy val root = (project in file("."))
   .settings(
     name         := "lensing_simulator_spark_kernel",

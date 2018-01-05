@@ -20,7 +20,6 @@ from app.utility import zeroVector
 from app.preferences import GlobalPreferences
 import numpy as np
 
-
 cimport numpy as np
 from libcpp.vector cimport vector
 from libc cimport math as CMATH
@@ -95,7 +94,7 @@ cdef class Engine:
 		# output buffers
 		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
-		prg = cl.Program(context, open(currDir+'ray_tracer.cl').read()).build()
+		prg = cl.Program(context, open(currDir + 'ray_tracer.cl').read()).build()
 		prg.ray_trace(queue, (width, height), None,
 			stars_buffer_mass,
 			stars_buffer_x,
@@ -112,7 +111,6 @@ cdef class Engine:
 			np.float64(self.__parameters.galaxy.position.to('rad').y),
 			result_buffer_x,
 			result_buffer_y)
-
 
 		cl.enqueue_copy(queue, result_nparray_x, result_buffer_x)
 		cl.enqueue_copy(queue, result_nparray_y, result_buffer_y)
@@ -158,7 +156,7 @@ cdef class Engine:
 		# output buffers
 		result_buffer_x = cl.Buffer(context, mf.READ_WRITE, result_nparray_x.nbytes)
 		result_buffer_y = cl.Buffer(context, mf.READ_WRITE, result_nparray_y.nbytes)
-		prg = cl.Program(context, open(currDir+'ray_tracer.cl').read()).build()
+		prg = cl.Program(context, open(currDir + 'ray_tracer.cl').read()).build()
 		prg.ray_trace(queue, (width, height), None,
 			stars_buffer_mass,
 			stars_buffer_x,
@@ -176,7 +174,6 @@ cdef class Engine:
 			result_buffer_x,
 			result_buffer_y)
 
-
 		cl.enqueue_copy(queue, result_nparray_x, result_buffer_x)
 		cl.enqueue_copy(queue, result_nparray_y, result_buffer_y)
 		del(result_buffer_x)
@@ -193,15 +190,15 @@ cdef class Engine:
 		begin = time.clock()
 		cdef int height = self.__parameters.canvasDim
 		cdef int width = self.__parameters.canvasDim
-		height = height//2
-		width = width//2
+		height = height // 2
+		width = width // 2
 		cdef double dTheta = self.__parameters.dTheta.value
-		cdef np.ndarray[np.float64_t,ndim = 2] result_nparray_x = np.zeros((width*2, height*2), dtype=np.float64)
-		cdef np.ndarray[np.float64_t,ndim = 2] result_nparray_y = np.zeros((width*2, height*2), dtype=np.float64)
+		cdef np.ndarray[np.float64_t, ndim = 2] result_nparray_x = np.zeros((width * 2, height * 2), dtype=np.float64)
+		cdef np.ndarray[np.float64_t, ndim = 2] result_nparray_y = np.zeros((width * 2, height * 2), dtype=np.float64)
 		cdef double dS = self.__parameters.quasar.angDiamDist.to('lyr').value
 		cdef double dL = self.__parameters.galaxy.angDiamDist.to('lyr').value
 		cdef double dLS = self.__parameters.dLS.to('lyr').value
-		cdef np.ndarray[np.float64_t,ndim = 1] stars_mass, stars_x, stars_y
+		cdef np.ndarray[np.float64_t, ndim = 1] stars_mass, stars_x, stars_y
 		cdef int numStars = 0
 		if self.__parameters.galaxy.percentStars > 0.0:
 			stars_mass, stars_x, stars_y = self.__parameters.galaxy.starArray
@@ -212,48 +209,44 @@ cdef class Engine:
 		cdef double centerY = self.__parameters.galaxy.position.to('rad').y
 		cdef double sis_constant = 	np.float64(4 * math.pi * self.__parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
 		cdef double point_constant = (4 * const.G / const.c / const.c).to("lyr/solMass").value * dLS / dS / dL
-		cdef double pi2 = math.pi/2
+		cdef double pi2 = math.pi / 2
 		cdef int x, y, i
 		cdef double incident_angle_x, incident_angle_y, r, deltaR_x, deltaR_y, phi
-		for x in prange(0,width*2,1,nogil=True,schedule='static',num_threads=self.core_count):
-			for y in range(0,height*2):
-				incident_angle_x = (x - width)*dTheta
-				incident_angle_y = (height - y)*dTheta
+		for x in prange(0, width * 2, 1, nogil=True, schedule='static', num_threads=self.core_count):
+			for y in range(0, height * 2):
+				incident_angle_x = (x - width) * dTheta
+				incident_angle_y = (height - y) * dTheta
 
 				for i in range(numStars):
 					deltaR_x = incident_angle_x - stars_x[i]
 					deltaR_y = incident_angle_y - stars_y[i]
-					r = deltaR_x*deltaR_x + deltaR_y*deltaR_y
+					r = deltaR_x * deltaR_x + deltaR_y * deltaR_y
 					if r != 0.0:
-						result_nparray_x[x,y] += deltaR_x*stars_mass[i]*point_constant/r;
-						result_nparray_y[x,y] += deltaR_y*stars_mass[i]*point_constant/r;				
+						result_nparray_x[x, y] += deltaR_x * stars_mass[i] * point_constant / r;
+						result_nparray_y[x, y] += deltaR_y * stars_mass[i] * point_constant / r;				
 # 				
-				#SIS
+				# SIS
 				deltaR_x = incident_angle_x - centerX
 				deltaR_y = incident_angle_y - centerY
-				r = sqrt(deltaR_x*deltaR_x+deltaR_y*deltaR_y)
+				r = sqrt(deltaR_x * deltaR_x + deltaR_y * deltaR_y)
 				if r != 0.0:
-					result_nparray_x[x,y] += deltaR_x*sis_constant/r 
-					result_nparray_y[x,y] += deltaR_y*sis_constant/r
+					result_nparray_x[x, y] += deltaR_x * sis_constant / r 
+					result_nparray_y[x, y] += deltaR_y * sis_constant / r
 
-				#Shear
-				phi = 2*(pi2 - shearAngle )-CMATH.atan2(deltaR_y,deltaR_x)
-				result_nparray_x[x,y] += shearMag*r*CMATH.cos(phi)
-				result_nparray_y[x,y] += shearMag*r*CMATH.sin(phi)
-				result_nparray_x[x,y] = deltaR_x - result_nparray_x[x,y]
-				result_nparray_y[x,y] = deltaR_y - result_nparray_y[x,y]
-		
-		
+				# Shear
+				phi = 2 * (pi2 - shearAngle) - CMATH.atan2(deltaR_y, deltaR_x)
+				result_nparray_x[x, y] += shearMag * r * CMATH.cos(phi)
+				result_nparray_y[x, y] += shearMag * r * CMATH.sin(phi)
+				result_nparray_x[x, y] = deltaR_x - result_nparray_x[x, y]
+				result_nparray_y[x, y] = deltaR_y - result_nparray_y[x, y]
 				
 		print("Time Ray-Tracing = " + str(time.clock() - begin))			
-		return (result_nparray_x,result_nparray_y)
-	
-
-	def getCenterCoords(self,params = None):
+		return (result_nparray_x, result_nparray_y)
+	def getCenterCoords(self, params=None):
 
 		'''Calculates and returns the location of a ray sent out from the center of the screen after 
 		projecting onto the Source Plane.'''
-		#Pulling parameters out of parameters class
+		# Pulling parameters out of parameters class
 		parameters = params or self.__parameters
 		height = parameters.canvasDim
 		width = parameters.canvasDim
@@ -267,38 +260,38 @@ cdef class Engine:
 		centerY = parameters.galaxy.position.to('rad').y
 		sis_constant = 	np.float64(4 * math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
 		point_constant = (4 * const.G / (const.c * const.c)).to("lyr/solMass").value * dLS / dS / dL
-		pi2 = math.pi/2
+		pi2 = math.pi / 2
 
-		#Calculation variables
+		# Calculation variables
 		resx = 0
 		resy = 0
 
-		#Calculation is Below
+		# Calculation is Below
 		incident_angle_x = 0.0
 		incident_angle_y = 0.0
 		
 		try:
-			#SIS
+			# SIS
 			deltaR_x = incident_angle_x - centerX
 			deltaR_y = incident_angle_y - centerY
-			r = sqrt(deltaR_x*deltaR_x+deltaR_y*deltaR_y)
+			r = sqrt(deltaR_x * deltaR_x + deltaR_y * deltaR_y)
 			if r == 0.0:
 				resx += deltaR_x 
 				resy += deltaR_y
 			else:
-				resx += deltaR_x*sis_constant/r 
-				resy += deltaR_y*sis_constant/r 
+				resx += deltaR_x * sis_constant / r 
+				resy += deltaR_y * sis_constant / r 
 			
-			#Shear
-			phi = 2*(pi2 - shearAngle)-CMATH.atan2(deltaR_y,deltaR_x)
-			resx += shearMag*r*CMATH.cos(phi)
-			resy += shearMag*r*CMATH.sin(phi)
+			# Shear
+			phi = 2 * (pi2 - shearAngle) - CMATH.atan2(deltaR_y, deltaR_x)
+			resx += shearMag * r * CMATH.cos(phi)
+			resy += shearMag * r * CMATH.sin(phi)
 			resx = deltaR_x - resx
 			resy = deltaR_y - resy
 		except ZeroDivisionError:
 			resx = 0.0
 			resy = 0.0
-		return Vector2D(resx,resy,'rad')
+		return Vector2D(resx, resy, 'rad')
 
 	def calTheta(self):
 		'''Deprecated'''
@@ -317,7 +310,6 @@ cdef class Engine:
 	def trueLuminosity(self):
 		'''Returns the apparent radius of the quasar in units of pixels^2'''
 		return math.pi * (self.parameters.quasar.radius.value / self.parameters.dTheta.value) ** 2
-
 
 	cpdef getMagnification(self, pixelCount):
 		"""
@@ -351,12 +343,12 @@ cdef class Engine:
 		mmin = mmin.to('rad')
 		cdef double stepX = (mmax.x - mmin.x) / resolution
 		cdef double stepY = (mmax.y - mmin.y) / resolution
-		cdef np.ndarray[np.float64_t, ndim=1] yAxis = np.ones(resolution)
+		cdef np.ndarray[np.float64_t, ndim = 1] yAxis = np.ones(resolution)
 		cdef int i = 0
 		cdef double radius = self.__parameters.queryQuasarRadius
 		cdef double x = mmin.x
 		cdef double y = mmin.y
-		cdef bool hasVel = False #Will change later
+		cdef bool hasVel = False  # Will change later
 		cdef double trueLuminosity = self.trueLuminosity
 		cdef int aptLuminosity = 0
 		with nogil:
@@ -364,21 +356,18 @@ cdef class Engine:
 				x += stepX
 				y += stepY
 				aptLuminosity = self.query_data_length(x, y, radius)  # Incorrect interface
-				yAxis[i] = (<double> aptLuminosity)/trueLuminosity
+				yAxis[i] = (< double > aptLuminosity) / trueLuminosity
 				if hasVel:
 					with gil:
 						self.__parameters.galaxy.moveStars(self.__parameters.dt)
 						self.reconfigure()
 		return yAxis
 	
-	def makeLightCurve(self,mmin, mmax, resolution):
+	def makeLightCurve(self, mmin, mmax, resolution):
 		'''Python-callable wrapper of makeLightCurve_helper'''
-		return self.makeLightCurve_helper(mmin,mmax,resolution)
-
-		
+		return self.makeLightCurve_helper(mmin, mmax, resolution)
 	
-	
-	cpdef makeMagMap(self, object center, object dims, object resolution, object signal, object signalMax): #######Possibly slow implementation. Temporary
+	cpdef makeMagMap(self, object center, object dims, object resolution, object signal, object signalMax):  #######Possibly slow implementation. Temporary
 		'''
 		Calulates and returns a 2D magnification map of the magnification coefficients 
 		of a quasar placed around the point center. dims specifies the width and height of the magnification
@@ -389,9 +378,9 @@ cdef class Engine:
 		'''
 		########################## I STILL WANT TO SEE IF CAN MAKE MAGMAP FROM THE SOURCEPLANE RAY TRACE LOCATIONS, BUT IN THE MEANTIME
 		########################## I'M DOING IT THE OLD-FASHIONED WAY #################################################################
-		cdef int resx = <int> resolution.x
-		cdef int resy = <int> resolution.y
-		cdef np.ndarray[np.float64_t, ndim=2] retArr = np.ndarray((resx,resy), dtype=np.float64)
+		cdef int resx = < int > resolution.x
+		cdef int resy = < int > resolution.y
+		cdef np.ndarray[np.float64_t, ndim = 2] retArr = np.ndarray((resx, resy), dtype=np.float64)
 		cdef double stepX = dims.to('rad').x / resolution.x
 		cdef double stepY = dims.to('rad').y / resolution.y
 		cdef int i = 0
@@ -399,18 +388,15 @@ cdef class Engine:
 		cdef double x = 0
 		cdef double y = 0
 		# self.__parameters.galaxy.update(center=center)
-		start = center - dims/2
+		start = center - dims / 2
 		cdef double x0 = start.to('rad').x
-		cdef double y0 = start.to('rad').y+dims.to('rad').y
+		cdef double y0 = start.to('rad').y + dims.to('rad').y
 		cdef double radius = self.__parameters.queryQuasarRadius
-		for i in prange(0,resx,nogil=True,schedule='guided',num_threads=self.core_count):
-			for j in range(0,resy):
-				retArr[i,j] = (<double> self.query_data_length(x0+i*stepX,y0-stepY*j,radius))
-		trueLuminosity = self.rawMagnification(center.to('rad').x,center.to('rad').y)
+		for i in prange(0, resx, nogil=True, schedule='guided', num_threads=self.core_count):
+			for j in range(0, resy):
+				retArr[i, j] = (< double > self.query_data_length(x0 + i * stepX, y0 - stepY * j, radius))
+		trueLuminosity = self.rawMagnification(center.to('rad').x, center.to('rad').y)
 		return retArr / trueLuminosity
-
-		
-		
 
 	cpdef visualize(self):
 		"""
@@ -436,19 +422,17 @@ cdef class Engine:
 				img[ < int > x[i, j], < int > y[i, j]] += 1
 		return img
 	
-	def rawMagnification(self,x,y):
+	def rawMagnification(self, x, y):
 		import copy
 		rawP = copy.deepcopy(self.parameters)
 		oldP = self.parameters
-		rawP.galaxy.update(percentStars = 0)
+		rawP.galaxy.update(percentStars=0)
 		self.updateParameters(rawP)
-		rawMag = self.query_data_length(x,y,rawP.queryQuasarRadius)
-		print("RawMag = "+str(rawMag))
+		rawMag = self.query_data_length(x, y, rawP.queryQuasarRadius)
+		print("RawMag = " + str(rawMag))
 		return rawMag
 
-
-
-	def updateParameters(self, parameters,autoRecalculate = True):
+	def updateParameters(self, parameters, autoRecalculate=True):
 		"""Provides an interface for updating the parameters describing the lensed system to be modeled.
 
 		If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
@@ -462,7 +446,7 @@ cdef class Engine:
 			else:
 				self.needsReconfiguring = True
 		elif not self.__parameters.isSimilar(parameters):
-			self.__parameters.update(canvasDim = parameters.canvasDim)
+			self.__parameters.update(canvasDim=parameters.canvasDim)
 			if self.__parameters.isSimilar(parameters):
 				self.__parameters = parameters
 				if self.__parameters.galaxy.percentStars > 0 and self.__parameters.galaxy.stars == []:
