@@ -25,9 +25,7 @@ class LightCurveController(Controller):
         self._viewType = PlotView
         self.addSignals(view_update_signal = self._update_signal,
                         destroy_view = self._destroy_signal)
-        self._x = np.arange(0,100,dtype=np.uint16)
-        self._y = np.zeros(100,dtype=np.uint16)
-        self._ind = 0
+        self.reset()
         
     def bind_view_signals(self, view):
         assert isinstance(view, self._viewType), "view must be a PlotView instance for LightCurveController to bind to it."
@@ -50,9 +48,10 @@ class LightCurveController(Controller):
         self._x = np.arange(0,self._x.size*2)
         self._y = np.append(self._y,np.zeros_like(self._y))
         
-    def reset(self):
-        self._x = np.arange(0,100,dtype=np.uint16)
-        self._y = np.zeros(100,dtype=np.uint16)
+    def reset(self,x_axis = None):
+        self._x = x_axis or np.arange(0,100)
+        self._y = np.zeros(len(self._x),)
+        self._ind = 0
         
         
         

@@ -94,14 +94,6 @@ class FrameRunner(Runner):
         yield model.engine.getFrame()
         raise StopIteration
         
-    def trigger(self,model,masterController):
-        frame = model.engine.getFrame()
-#         masterController.parametersController.update(model.parameters)
-        masterController.lensedImageController.setLensedImg(model,frame)
-        masterController.lightCurveController.add_point_and_plot(frame)
-#         masterController.magMapController.update(model.parameters)
-        model.parameters.incrementTime(model.parameters.dt)
-        QApplication.processEvents()
         
     # THIS ONE TOO
         
@@ -122,12 +114,13 @@ class LightCurveFollowerRunner(Runner):
         resolution = lcparams.resolution
         dist = begin.distanceTo(end)
         xAxis = np.arange(0,dist,dist/resolution)
+        masterController.lightCurveController.reset(xAxis)
         self._xStepArr = np.arange(begin.x,end.x,math.fabs(end.x-begin.x)/resolution)
         self._yStepArr = np.arange(begin.y,end.y,math.fabs(end.y-begin.y)/resolution)
         self._counter = 0
         
     def generator(self, model, masterController):
-        while self._counter <len(self._xStepArr):
+        while self._counter < len(self._xStepArr):
             x = self._xStepArr[self._counter]
             y = self._yStepArr[self._counter]
             yield model.engine.getFrame(x,y)
