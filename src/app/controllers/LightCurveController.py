@@ -37,7 +37,11 @@ class LightCurveController(Controller):
         self.signals['view_update_signal'].emit({'xAxis':x,'yAxis':y})
         
     def add_point_and_plot(self,pixels):
-        newY = pixels.size
+        newY = None
+        try:
+            newY = pixels.size
+        except:
+            newY = pixels
         if self._ind == self._x.size:
             self.grow_array()
         self._y[self._ind] = newY
@@ -49,7 +53,10 @@ class LightCurveController(Controller):
         self._y = np.append(self._y,np.zeros_like(self._y))
         
     def reset(self,x_axis = None):
-        self._x = x_axis or np.arange(0,100)
+        if isinstance(x_axis,np.ndarray):
+            self._x = x_axis
+        else:
+            self._x = np.arange(0,100)
         self._y = np.zeros(len(self._x),)
         self._ind = 0
         

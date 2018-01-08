@@ -1,6 +1,5 @@
 
-from app.engine import Engine, Engine_PointerGrid, Engine_ScalaSpark
-from app.engine import Engine as Engine_MagMap
+from app.engine import Engine, Engine_PointerGrid, Engine_ScalaSpark, Engine_MagMap
 from app.parameters import Parameters, DefaultParameters
 
 
@@ -115,7 +114,11 @@ class TrialModel(_AbstractModel):
         if not 'lightcurve' in self.parameters.extras:
             from app.parameters.ExperimentParams import LightCurveParameters
             self.parameters.extras.append(LightCurveParameters(start,end,100))
+        start = self.parameters.extras['magmap'].pixelToAngle(start)
+        end = self.parameters.extras['magmap'].pixelToAngle(end)
         self.parameters.extras['lightcurve'].update(start = start, end = end)
+        print("Start = " + str(start))
+        print("End = " + str(end))
         
         
         

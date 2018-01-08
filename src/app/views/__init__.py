@@ -77,5 +77,5 @@ from .ImageView import ImageView
 from .ParametersView import ParametersView
 from .PlotView import PlotView
 from .TableView import TableView
-from .WindowView import WindowView
+from .WindowView import WindowView, AnalysisPerspectiveManager, TablePerspectiveManager, ExplorePerspectiveManager
 from .MagMapView import MagMapView

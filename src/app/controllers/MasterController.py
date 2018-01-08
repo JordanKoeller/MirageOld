@@ -6,11 +6,13 @@ Created on Dec 22, 2017
 import sys
 
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QMessageBox
 
+from app.controllers.RunnerController import LightCurveRunner
+
+from . import AnimationRunner
 from . import Controller
 from . import LightCurveController, LensedImageController, MagMapController, ParametersController, TableController
-from . import AnimationRunner
-from PyQt5.QtWidgets import QMessageBox
 
 
 class MasterController(Controller):
@@ -78,14 +80,18 @@ class MasterController(Controller):
         
     def updateModel(self):
         parameters = self.parametersController.getParameters()
+        if parameters is None:
+            return True
         if parameters:
             if parameters != self.model.parameters:
                 self.model.set_parameters(parameters)
                 self.model.bind_parameters()
             return True
-        else:
+        elif parameters == False:
             self.signals['warning'].emit("Error: Could not construct system parameters. Please make sure all values are input correctly.")
             return False
+        else:
+            print("WHAT HAPPENED IN UPDATE MODEL???")
         
     def resetSlot(self):
         parameters = self.parametersController.getParameters()
@@ -94,16 +100,19 @@ class MasterController(Controller):
             self.model.bind_parameters()
             self.runner.reset()
         
-    def enableAnalysis(self):
-        print("CALLING")
+    def enableAnalysis(self,trial=None):
         from app.model import TrialModel
-        from app.lens_analysis import load
-        trial = load(None)
-        trial = trial[0]
+        from app.lens_analysis import Trial
+        if not isinstance(trial,Trial):
+            from app.lens_analysis import load
+            trial = load(None)
+            trial = trial[0]
         model = TrialModel(trial)
+        self.runner = LightCurveRunner()
         self.bind_to_model(model)
     
     def disableAnalysis(self):
+        self.runner = AnimationRunner()
         from app.model import ParametersModel
         if self.model:
             self.model.disable()

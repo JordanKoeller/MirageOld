@@ -17,19 +17,19 @@ class MagMapCalculationDelegate(CalculationDelegate):
 
     def __init__(self, parameters, magMapParameters, magMapArray):
         CalculationDelegate.__init__(self)
+        self._internal_engine = None
         self.reconfigure(parameters)
         self.magMapParameters = magMapParameters
         self.magMapArray = magMapArray.copy()
-        self.__internalEngine = None
 
     def reconfigure(self,parameters):
         self._parameters = parameters
-        if self.__internalEngine:
-            self.__internalEngine.reconfigure()
+        if self._internal_engine:
+            self._internal_engine.reconfigure()
     
     def make_light_curve(self,mmin, mmax, resolution):
-        if self.__internalEngine:
-            return self.__internalEngine.makeLightCurve_helper(mmin,mmax,resolution)
+        if self._internal_engine:
+            return self._internal_engine.makeLightCurve_helper(mmin,mmax,resolution)
         else:
             pixels = self.makePixelSteps(mmin,mmax)
             retArr = np.ndarray(pixels.shape[0],dtype=np.float64)
@@ -43,13 +43,19 @@ class MagMapCalculationDelegate(CalculationDelegate):
         raise NotImplementedError
     
     def get_frame(self,x, y, r):
-        raise NotImplementedError
+        return self.query_data_length(x, y, r)
     
     def ray_trace(self):
         raise NotImplementedError
     
     def query_data_length(self, x, y, radius):
-        raise NotImplementedError
+        xy = Vector2D(x,y,'rad')
+        xy = self.magMapParameters.angleToPixel(xy)
+#         assert radius == self._parameters.queryQuasarRadius, "MagMap cannot query a radius different from that used to generate it."
+        x = int(round(xy.x))
+        y = int(round(xy.y))
+        ret = self.magMapArray[x,y]
+        return ret
     
     
     
@@ -62,8 +68,8 @@ class MagMapCalculationDelegate(CalculationDelegate):
             mmin = Vector2D(mmin[0],mmin[1])
         if not isinstance(mmax,Vector2D):
             mmax = Vector2D(mmax[0],mmax[1])
-        pixelStart = mmin#self.magMapParameters.angleToPixel(mmin)
-        pixelEnd = mmax#self.magMapParameters.angleToPixel(mmax)
+        pixelStart = self.magMapParameters.angleToPixel(mmin)
+        pixelEnd = self.magMapParameters.angleToPixel(mmax)
         dx = pixelEnd.x - pixelStart.x
         dy = pixelEnd.y - pixelStart.y
         maxD = max(abs(dx),abs(dy))

@@ -126,7 +126,7 @@ class _ParametersViewWidget(GraphicsLayoutWidget):
                 return params
         except:
             print("Tried. Failed to build Parameters Instance")
-            return None
+            return False
     
     def getApparentVelocity(self, pos, v):
         ev = EarthVelocity

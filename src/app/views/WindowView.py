@@ -70,7 +70,7 @@ class WindowView(QMainWindow, SignalRepo):
         
     def bind_menubar_signals(self):
         self.actionExplorePerspective.triggered.connect(lambda: self.setPerspective(ExplorePerspectiveManager))
-        self.actionTablePerspective.triggered.connect(lambda: self.setPerspective(TablePerspectivemanager))
+        self.actionTablePerspective.triggered.connect(lambda: self.setPerspective(TablePerspectiveManager))
         self.actionAnalysisPerspective.triggered.connect(lambda: self.setPerspective(AnalysisPerspectiveManager))
         
     def removeView(self,ViewType):
@@ -144,20 +144,20 @@ class ExplorePerspectiveManager(PerspectiveManager):
     def __init__(self, mainview, auto_configure=False):
         PerspectiveManager.__init__(self, mainview, auto_configure)
     
-    def showParameters(self, state=True):
-        pass
-    
-    def showTable(self, state=True):
-        pass
-
-    def showImage(self, state=True):
-        pass
-
-    def showPlot(self, state=True):
-        pass
-
-    def showMagMap(self, state=True):
-        pass
+#     def showParameters(self, state=True):
+#         pass
+#     
+#     def showTable(self, state=True):
+#         pass
+# 
+#     def showImage(self, state=True):
+#         pass
+# 
+#     def showPlot(self, state=True):
+#         pass
+# 
+#     def showMagMap(self, state=True):
+#         pass
     
     def showPerspective(self, state=True):
         self._disableMenuBar()
@@ -176,20 +176,20 @@ class AnalysisPerspectiveManager(PerspectiveManager):
     def __init__(self, mainview, auto_configure=False):
         PerspectiveManager.__init__(self, mainview, auto_configure)
         
-    def showParameters(self, state=True):
-        pass
-    
-    def showTable(self, state=True):
-        pass
-
-    def showImage(self, state=True):
-        pass
-
-    def showPlot(self, state=True):
-        pass
-
-    def showMagMap(self, state=True):
-        pass
+#     def showParameters(self, state=True):
+#         pass
+#     
+#     def showTable(self, state=True):
+#         pass
+# 
+#     def showImage(self, state=True):
+#         pass
+# 
+#     def showPlot(self, state=True):
+#         pass
+# 
+#     def showMagMap(self, state=True):
+#         pass
     
     def showPerspective(self, state=True):
         self._disableMenuBar()
@@ -202,24 +202,24 @@ class AnalysisPerspectiveManager(PerspectiveManager):
         self.v.resetAction.setEnabled(True)
         self.v.actionAnalysisPerspective.setChecked(True)
 
-class TablePerspectivemanager(PerspectiveManager):
+class TablePerspectiveManager(PerspectiveManager):
     def __init__(self, mainview, auto_configure=False):
         PerspectiveManager.__init__(self, mainview, auto_configure)
         
-    def showParameters(self, state=True):
-        pass
-    
-    def showTable(self, state=True):
-        pass
-
-    def showImage(self, state=True):
-        pass
-
-    def showPlot(self, state=True):
-        pass
-
-    def showMagMap(self, state=True):
-        pass
+#     def showParameters(self, state=True):
+#         pass
+#     
+#     def showTable(self, state=True):
+#         pass
+# 
+#     def showImage(self, state=True):
+#         pass
+# 
+#     def showPlot(self, state=True):
+#         pass
+# 
+#     def showMagMap(self, state=True):
+#         pass
     
     def showPerspective(self, state=True):
         self._disableMenuBar()

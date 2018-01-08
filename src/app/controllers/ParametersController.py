@@ -47,7 +47,7 @@ class ParametersController(Controller):
         self.signals['regenerate_stars'].connect(model.regenerate_stars)
         
     def receive_parameters(self, parameters):
-        self._parameters = parameters
+        self._parameters = parameters 
     
     def getParameters(self):
         p1 = self._getPHelper()
@@ -58,7 +58,7 @@ class ParametersController(Controller):
     def _getPHelper(self):
         self._parameters = None
         self.signals['request_parameters'].emit()
-        QApplication.processEvents()
+        QApplication.processEvents() #If parameters is still None, there is no view. If parameters is False, threw an error. If returns Parameters object, was successful
         parameters = self._parameters
         self._parameters = None
         return parameters

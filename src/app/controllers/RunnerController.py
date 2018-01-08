@@ -92,13 +92,13 @@ class FrameRunner(Runner):
         Runner.initialize(self, model, masterController)
     
     def generator(self,model, masterController):
-        yield model.engine.getFrame()
+        yield model.engine.get_frame()
         raise StopIteration
         
         
     # THIS ONE TOO
         
-class LightCurveFollowerRunner(Runner):
+class LightCurveRunner(Runner):
     
     def __init__(self,*args,**kwargs):
         Runner.__init__(self,*args,**kwargs)
@@ -108,25 +108,36 @@ class LightCurveFollowerRunner(Runner):
         self._generator = None
         
     def initialize(self,model,masterController): 
-        Runner.initialize(self, model, masterController) 
+        Runner.initialize(self, model, masterController)
         lcparams = model.parameters.getExtras('lightcurve')
         begin = lcparams.pathStart.to('rad')
         end = lcparams.pathEnd.to('rad')
         resolution = lcparams.resolution
+        resolution = 1000
+        print("NEED TO REFINE RESOLUTION SETTING IN LIGHTCURVERUNNER")
         dist = begin.distanceTo(end)
-        xAxis = np.arange(0,dist,dist/resolution)
+        xAxis = np.linspace(0,dist.value,resolution)
         masterController.lightCurveController.reset(xAxis)
-        self._xStepArr = np.arange(begin.x,end.x,math.fabs(end.x-begin.x)/resolution)
-        self._yStepArr = np.arange(begin.y,end.y,math.fabs(end.y-begin.y)/resolution)
+        self._xStepArr = np.linspace(begin.x,end.x,resolution)
+        self._yStepArr = np.linspace(begin.y,end.y,resolution)
         self._counter = 0
         
     def generator(self, model, masterController):
         while self._counter < len(self._xStepArr):
             x = self._xStepArr[self._counter]
             y = self._yStepArr[self._counter]
-            yield model.engine.getFrame(x,y)
+            yield model.engine.get_frame(x,y)
             self._counter += 1
         raise StopIteration
+    
+    def broadcast(self,model,masterController,frame):
+        frame = float(frame)
+#         masterController.parametersController.update(model.parameters)
+#         masterController.lensedImageController.setLensedImg(model,frame)
+        masterController.lightCurveController.add_point_and_plot(frame)
+#         masterController.magMapController.update(model.parameters)
+        model.parameters.incrementTime(model.parameters.dt)
+        QApplication.processEvents()
         
         
         

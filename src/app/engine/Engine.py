@@ -5,7 +5,6 @@ Created on Jan 7, 2018
 '''
 import math
 from astropy import constants as const
-# from astropy import units as u
 import numpy as np
 
 from app.utility import Vector2D

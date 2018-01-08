@@ -388,15 +388,11 @@ class Quasar:<br>
 		return self.quasar.radius.to('rad').value
 	
 	def getExtras(self,keyword):
-		extrasIndex = -1
-		for i in range(len(self.extras)):
-			if self.extras[i].keyword == keyword:
-				extrasIndex = i
-		if extrasIndex != -1:
-			return self.extras[extrasIndex]
+		if keyword in self.extras:
+			return self.extras[keyword]
 		else:
 			return None
-
+		
 	def isSimilar(self,other):
 		if self.dTheta != other.dTheta:
 			return False
