@@ -33,9 +33,10 @@ class LensedImageController(Controller):
         assert isinstance(view, self._viewType)
         self.signals['view_update_signal'].connect(view.setImage)
         self.signals['destroy_view'].connect(view.destroy)
-        view.signals['imgRightClicked'].connect(self._createROI)
-        view.signals['imgRightDragged'].connect(self._defineROI)
-        view.signals['imgRightReleased'].connect(self._closeROI)
+#         view.signals['imgRightClicked'].connect(self._createROI)
+#         view.signals['imgRightDragged'].connect(self._defineROI)
+#         view.signals['imgRightReleased'].connect(self._closeROI)
+#         view.signals['ROI_set'].connect(self.zoom_on_roi)
     
     def setModel(self,model):
         self._model = model
@@ -48,12 +49,8 @@ class LensedImageController(Controller):
     def setImage(self,img):
         assert isinstance(img, np.ndarray), "img must be a 2D numpy array."
         self.signals['view_update_signal'].emit(img)
-    
-    def _createROI(self,event):
+        
+    def zoom_on_roi(self,roi):
         pass
     
-    def _defineROI(self,event):
-        pass
     
-    def _closeROI(self,event):
-        pass

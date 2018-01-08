@@ -1,7 +1,7 @@
 from .Engine cimport Engine
 import numpy as np
 
-from ...Utility.Vec2D import Vector2D
+from app.utility import Vector2D
 
 
 cdef class Engine_MagMap(Engine):

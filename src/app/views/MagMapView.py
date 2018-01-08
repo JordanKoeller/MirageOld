@@ -6,7 +6,6 @@ Created on Dec 30, 2017
 
 
 from PyQt5 import QtCore, uic
-from pyqtgraph.graphicsItems.ImageItem import ImageItem
 from pyqtgraph.graphicsItems.ROI import LineSegmentROI
 from pyqtgraph.widgets.GraphicsLayoutWidget import GraphicsLayoutWidget
 
@@ -14,58 +13,7 @@ from app import magmapUIFile
 from app.drawer.ShapeDrawer import drawSolidCircle_Gradient
 
 
-from . import View
-
-
-class MagMapImageItem(ImageItem):
-        """Extends ImageItem with its own mousePressEvent, mouseDragEvent, and mouseReleaseEvent methods to handle click-and-drag production
-        of linear ROI objects.
-
-        Any initialization parameters passed in are passed on to ImageItem.
-
-        Intercepts RightClick MouseEvents and sends them on with the three signals
-
-        sigPressed(QtCore.QPoint) of where the mouse event occurred.
-        sigDragged(QtCore.QPoint) of where the mouse event occurred.
-        sigReleased(QtCore.QPoint) of where the mouse event occurred."""
-
-        sigPressed = QtCore.pyqtSignal(object)
-        sigDragged = QtCore.pyqtSignal(object)
-        sigReleased = QtCore.pyqtSignal(object)
-
-        def __init__(self, *args, **kwargs):
-                ImageItem.__init__(self,*args,**kwargs)
-                self.dragStarted = False
-
-
-        def mousePressEvent(self,ev):
-                if ev.button() == QtCore.Qt.RightButton:
-                        ev.accept()
-                        self.dragStarted = True
-                        self.sigPressed.emit(ev.pos())
-                else:
-                        ImageItem.mousePressEvent(self,ev)
-
-        def mouseMoveEvent(self,ev):
-                if self.dragStarted:
-                        self.sigDragged.emit(ev.pos())
-                        ev.accept()
-                else:
-                        ImageItem.mouseMoveEvent(self,ev)
-        def mouseReleaseEvent(self,ev):
-                if ev.button() == QtCore.Qt.RightButton:
-                        ev.accept()
-                        self.dragStarted = False
-                        self.sigReleased.emit(ev.pos())
-                else:
-                        ImageItem.mouseMoveEvent(self,ev)
-
-
-
-
-
-
-
+from . import View, CustomImageItem
 
 
 class MagMapViewWidget(GraphicsLayoutWidget):
@@ -76,11 +24,11 @@ class MagMapViewWidget(GraphicsLayoutWidget):
     sigROISet = QtCore.pyqtSignal(object,object)
 
     def __init__(self):
-        View.__init__(self)
+        GraphicsLayoutWidget.__init__(self)
         uic.loadUi(magmapUIFile,self)
         self._viewBox = self.imgPane.addViewBox(lockAspect=True)
         self._viewBox.invertY()
-        self._imgItem = MagMapImageItem()
+        self._imgItem = CustomImageItem()
         self._viewBox.addItem(self._imgItem)
         self.radius = 5
         self._roi = None
@@ -98,10 +46,10 @@ class MagMapViewWidget(GraphicsLayoutWidget):
         self._imgItem.setLookupTable(gradient,True)
         
     def setMagMap(self,img,baseMag=0):
-        self._imgStatic = img.copy()
-        self._imgItem.setImage(self._imgStatic)
-        self.gradientWidget.restoreState(self._getCenteredGradient(baseMag))
-        self._baseMag = int(baseMag)
+            self._imgStatic = img.copy()
+            self._imgItem.setImage(self._imgStatic)
+            self.gradientWidget.restoreState(self._getCenteredGradient(baseMag))
+            self._baseMag = int(baseMag)
                 
     def _getCenteredGradient(self,center):
         default = {'ticks':[(0.0, (0, 255, 255, 255)), (1.0, (255, 255, 0, 255)), (center/self._imgStatic.max(), (0, 0, 0, 255)), (center/self._imgStatic.max()/2, (0, 0, 255, 255)), (self._imgStatic.max()/255/2, (255, 0, 0, 255))],'mode':'rgb'}

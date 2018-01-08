@@ -7,10 +7,10 @@ from .Engine import Engine
 from astropy import constants as const
 #import os
 
-conf = SparkConf().setAppName("lensing_simulator")
-conf = (conf)
-sc = SparkContext(conf=conf)
-sc.setLogLevel('WARN')
+# conf = SparkConf().setAppName("lensing_simulator")
+# conf = (conf)
+# sc = SparkContext(conf=conf)
+# sc.setLogLevel('WARN')
 
 class _Ray(object):
 

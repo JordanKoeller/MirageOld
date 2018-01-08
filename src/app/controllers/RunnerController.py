@@ -37,6 +37,7 @@ class Runner(Controller):
                     self._initialized = False
                 
     def halt(self):
+        print("Halting")
         self._runningBool = False
         
     def reset(self):
@@ -72,7 +73,7 @@ class AnimationRunner(Runner):
                         
     def generator(self, model, masterController):
         while True:
-            yield model.engine.getFrame()
+            yield model.engine.get_frame()
     
     def initialize(self, model, masterController):
         Runner.initialize(self, model, masterController)

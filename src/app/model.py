@@ -1,5 +1,6 @@
 
-from app.engine import Engine, Engine_PointerGrid, Engine_ScalaSpark  # , Engine_MagMap
+from app.engine import Engine, Engine_PointerGrid, Engine_ScalaSpark
+from app.engine import Engine as Engine_MagMap
 from app.parameters import Parameters, DefaultParameters
 
 
@@ -20,7 +21,7 @@ class _AbstractModel(object):
         self._parameters = parameters
         
     def bind_parameters(self):
-        self._engine.updateParameters(self._parameters)
+        self._engine.update_parameters(self._parameters)
         
     def regenerate_stars(self):
         try:
@@ -37,6 +38,9 @@ class _AbstractModel(object):
     @property
     def engine(self):
         return self._engine
+    
+    def disable(self):
+        pass
     
     
     
@@ -84,7 +88,10 @@ class TrialModel(_AbstractModel):
         assert isinstance(trial,Trial)
         parameters = trial.parameters
         self._trial = trial
-        engine = Engine_MagMap()
+        magmap = self._trial.magMap
+        mmp = self._trial.parameters.extras['magmap']
+        params = self._trial.parameters
+        engine = Engine_MagMap(params,mmp,magmap)
         _AbstractModel.__init__(self, parameters, engine)
         
     @classmethod
@@ -105,11 +112,10 @@ class TrialModel(_AbstractModel):
         return self._trial.magMap
     
     def specify_light_curve(self,start,end):
-        lcp = self.parameters.getExtras('lightcurve')
-        if not lcp:
+        if not 'lightcurve' in self.parameters.extras:
             from app.parameters.ExperimentParams import LightCurveParameters
             self.parameters.extras.append(LightCurveParameters(start,end,100))
-        self.parameters.getExtras('lightcurve').update(start = start, end = end)
+        self.parameters.extras['lightcurve'].update(start = start, end = end)
         
         
         

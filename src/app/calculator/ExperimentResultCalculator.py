@@ -84,7 +84,7 @@ class ExperimentResultCalculator(object):
         special = model.parameters.extras.desiredResults[index]
         start,finish = (special.pathStart,special.pathEnd)
         res = special.resolution
-        return model.engine.makeLightCurve(start,finish,res)
+        return model.engine.make_light_curve(start,finish,res)
         
     def __MAGMAP(self,index,model):
         '''
@@ -92,7 +92,7 @@ class ExperimentResultCalculator(object):
 
         '''
         special = model.parameters.extras.desiredResults[index]
-        ret = model.engine.makeMagMap(special.center,special.dimensions,special.resolution,self.signals['progressBar'],self.signals['progressBarMax']) #Assumes args are (topleft,height,width,resolution)
+        ret = model.engine.make_mag_map(special.center,special.dimensions,special.resolution) #Assumes args are (topleft,height,width,resolution)
 #         rawMag = Model['exptModel'].engine.rawMagnification(special.center.to('rad').x,special.center.to('rad').y)
         return ret
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################

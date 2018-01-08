@@ -15,8 +15,6 @@ def setMassFunction(fn):
     elif fn == "Aged_galaxy": ret = Evolved_IMF()
     #Means this is a custom IMF. It may or may not have aging thresholds.
     elif "mass_limits" in fn and "powers" in fn:
-        print(fn['mass_limits'])
-        print(fn['powers'])
         ret = IMF_broken_powerlaw(np.array(fn['mass_limits']),np.array(fn['powers']))
         if "conversions" in fn: ret = Evolved_IMF(ret,fn['conversions'])
     if ret == None:

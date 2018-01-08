@@ -43,8 +43,10 @@ class MasterController(Controller):
                         destroy_view=self._destroy_signal)
     
     def bind_to_model(self, model):
+        print("Binding to " + str(model))
         self.model = model
         self.parametersController.bind_to_model(self.model)
+        self.magMapController.bind_to_model(self.model)
     
     def bind_view_signals(self, viewSignals):
         from ..views import WindowView
@@ -93,10 +95,23 @@ class MasterController(Controller):
             self.runner.reset()
         
     def enableAnalysis(self):
-        pass
+        print("CALLING")
+        from app.model import TrialModel
+        from app.lens_analysis import load
+        trial = load(None)
+        trial = trial[0]
+        model = TrialModel(trial)
+        self.bind_to_model(model)
     
     def disableAnalysis(self):
-        pass
+        from app.model import ParametersModel
+        if self.model:
+            self.model.disable()
+            model = ParametersModel(self.model.parameters)
+            self.bind_to_model(model)
+        else:
+            model = ParametersModel()
+            self.bind_to_model(model)
         
     def exit(self):
         self.runner.halt()
@@ -115,7 +130,14 @@ class MasterController(Controller):
             self.lightCurveController.signals['destroy_view'].emit()
     
     def toggleMagMapPane(self, state):
-        print("Calling toggleMagMapPane " + str(state))
+        from ..views import MagMapView
+        if state is True: 
+            view = MagMapView()
+            self.magMapController.bind_view_signals(view)
+            self.signals['add_view_signal'].emit(view)
+        else:
+            self.magMapController.signals['destroy_view'].emit()
+    
     
     def toggleParamPane(self, state):
         from ..views import ParametersView

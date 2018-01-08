@@ -48,7 +48,7 @@ class ExperimentParamsJSONDecoder(object):
             elif kind == 'starfield':
                 resultParams.append(StarFieldData())
         return ExperimentParams(name,desc,nt,tv,resultParams)
-class ExperimentParams(object):
+class ExperimentParams(dict):
     '''
     classdocs
     '''
@@ -63,6 +63,8 @@ class ExperimentParams(object):
         self.numTrials = numTrials
         self.trialVarianceFunction = trialVariance
         self.desiredResults = resultParams
+        for i in self.desiredResults:
+            self[i.keyword] = i
         
         
     def generatePath(self,params):
@@ -73,6 +75,9 @@ class ExperimentParams(object):
             if name == i.keyword:
                 return i
         return None
+    
+    def append(self,data):
+        self[data.keyword] = data
     
 
     
