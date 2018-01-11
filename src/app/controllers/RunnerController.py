@@ -3,8 +3,6 @@ Created on Dec 24, 2017
 
 @author: jkoeller
 '''
-import math
-
 from app.controllers.Controller import Controller
 from PyQt5.QtWidgets import QApplication
 
