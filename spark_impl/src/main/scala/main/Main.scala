@@ -8,7 +8,6 @@ import lensing.RayParameters
 import lensing.RayTracer
 import spatialrdd.MinMax2D
 import spatialrdd.RDDGrid
-import spatialrdd.PaddedRDDGrid
 import spatialrdd.XYDoublePair
 import spatialrdd.XYIntPair
 import spatialrdd.partitioners.ColumnPartitioner

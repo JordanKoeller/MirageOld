@@ -2,11 +2,14 @@ package spatialrdd
 import scala.collection.mutable
 import scala.util.Random 
 
-class OptGrid(override protected val data: IndexedSeq[(Double,Double)], bucketFactor: Int = 1) extends SpatialData {
+class OptGrid(private val data: IndexedSeq[(Double,Double)], bucketFactor: Int = 1) extends SpatialData {
   private val _buckets: mutable.HashMap[Int, mutable.HashMap[Int, mutable.Set[Int]]] = collection.mutable.HashMap()
   private val _hashX = equalHashing(data, (l: (Double,Double)) => l._1, math.sqrt(data.size).toInt * bucketFactor)
   private val _hashY = equalHashing(data, (l: (Double,Double)) => l._2, math.sqrt(data.size).toInt * bucketFactor)
-  for (i <- 0 until data.size) _insert_pt(i)
+  
+  if (data.size > 0) {
+    	  for (i <- 0 until data.size) _insert_pt(i)
+  }
 
   private def _hashFunction(xx: Double, yy: Double): XYIntPair = {
     val x = _hashX(xx)

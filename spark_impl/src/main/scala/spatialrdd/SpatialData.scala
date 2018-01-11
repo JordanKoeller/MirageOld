@@ -1,7 +1,6 @@
 package spatialrdd
 
 trait SpatialData extends Serializable {
-	protected val data:IndexedSeq[(Double,Double)]
 
 	protected def _insert_pt(index:Int):Unit
 
