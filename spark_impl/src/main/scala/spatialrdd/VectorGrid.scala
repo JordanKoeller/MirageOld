@@ -2,7 +2,8 @@ package spatialrdd
 import scala.collection.mutable
 import scala.util.Random 
 
-class VectorGrid(override protected val data: IndexedSeq[(Double,Double)], bucketFactor: Int = 1) extends SpatialData{
+class VectorGrid(override protected val data: IndexedSeq[(Double,Double)], bucketFactor: Int = 1, override val partitionIndex:Int) extends SpatialData {
+  
   private val _hashX = equalHashing(data, (l: (Double,Double)) => l._1, math.sqrt(data.size).toInt * bucketFactor)
   private val _hashY = equalHashing(data, (l: (Double,Double)) => l._2, math.sqrt(data.size).toInt * bucketFactor)
   private val _buckets = _initBuckets()
@@ -121,8 +122,8 @@ object VectorGrid {
 
   val bucketFactor = 1
 
-  def apply(data: IndexedSeq[(Double, Double)]): VectorGrid = {
-    val ret = new VectorGrid(data, bucketFactor)
+  def apply(data: IndexedSeq[(Double, Double)],partitionIndex:Int): VectorGrid = {
+    val ret = new VectorGrid(data, bucketFactor,partitionIndex)
     ret
   }
 

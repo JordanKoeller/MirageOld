@@ -16,8 +16,7 @@ class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends
   def _init(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) = {
     val rddProfiled = partitioner.profileData(data)
     val rddTraced = rddProfiled.partitionBy(partitioner)
-    val glommed = rddTraced.glom()
-    val ret = glommed.mapPartitions(arrr => arrr.map(arr => VectorGrid(arr))).persist(StorageLevel.MEMORY_AND_DISK)
+    val ret = rddTraced.mapPartitionsWithIndex((ind,arrr) => Iterator(VectorGrid(arrr.toIndexedSeq,partitionIndex = ind))).persist(StorageLevel.MEMORY_AND_DISK)
     ret
   }
 
@@ -35,16 +34,16 @@ class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends
       ret2(i)(j) = keys.size
     }
     val broadcastedGroups = sc.broadcast(groupings)
-    val ret = Array.fill(pts.size, pts(0).size)(0)
-    val countRDD = rdd.mapPartitionsWithIndex((ind, gridInIterator) => {
-      val grid = gridInIterator.next()
-      broadcastedGroups.value(ind).map { elem =>
-        elem._1 -> grid.query_point_count(elem._2.x, elem._2.y, radius)
-      }.iterator
-    }, true)
-    countRDD.collect().foreach { elem => ret(elem._1.x)(elem._1.y) += elem._2 }
-    ret
-
+    rdd.aggregate(Array.fill(pts.size,pts(0).size)(0))((counter,grid) => {
+      val relevantQueryPts = broadcastedGroups.value(grid.partitionIndex)
+      relevantQueryPts.foreach{qPt =>
+        counter(qPt._1.x)(qPt._1.y) = grid.query_point_count(qPt._2.x, qPt._2.y, radius)
+      }
+      counter
+    }, (c1,c2) => {
+      for (i <- 0 until c1.size; j <- 0 until c1(0).size) c1(i)(j) += c2(i)(j)
+      c1
+    })
   }
 
   def count: Long = rdd.count()

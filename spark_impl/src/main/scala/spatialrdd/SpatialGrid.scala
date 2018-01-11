@@ -1,7 +1,7 @@
 package spatialrdd
 import scala.collection.mutable
 
-class SpatialGrid(data: IndexedSeq[XYDoublePair], bucketFactor: Int = 1) extends Serializable {
+class SpatialGrid(data: IndexedSeq[XYDoublePair], bucketFactor: Int = 1, val partitionIndex:Int) extends Serializable {
   private val _buckets: mutable.HashMap[Int, mutable.HashMap[Int, mutable.Set[Int]]] = collection.mutable.HashMap()
   private val _hashX = equalHashing(data, (l: XYDoublePair) => l.x, (math.sqrt(data.size)*bucketFactor).toInt)
   private val _hashY = equalHashing(data, (l: XYDoublePair) => l.y, (math.sqrt(data.size)*bucketFactor).toInt)
