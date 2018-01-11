@@ -70,7 +70,8 @@ object Main extends App {
     
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
-    val pixels = sc.range(0, (width * height).toLong, 1)
+    val pixels = sc.range(0, (width * height).toLong, 1,256*3)
+    println("Pixels on " + (256*3) + " partitions")
     val parameters = RayParameters(stars,
       pointConstant,
       sisConstant,
