@@ -13,7 +13,6 @@ import spatialrdd.XYIntPair
 import spatialrdd.partitioners.ColumnPartitioner
 import spatialrdd.partitioners.BalancedColumnPartitioner
 import scala.collection.JavaConverters._
-import spatialrdd.OptGrid
 
 import java.util.ArrayList
 import scala.util.Random
@@ -31,7 +30,6 @@ object Main extends App {
   }
 
   def TestSuite(ctx:JavaRDD[Int]) = {
-    OptGrid.TestGrid()
     TestPixels(ctx)
   }
 

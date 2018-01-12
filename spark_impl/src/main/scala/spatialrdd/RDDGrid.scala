@@ -13,12 +13,20 @@ import org.apache.spark.RangePartitioner
 
 class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends RDDGridProperty {
   private val rdd = _init(data, partitioner)
+
+
   def _init(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) = {
     val rddProfiled = partitioner.profileData(data)
     val rddTraced = rddProfiled.partitionBy(partitioner)
     val ret = rddTraced.mapPartitionsWithIndex((ind,arrr) => Iterator(VectorGrid(arrr.toIndexedSeq,partitionIndex = ind))).persist(StorageLevel.MEMORY_AND_DISK)
     ret
   }
+
+
+
+
+
+
 
   def queryPoints(pts: Array[Array[XYDoublePair]], radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
     val groupings = Array.fill(partitioner.numPartitions)(collection.mutable.ListBuffer[(XYIntPair, XYDoublePair)]())
@@ -49,6 +57,20 @@ class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends
   def count: Long = rdd.count()
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 object RDDGrid extends App {
   val conf = new SparkConf().setAppName("RDDGrid Test").setMaster("local[*]")

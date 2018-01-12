@@ -139,9 +139,10 @@ class Engine(object):
             self._parameters = parameters
             
     def normalize_magnification(self,values):
-        assert isinstance(values, np.ndarray) or isinstance(values,float) or isinstance(values,int), "values must be a numeric type or numpy array."
-        center = self.get_center_coords()
-        rawMag = self.raw_magnification(center.x, center.y)
-        return values / rawMag
+        return values
+        #assert isinstance(values, np.ndarray) or isinstance(values,float) or isinstance(values,int), "values must be a numeric type or numpy array."
+        #center = self.get_center_coords()
+        #rawMag = self.raw_magnification(center.x, center.y)
+        #return values / rawMag
             
             
