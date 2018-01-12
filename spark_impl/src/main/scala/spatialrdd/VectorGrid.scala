@@ -53,29 +53,28 @@ class VectorGrid(private val data: IndexedSeq[(Double, Double)], val partitionIn
   override def size: Int = data.size
 
   override def query_point_count(x: Double, y: Double, r: Double): Int = {
-    val rr = r*1.1
-    val left = _hashFunction(x - rr, y - rr)
+    val left = _hashFunction(x - r, y - r)
     val center = _hashFunction(x, y)
-    val right = _hashFunction(x + rr, y + rr)
+    val right = _hashFunction(x + r, y + r)
     val intR = new XYIntPair(center.x - left.x, center.y - left.y)
     val hypot2 = intR.x * intR.x + intR.y * intR.y
     val r2 = r * r
     var counter = 0
     counter += _query_bucket(center.x, center.y, x, y, r2) //Query center
 
-    for (i <- 1 to intR.x + 1) { //Query x - axis
+    for (i <- 1 to intR.x + 2) { //Query x - axis
       counter += _query_bucket(center.x + i, center.y, x, y, r2)
       counter += _query_bucket(center.x - i, center.y, x, y, r2)
     }
-    for (i <- 1 to intR.y + 1) {
+    for (i <- 1 to intR.y + 2) {
       counter += _query_bucket(center.x, center.y + i, x, y, r2)
       counter += _query_bucket(center.x, center.y - i, x, y, r2)
     }
 
 
-    for (i <- 1 to intR.x + 1) {
+    for (i <- 1 to intR.x + 2) {
       val intRY = (math.sqrt(hypot2 - i * i)).toInt
-      for (j <- 1 to intRY + 1) {
+      for (j <- 1 to intRY + 2) {
         counter += _query_bucket(center.x + i, center.y + j, x, y, r2)
         counter += _query_bucket(center.x + i, center.y - j, x, y, r2)
         counter += _query_bucket(center.x - i, center.y + j, x, y, r2)

@@ -70,9 +70,9 @@
             "value": 200.0
         },
         "extraParameters": {
-            "name": "2237_10pcnt_clusterTest",
+            "name": "2237_10pcnt_clusterTest_2",
             "description": "imageC 2237 run at 10% of mass in stars. Set up to be the same dimensions of those specified in Pooley et al. 10,000^2 canvas, drawing to a 2000x2000 magnification map.",
-            "numTrials": 10,
+            "numTrials": 1,
             "trialVariance": "newParams = copy.deepcopy(oldParams)\nnewParams.galaxy.update(percentStars=10.0)",
             "resultList": {
                 "magmap": {
