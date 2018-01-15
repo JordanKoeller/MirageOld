@@ -18,7 +18,7 @@ class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends
   def _init(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) = {
     val rddProfiled = partitioner.profileData(data)
     val rddTraced = rddProfiled.partitionBy(partitioner)
-    val ret = rddTraced.mapPartitionsWithIndex((ind,arrr) => Iterator(VectorGrid(arrr.toIndexedSeq,partitionIndex = ind))).persist(StorageLevel.MEMORY_AND_DISK)
+    val ret = rddTraced.mapPartitionsWithIndex((ind,arrr) => Iterator(MemGrid(arrr.toIndexedSeq,partitionIndex = ind))).persist(StorageLevel.MEMORY_AND_DISK)
     ret
   }
 
