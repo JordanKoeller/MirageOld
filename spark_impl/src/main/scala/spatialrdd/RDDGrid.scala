@@ -31,7 +31,7 @@ class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends
   def queryPoints(pts: Array[Array[XYDoublePair]], radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
     val groupings = Array.fill(partitioner.numPartitions)(collection.mutable.ListBuffer[(XYIntPair, XYDoublePair)]())
     var counter = 0
-    val ret2 = Array.fill(pts.size, pts(0).size)(0)
+    val ret = Array.fill(pts.size, pts(0).size)(0)
     for (i <- 0 until pts.size; j <- 0 until pts(0).size) {
       val pt = pts(i)(j)
       val keys = partitioner.getPartitions(pt, radius)
@@ -39,19 +39,21 @@ class RDDGrid(data: RDD[XYDoublePair], partitioner: SpatialPartitioning) extends
         val adding = new XYIntPair(i, j)
         groupings(key) += adding -> pt
       }
-      ret2(i)(j) = keys.size
     }
     val broadcastedGroups = sc.broadcast(groupings)
-    rdd.aggregate(Array.fill(pts.size,pts(0).size)(0))((counter,grid) => {
+    val retPairs = rdd.aggregate(new Array[(XYIntPair,Int)](0))((counter,grid) => {
       val relevantQueryPts = broadcastedGroups.value(grid.partitionIndex)
-      relevantQueryPts.foreach{qPt =>
-        counter(qPt._1.x)(qPt._1.y) = grid.query_point_count(qPt._2.x, qPt._2.y, radius)
+      val newPts = relevantQueryPts.map{qPt =>
+        (new XYIntPair(qPt._1.x,qPt._1.y),grid.query_point_count(qPt._2.x, qPt._2.y, radius))
       }
-      counter
-    }, (c1,c2) => {
-      for (i <- 0 until c1.size; j <- 0 until c1(0).size) c1(i)(j) += c2(i)(j)
-      c1
-    })
+      counter ++ newPts
+    }, (c1,c2) => c1 ++ c2)
+    retPairs.foreach{elem => 
+      val coord = elem._1
+      val value = elem._2
+      ret(coord.x)(coord.y) += value
+    }
+    ret
   }
 
   def count: Long = rdd.count()

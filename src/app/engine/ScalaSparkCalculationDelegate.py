@@ -24,7 +24,6 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         Constructor
         '''
         CalculationDelegate.__init__(self)
-        self.sc = _get_or_create_context()
         
     @property
     def parameters(self):
@@ -32,6 +31,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
 
     def reconfigure(self,parameters):
         self._parameters = parameters
+        self.sc = _get_or_create_context(parameters)
         self.ray_trace()
     
     
@@ -107,12 +107,14 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
     
     
     
-def _get_or_create_context():
+def _get_or_create_context(p):
     global _sc
     if not _sc:
         from pyspark.conf import SparkConf
         from pyspark.context import SparkContext
-        conf = SparkConf().setAppName("Lensing Simulation")
+        cd = p.canvasDim
+        ns = p.galaxy.percentStars
+        conf = SparkConf().setAppName(str(cd) + "," + str(ns))
         conf = (conf)
         _sc = SparkContext(conf=conf)
         _sc.setLogLevel("WARN")
