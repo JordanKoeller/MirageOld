@@ -36,7 +36,7 @@ class LensedImageController(Controller):
 #         view.signals['imgRightClicked'].connect(self._createROI)
 #         view.signals['imgRightDragged'].connect(self._defineROI)
 #         view.signals['imgRightReleased'].connect(self._closeROI)
-#         view.signals['ROI_set'].connect(self.zoom_on_roi)
+        view.signals['ROI_set'].connect(self.zoom_on_roi)
     
     def setModel(self,model):
         self._model = model
@@ -51,6 +51,7 @@ class LensedImageController(Controller):
         self.signals['view_update_signal'].emit(img)
         
     def zoom_on_roi(self,roi):
+        print("Should zoom")
         pass
     
     

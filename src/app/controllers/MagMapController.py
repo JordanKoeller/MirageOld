@@ -4,6 +4,7 @@ Created on Dec 22, 2017
 @author: jkoeller
 '''
 from PyQt5.QtCore import pyqtSignal
+import numpy as np
 
 from . import Controller
 
@@ -39,7 +40,9 @@ class MagMapController(Controller):
     def bind_to_model(self,modelRef):
         try:
             self._modelRef = modelRef
-            self.signals['set_magmap'].emit(self._modelRef.magnification_map)
+            logMap = np.log10(self._modelRef.magnification_map)
+            print("Log of map")
+            self.signals['set_magmap'].emit(logMap)
         except:
             print("Exception in binding magmapmodel")
         
@@ -48,27 +51,5 @@ class MagMapController(Controller):
         vstart = Vector2D(start[0],start[1])
         vend = Vector2D(end[0],end[1])
         self._modelRef.specify_light_curve(vstart,vend)
-
-class MagMapController2(object):
-    """docstring for MagMapController"""
-
-
-
-    def __init__(self, view):
-        pass
-    
-    def bindFields(self):
-        from ..Models import Model
-        self.view.setMagMap(Model[self.modelID].magMapArray)
-
-    def setModel(self,model):
-#         if isinstance(model,la.Trial):
-        from ..Models.MagnificationMapModel import MagnificationMapModel
-        from ..Models import Model
-        self.view._modelID = model.filename
-        Model[self.modelID] = MagnificationMapModel(model)
-        self.bindFields()
-#         else:
-#             raise ValueError("model must be of type Trial")
 
 
