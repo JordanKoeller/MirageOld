@@ -2,7 +2,6 @@ package spatialrdd
 
 trait SpatialData extends Serializable {
 
-	protected def _insert_pt(index:Int):Unit
 
 	def size:Int
 	def query_point_count(x:Double, y:Double, r:Double):Int

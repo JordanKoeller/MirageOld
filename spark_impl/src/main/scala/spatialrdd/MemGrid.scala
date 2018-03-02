@@ -1,7 +1,7 @@
 package spatialrdd
 import scala.collection.mutable
 
-class MemGrid(grid: Array[Array[mutable.ListBuffer[(Double, Double)]]], _hashX: Double => Int, _hashY: Double => Int, sz: Int, val partitionIndex: Int) extends SpatialData {
+class MemGrid(grid: Array[Array[Array[(Double, Double)]]], _hashX: Double => Int, _hashY: Double => Int, sz: Int, val partitionIndex: Int) extends SpatialData {
 
   private def _hashFunction(xx: Double, yy: Double): XYIntPair = {
     val x = _hashX(xx)
@@ -10,7 +10,7 @@ class MemGrid(grid: Array[Array[mutable.ListBuffer[(Double, Double)]]], _hashX: 
   }
 
   private def _query_bucket(i: Int, j: Int, x: Double, y: Double, r2: Double): Int = {
-    if (i < grid.size && j < grid(i).size) {
+    if (i >= 0 && j >= 0 && i < grid.size && j < grid(i).size) {
       val lst = grid(i)(j)
       if (lst.size > 0) {
         var counter = 0
@@ -40,21 +40,21 @@ class MemGrid(grid: Array[Array[mutable.ListBuffer[(Double, Double)]]], _hashX: 
     var j = 0
     counter += _query_bucket(center.x, center.y, x, y, r2) //Query center
 
-    while (i <= intR.x + 2) { //Query x - axis
+    while (i <= intR.x + 3) { //Query x - axis
       counter += _query_bucket(center.x + i, center.y, x, y, r2)
       counter += _query_bucket(center.x - i, center.y, x, y, r2)
       i += 1
     }
     i = 0
-    while (i <= intR.y + 2) {
+    while (i <= intR.y + 3) {
       counter += _query_bucket(center.x, center.y + i, x, y, r2)
       counter += _query_bucket(center.x, center.y - i, x, y, r2)
       i += 1
     }
     i = 0
-    while (i <= intR.x + 2) {
+    while (i <= intR.x + 3) {
       val intRY = (math.sqrt(hypot2 - i * i)).toInt
-      while (j <= intRY + 2) {
+      while (j <= intRY + 3) {
         counter += _query_bucket(center.x + i, center.y + j, x, y, r2)
         counter += _query_bucket(center.x + i, center.y - j, x, y, r2)
         counter += _query_bucket(center.x - i, center.y + j, x, y, r2)
@@ -90,6 +90,6 @@ object MemGrid {
       grid(x)(y) += elem
       rover += 1
     }
-    new MemGrid(grid, _hashX, _hashY, data.size, partitionIndex)
+    new MemGrid(grid.map(_.map(_.toArray)), _hashX, _hashY, data.size, partitionIndex)
   }
 }

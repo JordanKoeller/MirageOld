@@ -45,7 +45,7 @@ class VectorGrid(private val data: IndexedSeq[(Double, Double)], val partitionIn
     }
   }
 
-  override def _insert_pt(index: Int): Unit = {
+  private def _insert_pt(index: Int): Unit = {
     val coords = _hashFunction(data(index)._1, data(index)._2)
     _buckets(coords.x)(coords.y) += index
   }
