@@ -27,6 +27,19 @@ class MemGrid(grid: Array[Array[Array[(Double, Double)]]], _hashX: Double => Int
       } else 0
     } else 0
   }
+  
+//  private def queryOptimized(x:Double, y:Double, r:Double): Int = {
+//    var counter = 0
+//    var i = 0
+//    var j = 0
+//    val center = _hashFunction(x,y)
+//    var rx = _hashX(r)
+//    var ry = _hashY(r)
+//    while (rx >= 0) {
+//      
+//    }
+//    ???
+//  }
 
   override def query_point_count(x: Double, y: Double, r: Double): Int = {
     val left = _hashFunction(x - r, y - r)
