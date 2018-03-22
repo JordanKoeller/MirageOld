@@ -67,8 +67,7 @@ object Main extends App {
     
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
-    val pixels = sc.range(0, (width * height).toLong, 1,256*3)
-    println("Pixels on " + (256*3) + " partitions")
+    val pixels = sc.range(0, (width * height).toLong, 1)
     val parameters = RayParameters(stars,
       pointConstant,
       sisConstant,
@@ -85,11 +84,12 @@ object Main extends App {
       }
     },true)
     val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters))//.cache()
+    mappedPixels.collect()
     //Now need to construct the grid
     // val partitioner = new ColumnPartitioner()
-    val partitioner = new BalancedColumnPartitioner
+    //val partitioner = new BalancedColumnPartitioner
 
-    rddGrid = new RDDGrid(mappedPixels, partitioner)
+    //rddGrid = new RDDGrid(mappedPixels, partitioner)
   }
 
   private def mkGrid(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int):Array[Array[(Double,Double)]] = {

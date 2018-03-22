@@ -10,7 +10,7 @@ cdef class CalculationDelegate:
     
     cpdef object get_frame(self,object x, object y, object r)
     
-    cpdef ray_trace(self)
+    cdef ray_trace(self)
     
     cpdef unsigned int query_data_length(self, object x, object y, object radius)
     
