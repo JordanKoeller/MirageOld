@@ -128,5 +128,19 @@ class ClusterModel(_AbstractModel):
         engine = Engine_ScalaSpark()
         _AbstractModel.__init__(self, parameters, engine)
         
-CalculationModel = ClusterModel
-        
+class CPUModel(_AbstractModel):
+    
+    def __init__(self,parameters):
+        engine = Engine_PointerGrid()
+        _AbstractModel.__init__(self, parameters, engine)
+       
+def __initialize():
+    from app.preferences import GlobalPreferences
+    global CalculationModel
+    if GlobalPreferences['calculation_device'] == 'cpu':
+        CalculationModel = CPUModel
+    if GlobalPreferences['calculation_device'] == 'spark':
+        CalculationModel = ClusterModel
+
+CalculationModel = None
+__initialize()
