@@ -35,6 +35,7 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         self._parameters = None
         self.__preCalculating = False
         self.core_count = GlobalPreferences['core_count']
+        print("Core count found as " + str(self.core_count))
 
     cpdef void reconfigure(self,object parameters):
         print("Reconfiguring")
