@@ -15,7 +15,7 @@ cdef class CalculationDelegate:
     cpdef object get_frame(self,object x, object y, object r):
         raise NotImplementedError
     
-    cpdef ray_trace(self):
+    cdef ray_trace(self):
         raise NotImplementedError
     
     cpdef unsigned int query_data_length(self, object x, object y, object radius):

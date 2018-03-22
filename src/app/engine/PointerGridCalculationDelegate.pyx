@@ -153,7 +153,7 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
     
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    cpdef ray_trace(self):
+    cdef ray_trace(self):
         '''Ray-traces the system on the CPU. Does not require openCL
         
         Must call reconfigure() before this method.
@@ -183,6 +183,7 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef double pi2 = math.pi / 2
         cdef int x, y, i
         cdef double incident_angle_x, incident_angle_y, r, deltaR_x, deltaR_y, phi
+        print("Now ray-tracing")
         for x in prange(0, width * 2, 1, nogil=True, schedule='static', num_threads=self.core_count):
             for y in range(0, height * 2):
                 incident_angle_x = (x - width) * dTheta

@@ -64,7 +64,7 @@
             "redshift": 1.69,
             "colorKey": 3
         },
-        "canvasDim": 2000,
+        "canvasDim": 5000,
         "dTheta": {
             "unit": "theta_E",
             "value": 200.0
