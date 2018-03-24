@@ -10,7 +10,6 @@ import spatialrdd.MinMax2D
 import spatialrdd.RDDGrid
 import spatialrdd.XYDoublePair
 import spatialrdd.XYIntPair
-import spatialrdd.partitioners.ColumnPartitioner
 import spatialrdd.partitioners.BalancedColumnPartitioner
 import scala.collection.JavaConverters._
 
@@ -25,27 +24,9 @@ object Main extends App {
   private var rddGrid: RDDGridProperty = _
   private var filename:String = "/tmp/lenssim_tmpfile"
 
-  def helloWorld() = {
-    println("Hello world!")
-  }
-
-  def TestSuite(ctx:JavaRDD[Int]) = {
-    TestPixels(ctx)
-  }
 
   def setFile(fname:String) = filename = fname
 
-  def TestPixels(ctx:JavaRDD[Int]) = {
-    println("Test Pixels")
-    val sc = ctx.context
-    val width = 10000
-    val height = 10000
-    val partitioner = new BalancedColumnPartitioner()
-    val testPixels = sc.range(0,(width*height).toLong,1,256)
-    val testPix2 = testPixels.map(i => new XYDoublePair(Random.nextDouble()*100,Random.nextDouble()*100))
-    rddGrid = new RDDGrid(testPix2, partitioner)
-    queryPoints(25.0,25.0,75.0,75.0,5,5,0.1,ctx,verbose = true)
-  }
 
   def createRDDGrid(
     starsfile: String,
@@ -64,7 +45,6 @@ object Main extends App {
       val starInfoArr = row.split(",").map(_.toDouble)
       (starInfoArr(0),starInfoArr(1),starInfoArr(2))
     }
-    
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
     val pixels = sc.range(0, (width * height).toLong, 1)
@@ -78,18 +58,17 @@ object Main extends App {
       centerY,
       width.toDouble,
       height.toDouble)
-    val formattedPixels = pixels.mapPartitions(longIter => {
-      longIter.map{long => 
-        new XYIntPair(long.toInt % width,long.toInt/width)
-      }
-    },true)
-    val mappedPixels = rayTracer(formattedPixels, sc.broadcast(parameters))//.cache()
-    mappedPixels.collect()
+//    val formattedPixels = pixels.mapPartitions(longIter => {
+//      longIter.map{long => 
+//        new XYIntPair(long.toInt % width,long.toInt/width)
+//      }
+//    },true)
+    val mappedPixels = rayTracer(pixels, sc.broadcast(parameters))
     //Now need to construct the grid
     // val partitioner = new ColumnPartitioner()
-    //val partitioner = new BalancedColumnPartitioner
+    val partitioner = new BalancedColumnPartitioner
 
-    //rddGrid = new RDDGrid(mappedPixels, partitioner)
+    rddGrid = new RDDGrid(mappedPixels, partitioner)
   }
 
   private def mkGrid(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int):Array[Array[(Double,Double)]] = {
@@ -110,7 +89,7 @@ object Main extends App {
   private def mkGridWithIndex(x0:Double,y0:Double,x1:Double,y1:Double,xDim:Int,yDim:Int) = {
     val ret = mkGrid(x0,y0,x1,y1,xDim,yDim)
     (for (i <- 0 until ret.length) yield {
-      (for (j <- 0 until ret(0).length) yield new XYDoublePair(ret(i)(j)._1,ret(i)(j)._2)).toArray
+      (for (j <- 0 until ret(0).length) yield (ret(i)(j)._1,ret(i)(j)._2)).toArray
     }).toArray
   }
 

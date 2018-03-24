@@ -21,6 +21,9 @@ if __name__ =="__main__":
 	engine_ptrgrid = Extension("engine/Engine_PointerGrid", sources = ["engine/Engine_PointerGrid.pyx"], language = "c++",    extra_compile_args=["-std=c++11","-fopenmp"], extra_link_args=["-std=c++11","-Ofast"], libraries = ["m"])
 	calcDel = Extension("engine/CalculationDelegate", sources = ["engine/CalculationDelegate.pyx"], language = "c++", extra_compile_args=["-std=c++11","-fopenmp"], extra_link_args=["-std=c++11","-fopenmp"], libraries=["m"])
 	ptrCalcDel = Extension("engine/PointerGridCalculationDelegate", sources = ["engine/PointerGridCalculationDelegate.pyx"], language = "c++", extra_compile_args=["-std=c++11","-fopenmp"], extra_link_args=["-std=c++11","-fopenmp"], libraries=["m"])
+
+
+	rayTracerDel = Extension("engine/RayTracerDelegate", sources = ["engine/RayTracerDelegate.pyx"], language = "c++", libraries = ["m"])
 	#engine_spark = Extension("engine/Engine_Spark", sources = ["engine/Engine_Spark.pyx"], language = "c++",    extra_compile_args=["-std=c++11","-fopenmp"], extra_link_args=["-std=c++11","-Ofast"], libraries = ["m"])
 	#engine_bruteforce = Extension("engine/Engine_BruteForce", sources = ["engine/Engine_BruteForce.pyx"], language = "c++",    extra_compile_args=["-std=c++11","-fopenmp","-funroll-loops"], extra_link_args=["-std=c++11","-Ofast"], libraries = ["m"])
 	#engine_shapegrid = Extension("engine/Engine_ShapeGrid", sources = ["engine/Engine_ShapeGrid.pyx"], language = "c++",    extra_compile_args=["-std=c++11","-fopenmp","-funroll-loops"], extra_link_args=["-std=c++11","-Ofast"], libraries = ["m"])
@@ -46,6 +49,7 @@ if __name__ =="__main__":
 								ptrCalcDel,
 								drawer_supers,
 								datavisdrawer,
+								rayTracerDel,
 # 								engine_ptrgrid,
 	# 							engine_spark,
 								lensedimgdrawer,
