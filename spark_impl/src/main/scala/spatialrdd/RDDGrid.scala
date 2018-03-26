@@ -20,7 +20,7 @@ class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) exte
     val glommed = rddTraced.glom()
     println (glommed.map(_.length).collect.mkString(","))
     val zipped = glommed.zipWithIndex()
-    val ret = zipped.map(arr => MemGrid(arr._1,partitionIndex = arr._2.toInt)).persist(StorageLevel.MEMORY_ONLY)
+    val ret = zipped.map(arr => MemGrid(arr._1,partitionIndex = arr._2.toInt)).persist(StorageLevel.MEMORY_AND_DISK)
     ret
   }
 
