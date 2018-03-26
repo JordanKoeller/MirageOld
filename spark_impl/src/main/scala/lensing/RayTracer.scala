@@ -1,7 +1,7 @@
 package lensing
 
-import spatialrdd.XYDoublePair
-import spatialrdd.XYIntPair
+//import spatialrdd.XYDoublePair
+//import spatialrdd.XYIntPair
 import org.apache.spark.rdd.RDD
 import org.apache.spark.broadcast.Broadcast
 

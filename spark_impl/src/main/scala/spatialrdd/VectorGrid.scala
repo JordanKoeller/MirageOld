@@ -14,10 +14,10 @@ class VectorGrid(private val data: IndexedSeq[(Double, Double)], val partitionIn
 
   for (i <- 0 until data.size) _insert_pt(i)
 
-  private def _hashFunction(xx: Double, yy: Double): XYIntPair = {
+  private def _hashFunction(xx: Double, yy: Double): (Int,Int) = {
     val x = _hashX(xx)
     val y = _hashY(yy)
-    new XYIntPair(x, y)
+    (x, y)
   }
 
   private def _fetch_bucket(i: Int, j: Int): Int = {
@@ -47,7 +47,7 @@ class VectorGrid(private val data: IndexedSeq[(Double, Double)], val partitionIn
 
   private def _insert_pt(index: Int): Unit = {
     val coords = _hashFunction(data(index)._1, data(index)._2)
-    _buckets(coords.x)(coords.y) += index
+    _buckets(coords._1)(coords._2) += index
   }
 
   override def size: Int = data.size
@@ -56,36 +56,36 @@ class VectorGrid(private val data: IndexedSeq[(Double, Double)], val partitionIn
     val left = _hashFunction(x - r, y - r)
     val center = _hashFunction(x, y)
     val right = _hashFunction(x + r, y + r)
-    val intR = new XYIntPair(center.x - left.x, center.y - left.y)
-    val hypot2 = intR.x * intR.x + intR.y * intR.y
+    val intR = (center._1 - left._1, center._2 - left._2)
+    val hypot2 = intR._1 * intR._1 + intR._2 * intR._2
     val r2 = r * r
     var counter = 0
-    counter += _query_bucket(center.x, center.y, x, y, r2) //Query center
+    counter += _query_bucket(center._1, center._2, x, y, r2) //Query center
 
-    for (i <- 1 to intR.x + 2) { //Query x - axis
-      counter += _query_bucket(center.x + i, center.y, x, y, r2)
-      counter += _query_bucket(center.x - i, center.y, x, y, r2)
+    for (i <- 1 to intR._1 + 2) { //Query x - axis
+      counter += _query_bucket(center._1 + i, center._2, x, y, r2)
+      counter += _query_bucket(center._1 - i, center._2, x, y, r2)
     }
-    for (i <- 1 to intR.y + 2) {
-      counter += _query_bucket(center.x, center.y + i, x, y, r2)
-      counter += _query_bucket(center.x, center.y - i, x, y, r2)
+    for (i <- 1 to intR._2 + 2) {
+      counter += _query_bucket(center._1, center._2 + i, x, y, r2)
+      counter += _query_bucket(center._1, center._2 - i, x, y, r2)
     }
 
 
-    for (i <- 1 to intR.x + 2) {
+    for (i <- 1 to intR._1 + 2) {
       val intRY = (math.sqrt(hypot2 - i * i)).toInt
       for (j <- 1 to intRY + 2) {
-        counter += _query_bucket(center.x + i, center.y + j, x, y, r2)
-        counter += _query_bucket(center.x + i, center.y - j, x, y, r2)
-        counter += _query_bucket(center.x - i, center.y + j, x, y, r2)
-        counter += _query_bucket(center.x - i, center.y - j, x, y, r2)
+        counter += _query_bucket(center._1 + i, center._2 + j, x, y, r2)
+        counter += _query_bucket(center._1 + i, center._2 - j, x, y, r2)
+        counter += _query_bucket(center._1 - i, center._2 + j, x, y, r2)
+        counter += _query_bucket(center._1 - i, center._2 - j, x, y, r2)
       }
     }
     counter
   }
 
-  override def query_points(pts: Iterator[(XYIntPair, XYDoublePair)], r: Double): Iterator[(XYIntPair, Int)] = {
-    pts.map(pt => pt._1 -> query_point_count(pt._2.x, pt._2.y, r))
+  override def query_points(pts: Iterator[((Int,Int), (Double,Double))], r: Double): Iterator[((Int,Int), Int)] = {
+    pts.map(pt => pt._1 -> query_point_count(pt._2._1, pt._2._2, r))
   }
 }
 

@@ -8,8 +8,8 @@ import lensing.RayParameters
 import lensing.RayTracer
 import spatialrdd.MinMax2D
 import spatialrdd.RDDGrid
-import spatialrdd.XYDoublePair
-import spatialrdd.XYIntPair
+//import spatialrdd.XYDoublePair
+//import spatialrdd.XYIntPair
 import spatialrdd.partitioners.BalancedColumnPartitioner
 import scala.collection.JavaConverters._
 
@@ -47,7 +47,7 @@ object Main extends App {
     }
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
-    val pixels = sc.range(0, (width * height).toLong, 1)
+    val pixels = sc.range(0, (width * height).toLong, 1,sc.defaultParallelism*3)
     val parameters = RayParameters(stars,
       pointConstant,
       sisConstant,
