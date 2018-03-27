@@ -7,7 +7,7 @@ package object utility {
     type DoublePair = (Double,Double)
     
     
-    class IndexPair(val v:Int=0) extends AnyVal{
+    class IndexPair(val v:Int=0) extends AnyVal with Serializable {
       def _2:Short = {
         ((v << 16) >> 16).toShort
       }

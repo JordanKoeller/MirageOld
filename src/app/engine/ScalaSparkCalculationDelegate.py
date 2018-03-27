@@ -9,6 +9,7 @@ from astropy import constants as const
 import numpy as np
 
 from .CalculationDelegate import CalculationDelegate
+from memory_profiler import profile
 
 
 _sc = None
@@ -25,7 +26,6 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         '''
         CalculationDelegate.__init__(self)
         
-    @property
     def parameters(self):
         return self._parameters
 
@@ -33,7 +33,6 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         self._parameters = parameters
         self.sc = _get_or_create_context(parameters)
         self.ray_trace()
-    
     
     def make_mag_map(self,center,dims,resolution):
         print("Now querying the source plane to calculate the magnification map.")
@@ -52,7 +51,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
             numArr = [list(map(lambda s:float(s),row)) for row in stringArr]
             npArr = np.array(numArr,dtype = float)
             return npArr    
-    
+
     def ray_trace(self):
         _width = self.parameters.canvasDim
         _height = self.parameters.canvasDim
