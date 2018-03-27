@@ -59,12 +59,12 @@
             },
             "radius": {
                 "unit": "r_g",
-                "value": 6.0
+                "value": 60.0
             },
             "redshift": 1.69,
             "colorKey": 3
         },
-        "canvasDim": 24000,
+        "canvasDim": 2000,
         "dTheta": {
             "unit": "theta_E",
             "value": 200.0
