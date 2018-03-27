@@ -19,9 +19,9 @@ class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) exte
     val rddProfiled = partitioner.profileData(data)
     val rddTraced = rddProfiled.partitionBy(partitioner)
     val glommed = rddTraced.glom()
-    println (glommed.map(_.length).collect.mkString(","))
+//    println (glommed.map(_.length).collect.mkString(","))
     val zipped = glommed.zipWithIndex()
-    val ret = zipped.map(arr => MemGrid(arr._1,partitionIndex = arr._2.toInt)).persist(StorageLevel.MEMORY_AND_DISK)
+    val ret = zipped.map(arr => MemGrid(arr._1,partitionIndex = arr._2.toInt)).persist(StorageLevel.MEMORY_ONLY_SER)
     ret
   }
 
@@ -33,7 +33,8 @@ class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) exte
 
   def queryPoints(pts: Array[Array[(Double,Double)]], radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
     val groupings = Array.fill(partitioner.numPartitions)(collection.mutable.ListBuffer[((Int,Int), (Double,Double))]())
-    val accumulator = new PixelAccumulator(pts.size,pts(0).size)
+//    val accumulator = new PixelAccumulator(pts.size,pts(0).size)
+//    sc.register(accumulator)
     for (i <- 0 until pts.size; j <- 0 until pts(0).size) {
       val pt = pts(i)(j)
       val keys = partitioner.getPartitions(pt, radius)
@@ -43,7 +44,7 @@ class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) exte
       }
     }
     val broadcastedGroups = sc.broadcast(groupings)
-    rdd.foreach{grid =>
+/*    rdd.foreach{grid =>
       val relevantQP = broadcastedGroups.value(grid.partitionIndex)
       relevantQP.foreach{qp =>
         val count = grid.query_point_count(qp._2._1, qp._2._1, radius)
@@ -52,18 +53,21 @@ class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) exte
     }
     rdd.count()
     accumulator.getGrid()
-//    val retPairs = rdd.aggregate(new Array[((Int,Int),Int)](0))((counter,grid) => {
-//      val relevantQueryPts = broadcastedGroups.value(grid.partitionIndex)
-//      val newPts = relevantQueryPts.map{qPt =>
-//        ((qPt._1._1,qPt._1._2),grid.query_point_count(qPt._2._1, qPt._2._2, radius))
-//      }
-//      counter ++ newPts
-//    }, (c1,c2) => c1 ++ c2)
-//    retPairs.foreach{elem => 
-//      val coord = elem._1
-//      val value = elem._2
-//      ret(coord._1)(coord._2) += value
-//    }
+*/
+    val ret = Array.fill(pts.size,pts(1).size)(0)
+    val retPairs = rdd.aggregate(new Array[((Short,Short),Short)](0))((counter,grid) => {
+      val relevantQueryPts = broadcastedGroups.value(grid.partitionIndex)
+      val newPts = relevantQueryPts.map{qPt =>
+        ((qPt._1._1.toShort,qPt._1._2.toShort),grid.query_point_count(qPt._2._1, qPt._2._2, radius).toShort)
+      }
+      counter ++ newPts
+    }, (c1,c2) => c1 ++ c2)
+    retPairs.foreach{elem => 
+      val coord = elem._1
+      val value = elem._2
+      ret(coord._1)(coord._2) += value
+    }
+    ret
   }
 
   def count: Long = rdd.count()
