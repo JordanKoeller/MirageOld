@@ -10,7 +10,10 @@ import org.apache.spark.storage.StorageLevel
 
 import org.apache.spark.RangePartitioner
 import utility.PixelAccumulator
-
+import utility.IndexPair
+import utility.DoublePair
+import utility.mkPair
+import utility.Index
 class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) extends RDDGridProperty {
   private val rdd = _init(data, partitioner)
 
@@ -31,15 +34,15 @@ class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) exte
 
 
 
-  def queryPoints(pts: Array[Array[(Double,Double)]], radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
-    val groupings = Array.fill(partitioner.numPartitions)(collection.mutable.ListBuffer[((Int,Int), (Double,Double))]())
+  def queryPoints(pts: Array[Array[DoublePair]], radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Index]] = {
+    val groupings = Array.fill(partitioner.numPartitions)(collection.mutable.ListBuffer[(IndexPair, DoublePair)]())
 //    val accumulator = new PixelAccumulator(pts.size,pts(0).size)
 //    sc.register(accumulator)
     for (i <- 0 until pts.size; j <- 0 until pts(0).size) {
       val pt = pts(i)(j)
       val keys = partitioner.getPartitions(pt, radius)
       keys.foreach { key =>
-        val adding = (i, j)
+        val adding = mkPair(i.toShort, j.toShort)
         groupings(key) += adding -> pt
       }
     }
@@ -55,17 +58,17 @@ class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) exte
     accumulator.getGrid()
 */
     val ret = Array.fill(pts.size,pts(1).size)(0)
-    val retPairs = rdd.aggregate(new Array[((Short,Short),Short)](0))((counter,grid) => {
+    val retPairs = rdd.aggregate(new Array[(IndexPair,Index)](0))((counter,grid) => {
       val relevantQueryPts = broadcastedGroups.value(grid.partitionIndex)
       val newPts = relevantQueryPts.map{qPt =>
-        ((qPt._1._1.toShort,qPt._1._2.toShort),grid.query_point_count(qPt._2._1, qPt._2._2, radius).toShort)
+        (mkPair(qPt._1._1,qPt._1._2),grid.query_point_count(qPt._2._1, qPt._2._2, radius))
       }
       counter ++ newPts
     }, (c1,c2) => c1 ++ c2)
     retPairs.foreach{elem => 
       val coord = elem._1
       val value = elem._2
-      ret(coord._1)(coord._2) += value
+      ret(coord._1.toInt)(coord._2.toInt) += value
     }
     ret
   }

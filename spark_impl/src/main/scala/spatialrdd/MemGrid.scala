@@ -1,10 +1,12 @@
 package spatialrdd
 import scala.collection.mutable
-
+import utility.IndexPair
+import utility.DoublePair
+import utility.Index
 import math.sqrt
 
 //class MemGrid(grid: Array[Array[mutable.ArrayBuffer[Double]]], _hashX: Double => Int, _hashY: Double => Int, sz: Int, val partitionIndex: Int) extends SpatialData {
-class MemGrid(grid: mutable.Map[Int, mutable.Map[Int, mutable.ArrayBuffer[Double]]], hashXPair: (HashFunc, Dehasher), hashYPair: (HashFunc, Dehasher), sz: Int, val partitionIndex: Int) extends SpatialData {
+class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Double]]], hashXPair: (HashFunc, Dehasher), hashYPair: (HashFunc, Dehasher), sz: Int, val partitionIndex: Int) extends SpatialData {
 
   private def _hashX = hashXPair._1
 
@@ -90,7 +92,7 @@ class MemGrid(grid: mutable.Map[Int, mutable.Map[Int, mutable.ArrayBuffer[Double
     }
     i = 1
     while (i <= intRX) {
-      val xSpread = _dehashX(i)
+      val xSpread = _dehashX(i.toShort)
       intRY = _hashY(y + sqrt(r2 - (xSpread - x) * (xSpread - x))) + 2
       while (j <= intRY) {
 //        if (i < (intRX - 2) && j < (intRY - 2)) {
@@ -113,7 +115,7 @@ class MemGrid(grid: mutable.Map[Int, mutable.Map[Int, mutable.ArrayBuffer[Double
     counter
   }
 
-  override def query_points(pts: Iterator[((Int, Int), (Double, Double))], r: Double): Iterator[((Int, Int), Int)] = {
+  override def query_points(pts: Iterator[(IndexPair, DoublePair)], r: Double): Iterator[(IndexPair, Index)] = {
     pts.map(pt => pt._1 -> query_point_count(pt._2._1, pt._2._2, r))
   }
 
@@ -124,13 +126,13 @@ class MemGrid(grid: mutable.Map[Int, mutable.Map[Int, mutable.ArrayBuffer[Double
 object MemGrid {
 
   val bucketFactor = 4
-  def apply(data: IndexedSeq[(Double, Double)], partitionIndex: Int, bucketFactor: Int = bucketFactor): MemGrid = {
-    val xHashPair = hashDehashPair(data, (l: (Double, Double)) => l._1, math.sqrt(data.size).toInt * bucketFactor)
-    val yHashPair = hashDehashPair(data, (l: (Double, Double)) => l._2, math.sqrt(data.size).toInt * bucketFactor)
+  def apply(data: IndexedSeq[DoublePair], partitionIndex: Int, bucketFactor: Int = bucketFactor): MemGrid = {
+    val xHashPair = hashDehashPair(data, (l: DoublePair) => l._1, math.sqrt(data.size).toInt * bucketFactor)
+    val yHashPair = hashDehashPair(data, (l: DoublePair) => l._2, math.sqrt(data.size).toInt * bucketFactor)
     //    val _hashX = equalHashing(data, (l: (Double, Double)) => l._1, math.sqrt(data.size).toInt * bucketFactor)
     //    val _hashY = equalHashing(data, (l: (Double, Double)) => l._2, math.sqrt(data.size).toInt * bucketFactor)
     val numBucs = math.sqrt(data.size).toInt * bucketFactor
-    val grid: mutable.Map[Int, mutable.Map[Int, mutable.ArrayBuffer[Double]]] = mutable.Map()
+    val grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Double]]] = mutable.Map()
     //    val grid = Array.fill(numBucs)(Array.fill(numBucs)(mutable.ArrayBuffer[Double]()))
     var rover = 0
     while (rover < data.size) {
