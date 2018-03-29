@@ -1,5 +1,7 @@
 {
 
+	"calculation_device":"spark",
+	
 	"use_openCL":true,
 	
 	"cl_device":3,
