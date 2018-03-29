@@ -62,19 +62,20 @@ class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) exte
 */
     
     val ret = Array.fill(pts.size,pts(1).size)(0)
-    val retPairs = rdd.aggregate(Array[Long]())((counter,grid) => {
+    val retPairs = rdd.treeAggregate(Array[PixelValue]())((counter,grid) => {
       val relevantQueryPts = broadcastedGroups.value(grid.partitionIndex)
       val newPts = relevantQueryPts.map{qPt =>
-        val x = qPt._1._1 
+	pixelConstructor(qPt._1._1.toInt,qPt._1._2.toInt,grid.query_point_count(qPt._2._1,qPt._2._2,radius))
+/*        val x = qPt._1._1 
         val y = qPt._1._2
         val num = grid.query_point_count(x, y, radius)
         val pos = (x.toLong << 16) + y.toInt
         (pos.toLong << 32) + num.toLong
-      }
+*/      }
       counter ++ newPts
     }, (c1,c2) => c1 ++ c2)
     retPairs.foreach{elem =>
-      ret((elem >>48).toInt)((elem << 48 >> 48).toInt) += (elem >> 32).toInt
+      ret(elem.x)(elem.y) += elem.value
     }
     ret
   }
