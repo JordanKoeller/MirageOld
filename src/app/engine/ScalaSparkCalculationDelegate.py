@@ -26,6 +26,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         '''
         CalculationDelegate.__init__(self)
         
+    @property
     def parameters(self):
         return self._parameters
 

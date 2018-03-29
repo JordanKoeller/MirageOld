@@ -14,6 +14,9 @@ import utility.IndexPair
 import utility.DoublePair
 import utility.mkPair
 import utility.Index
+import utility.PixelValue
+import utility.pixelConstructor
+
 class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) extends RDDGridProperty {
   private val rdd = _init(data, partitioner)
 
@@ -35,7 +38,7 @@ class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) exte
 
 
   def queryPoints(pts: Array[Array[DoublePair]], radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Index]] = {
-    val groupings = Array.fill(partitioner.numPartitions)(collection.mutable.ListBuffer[(IndexPair, DoublePair)]())
+    val groupings = Array.fill(partitioner.numPartitions)(collection.mutable.ArrayBuffer[(IndexPair, DoublePair)]())
 //    val accumulator = new PixelAccumulator(pts.size,pts(0).size)
 //    sc.register(accumulator)
     for (i <- 0 until pts.size; j <- 0 until pts(0).size) {
@@ -57,18 +60,17 @@ class RDDGrid(data: RDD[(Double,Double)], partitioner: SpatialPartitioning) exte
     rdd.count()
     accumulator.getGrid()
 */
+    
     val ret = Array.fill(pts.size,pts(1).size)(0)
-    val retPairs = rdd.aggregate(new Array[(IndexPair,Index)](0))((counter,grid) => {
+    val retPairs = rdd.aggregate(Set[PixelValue]())((counter,grid) => {
       val relevantQueryPts = broadcastedGroups.value(grid.partitionIndex)
       val newPts = relevantQueryPts.map{qPt =>
-        (mkPair(qPt._1._1,qPt._1._2),grid.query_point_count(qPt._2._1, qPt._2._2, radius))
+        pixelConstructor(qPt._1._1,qPt._1._2,grid.query_point_count(qPt._2._1, qPt._2._2, radius))
       }
       counter ++ newPts
     }, (c1,c2) => c1 ++ c2)
     retPairs.foreach{elem => 
-      val coord = elem._1
-      val value = elem._2
-      ret(coord._1.toInt)(coord._2.toInt) += value
+      ret(elem.x)(elem.y) += elem.value
     }
     ret
   }

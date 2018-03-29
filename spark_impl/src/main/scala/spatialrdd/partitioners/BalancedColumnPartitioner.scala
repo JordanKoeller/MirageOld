@@ -18,7 +18,9 @@ class BalancedColumnPartitioner extends SpatialPartitioning {
   }
 
   def getPartitions(key: (Double,Double), r: Double): Set[Int] = {
-    (for (i <- getPartition(key._1 - r) to getPartition(key._1+r)) yield i).toSet
+    val range = _ranger.getPartition(key._1 - r) to _ranger.getPartition(key._2+r)
+    range.toSet.map(_mixer)
+    
 
 
   }
@@ -32,8 +34,8 @@ class BalancedColumnPartitioner extends SpatialPartitioning {
     println("Found and setting number of partitions as " + _numPartitions)
     _mixer = Array.range(0,numPartitions).toSet.toArray
 //    val shuffled = data.repartition(_numPartitions)
-    val ret = data.mapPartitions(elemIter => elemIter.map(elem => (elem._1, elem._2)),true) 
-    _ranger = new RangePartitioner(_numPartitions, ret)
-    ret
+//    val ret = data.mapPartitions(elemIter => elemIter.map(elem => (elem._1, elem._2)),true) 
+    _ranger = new RangePartitioner(_numPartitions, data)
+    data
   }
 }
