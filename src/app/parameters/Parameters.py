@@ -346,6 +346,46 @@ class Quasar:<br>
 		absRg = (self.__quasar.mass*const.G/const.c/const.c).to('m')
 		angle = absRg/self.quasar.angDiamDist.to('m')
 		return self.quasar.radius.to('rad').value/angle.value
+
+	def convergence(self,position):
+		"""Given a position, calculates the convergence of the lens at that position.
+		
+		Calculates the convergence of the macro-lens at the specified position. Useful for comparing to published values for convergence at an image,
+		to check that the model is behaving properly.
+		
+		Arguments:
+			position {`Vector2D:app.utility.Vector2D`} -- Position at which to calculate convergence. Must be in angular units.
+		"""
+
+		assert isinstance(position, Vector2D)
+		position = (position - self.galaxy.position).to('rad').magnitude()
+		er = self.einsteinRadius.value
+		return (1/2)*er/position
+
+	def shear(self,position):
+		'''Given a position, calculates the shear of the lens at that position.
+
+		Calculates the Shear of the macro-lens at the specified position. Useful for comparing to published values for the shear of an image.
+		Note that this is not a shear as in the external shear applied to the system. It is the shear value, coming from the aniosotropic component
+		of the Jacobian matrix, mapping from the source plane to lens plane. In other words, it describes how much a circular image would be stretched,
+		provided the image is at the specified location.
+		
+		[description]
+		
+		Arguments:
+			position {`Vector2D:app.utility.Vector2D`} -- Position at which to calculate shear. Must be in angular units.
+		'''
+
+		assert isinstance(position,Vector2D)
+		v = (position - self.galaxy.position).to('rad')
+		b = self.einsteinRadius.value
+		gam = self.galaxy.shearMag
+		p = self.galaxy.shearAngle.to('rad').value
+		s1 = (1/2)*(b*(v.y*v.y-v.x*v.x)/((v.x*v.x+v.y*v.y)**(1.5)) + 2*gam*math.cos(2*p))
+		s2 = -b*v.x*v.y/((v.x*v.x+v.y*v.y)**(1.5))+gam*math.sin(2*p)
+		return math.sqrt(s1*s1+s2*s2)
+
+
 	
 
 	def setStars(self,stars):
@@ -403,6 +443,7 @@ class Quasar:<br>
 		if self.quasar.redshift != other.quasar.redshift:
 			return False
 		return True
+
 
 	@property
 	def jsonString(self):

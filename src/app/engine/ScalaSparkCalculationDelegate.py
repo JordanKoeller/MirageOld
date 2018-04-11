@@ -36,6 +36,8 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
     
     def make_mag_map(self,center,dims,resolution):
         print("Now querying the source plane to calculate the magnification map.")
+        #return
+        print("Made it too far")
         resx = resolution.x
         resy = resolution.y
         start = center - dims/2
