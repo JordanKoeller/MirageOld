@@ -30,7 +30,7 @@ object Main extends App {
 
   def setFile(fname: String) = filename = fname
 
-  def createRDDdGrid(
+  def createRDDGrid(
     starsfile: String,
     pointConstant: Double,
     sisConstant: Double,
@@ -71,7 +71,7 @@ object Main extends App {
     broadParams.unpersist()
   }
   
-  def createRDDGrid(
+  def createRDDdGrid(
     starsfile: String,
     pointConstant: Double,
     sisConstant: Double,
@@ -113,9 +113,9 @@ object Main extends App {
       width.toDouble,
       height.toDouble)
       
+    val broadParams = sc.broadcast(parameters)
     val rayTraceUDF = session.udf.register("raytrace", (x:Long) => rayTracer(x,broadParams))
 
-    val broadParams = sc.broadcast(parameters)
     //Now need to construct the grid
     // val partitioner = new ColumnPartitioner()
     val partitioner = new BalancedColumnPartitioner

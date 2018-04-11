@@ -36,8 +36,8 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) ext
     println("Done. Now onto Querying")
     val queries = rdd.flatMap { grid =>
       gen.flatMap { qPt =>
-        if (grid.intersects(qPt.x,qPt.y, r.value)) Array(pixelConstructor(qPt.px, qPt.py, grid.query_point_count(qPt.x, qPt.y, r.value)))
-        else Array[PixelValue]()
+        if (grid.intersects(qPt.x,qPt.y, r.value)) List(pixelConstructor(qPt.px, qPt.py, grid.query_point_count(qPt.x, qPt.y, r.value)))
+        else List[PixelValue]()
       }
     }
 
