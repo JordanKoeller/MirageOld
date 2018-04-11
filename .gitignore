@@ -181,7 +181,7 @@ project/plugins/project/
 ### Scala ###
 *.class
 *.log
-
+*.classpath
 
 ### Spark-related things ###
 /src/metastore_db/

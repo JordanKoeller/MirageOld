@@ -40,33 +40,12 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) ext
         else List[PixelValue]()
       }
     }
-<<<<<<< HEAD
-    rdd.count()
-    accumulator.getGrid()
-*/
-    
-    val ret = Array.fill(pts.size,pts(1).size)(0)
-    val retPairs = rdd.aggregate(Array[Long]())((counter,grid) => {
-      val relevantQueryPts = broadcastedGroups.value(grid.partitionIndex)
-      val newPts = relevantQueryPts.map{qPt =>
-        val x = qPt._1._1 
-        val y = qPt._1._2
-        val num = grid.query_point_count(x, y, radius)
-        val pos = (x.toLong << 16) + y.toInt
-        (pos.toLong << 32) + num.toLong
-      }
-      counter ++ newPts
-    }, (c1,c2) => c1 ++ c2)
-    retPairs.foreach{elem =>
-      ret((elem >>48).toInt)((elem << 48 >> 48).toInt) += (elem >> 32).toInt
-=======
 
     val collected = queries.collect()
     println("Collected. Formatting Return")
     val ret = Array.fill(gen.xDim, gen.yDim)(0)
     collected.foreach { elem =>
       ret(elem.x)(elem.y) += elem.value
->>>>>>> 46e94f79aa28282b23f16fddafd60b11fc61e56f
     }
     ret
   }
