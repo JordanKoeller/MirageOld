@@ -9,7 +9,6 @@ from astropy import constants as const
 import numpy as np
 
 from .CalculationDelegate import CalculationDelegate
-from memory_profiler import profile
 
 
 _sc = None
@@ -25,7 +24,8 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         Constructor
         '''
         CalculationDelegate.__init__(self)
-        
+
+    @property    
     def parameters(self):
         return self._parameters
 
