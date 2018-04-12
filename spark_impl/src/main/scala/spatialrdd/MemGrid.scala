@@ -1,12 +1,11 @@
 package spatialrdd
 import scala.collection.mutable
-import utility.IndexPair
 import utility.DoublePair
 import utility.Index
 import math.sqrt
 
 //class MemGrid(grid: Array[Array[mutable.ArrayBuffer[Double]]], _hashX: Double => Int, _hashY: Double => Int, sz: Int, val partitionIndex: Int) extends SpatialData {
-class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Double]]], hashXPair: (HashFunc, Dehasher), hashYPair: (HashFunc, Dehasher), sz: Int, val partitionIndex: Int) extends SpatialData {
+class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Double]]], hashXPair: (HashFunc, Dehasher), hashYPair: (HashFunc, Dehasher), sz: Int, extremes:(Double,Double,Double,Double)) extends SpatialData {
 
   private def _hashX = hashXPair._1
 
@@ -45,6 +44,25 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
       grid(i)(j).size / 2
     } else 0
   }
+  
+  private def radius2(x1:Double,x2:Double,y1:Double,y2:Double):Double = {
+    val dx = x2 - x1
+    val dy = y2 - y1
+    dx*dx+dy*dy
+  }
+  
+  private def contains(x:Double,y:Double):Boolean = {
+    x > extremes._1 && x < extremes._2 && y > extremes._3 && y < extremes._4
+  }
+  
+  def intersects(x:Double,y:Double,r:Double):Boolean = {
+    val flag1 = contains(x-r,y) || contains(x+r,y) || contains(x,y-r) || contains(x,y+r)
+//    val r2 = r*r
+//    val flag2 = radius2(extremes._1,extremes._2,pt._1,pt._2)
+    flag1
+    //NEEDS WORK
+    //FIXME
+  }
 
   //  private def queryOptimized(x:Double, y:Double, r:Double): Int = {
   //    var counter = 0
@@ -58,6 +76,8 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
   //    }
   //    ???
   //  }
+  
+  
 
   override def query_point_count(x: Double, y: Double, r: Double): Int = {
     val center = _hashFunction(x, y)
@@ -115,7 +135,7 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
     counter
   }
 
-  override def query_points(pts: Iterator[(IndexPair, DoublePair)], r: Double): Iterator[(IndexPair, Index)] = {
+  override def query_points(pts: Iterator[((Int,Int), DoublePair)], r: Double): Iterator[((Int,Int), Index)] = {
     pts.map(pt => pt._1 -> query_point_count(pt._2._1, pt._2._2, r))
   }
 
@@ -125,8 +145,8 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
 
 object MemGrid {
 
-  val bucketFactor = 4
-  def apply(data: IndexedSeq[DoublePair], partitionIndex: Int, bucketFactor: Int = bucketFactor): MemGrid = {
+  val bucketFactor = 2
+  def apply(data: IndexedSeq[DoublePair], bucketFactor: Int = bucketFactor): MemGrid = {
     val xHashPair = hashDehashPair(data, (l: DoublePair) => l._1, math.sqrt(data.size).toInt * bucketFactor)
     val yHashPair = hashDehashPair(data, (l: DoublePair) => l._2, math.sqrt(data.size).toInt * bucketFactor)
     //    val _hashX = equalHashing(data, (l: (Double, Double)) => l._1, math.sqrt(data.size).toInt * bucketFactor)
@@ -135,6 +155,10 @@ object MemGrid {
     val grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Double]]] = mutable.Map()
     //    val grid = Array.fill(numBucs)(Array.fill(numBucs)(mutable.ArrayBuffer[Double]()))
     var rover = 0
+    var xMin = Double.MaxValue
+    var xMax = -Double.MaxValue
+    var yMin = Double.MaxValue
+    var yMax = -Double.MaxValue
     while (rover < data.size) {
       val elem = data(rover)
       val x = xHashPair._1(elem._1)
@@ -144,7 +168,11 @@ object MemGrid {
       grid(x)(y) += elem._1
       grid(x)(y) += elem._2
       rover += 1
+      if (elem._1 < xMin) xMin = elem._1
+      if (elem._2 < yMin) yMin = elem._2
+      if (elem._2 > yMax) yMax = elem._2
+      if (elem._1 > xMax) xMax = elem._1
     }
-    new MemGrid(grid, xHashPair, yHashPair, data.size, partitionIndex)
+    new MemGrid(grid, xHashPair, yHashPair, data.size,(xMin,xMax,yMin,yMax))
   }
 }
