@@ -37,7 +37,6 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
     def make_mag_map(self,center,dims,resolution):
         print("Now querying the source plane to calculate the magnification map.")
         #return
-        print("Made it too far")
         resx = resolution.x
         resy = resolution.y
         start = center - dims/2
@@ -98,7 +97,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
             stringArr = list(map(lambda row: row.split(','), data.split(':')))
             numArr = [list(map(lambda s:float(s),row)) for row in stringArr]
             npArr = np.array(numArr,dtype = float)
-            return int(npArr[0,0])   
+            return npArr   
             
     def make_light_curve(self,mmin,mmax,resolution):
         raise NotImplementedError
@@ -113,9 +112,8 @@ def _get_or_create_context(p):
     if not _sc:
         from pyspark.conf import SparkConf
         from pyspark.context import SparkContext
-        cd = p.canvasDim
-        ns = p.galaxy.percentStars
-        conf = SparkConf().setAppName(str(cd) + "," + str(ns))
+
+        conf = SparkConf().setAppName(p.jsonString)
         conf = (conf)
         _sc = SparkContext(conf=conf)
         _sc.setLogLevel("WARN")
