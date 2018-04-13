@@ -1,0 +1,30 @@
+{
+	"build_systems":
+	[
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"/home/jkoeller/miniconda3/bin/python\" -u \"$file\""
+		}
+	],
+	"folders":
+	[
+		{
+			"path": "src/app"
+		},
+		{
+			"path": "spark_impl"
+		}
+	],
+	"settings":
+	{
+		"anaconda_linting": true,
+		"anaconda_linting_behaviour": "always",
+		"pep257": false,
+		"python_interpreter": "~/miniconda3/bin/python",
+		"test_command": "python -m unittest discover",
+		"use_pylint": false,
+		"validate_imports": true
+	}
+}
