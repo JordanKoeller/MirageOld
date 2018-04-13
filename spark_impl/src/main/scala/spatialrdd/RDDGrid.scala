@@ -35,11 +35,10 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) ext
     val r = sc.broadcast(radius)
     val queries = rdd.flatMap { grid =>
       gen.flatMap { qPt =>
-        if (grid.intersects(qPt.x,qPt.y, r.value)) {
-	val num = grid.query_point_count(qPt.x,qPt.y,r.value)
-	if (num != 0) pixelConstructor(qPt.px,qPt.py,num) :: Nil else Nil
-	}
-        else List[PixelValue]()
+        if (grid.intersects(qPt.x, qPt.y, r.value)) {
+          val num = grid.query_point_count(qPt.x, qPt.y, r.value)
+          if (num != 0) pixelConstructor(qPt.px, qPt.py, num) :: Nil else Nil
+        } else List[PixelValue]()
       }
     }
 
@@ -50,7 +49,6 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) ext
     }
     ret
   }
-
 
   def count: Long = rdd.count()
 

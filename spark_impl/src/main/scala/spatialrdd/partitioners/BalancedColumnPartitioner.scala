@@ -8,21 +8,18 @@ import spatialrdd.MinMax
 import utility.DoublePair
 class BalancedColumnPartitioner extends SpatialPartitioning {
   private var _numPartitions = 1
-  private var _ranger:RangePartitioner[Double,Double] = _
-//  private var _mixer:Array[Int] = _
-
+  private var _ranger: RangePartitioner[Double, Double] = _
+  //  private var _mixer:Array[Int] = _
 
   def getPartition(key: Any): Int = {
     //Has the _mixer array to jumble the keys a bit. Gives a more even distribution of work across the cluster, while the RangePartitioner gives an equal distribution of data.
     _ranger.getPartition(key)
   }
 
-  def getPartitions(key: (Double,Double), r: Double): Set[Int] = {
-    (for (i <- _ranger.getPartition(key._1 - r) to _ranger.getPartition(key._2+r)) yield i).toSet
-//    val range = _ranger.getPartition(key._1 - r) to _ranger.getPartition(key._2+r)
-//    range.toSet
-    
-
+  def getPartitions(key: (Double, Double), r: Double): Set[Int] = {
+    (for (i <- _ranger.getPartition(key._1 - r) to _ranger.getPartition(key._2 + r)) yield i).toSet
+    //    val range = _ranger.getPartition(key._1 - r) to _ranger.getPartition(key._2+r)
+    //    range.toSet
 
   }
 
@@ -33,9 +30,9 @@ class BalancedColumnPartitioner extends SpatialPartitioning {
   override def profileData(data: RDD[DoublePair]): RDD[DoublePair] = {
     _numPartitions = data.getNumPartitions
     println("Found and setting number of partitions as " + _numPartitions)
-//    _mixer = Array.range(0,numPartitions).toSet.toArray
-//    val shuffled = data.repartition(_numPartitions)
-//    val ret = data.mapPartitions(elemIter => elemIter.map(elem => (elem._1, elem._2)),true) 
+    //    _mixer = Array.range(0,numPartitions).toSet.toArray
+    //    val shuffled = data.repartition(_numPartitions)
+    //    val ret = data.mapPartitions(elemIter => elemIter.map(elem => (elem._1, elem._2)),true)
     _ranger = new RangePartitioner(_numPartitions, data)
     data
   }
