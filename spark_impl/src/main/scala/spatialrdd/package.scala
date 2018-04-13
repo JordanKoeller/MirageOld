@@ -27,7 +27,7 @@ package object spatialrdd {
       if (mm1.max > mm2.max) ret.max = mm1.max else ret.max = mm2.max
       ret
     })
-    val div = (minMax.max - minMax.min) / math.sqrt(buckets)
+    val div = (minMax.max - minMax.min) / buckets.toDouble
     (x: Double) => ((x - minMax.min) / div).toInt
   }
 

@@ -29,7 +29,8 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) ext
     ret
   }
 
-  def query_2(gen: GridGenerator, radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
+  def query_2(gen: 
+      GridGenerator, radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
     println("Broadcasting generator")
     val bgen = sc.broadcast(gen)
     val r = sc.broadcast(radius)
@@ -38,7 +39,7 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) ext
         if (grid.intersects(qPt.x, qPt.y, r.value)) {
           val num = grid.query_point_count(qPt.x, qPt.y, r.value)
           if (num != 0) pixelConstructor(qPt.px, qPt.py, num) :: Nil else Nil
-        } else List[PixelValue]()
+        } else Nil
       }
     }
 
@@ -51,5 +52,9 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) ext
   }
 
   def count: Long = rdd.count()
+  
+  def destroy():Unit = {
+	rdd.unpersist(blocking=true)    
+  }
 
 }
