@@ -34,7 +34,7 @@ object Main extends App {
     starsfile: String,
     pointConstant: Double,
     sisConstant: Double,
-    shearMag: Double,
+    shearMag: Double, 
     shearAngle: Double,
     dTheta: Double,
     centerX: Double,
@@ -129,12 +129,9 @@ object Main extends App {
 
 
   def queryPoints(x0: Double, y0: Double, x1: Double, y1: Double, xDim: Int, yDim: Int, radius: Double, ctx: JavaRDD[Int], verbose: Boolean = false) = {
-    println("Querying Points")
     val sc = ctx.context
-    println("Made coordinate plane. Now broadcasting to SpatialRDD")
     val generator = new GridGenerator(x0, y0, x1, y1, xDim, yDim)
     val retArr = rddGrid.query_2(generator, radius, sc, verbose = verbose)
-    println("Done Querying. Now onto formatting to return.")
     writeFile(retArr)
   }
 
