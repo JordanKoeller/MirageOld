@@ -59,9 +59,9 @@ package object spatialrdd {
       if (mm1.max > mm2.max) ret.max = mm1.max else ret.max = mm2.max
       ret
     })
-    val div = (minMax.max - minMax.min) / buckets.toInt
+    val div = (minMax.max - minMax.min) / buckets.toDouble
     val hash = (x: Double) => ((x - minMax.min) / div).toInt
-    val dehash = (x: Index) => (x.toDouble*div + minMax.min)
+    val dehash = (x: Index) => (x.toDouble*div.toDouble + minMax.min)
     (hash,dehash)
   }
 

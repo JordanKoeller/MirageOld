@@ -56,5 +56,9 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) ext
   def destroy():Unit = {
 	rdd.unpersist(blocking=true)    
   }
+  
+  def printSuccess:Unit = {
+    rdd.foreach(i => println("Finished Successfully"))
+  }
 
 }

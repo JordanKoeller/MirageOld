@@ -69,10 +69,17 @@ class ExperimentResultCalculator(object):
         Function to call to calculate results. Returns a list of the resultant data.
         '''
         ret = []
-        begin = time.clock()
+        from datetime import datetime as DT
+        starttime = DT.now()
         for exp in range(0,len(self.experimentRunners)):
             ret.append(self.experimentRunners[exp](exp,model))
-        print("Experiment Finished in "+str(time.clock()-begin)+" seconds")
+        endTime = DT.now()
+        dSec = (endTime - starttime).seconds
+        hrs = dSec // 3600
+        mins = (dSec // 60) % 60
+        secs = dSec % 60
+        timeString = str(hrs)+" hours, " + str(mins) + " minutes, and " + str(secs) + " seconds"
+        print("Experiment Finished in " + timeString)
         return ret
 
 
