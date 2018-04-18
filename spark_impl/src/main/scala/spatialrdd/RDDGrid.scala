@@ -16,8 +16,9 @@ import utility.mkPair
 import utility.Index
 import utility.PixelValue
 import utility.pixelConstructor
+import spatialrdd.partitioners.BalancedColumnPartitioner
 
-class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) extends RDDGridProperty {
+class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = new BalancedColumnPartitioner, nodeStructure: IndexedSeq[(Double,Double)] => SpatialData = MemGrid.apply) extends RDDGridProperty {
   private val rdd = _init(data, partitioner)
 
   def _init(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) = {
@@ -25,11 +26,11 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) ext
     val rddTraced = rddProfiled.partitionBy(partitioner)
     val glommed = rddTraced.glom()
     //    println (glommed.map(_.length).collect.mkString(","))
-    val ret = glommed.map(arr => MemGrid(arr)).persist(StorageLevel.MEMORY_ONLY)
+    val ret = glommed.map(arr => nodeStructure(arr)).persist(StorageLevel.MEMORY_ONLY)
     ret
   }
 
-  def query_2(gen: GridGenerator, radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
+  def queryPoints(gen: GridGenerator, radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
     println("Broadcasting generator")
     val bgen = sc.broadcast(gen)
     val r = sc.broadcast(radius)
