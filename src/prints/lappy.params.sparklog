@@ -1,0 +1,14 @@
+Program initialized.
+____________________________ 
+
+Process ID = 121864
+
+____________________________
+Traceback (most recent call last):
+  File "/users/jkoeller/Documents/Research/Pooley_Research/lensing_simulator/src/Main.py", line 70, in <module>
+    run_simulation(args.run)
+  File "/users/jkoeller/Documents/Research/Pooley_Research/lensing_simulator/src/Main.py", line 21, in run_simulation
+    table = fileLoader.load()
+  File "/users/jkoeller/Documents/Research/Pooley_Research/lensing_simulator/src/app/io.py", line 287, in load
+    self._file = open(self._filename,'rb+')
+FileNotFoundError: [Errno 2] No such file or directory: '../Test/lappy.params'

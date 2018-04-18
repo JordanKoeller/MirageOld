@@ -1,0 +1,19 @@
+Program initialized.
+____________________________ 
+
+Process ID = 113061
+
+____________________________
+Core count found as 32
+Started tracking
+Core count found as 32
+Mass = 3940.6910527865207 solMass
+Mass = 3940.6910527865207 solMass
+Smooth mass = 3940.6910527865207 solMass
+Percent Stars mass = 0.2
+Using the massFunction <app.calculator.InitialMassFunction.Kroupa_2001_Modified object at 0x7f30c4805c50>
+Reconfiguring
+Now ray-tracing
+Time Ray-Tracing = 7562.15
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc

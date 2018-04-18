@@ -34,13 +34,23 @@ class ExperimentTableRunner(object):
             numTrials = params.extras.numTrials 
             self.filemanager.newExperiment(params) #NEED TO IMPLIMENT
             exptRunner = ExperimentResultCalculator(params,self.signals)
+            from datetime import datetime as DT
             for expt in range(0,numTrials):
+                starttime = DT.now()
+                print("Started tracking")
                 newP = varyTrial(params,expt) #NEED TO IMPLIMENT
                 model = CalculationModel(newP)
                 model.bind_parameters()
                 data = exptRunner.runExperiment(model) #NEED TO IMPLIMENT
                 self.signals['progressLabel'].emit("Trial "+str(expt) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)) +" finished")
                 self.filemanager.write(data)
+                endTime = DT.now()
+                dSec = (endTime - starttime).seconds
+                hrs = dSec // 3600
+                mins = (dSec // 60) % 60
+                secs = dSec % 60
+                timeString = str(hrs)+" hours, " + str(mins) + " minutes, and " + str(secs) + " seconds"
+                print("Experiment Finished in " + timeString)
             self.filemanager.closeExperiment()
         self.filemanager.flush()
         self.filemanager.close()

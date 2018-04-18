@@ -1,6 +1,7 @@
 package main
 
 import java.io._
+import org.apache.spark.sql.Encoders.scalaLong
 
 import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.sql.SparkSession
@@ -21,13 +22,21 @@ import org.apache.spark.sql.types.StructField
 import org.apache.spark.sql.types.LongType
 import org.apache.spark.sql.Row
 import org.apache.spark.sql._
+import org.apache.spark.sql.types.DoubleType
+import lensing.SQLTracer
 
 object Main extends App {
 
   private var rddGrid: RDDGridProperty = null
   private var filename: String = "/tmp/lenssim_tmpfile"
 
-
+  val schema = StructType(
+		  Array(
+				  StructField("long", LongType)))
+  val pairSchema = StructType(
+		  Array(
+				  StructField("x", DoubleType),
+				  StructField("y", DoubleType)))
   def setFile(fname: String) = filename = fname
 
   def createRDDGrid(
@@ -50,7 +59,7 @@ object Main extends App {
     }
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
-    val pixels = sc.range(0, (width * height).toLong, 1,768)
+    val pixels = sc.range(0, (width * height).toLong, 1, 32*3)
     val parameters = RayParameters(
       stars,
       pointConstant,
@@ -73,7 +82,7 @@ object Main extends App {
     broadParams.unpersist()
   }
 
-  def createRDDdGrid(
+  def createRDDGfrid(
     starsfile: String,
     pointConstant: Double,
     sisConstant: Double,
@@ -85,12 +94,11 @@ object Main extends App {
     width: Int,
     height: Int,
     ctx: JavaRDD[Int]): Unit = {
+    if (rddGrid != null) rddGrid.destroy()
+
     val sc = ctx.context
     val session = SparkSession.builder().config(sc.getConf).getOrCreate()
 
-    val schema = StructType(
-      Array(
-        StructField("long", LongType)))
     //    val df = session.range(start, end)
 
     val stars = scala.io.Source.fromFile(starsfile).getLines().toArray.map { row =>
@@ -99,9 +107,9 @@ object Main extends App {
     }
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new DataFrameRayTracer()
-    val pixels = sc.range(0, (width * height).toLong, 1, 768).map(Row(_))
+    val pixels = sc.range(0, (width * height).toLong, 1, 768)
 
-    val pixelFrame = session.createDataFrame(pixels, schema)
+    val pixelFrame = session.createDataset(pixels)(scalaLong)
     val parameters = RayParameters(
       stars,
       pointConstant,
@@ -120,10 +128,18 @@ object Main extends App {
     //Now need to construct the grid
     // val partitioner = new ColumnPartitioner()
     val partitioner = new BalancedColumnPartitioner
+    val tracer = new SQLTracer
 
-    val mappedPixels = pixelFrame.select(callUDF("raytrace", col("sourceplane")))
-    print(mappedPixels.schema.toString())
-    val rdd = mappedPixels.rdd.map { case Row(x: Double, y: Double) => (x, y) }
+//    val mappedPixels = pixelFrame.select(callUDF("raytrace", col("value")) as "value")
+//    println(mappedPixels.schema.toString())
+//    mappedPixels.collect()
+//    println("DONE COLLECTING")
+    val mappedPixels = tracer(pixelFrame,broadParams)
+    val rdd = mappedPixels.rdd.map{row =>
+//      val row = elem.getAs[Row]("value")
+      (row.getAs[Double]("_1"),row.getAs[Double]("_2"))
+    }
+//    println(rdd.first().schema)
     rddGrid = new RDDGrid(rdd, partitioner)
     broadParams.unpersist()
   }

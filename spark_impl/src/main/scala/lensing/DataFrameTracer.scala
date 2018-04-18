@@ -6,9 +6,9 @@ import org.apache.spark.sql.Row
 
 
 
-class DataFrameRayTracer() {
+class DataFrameRayTracer() extends Serializable {
 
-  def apply(long:Long, p: Broadcast[RayParameters]): Row = {
+  def apply(long:Long, p: Broadcast[RayParameters]): (Double,Double) = {
     val pi2 = math.Pi / 2.0
     //    val ret = pixels.glom().map { pixelIter =>
       val y = long.toInt % p.value.width
@@ -42,6 +42,6 @@ class DataFrameRayTracer() {
       val phi = 2 * (pi2 - p.value.shearAngle) - math.atan2(deltaRY, deltaRX)
       retX += p.value.shearMag * r * math.cos(phi)
       retY += p.value.shearMag * r * math.sin(phi)
-      Row(deltaRX - retX, deltaRY - retY)
+      (deltaRX - retX, deltaRY - retY)
   }
 }
