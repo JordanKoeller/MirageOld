@@ -1,0 +1,40 @@
+Program initialized.
+____________________________ 
+
+Process ID = 16914
+
+____________________________
+Core count found as 32
+Core count found as 32
+Mass = 3940.69105278652 solMass
+Mass = 3940.69105278652 solMass
+Smooth mass = 3940.69105278652 solMass
+Percent Stars mass = 0.2
+Using the massFunction <app.calculator.InitialMassFunction.Kroupa_2001_Modified object at 0x7fd1d361a518>
+Reconfiguring
+Now ray-tracing
+Time Ray-Tracing = 3348.8700000000003
+Time calculating = 3362.21 seconds.
+Experiment Finished in 0 hours, 6 minutes, and 28 seconds
+Core count found as 32
+Mass = 3940.69105278652 solMass
+Mass = 3940.69105278652 solMass
+Smooth mass = 3940.69105278652 solMass
+Percent Stars mass = 0.4
+Using the massFunction <app.calculator.InitialMassFunction.Kroupa_2001_Modified object at 0x7fd1d361a518>
+Reconfiguring
+Now ray-tracing
+Time Ray-Tracing = 6396.879999999999
+Time calculating = 6409.459999999999 seconds.
+Experiment Finished in 0 hours, 4 minutes, and 48 seconds
+Core count found as 32
+Mass = 3940.69105278652 solMass
+Mass = 3940.69105278652 solMass
+Smooth mass = 3940.69105278652 solMass
+Percent Stars mass = 0.8
+Using the massFunction <app.calculator.InitialMassFunction.Kroupa_2001_Modified object at 0x7fd1d361a518>
+Reconfiguring
+Now ray-tracing
+Time Ray-Tracing = 13020.51
+Time calculating = 13032.550000000001 seconds.
+Experiment Finished in 0 hours, 7 minutes, and 19 seconds

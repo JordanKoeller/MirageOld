@@ -1,0 +1,71 @@
+lll.params.clog
+lll.params.clog
+llm.params.clog
+lls.params.clog
+lml.params.clog
+lmm.params.clog
+lms.params.clog
+lsl.params.clog
+lsm.params.clog
+lss.params.clog
+Experiment Finished in 0 hours, 30 minutes, and 33 seconds
+Experiment Finished in 0 hours, 30 minutes, and 50 seconds
+mll.params.clog
+mlm.params.clog
+mls.params.clog
+mml.params.clog
+mmm.params.clog
+mms.params.clog
+msl.params.clog
+Experiment Finished in 0 hours, 6 minutes, and 5 seconds
+Experiment Finished in 0 hours, 6 minutes, and 17 seconds
+Experiment Finished in 0 hours, 6 minutes, and 0 seconds
+Experiment Finished in 0 hours, 6 minutes, and 37 seconds
+Experiment Finished in 0 hours, 6 minutes, and 15 seconds
+Experiment Finished in 0 hours, 7 minutes, and 31 seconds
+msm.params.clog
+Experiment Finished in 0 hours, 5 minutes, and 14 seconds
+Experiment Finished in 0 hours, 5 minutes, and 26 seconds
+Experiment Finished in 0 hours, 6 minutes, and 32 seconds
+Experiment Finished in 0 hours, 7 minutes, and 12 seconds
+Experiment Finished in 0 hours, 7 minutes, and 9 seconds
+Experiment Finished in 0 hours, 8 minutes, and 24 seconds
+mss.params.clog
+Experiment Finished in 0 hours, 1 minutes, and 37 seconds
+Experiment Finished in 0 hours, 1 minutes, and 48 seconds
+Experiment Finished in 0 hours, 1 minutes, and 59 seconds
+Experiment Finished in 0 hours, 2 minutes, and 35 seconds
+Experiment Finished in 0 hours, 2 minutes, and 43 seconds
+Experiment Finished in 0 hours, 3 minutes, and 59 seconds
+sll.params.clog
+Experiment Finished in 0 hours, 4 minutes, and 53 seconds
+Experiment Finished in 0 hours, 5 minutes, and 0 seconds
+Experiment Finished in 0 hours, 5 minutes, and 5 seconds
+Experiment Finished in 0 hours, 5 minutes, and 15 seconds
+Experiment Finished in 0 hours, 4 minutes, and 53 seconds
+Experiment Finished in 0 hours, 5 minutes, and 13 seconds
+slm.params.clog
+Experiment Finished in 0 hours, 2 minutes, and 14 seconds
+Experiment Finished in 0 hours, 2 minutes, and 21 seconds
+Experiment Finished in 0 hours, 2 minutes, and 24 seconds
+Experiment Finished in 0 hours, 2 minutes, and 34 seconds
+Experiment Finished in 0 hours, 2 minutes, and 27 seconds
+Experiment Finished in 0 hours, 2 minutes, and 46 seconds
+sls.params.clog
+Experiment Finished in 0 hours, 0 minutes, and 54 seconds
+Experiment Finished in 0 hours, 1 minutes, and 1 seconds
+Experiment Finished in 0 hours, 0 minutes, and 59 seconds
+Experiment Finished in 0 hours, 1 minutes, and 9 seconds
+Experiment Finished in 0 hours, 1 minutes, and 5 seconds
+Experiment Finished in 0 hours, 1 minutes, and 23 seconds
+smm.params.clog
+Experiment Finished in 0 hours, 2 minutes, and 58 seconds
+Experiment Finished in 0 hours, 3 minutes, and 22 seconds
+Experiment Finished in 0 hours, 3 minutes, and 24 seconds
+Experiment Finished in 0 hours, 4 minutes, and 1 seconds
+Experiment Finished in 0 hours, 3 minutes, and 34 seconds
+Experiment Finished in 0 hours, 4 minutes, and 51 seconds
+sms.params.clog
+ssl.params.clog
+ssm.params.clog
+sss.params.clog

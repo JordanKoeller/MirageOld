@@ -1,0 +1,40 @@
+Program initialized.
+____________________________ 
+
+Process ID = 131472
+
+____________________________
+Core count found as 32
+Mass = 3940.69105278652 solMass
+Mass = 3940.69105278652 solMass
+Smooth mass = 3940.69105278652 solMass
+Percent Stars mass = 0.2
+Using the massFunction <app.calculator.InitialMassFunction.Kroupa_2001_Modified object at 0x7fb62fb994e0>
+Calling JVM to ray-trace.
+Found and setting number of partitions as 768
+Finished ray-tracing.
+Now querying the source plane to calculate the magnification map.
+Broadcasting generator
+Experiment Finished in 0 hours, 5 minutes, and 0 seconds
+Mass = 3940.69105278652 solMass
+Mass = 3940.69105278652 solMass
+Smooth mass = 3940.69105278652 solMass
+Percent Stars mass = 0.4
+Using the massFunction <app.calculator.InitialMassFunction.Kroupa_2001_Modified object at 0x7fb62fb994e0>
+Calling JVM to ray-trace.
+Found and setting number of partitions as 768
+Finished ray-tracing.
+Now querying the source plane to calculate the magnification map.
+Broadcasting generator
+Experiment Finished in 0 hours, 6 minutes, and 53 seconds
+Mass = 3940.69105278652 solMass
+Mass = 3940.69105278652 solMass
+Smooth mass = 3940.69105278652 solMass
+Percent Stars mass = 0.8
+Using the massFunction <app.calculator.InitialMassFunction.Kroupa_2001_Modified object at 0x7fb62fb994e0>
+Calling JVM to ray-trace.
+Found and setting number of partitions as 768
+Finished ray-tracing.
+Now querying the source plane to calculate the magnification map.
+Broadcasting generator
+Experiment Finished in 0 hours, 11 minutes, and 38 seconds

@@ -1,0 +1,16 @@
+Program initialized.
+____________________________ 
+
+Process ID = 92603
+
+____________________________
+Traceback (most recent call last):
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/Main.py", line 70, in <module>
+    run_simulation(args.run)
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/Main.py", line 14, in run_simulation
+    from app.calculator import ExperimentTableRunner
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/app/calculator/__init__.py", line 4, in <module>
+    from .ExperimentTableRunner import ExperimentTableRunner
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/app/calculator/ExperimentTableRunner.py", line 6, in <module>
+    from app.calculator.ExperimentResultCalculator import ExperimentResultCalculator, varyTrial
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/app/calculator/ExperimentResultCalculator.py", line 8, in <module>

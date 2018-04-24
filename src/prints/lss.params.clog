@@ -1,0 +1,80 @@
+Program initialized.
+____________________________ 
+
+Process ID = 92827
+
+____________________________
+Core count found as 32
+Mass = 3940.6910527865207 solMass
+Mass = 3940.6910527865207 solMass
+Smooth mass = 3940.6910527865207 solMass
+Percent Stars mass = 0.01
+Using the massFunction <app.calculator.InitialMassFunction.Kroupa_2001_Modified object at 0x7f9e0e82c518>
+Calling JVM to ray-trace.
+Found and setting number of partitions as 768
+Finished ray-tracing.
+Now querying the source plane to calculate the magnification map.
+Broadcasting generator
+Experiment Finished in 0 hours, 30 minutes, and 33 seconds
+Experiment Finished in 0 hours, 30 minutes, and 50 seconds
+Mass = 3940.6910527865207 solMass
+Mass = 3940.6910527865207 solMass
+Smooth mass = 3940.6910527865207 solMass
+Percent Stars mass = 0.1
+Using the massFunction <app.calculator.InitialMassFunction.Kroupa_2001_Modified object at 0x7f9e0e82c518>
+Calling JVM to ray-trace.
+Found and setting number of partitions as 768
+Finished ray-tracing.
+Now querying the source plane to calculate the magnification map.
+Broadcasting generator
+Traceback (most recent call last):
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/Main.py", line 70, in <module>
+    run_simulation(args.run)
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/Main.py", line 26, in run_simulation
+    queueThread.run()
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/app/calculator/ExperimentTableRunner.py", line 43, in run
+    data = exptRunner.runExperiment(model) #NEED TO IMPLIMENT
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/app/calculator/ExperimentResultCalculator.py", line 75, in runExperiment
+    ret.append(self.experimentRunners[exp](exp,model))
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/app/calculator/ExperimentResultCalculator.py", line 102, in __MAGMAP
+    ret = model.engine.make_mag_map(special.center,special.dimensions,special.resolution) #Assumes args are (topleft,height,width,resolution)
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/app/engine/Engine.py", line 48, in make_mag_map
+    ret = self._calcDel.make_mag_map(center,dims,resolution)
+  File "/users/jkoeller/Documents/Research/Pooley_Research/cluster/lensing_simulator/src/app/engine/ScalaSparkCalculationDelegate.py", line 48, in make_mag_map
+    self.sc._jvm.main.Main.queryPoints(x0,y0,x0+dims.to('rad').x,y0+dims.to('rad').y,int(resx),int(resy),radius,ctx,False)
+  File "/users/mlewis/spark-2.2.0-bin-hadoop2.7/python/lib/py4j-0.10.4-src.zip/py4j/java_gateway.py", line 1133, in __call__
+  File "/users/mlewis/spark-2.2.0-bin-hadoop2.7/python/lib/py4j-0.10.4-src.zip/py4j/protocol.py", line 319, in get_return_value
+py4j.protocol.Py4JJavaError: An error occurred while calling z:main.Main.queryPoints.
+: org.apache.spark.SparkException: Job 5 cancelled 
+	at org.apache.spark.scheduler.DAGScheduler.org$apache$spark$scheduler$DAGScheduler$$failJobAndIndependentStages(DAGScheduler.scala:1499)
+	at org.apache.spark.scheduler.DAGScheduler.handleJobCancellation(DAGScheduler.scala:1439)
+	at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:1686)
+	at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:1669)
+	at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:1658)
+	at org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:48)
+	at org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:630)
+	at org.apache.spark.SparkContext.runJob(SparkContext.scala:2022)
+	at org.apache.spark.SparkContext.runJob(SparkContext.scala:2043)
+	at org.apache.spark.SparkContext.runJob(SparkContext.scala:2062)
+	at org.apache.spark.SparkContext.runJob(SparkContext.scala:2087)
+	at org.apache.spark.rdd.RDD$$anonfun$foreach$1.apply(RDD.scala:918)
+	at org.apache.spark.rdd.RDD$$anonfun$foreach$1.apply(RDD.scala:916)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)
+	at org.apache.spark.rdd.RDD.withScope(RDD.scala:362)
+	at org.apache.spark.rdd.RDD.foreach(RDD.scala:916)
+	at spatialrdd.RDDGrid.printSuccess(RDDGrid.scala:61)
+	at main.Main$.queryPoints(Main.scala:135)
+	at main.Main.queryPoints(Main.scala)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)
+	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:357)
+	at py4j.Gateway.invoke(Gateway.java:280)
+	at py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)
+	at py4j.commands.CallCommand.execute(CallCommand.java:79)
+	at py4j.GatewayConnection.run(GatewayConnection.java:214)
+	at java.lang.Thread.run(Thread.java:748)
+
