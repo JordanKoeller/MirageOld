@@ -39,7 +39,7 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
         if (grid.intersects(qPt.x, qPt.y, r.value)) {
           val num = grid.query_point_count(qPt.x, qPt.y, r.value)
           if (num != 0) pixelConstructor(qPt.px, qPt.py, num) :: Nil else Nil
-        } else List[PixelValue]()
+        } else Nil
       }
     }
 
@@ -52,5 +52,13 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
   }
 
   def count: Long = rdd.count()
+  
+  def destroy():Unit = {
+	rdd.unpersist(blocking=true)    
+  }
+  
+  def printSuccess:Unit = {
+    rdd.foreach(i => println("Finished Successfully"))
+  }
 
 }

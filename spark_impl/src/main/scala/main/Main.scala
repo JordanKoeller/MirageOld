@@ -24,8 +24,9 @@ import org.apache.spark.sql._
 
 object Main extends App {
 
-  private var rddGrid: RDDGridProperty = _
+  private var rddGrid: RDDGridProperty = null
   private var filename: String = "/tmp/lenssim_tmpfile"
+
 
   def setFile(fname: String) = filename = fname
 
@@ -41,6 +42,7 @@ object Main extends App {
     width: Int,
     height: Int,
     ctx: JavaRDD[Int]): Unit = {
+    if (rddGrid != null) rddGrid.destroy()
     val sc = ctx.context
     val stars = scala.io.Source.fromFile(starsfile).getLines().toArray.map { row =>
       val starInfoArr = row.split(",").map(_.toDouble)
@@ -48,7 +50,7 @@ object Main extends App {
     }
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
-    val pixels = sc.range(0, (width * height).toLong, 1, 768)
+    val pixels = sc.range(0, (width * height).toLong, 1,768)
     val parameters = RayParameters(
       stars,
       pointConstant,
@@ -130,6 +132,7 @@ object Main extends App {
     val sc = ctx.context
     val generator = new GridGenerator(x0, y0, x1, y1, xDim, yDim)
     val retArr = rddGrid.query_2(generator, radius, sc, verbose = verbose)
+    rddGrid.printSuccess
     writeFile(retArr)
   }
 

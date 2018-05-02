@@ -64,8 +64,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.log:
         logging.basicConfig(filename=args.log[0],level=logging.INFO)
-    else:
-        logging.basicConfig(filename="logs/"+str(starttime.isoformat())+".log",level=logging.INFO)
     if not args.run and not args.visualize:
         visualize()
     if args.run:

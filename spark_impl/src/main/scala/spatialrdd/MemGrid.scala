@@ -23,10 +23,10 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
 
   private def _query_bucket(i: Int, j: Int, x: Double, y: Double, r2: Double): Int = {
     if (grid.contains(i) && grid(i).contains(j)) {
-//      val queryType = query_type(i, j, r2, x, y)
-//      if (queryType == -1) 0
-//      else if (queryType == 1) grid(i)(j).size / 2
-//      else if (queryType == 0 && grid(i)(j).size > 0) {
+      val queryType = query_type(i, j, r2, x, y)
+      if (queryType == -1) 0
+      else if (queryType == 1) grid(i)(j).size / 2
+      else if (queryType == 0 && grid(i)(j).size > 0) {
         var counter = 0
         var ind = 0
         var dx = 0.0
@@ -39,7 +39,7 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
         }
         counter
 
-//      } else 0
+      } else 0
 
     } else 0
 
@@ -56,7 +56,7 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
     ret += pointInCircle(x, y, r2, _dehashX(i + 1), _dehashY(j))
     ret += pointInCircle(x, y, r2, _dehashX(i), _dehashY(j + 1))
     ret += pointInCircle(x, y, r2, _dehashX(i + 1), _dehashY(j + 1))
-    if (ret == 4) 1 else if (ret == 0) -1 else 0
+    if (ret == 4) 1 else 0
     //1 means all enclosed
     //-1 means completely excluded
     //0 means partially enclosed
@@ -162,7 +162,6 @@ object MemGrid {
     val yHashPair = hashDehashPair(data, (l: DoublePair) => l._2, math.sqrt(data.size).toInt * bucketFactor)
     //    val _hashX = equalHashing(data, (l: (Double, Double)) => l._1, math.sqrt(data.size).toInt * bucketFactor)
     //    val _hashY = equalHashing(data, (l: (Double, Double)) => l._2, math.sqrt(data.size).toInt * bucketFactor)
-    val numBucs = math.sqrt(data.size).toInt * bucketFactor
     val grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Double]]] = mutable.Map()
     //    val grid = Array.fill(numBucs)(Array.fill(numBucs)(mutable.ArrayBuffer[Double]()))
     var rover = 0
