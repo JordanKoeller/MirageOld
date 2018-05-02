@@ -131,7 +131,7 @@ object Main extends App {
   def queryPoints(x0: Double, y0: Double, x1: Double, y1: Double, xDim: Int, yDim: Int, radius: Double, ctx: JavaRDD[Int], verbose: Boolean = false) = {
     val sc = ctx.context
     val generator = new GridGenerator(x0, y0, x1, y1, xDim, yDim)
-    val retArr = rddGrid.query_2(generator, radius, sc, verbose = verbose)
+    val retArr = rddGrid.queryPoints(generator, radius, sc, verbose = verbose)
     rddGrid.printSuccess
     writeFile(retArr)
   }
