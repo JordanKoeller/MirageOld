@@ -79,7 +79,6 @@ class ExperimentResultCalculator(object):
         mins = (dSec // 60) % 60
         secs = dSec % 60
         timeString = str(hrs)+" hours, " + str(mins) + " minutes, and " + str(secs) + " seconds"
-        print("Experiment Finished in " + timeString)
         return ret
 
 

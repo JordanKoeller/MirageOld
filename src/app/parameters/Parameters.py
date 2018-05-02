@@ -52,7 +52,7 @@ class ParametersJSONDecoder(object):
 		with u.add_enabled_units([Parameters.calculateAvgMassEinsteinRadius(js['galaxy']['redshift'],js['quasar']['redshift']),Parameters.calculateGravRad(qmass,js['quasar']['redshift'])]):
 			galaxy = gd.decode(js['galaxy'])
 			quasar = qd.decode(js['quasar'])
-			canvasDim = js['canvasDim']
+			canvasDim = int(js['canvasDim'])
 			# print(canvasDim)
 			dTheta = qDecode.decode(js['dTheta'])
 			# print(str(dTheta)+str("DTHETA HERE"))

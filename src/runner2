@@ -1,0 +1,1 @@
+spark-submit --driver-memory 30g --executor-memory 20g --jars ../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar --conf spark.driver.maxResultSize=10g --master spark://pandora00:7077 --verbose Main.py --run ../Test/$1 ../Test/ --log ../Test/logs/$1.log > prints/$1.clog
