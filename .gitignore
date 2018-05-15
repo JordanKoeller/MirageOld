@@ -181,8 +181,15 @@ project/plugins/project/
 ### Scala ###
 *.class
 *.log
-
+*.cache
 
 ### Spark-related things ###
 /src/metastore_db/
 # End of https://www.gitignore.io/api/sbt,scala
+
+*.deb
+*.cache
+*.jar
+
+/spark_impl/target/*
+
