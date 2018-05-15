@@ -45,7 +45,6 @@ class MasterController(Controller):
                         destroy_view=self._destroy_signal)
     
     def bind_to_model(self, model):
-        print("Binding to " + str(model))
         self.model = model
         self.parametersController.bind_to_model(self.model)
         self.magMapController.bind_to_model(self.model)
@@ -106,7 +105,11 @@ class MasterController(Controller):
         if not isinstance(trial,Trial):
             from app.lens_analysis import load
             trial = load(None)
-            trial = trial[0]
+            if trial:
+                trial = trial[0]
+            else:
+                print("Analysis Aborted")
+                return
         model = TrialModel(trial)
         self.runner = LightCurveRunner()
         self.bind_to_model(model)

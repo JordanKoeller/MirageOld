@@ -1,4 +1,4 @@
 cd ../spark_impl
 sbt assembly 
 cd ../src
-spark-submit --driver-memory 10g --executor-memory 12g --jars ../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar --master local[*] --verbose Main.py --run lappy.params ../Test/ --log test_local.log
+spark-submit --driver-memory 10g --executor-memory 12g --jars ../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar --master local[*] --verbose Main.py --run lappy.params ../debugging/ --log test_local.log

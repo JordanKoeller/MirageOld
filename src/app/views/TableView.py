@@ -240,3 +240,8 @@ class TableView(View):
     @property
     def experiments(self):
         return self.widget.experiments
+    
+    
+    
+    
+    

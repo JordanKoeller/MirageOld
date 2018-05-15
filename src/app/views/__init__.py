@@ -22,11 +22,12 @@ class View(Dock, SignalRepo):
         pass
     
     def destroy(self):
-#         print("BUG INFO: Should have closed the " +str(self))
+        print("Destroying " + str(self))
         try:
             self.sigClosed.emit(self)
             self.close()
         except AttributeError:
+            print("BUG INFO: Should have closed the " +str(self))
             return
     
 class CustomImageItem(ImageItem):

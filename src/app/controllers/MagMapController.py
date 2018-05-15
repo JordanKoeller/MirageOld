@@ -44,6 +44,7 @@ class MagMapController(Controller):
             print("Log of map")
             self.signals['set_magmap'].emit(logMap)
         except:
+            pass
             print("Exception in binding magmapmodel")
         
     def setROI(self,start,end):
