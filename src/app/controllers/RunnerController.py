@@ -8,23 +8,25 @@ from PyQt5.QtWidgets import QApplication
 
 import numpy as np
 
+
 class Runner(Controller):
-    def __init__(self,*args,**kwargs):
+
+    def __init__(self, *args, **kwargs):
         '''
         Constructor
         '''
-        Controller.__init__(self,*args,**kwargs)
+        Controller.__init__(self, *args, **kwargs)
         self._runningBool = False
         self._initialized = False
         self._spawnedGen = None
         
-    def trigger(self,model,masterController):
+    def trigger(self, model, masterController):
         if self._runningBool:
             self.halt()
         else:
             if not self._initialized:
-                self.initialize(model,masterController)
-                self._spawnedGen = self.generator(model,masterController)
+                self.initialize(model, masterController)
+                self._spawnedGen = self.generator(model, masterController)
             self._runningBool = True
             while self._runningBool:
                 try:
@@ -42,32 +44,32 @@ class Runner(Controller):
         self.halt()
         self._initialized = False
     
-    def broadcast(self,model,masterController,frame):
+    def broadcast(self, model, masterController, frame):
         masterController.parametersController.update(model.parameters)
-        masterController.lensedImageController.setLensedImg(model,frame)
+        masterController.lensedImageController.setLensedImg(model, frame)
         masterController.lightCurveController.add_point_and_plot(frame)
 #         masterController.magMapController.update(model.parameters)
         model.parameters.incrementTime(model.parameters.dt)
         QApplication.processEvents()
         
-    def initialize(self,model,masterController):
+    def initialize(self, model, masterController):
         print("Calling initialize")
         self._initialized = True
             
-    def generator(self,model,masterController):
+    def generator(self, model, masterController):
         pass
+
     
 class AnimationRunner(Runner):
     '''
     Controller for generating animations, like videos.
     '''
-    
 
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         '''
         Constructor
         '''
-        Runner.__init__(self,*args,**kwargs)
+        Runner.__init__(self, *args, **kwargs)
                         
     def generator(self, model, masterController):
         while True:
@@ -79,33 +81,34 @@ class AnimationRunner(Runner):
     def halt(self):
         self._runningBool = False
 
-    #NEED TO CHANGE THIS TO THE NEW INTERFACE
+    # NEED TO CHANGE THIS TO THE NEW INTERFACE
+
 
 class FrameRunner(Runner):
     
-    def __init__(self,*args,**kwargs):
-        Runner.__init__(self,*args,**kwargs)
+    def __init__(self, *args, **kwargs):
+        Runner.__init__(self, *args, **kwargs)
         
     def initialize(self, model, masterController):
         Runner.initialize(self, model, masterController)
     
-    def generator(self,model, masterController):
+    def generator(self, model, masterController):
         yield model.engine.get_frame()
         raise StopIteration
         
-        
     # THIS ONE TOO
+
         
 class LightCurveRunner(Runner):
     
-    def __init__(self,*args,**kwargs):
-        Runner.__init__(self,*args,**kwargs)
+    def __init__(self, *args, **kwargs):
+        Runner.__init__(self, *args, **kwargs)
         self._counter = 0
         self._xStepArr = 0
         self._yStepArr = 0
         self._generator = None
         
-    def initialize(self,model,masterController): 
+    def initialize(self, model, masterController): 
         Runner.initialize(self, model, masterController)
         lcparams = model.parameters.getExtras('lightcurve')
         begin = lcparams.pathStart.to('rad')
@@ -114,21 +117,21 @@ class LightCurveRunner(Runner):
         resolution = 1000
         print("NEED TO REFINE RESOLUTION SETTING IN LIGHTCURVERUNNER")
         dist = begin.distanceTo(end)
-        xAxis = np.linspace(0,dist.value,resolution)
+        xAxis = np.linspace(0, dist.value, resolution)
         masterController.lightCurveController.reset(xAxis)
-        self._xStepArr = np.linspace(begin.x,end.x,resolution)
-        self._yStepArr = np.linspace(begin.y,end.y,resolution)
+        self._xStepArr = np.linspace(begin.x, end.x, resolution)
+        self._yStepArr = np.linspace(begin.y, end.y, resolution)
         self._counter = 0
         
     def generator(self, model, masterController):
         while self._counter < len(self._xStepArr):
             x = self._xStepArr[self._counter]
             y = self._yStepArr[self._counter]
-            yield model.engine.get_frame(x,y)
+            yield model.engine.get_frame(x, y)
             self._counter += 1
         raise StopIteration
     
-    def broadcast(self,model,masterController,frame):
+    def broadcast(self, model, masterController, frame):
         frame = float(frame)
 #         masterController.parametersController.update(model.parameters)
 #         masterController.lensedImageController.setLensedImg(model,frame)
@@ -136,7 +139,4 @@ class LightCurveRunner(Runner):
 #         masterController.magMapController.update(model.parameters)
         model.parameters.incrementTime(model.parameters.dt)
         QApplication.processEvents()
-        
-        
-        
         

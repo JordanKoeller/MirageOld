@@ -3,7 +3,7 @@
 
 ## General Bugs
   - Gradient tool in magmapanalysis is tempermental.
-  - FileExplorers don't auto-add extensions.
+  - FileExplorers don't auto-add extensions.		DONE
   - Be able to load just the Parameters from a params file for exploring.
   - Properly scaling MagMaps with relative magnification as positive or negative.
   - Cleaner unit conversion protocols.
@@ -24,7 +24,7 @@
 
 ## Executor-specific bugs
   - consistency between Spark and CPU implimentations.
-    - Correctly finding the center of the image.
+    - Correctly finding the center of the image.		DONE?
     - Not just counting pixels, but giving relative magnification.
   - Modified kD-Tree implimentation.
 

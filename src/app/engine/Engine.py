@@ -45,6 +45,7 @@ class Engine(object):
         ret = self._calcDel.make_light_curve(mmin,mmax,resolution)
         return self.normalize_magnification(ret)
     def make_mag_map(self,center,dims,resolution):
+        center = self.get_center_coords(params)
         ret = self._calcDel.make_mag_map(center,dims,resolution)
         return self.normalize_magnification(ret)
 

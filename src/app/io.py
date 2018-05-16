@@ -45,12 +45,17 @@ Convenience function for setting the FileWriter's file. If no filename is provid
             if self._fileextension in filename:
                 self._filename=filename
             else:
-                print(type(filename))
                 self._filename = filename+self._fileextension
         else:
             from PyQt5 import QtWidgets
-            self._filename = QtWidgets.QFileDialog.getSaveFileName(filter='*'+self._fileextension)[0]
+            self._filename = self._addExt(QtWidgets.QFileDialog.getSaveFileName(filter='*'+self._fileextension)[0])
         return self._filename
+    
+    def _addExt(self,filename):
+        if self._fileextension in filename:
+            return filename
+        else:
+            return filename+self._fileextension
     
     def open(self, filename=None, *args,**kwargs):
         '''
@@ -135,6 +140,7 @@ Provides an interface for loading data from files.
         else:
             from PyQt5 import QtWidgets
             self._filename = QtWidgets.QFileDialog.getOpenFileName(filter='*'+self._fileextension)[0]
+            if self._filename == "": self._filename = None
         return self._filename
 
     def load(self, filename=None, *args,**kwargs):
@@ -233,7 +239,9 @@ class ParametersFileReader(FileReader):
         FileReader.__init__(self,*args,**kwargs)
 
     def open(self, filename=None):
-        return FileReader.open(self,filename)
+        ret = FileReader.open(self,filename)
+        print(ret)
+        return ret
 
     def load(self):
         self._filename = self._filename or self.open()
@@ -247,6 +255,9 @@ class ParametersFileReader(FileReader):
     def close(self):
         self._file.close()
     
+    @property
+    def _fileextension(self):
+        return '.param'
 
 class TableFileWriter(FileWriter):
     

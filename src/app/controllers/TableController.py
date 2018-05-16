@@ -134,9 +134,8 @@ class TableController(Controller):
     def load(self):
         from app.io import TableFileReader
         tableFileManager = TableFileReader()
-        tableFileManager.open()
-        tableFull = tableFileManager.load()
-        if tableFull:
+        if tableFileManager.open():
+            tableFull = tableFileManager.load()
             self.signals['clear_table'].emit()
             for expt in tableFull:
                 self.signals['add_experiment'].emit(expt)

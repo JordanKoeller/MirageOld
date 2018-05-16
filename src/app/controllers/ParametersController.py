@@ -81,8 +81,7 @@ class ParametersController(Controller):
     def load(self):
         from app.io import ParametersFileReader
         filemanager = ParametersFileReader()
-        filemanager.open()
-        params = filemanager.load()
-        filemanager.close()
-        if params:
+        if filemanager.open():
+            params = filemanager.load()
+            filemanager.close()
             self.update(params)
