@@ -13,55 +13,51 @@ class _AbstractModel(object):
         assert isinstance(engine, Engine) or isinstance(engine, Engine_ScalaSpark)
         self._parameters = parameters
         self._engine = engine
-        
-        
-    def set_parameters(self,parameters):
+
+    def set_parameters(self, parameters):
         assert isinstance(parameters, Parameters)
         self._parameters = parameters
-        
+
     def bind_parameters(self):
         self._engine.update_parameters(self._parameters)
-        
+
     def regenerate_stars(self):
         try:
             self._parameters.regenerateStars()
             self.bind_parameters()
         except:
             print("Failed to regenerate stars")
-            
+
     @property
     def parameters(self):
         return self._parameters
-    
 
     @property
     def engine(self):
         return self._engine
-    
+
     def disable(self):
         pass
-    
-    
-    
-    
+
+
 class ParametersModel(_AbstractModel):
     '''
     Standard Model for calculating lensed systems from a system description.
-    
+
     Parameters:
     
     - `parameters` (:class:`app.parameters.Parameters`) : System description to build the model around.
     - `engine` (:class:`app.engine.Engine`) : Engine to use for calculating the system. By default, uses a :class:`app.calculator.engine.Engine_PointerGrid` for calculating locally.
-    
+
     '''
 
-
-    def __init__(self, parameters = DefaultParameters(), engine = Engine_PointerGrid()):
+    def __init__(self, parameters=DefaultParameters(),
+                 engine=Engine_PointerGrid()):
         '''
         Constructor
         '''
         _AbstractModel.__init__(self, parameters, engine)
-        
+
     @classmethod
     def fromSubClass(cls,instance):
         '''
@@ -123,8 +119,8 @@ class TrialModel(_AbstractModel):
         
         
 class ClusterModel(_AbstractModel):
-    
-    def __init__(self,parameters):
+
+    def __init__(self, parameters):
         engine = Engine_ScalaSpark()
         _AbstractModel.__init__(self, parameters, engine)
         

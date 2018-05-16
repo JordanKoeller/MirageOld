@@ -182,6 +182,7 @@ project/plugins/project/
 *.class
 *.log
 *.cache
+*.classpath
 
 ### Spark-related things ###
 /src/metastore_db/
