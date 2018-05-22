@@ -7,6 +7,7 @@ import math
 from astropy import constants as const
 import numpy as np
 
+from astropy import units as u
 from app.utility import Vector2D
 
 from .CalculationDelegate import CalculationDelegate
@@ -24,6 +25,8 @@ class Engine(object):
         self.bind_calculation_delegate(calculation_delegate)
         self._parameters = None
         self._preCalculating = False
+        self._rawMag = None
+        self._center = None
         
     @property
     def parameters(self):
@@ -39,13 +42,93 @@ class Engine(object):
 #         self._calcDel.bind_manager(self)
     
     def reconfigure(self):
+        self._center = None
+        self._rawMag = None
         return self._calcDel.reconfigure(self.parameters)
     
     def make_light_curve(self,mmin,mmax,resolution):
         ret = self._calcDel.make_light_curve(mmin,mmax,resolution)
         return self.normalize_magnification(ret)
+    
+    def sample_light_curves(self,lines,bounding_box,resolution = u.Quantity(0.5,'uas')):
+        '''
+        Function for randomly sampling many light curves out of a starfield at once.
+        
+        Works as follows:
+        
+        To make a line, need two points. Thus, we start with a numpy array of (number,4) dimension.
+        It has number many rows, to specify number many coordinates.
+        In each row are four doubles, representing [xStart, yStart, xEnd, yEnd]
+        
+        This is then wrapped in a astropy units.Quantity, to allow for easy rescaling.
+        '''
+        bounding_box.center = self.get_center_coords()
+        
+        print("Sampling many curves")
+        def __slice_line(pts,bounding_box,resolution):
+            #pts is an array of [x1,y1,x2,y2]
+            #Bounding box is a MagMapParameters instance
+            #resolution is a specification of angular separation per data point
+            x1,y1,x2,y2 = pts
+            m = (y2 - y1)/(x2 - x1)
+            angle = math.atan(m)
+            resolution = resolution.to('rad')
+            dx = resolution.value*math.cos(angle)
+            dy = resolution.value*math.sin(angle)
+            dims = bounding_box.dimensions.to('rad')
+            center = bounding_box.center.to('rad')
+            lefX = center.x - dims.x/2
+            rigX = center.x + dims.x/2
+            topY = center.y + dims.y/2 
+            botY = center.y - dims.y/2
+            flag = True
+            x = x1
+            y = y1
+            retx = [] 
+            rety = [] 
+            while flag:
+                x -= dx
+                y -= dy
+                flag = x >= lefX and x <= rigX and y >= botY and y <= topY
+            flag = True
+            while flag:
+                x += dx
+                y += dy
+                retx.append(x)
+                rety.append(y)
+                flag = x >= lefX and x <= rigX and y >= botY and y <= topY
+            retx = retx[:-1]
+            rety = rety[:-1]
+            return [retx,rety]
+        
+        slices = []
+        for row in lines.value:
+            slice= __slice_line(row,bounding_box,resolution)
+            slices.append(np.array(slice).T)
+        lightCurves = self._calcDel.sample_light_curves(slices,self.parameters.queryQuasarRadius)
+        ret = []
+        print(lightCurves[0][0].shape)
+        print(lightCurves[0][1].shape)
+        for curve in lightCurves:
+            c = self.normalize_magnification(curve[0])
+            ret.append([c,curve[1]])
+        return ret
+        print(ret[0][0].shape)
+        print(ret[0][1].shape)
+        #slices is a list of numpy arrays.
+        #Each numpy array is of shape (N,2)
+        #So arr[:,0]  gives xvals, arr[:,1] gives yvals
+        
+        #Now I need to add a column for the number of points to query. Then I can pass along 
+        #        to the calculation delegate.
+        
+        
+        
+        
+        
+    
     def make_mag_map(self,center,dims,resolution):
-        center = self.get_center_coords(params)
+        center = self.get_center_coords(self.parameters)
         ret = self._calcDel.make_mag_map(center,dims,resolution)
         return self.normalize_magnification(ret)
 
@@ -60,46 +143,48 @@ class Engine(object):
         '''Calculates and returns the location of a ray sent out from the center of the screen after 
         projecting onto the Source Plane.'''
         # Pulling parameters out of parameters class
-        parameters = params or self.parameters
-        dS = parameters.quasar.angDiamDist.value
-        dLS = parameters.dLS.value
-        shearMag = parameters.galaxy.shear.magnitude
-        shearAngle = parameters.galaxy.shear.angle.value
-        centerX = parameters.galaxy.position.to('rad').x
-        centerY = parameters.galaxy.position.to('rad').y
-        sis_constant =     np.float64(4 * math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
-        pi2 = math.pi / 2
+        if not self._center:
+            parameters = params or self.parameters
+            dS = parameters.quasar.angDiamDist.value
+            dLS = parameters.dLS.value
+            shearMag = parameters.galaxy.shear.magnitude
+            shearAngle = parameters.galaxy.shear.angle.value
+            centerX = parameters.galaxy.position.to('rad').x
+            centerY = parameters.galaxy.position.to('rad').y
+            sis_constant =     np.float64(4 * math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
+            pi2 = math.pi / 2
 
-        # Calculation variables
-        resx = 0
-        resy = 0
+            # Calculation variables
+            resx = 0
+            resy = 0
 
-        # Calculation is Below
-        incident_angle_x = 0.0
-        incident_angle_y = 0.0
-        
-        try:
-            # SIS
-            deltaR_x = incident_angle_x - centerX
-            deltaR_y = incident_angle_y - centerY
-            r = math.sqrt(deltaR_x * deltaR_x + deltaR_y * deltaR_y)
-            if r == 0.0:
-                resx += deltaR_x 
-                resy += deltaR_y
-            else:
-                resx += deltaR_x * sis_constant / r 
-                resy += deltaR_y * sis_constant / r 
+            # Calculation is Below
+            incident_angle_x = 0.0
+            incident_angle_y = 0.0
             
-            # Shear
-            phi = 2 * (pi2 - shearAngle) - math.atan2(deltaR_y, deltaR_x)
-            resx += shearMag * r * math.cos(phi)
-            resy += shearMag * r * math.sin(phi)
-            resx = deltaR_x - resx
-            resy = deltaR_y - resy
-        except ZeroDivisionError:
-            resx = 0.0
-            resy = 0.0
-        return Vector2D(resx, resy, 'rad')
+            try:
+                # SIS
+                deltaR_x = incident_angle_x - centerX
+                deltaR_y = incident_angle_y - centerY
+                r = math.sqrt(deltaR_x * deltaR_x + deltaR_y * deltaR_y)
+                if r == 0.0:
+                    resx += deltaR_x 
+                    resy += deltaR_y
+                else:
+                    resx += deltaR_x * sis_constant / r 
+                    resy += deltaR_y * sis_constant / r 
+                
+                # Shear
+                phi = 2 * (pi2 - shearAngle) - math.atan2(deltaR_y, deltaR_x)
+                resx += shearMag * r * math.cos(phi)
+                resy += shearMag * r * math.sin(phi)
+                resx = deltaR_x - resx
+                resy = deltaR_y - resy
+            except ZeroDivisionError:
+                resx = 0.0
+                resy = 0.0
+            self._center =  Vector2D(resx, resy, 'rad')
+        return self._center
     
     
     @property
@@ -108,13 +193,17 @@ class Engine(object):
         return math.pi * (self.parameters.quasar.radius.value / self.parameters.dTheta.value) ** 2
 
     def raw_magnification(self, x, y):
-        print("\n\n\n MAY BE BROKEN IN NORMALIZING MAGNIFICATION. NEED TO DOUBLE CHECK LATER \n\n\n")
-        import copy
-        rawP = copy.deepcopy(self.parameters)
-        rawP.galaxy.update(percentStars=0)
-        self.update_parameters(rawP)
-        rawMag = self._calcDel.query_data_length(x, y, rawP.queryQuasarRadius)
-        return rawMag
+        if not self._rawMag:
+            # print("\n\n\n MAY BE BROKEN IN NORMALIZING MAGNIFICATION. NEED TO DOUBLE CHECK LATER \n\n\n")
+            import copy
+            backup = copy.deepcopy(self.parameters)
+            cp = copy.deepcopy(self.parameters)
+            cp.galaxy.update(percentStars=0)
+            self.update_parameters(cp)
+            rawMag = self._calcDel.query_data_length(x, y, cp.queryQuasarRadius)
+            self._rawMag = rawMag
+            self.update_parameters(backup)
+        return self._rawMag
     
     def update_parameters(self, parameters):
         """Provides an interface for updating the parameters describing the lensed system to be modeled.
@@ -140,10 +229,11 @@ class Engine(object):
             self._parameters = parameters
             
     def normalize_magnification(self,values):
-        return values
-        #assert isinstance(values, np.ndarray) or isinstance(values,float) or isinstance(values,int), "values must be a numeric type or numpy array."
-        #center = self.get_center_coords()
-        #rawMag = self.raw_magnification(center.x, center.y)
-        #return values / rawMag
+        assert isinstance(values, np.ndarray) or isinstance(values,float) or isinstance(values,int), "values must be a numeric type or numpy array."
+        center = self.get_center_coords()
+        rawMag = self.raw_magnification(center.x, center.y)
+        return values / rawMag
             
-            
+
+
+    

@@ -4,7 +4,7 @@ Created on Jun 4, 2017
 @author: jkoeller
 '''
 import numpy as np
-
+from astropy import units as u
 from ..utility import Vector2D, Vector2DJSONDecoder, zeroVector
 
 
@@ -47,6 +47,9 @@ class ExperimentParamsJSONDecoder(object):
                 resultParams.append(decoder.decode(data))
             elif kind == 'starfield':
                 resultParams.append(StarFieldData())
+            elif kind == "batch_lightcurve":
+                decoder = BatchLightCurveJSONDecoder()
+                resultParams.append(decoder.decode(data))
         return ExperimentParams(name,desc,nt,tv,resultParams)
 class ExperimentParams(dict):
     '''
@@ -155,6 +158,90 @@ class LightCurveParameters(object):
     def __str__(self):
         return "LIGHTCURVE:\n\n Start = "+str(self.pathStart.to('arcsec'))+"\nEnd = "+str(self.pathEnd.to('arcsec'))+"\nResolution = "+str(self.resolution)+" pixels"
     
+class BatchLightCurveParameters(object):
+    
+    def __init__(self,num_curves,resolution,bounding_box,query_points = None):
+        print(type(bounding_box))
+        assert isinstance(bounding_box,MagMapParameters)
+        self.num_curves = num_curves
+        self.resolution = resolution
+        self.bounding_box = bounding_box
+        self._lines = query_points
+        
+    @property
+    def keyword(self):
+        return "batch_lightcurve"
+    
+    @property
+    def jsonString(self):
+        encoder = BatchLightCurveJSONEncoder()
+        return encoder.encode(self)
+    
+    @property
+    def lines(self):
+        if self._lines:
+            return self._lines
+        else:
+            scaled = np.random.rand(self.num_curves,4) - 0.5
+            #np.random.rand returns an array of (number,4) dimension of doubles over interval [0,1).
+            #I subtract 0.5 to center on 0.0
+            center = self.bounding_box.center.to('rad')
+            dims = self.bounding_box.dimensions.to('rad')
+            width = dims.x
+            height = dims.y
+            scaled[:,0] *= width
+            scaled[:,1] *= height
+            scaled[:,2] *= width
+            scaled[:,3] *= height
+            scaled[:,0] += center.x
+            scaled[:,1] += center.y
+            scaled[:,2] += center.x
+            scaled[:,3] += center.y
+            lines = u.Quantity(scaled,'rad')
+            self._lines = lines
+            return self._lines
+            
+    
+    def __str__(self):
+        return "LIGHTCURVE BATCH:\n\n Count = "+str(self.num_curves)+"\n Resolution"+str(self.resolution)
+
+class BatchLightCurveJSONEncoder():
+    
+    def __init__(self):
+        pass
+    
+    def encode(self,obj):
+        assert isinstance(obj,BatchLightCurveParameters)
+        from app.utility import QuantityJSONEncoder
+        res = {}
+        res['num_curves'] = obj.num_curves
+        qe = QuantityJSONEncoder()
+        res['resolution'] = qe.encode(obj.resolution)
+        res['bounding_box'] = obj.bounding_box.jsonString
+        if obj._lines:
+            res['query_points'] = qe.encode(obj._lines)
+        else:
+            res['query_points'] = None
+        return res
+    
+class BatchLightCurveJSONDecoder():
+     
+    def __init__(self):
+        pass 
+     
+    def decode(self,js):
+        from app.utility import QuantityJSONDecoder
+        qd = QuantityJSONDecoder()
+        num_curves  = js['num_curves']
+        resolution = qd.decode(js['resolution'])
+        mmd = MagMapJSONDecoder()
+        bounding_box = mmd.decode(js['bounding_box'])
+        pts = None
+        if js['query_points']:
+            pts = qd.decode(js['query_points'])
+        return BatchLightCurveParameters(num_curves,resolution,bounding_box,pts)
+         
+        
 
 class MagMapJSONEncoder(object):
     """docstring for MagMapJSONEncoder"""
@@ -212,7 +299,8 @@ class MagMapParameters(object):
             delta = angle - self.center.to('rad')
             pixel = (delta/dTheta).unitless()
             return Vector2D(int(pixel.x + self.resolution.x/2),int(self.resolution.y/2 - pixel.y))
-    
+        
+      
     @property
     def keyword(self):
         return "magmap"

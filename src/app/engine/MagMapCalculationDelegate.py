@@ -58,11 +58,6 @@ class MagMapCalculationDelegate(CalculationDelegate):
         return ret
     
     
-    
-    
-    
-    
-    
     def makePixelSteps(self,mmin, mmax):
         if not isinstance(mmin,Vector2D):
             mmin = Vector2D(mmin[0],mmin[1])

@@ -46,7 +46,6 @@ class MagMapViewWidget(GraphicsLayoutWidget):
         self._imgItem.setLookupTable(gradient,True)
         
     def setMagMap(self,img,baseMag=10):
-        print("AM I CALLING THIS???")
 #         baseMag = baseMag/img.max()
         baseMag = 0.1
         self._imgStatic = img.copy()

@@ -18,7 +18,7 @@ import utility.PixelValue
 import utility.pixelConstructor
 import spatialrdd.partitioners.BalancedColumnPartitioner
 
-class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = new BalancedColumnPartitioner, nodeStructure: IndexedSeq[(Double,Double)] => SpatialData = MemGrid.apply) extends RDDGridProperty {
+class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = new BalancedColumnPartitioner, nodeStructure: IndexedSeq[(Double, Double)] => SpatialData = MemGrid.apply) extends RDDGridProperty {
   private val rdd = _init(data, partitioner)
 
   def _init(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) = {
@@ -30,7 +30,7 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
     ret
   }
 
-  def queryPoints(gen: GridGenerator, radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
+  def queryPointsFromGen(gen: GridGenerator, radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
     println("Broadcasting generator")
     val bgen = sc.broadcast(gen)
     val r = sc.broadcast(radius)
@@ -50,14 +50,39 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
     }
     ret
   }
+  def queryPoints(pts: Array[Array[DoublePair]], radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Index]] = {
+    println("Size = " + pts.size)
+    val r = sc.broadcast(radius)
+    val queryPts = sc.broadcast(pts)
+    val queries = rdd.flatMap { grid =>
+      var ret: List[PixelValue] = Nil
+      for (line <- 0 until queryPts.value.length) {
+        for (qpt <- 0 until queryPts.value(line).length) {
+          if (grid.intersects(queryPts.value(line)(qpt)._1, queryPts.value(line)(qpt)._2, r.value)) {
+            val num = grid.query_point_count(queryPts.value(line)(qpt)._1, queryPts.value(line)(qpt)._2, r.value)
+            if (num != 0) ret ::= pixelConstructor(line, qpt, num)
+          }
+        }
+      }
+      ret
+
+    }
+    val collected = queries.collect()
+    val ret = Array.fill(pts.length)(Array[Int]())
+    for (i <- 0 until pts.length) ret(i) = Array.fill(pts(i).length)(0)
+    collected.foreach { elem =>
+      ret(elem.x)(elem.y) += elem.value
+    }
+    ret
+  }
 
   def count: Long = rdd.count()
-  
-  def destroy():Unit = {
-	rdd.unpersist(blocking=true)    
+
+  def destroy(): Unit = {
+    rdd.unpersist(blocking = true)
   }
-  
-  def printSuccess:Unit = {
+
+  def printSuccess: Unit = {
     rdd.foreach(i => println("Finished Successfully"))
   }
 

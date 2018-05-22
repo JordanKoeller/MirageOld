@@ -5,7 +5,7 @@ Created on Dec 22, 2017
 '''
 from app.calculator.ExperimentResultCalculator import varyTrial
 from app.parameters.ExperimentParams import LightCurveParameters, \
-    MagMapParameters, StarFieldData, ExperimentParams
+    MagMapParameters, StarFieldData, ExperimentParams, BatchLightCurveParameters
 from app.utility.ParametersError import ParametersError
 
 from . import Controller
@@ -26,6 +26,7 @@ class TableController(Controller):
     _updateSignal = pyqtSignal(object)
     _clearTable = pyqtSignal()
     _requestTable = pyqtSignal()
+    _destroy_view = pyqtSignal()
     
     def __init__(self):
         '''
@@ -39,7 +40,8 @@ class TableController(Controller):
                         set_enabled_edit = self._setEditEnabled,
                         clear_table = self._clearTable,
                         set_input_units = self._setUnits,
-                        request_table = self._requestTable)
+                        request_table = self._requestTable,
+                        destroy_view = self._destroy_view)
         self.addSignals(view_update_signal = self._updateSignal)
         self._table = None
 
@@ -49,6 +51,7 @@ class TableController(Controller):
         s['cancel_queue_edit'].connect(self.cancelEdit)
         s['save_table'].connect(self.save)
         s['editing_params'].connect(self.editParams)
+        self.signals['destroy_view'].connect(view.destroy)
         self.signals['add_experiment'].connect(view.addExperiment)
         self.signals['set_input_units'].connect(view.set_input_units)
         s['send_table'].connect(self.receiveTable)
@@ -88,15 +91,22 @@ class TableController(Controller):
                 
     def buildObject(self,extras,parameters):
         extraObjects = []
-        if 'lightcurve' in extras['datasets']:
-            extraObjects.append(LightCurveParameters(extras['datasets']['lightcurve']['resolution'],
-                                                              extras['datasets']['lightcurve']['pstart'],
-                                                              extras['datasets']['lightcurve']['pend']))
+#         if 'lightcurve' in extras['datasets']:
+#             extraObjects.append(LightCurveParameters(extras['datasets']['lightcurve']['resolution'],
+#                                                               extras['datasets']['lightcurve']['pstart'],
+#                                                               extras['datasets']['lightcurve']['pend']))
+        if extras['datasets']['starfield']:
+            extraObjects.append(StarFieldData())
         if 'magmap' in extras['datasets']:
             extraObjects.append(MagMapParameters(extras['datasets']['magmap']['magmapdims'],
                                                       extras['datasets']['magmap']['magmapres']))
-        if extras['datasets']['starfield']:
-            extraObjects.append(StarFieldData())
+        if 'batch_lightcurves' in extras['datasets'] and 'magmap' in extras['datasets']:
+            mm = MagMapParameters(extras['datasets']['batch_lightcurves']['magmapdims'],
+                                                      extras['datasets']['batch_lightcurves']['magmapres'])
+            extraObjects.append(BatchLightCurveParameters(extras['datasets']['batch_lightcurves']['num_curves'],
+                                                          extras['datasets']['batch_lightcurves']['resolution'],
+                                                          mm))
+            
         exptParams = ExperimentParams(extras['name'],
                                       extras['desc'],
                                       extras['numTrials'],

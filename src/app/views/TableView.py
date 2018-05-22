@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import QPushButton
 from pyqtgraph.widgets.GraphicsLayoutWidget import GraphicsLayoutWidget
 from pyqtgraph.widgets.TableWidget import TableWidget
 
+from astropy import units as u
+
 from app import tableUIFile
 from app.views import View
 from app.utility import Vector2D
@@ -129,10 +131,21 @@ class TableViewWidget(GraphicsLayoutWidget):
             ret['varianceStr'] = self.varianceTextArea.toPlainText()
             ret['datasets'] = {}
             if self.enableLightCurve.isChecked():
-                ret['datasets']['lightcurve'] = {}
-                ret['datasets']['lightcurve']['resolution'] = self.dataPointSpinBox.value()
-                ret['datasets']['lightcurve']['pstart'] =self.vectorFromQString(self.quasarPathStart.text(),unit=inputUnit)
-                ret['datasets']['lightcurve']['pend'] = self.vectorFromQString(self.quasarPathEnd.text(),unit=inputUnit)
+                res = self.sampleDensityEntry.value()
+                num_curves = self.lightCurveCountEntry.value()
+                #res = pts/uas. I want uas/pt
+                res = u.Quantity(1/res,'uas')
+                ret['datasets']['batch_lightcurves'] = {}
+                ret['datasets']['batch_lightcurves']['resolution'] = res
+                ret['datasets']['batch_lightcurves']['num_curves'] = num_curves
+                ret['datasets']['batch_lightcurves']['magmap'] = {}
+                ret['datasets']['batch_lightcurves']['magmapdims'] = self.vectorFromQString(self.magMapDimEntry.text(),unit=inputUnit)
+                ret['datasets']['batch_lightcurves']['magmapres'] = self.vectorFromQString(self.magMapResolutionEntry.text(),None)
+                
+#                 ret['datasets']['lightcurve'] = {}
+#                 ret['datasets']['lightcurve']['resolution'] = self.dataPointSpinBox.value()
+#                 ret['datasets']['lightcurve']['pstart'] =self.vectorFromQString(self.quasarPathStart.text(),unit=inputUnit)
+#                 ret['datasets']['lightcurve']['pend'] = self.vectorFromQString(self.quasarPathEnd.text(),unit=inputUnit)
             if self.enableMagMap.isChecked():
                 ret['datasets']['magmap'] = {}
                 ret['datasets']['magmap']['magmapdims'] = self.vectorFromQString(self.magMapDimEntry.text(),unit=inputUnit)

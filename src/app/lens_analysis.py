@@ -29,7 +29,7 @@ import os
 import sys
 
 from .parameters.ExperimentParams import LightCurveParameters, \
-    MagMapParameters, StarFieldData
+    MagMapParameters, StarFieldData, BatchLightCurveParameters
 import numpy as np
 from .calculator.ExperimentResultCalculator import varyTrial
 
@@ -397,33 +397,6 @@ class Trial(AbstractFileWrapper):
     def getStars(self,ind):
             return self._getDataSet(ind)
 
-    # @_requiresDtype(StarFieldData)
-    # @_requiresDtype(MagMapParameters)
-    # def superimpose_stars(self,magIndex,starsIndex,magmapimg=None,destination=None,color = (255,255,0,255)):
-    #     '''DEPRECATED'''
-    #     parameters = self.regenerateParameters()
-    #     from PIL import Image
-    #     img = Image.open(magmapimg)
-    #     pix = img.load()
-    #     stars = parameters.galaxy.stars
-    #     dTheta = parameters.extras.desiredResults[magIndex].dimensions.to('rad')/parameters.extras.desiredResults[magIndex].resolution
-    #     starCoords = stars[:,0:2]
-    #     starMass = stars[:,2]
-    #     starCoords[:,0] = starCoords[:,0]/dTheta.x + parameters.extras.desiredResults[magIndex].resolution.x/2
-    #     starCoords[:,1] = starCoords[:,1]/dTheta.y + parameters.extras.desiredResults[magIndex].resolution.y/2
-    #     # starCoords[:,0] = starCoords[:,0]*dTheta.x/parameters.dTheta.to('rad').value
-    #     # starCoords[:,1] = starCoords[:,1]*dTheta.y/parameters.dTheta.to('rad').value
-    #     starCoords = np.ascontiguousarray(starCoords,dtype=np.int32)
-    #     for row in range(0,starCoords.shape[0]):
-    #         x,y = (starCoords[row,0],starCoords[row,1])
-    #         mass = starMass[row]
-    #         r = int(math.sqrt(mass+2))
-    #         for i in range(x-r,x+r):
-    #             for j in range(y-r,y+r):
-    #                 if i >= 0 and i < parameters.extras.desiredResults[magIndex].resolution.x and j >= 0 and j < parameters.extras.desiredResults[magIndex].resolution.y:
-    #                     pix[j,i] = color
-    #     img.save(destination)
-    #     print("Superimposed image saved as "+destination)
 
     @_requiresDtype(StarFieldData)
     def regenerateParameters(self,ind):
@@ -524,6 +497,14 @@ class Trial(AbstractFileWrapper):
         return np.load(self._fileobject)
   
 
+    @property
+    @_requiresDtype(BatchLightCurveParameters)
+    def lightcurves(self,ind):
+        from app.models import LightCurveBatch
+        curves_array = self._getDataSet(ind)
+        return LightCurveBatch(curves_array)
+
+    
 
 
 

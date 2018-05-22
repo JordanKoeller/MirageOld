@@ -1,3 +1,7 @@
+# cython: boundscheck=False
+# cython: cdivision=True
+# cython: wraparound=False
+
 from __future__ import division
 
 from .CalculationDelegate cimport CalculationDelegate
@@ -37,21 +41,20 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         self.core_count = GlobalPreferences['core_count']
         print("Core count found as " + str(self.core_count))
 
-    cpdef void reconfigure(self,object parameters):
+    cpdef void reconfigure(self, object parameters):
         print("Reconfiguring")
         self._parameters = parameters
         self.__grid = PointerGrid()
         begin = time.clock()
         self.__preCalculating = True
         finalData = self.ray_trace()
-        self.build_data(finalData[0], finalData[1],int(2*finalData[0].shape[0]**2))
+        self.build_data(finalData[0], finalData[1], int(4 * finalData[0].shape[0] ** 2))
         del(finalData)
         self.__preCalculating = False
         print("Time calculating = " + str(time.clock() - begin) + " seconds.")
             
-    cpdef object make_light_curve(self,object mmin, object mmax, int resolution):
+    cpdef object make_light_curve(self, object mmin, object mmax, int resolution):
         while self.__preCalculating:
-            print("Waiting")
             time.sleep(0.1)
         mmax = mmax.to('rad')
         mmin = mmin.to('rad')
@@ -70,10 +73,10 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
                 x += stepX
                 y += stepY
                 aptLuminosity = self.__grid.find_within_count(x, y, radius)  # Incorrect interface
-                yAxis[i] = (< double > aptLuminosity) / trueLuminosity
+                yAxis[i] = (< double > aptLuminosity)
         return yAxis  
     
-    cpdef object make_mag_map(self,object center, object dims, object resolution):
+    cpdef object make_mag_map(self, object center, object dims, object resolution):
         cdef int resx = < int > resolution.x
         cdef int resy = < int > resolution.y
         cdef np.ndarray[np.float64_t, ndim = 2] retArr = np.ndarray((resx, resy), dtype=np.float64)
@@ -83,7 +86,6 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef int j = 0
         cdef double x = 0
         cdef double y = 0
-        # self._parameters.galaxy.update(center=center)
         start = center - dims / 2
         cdef double x0 = start.to('rad').x
         cdef double y0 = start.to('rad').y + dims.to('rad').y
@@ -91,18 +93,57 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef double roverX, roverY
         for i in prange(0, resx, nogil=True, schedule='guided', num_threads=self.core_count):
             for j in range(0, resy):
-                roverX = x0 + i*stepX
+                roverX = x0 + i * stepX
                 roverY = y0 - stepY * j
-                retArr[i, j] = (< double > self.__grid.find_within_count(roverX,roverY, radius))
+                retArr[i, j] = (< double > self.__grid.find_within_count(roverX, roverY, radius))
         return retArr
     
-    @cython.boundscheck(False)  # turn off bounds-checking for entire function
-    @cython.wraparound(False)
-    cpdef object get_frame(self,object x,object y,object r):
+    cpdef object sample_light_curves(self, object pts, double radius): #OPtimizations are definitely possible by cythonizing more, especially the last for loop.
+        cdef int i = 0
+        cdef int j = 0
+        cdef int counts = 0
+        cdef double x, y
+        lengths = []
+        for i in range(len(pts)):
+            lengths.append(pts[i].shape[0])
+        cdef int max_length = 0
+        max_length = max(lengths)
+        cdef np.ndarray[np.float64_t,ndim=3] queries = np.zeros((len(pts),max_length,2),dtype=np.float64) #added
+        cdef np.ndarray[np.int32_t,ndim=2] ret_pts = np.zeros((len(pts),max_length),dtype=np.int32) #added
+        queries = queries - 1.0
+        for i in range(0,len(pts)):
+            for j in range(0,len(pts[i])):
+                queries[i,j] = pts[i][j]
+        cdef np.ndarray[np.int32_t, ndim = 1] curve_lengths = < np.ndarray[np.int32_t, ndim = 1] > np.array(lengths,dtype=np.int32)
+        cdef int end = len(pts)
+        # Now need to actually query them
+        for i in prange(0, end, nogil=True, schedule='guided', num_threads=self.core_count):
+            for j in range(0, curve_lengths[i]):
+                x = queries[i,j,0]
+                y = queries[i,j,1]
+                counts = self.__grid.find_within_count(x, y, radius)
+                ret_pts[i,j] = counts
+        retLines = []
+        queryEnds = []
+        for i in range(0, len(pts)):
+            lineCounts = np.ndarray(curve_lengths[i],dtype=np.int32)
+            queriedPts = pts[i]
+            startLine = queriedPts[0]
+            last = queriedPts.shape[0]
+            endLine = queriedPts[last-1]
+            q = np.array([list(startLine),list(endLine)])
+            queryEnds.append(q)
+            for j in range(0,curve_lengths[i]):
+                lineCounts[j] = ret_pts[i,j]
+            retLines.append([lineCounts,q])
+        return retLines
+    
+
+    cpdef object get_frame(self, object x, object y, object r):
         """
         Returns a 2D numpy array, containing the coordinates of pixels illuminated by the source specified in the system's parameters.
         """
-        #Possible optimization by using vector data rather than copy?
+        # Possible optimization by using vector data rather than copy?
         while self.__preCalculating:
             print("waiting")
             time.sleep(0.1)
@@ -113,46 +154,42 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         qx = x or self._parameters.queryQuasarX
         qy = y or self._parameters.queryQuasarY
         qr = r or self._parameters.queryQuasarRadius
-        cdef vector[pair[int,int]] ret = self.query_data(qx,qy,qr)
+        cdef vector[pair[int, int]] ret = self.query_data(qx, qy, qr)
         cdef int retf = ret.size()
         cdef int i = 0
         cdef np.ndarray[np.int32_t, ndim = 2] fret = np.ndarray((ret.size(), 2), dtype=np.int32)
         with nogil:
             for i in range(0, retf):
-                fret[i,0] = <int> ret[i].first
-                fret[i,1] = <int> ret[i].second
+                fret[i, 0] = < int > ret[i].first
+                fret[i, 1] = < int > ret[i].second
 #         print(1/(time.clock()-begin))
         return fret
     
     cpdef unsigned int query_data_length(self, object x, object y, object radius):
-        cdef double xx = x or self.parameters.queryQuasarX
-        cdef double yy = y or self.parameters.queryQuasarY
-        cdef double r = radius or self.parameters.queryQuasarRadius
+        cdef double xx = x or self._parameters.queryQuasarX
+        cdef double yy = y or self._parameters.queryQuasarY
+        cdef double r = radius or self._parameters.queryQuasarRadius
         with nogil:
-            return self.__grid.find_within_count(xx,yy,r)
-    
+            return self.__grid.find_within_count(xx, yy, r)
 
-    cdef vector[pair[int,int]] query_data(self, double x, double y, double radius) nogil:
+    cdef vector[pair[int, int]] query_data(self, double x, double y, double radius) nogil:
         """Returns all rays that intersect the source plane within a specified radius of a location on the source plane."""
-        cdef vector[pair[int,int]] ret = self.__grid.find_within(x, y, radius)
+        cdef vector[pair[int, int]] ret = self.__grid.find_within(x, y, radius)
         return ret
         
-    @cython.boundscheck(False)  # turn off bounds-checking for entire function
-    @cython.wraparound(False)
-    cdef build_data(self, np.ndarray[np.float64_t, ndim=2] xArray, np.ndarray[np.float64_t, ndim=2] yArray,int binsize):
+
+    cdef build_data(self, np.ndarray[np.float64_t, ndim=2] xArray, np.ndarray[np.float64_t, ndim=2] yArray, int binsize):
         """Builds the spatial data structure, based on the passed in numpy arrays representing the x and y values of each
             pixel where it intersects the source plane after lensing effects have been accounted for."""
         cdef int w = xArray.shape[0]
         cdef int h = xArray.shape[1]
         cdef int nd = 2
-        cdef double* x = <double*> xArray.data 
-        cdef double* y = <double*> yArray.data
+        cdef double * x = < double *> xArray.data 
+        cdef double * y = < double *> yArray.data
         with nogil:
-            self.__grid = PointerGrid(x,y,h,w,nd,binsize)
+            self.__grid = PointerGrid(x, y, h, w, nd, binsize)
     
-    
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
+
     cdef ray_trace(self):
         '''Ray-traces the system on the CPU. Does not require openCL
         
@@ -178,7 +215,7 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef double shearAngle = self._parameters.galaxy.shear.angle.value
         cdef double centerX = self._parameters.galaxy.position.to('rad').x
         cdef double centerY = self._parameters.galaxy.position.to('rad').y
-        cdef double sis_constant =     np.float64(4 * math.pi * self._parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
+        cdef double sis_constant = np.float64(4 * math.pi * self._parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
         cdef double point_constant = (4 * const.G / const.c / const.c).to("lyr/solMass").value * dLS / dS / dL
         cdef double pi2 = math.pi / 2
         cdef int x, y, i

@@ -50,7 +50,7 @@ object Main extends App {
     }
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
-    val pixels = sc.range(0, (width * height).toLong, 1,768)
+    val pixels = sc.range(0, (width * height).toLong, 1,1)
     val parameters = RayParameters(
       stars,
       pointConstant,
@@ -73,67 +73,26 @@ object Main extends App {
     broadParams.unpersist()
   }
 
-  def createRDDdGrid(
-    starsfile: String,
-    pointConstant: Double,
-    sisConstant: Double,
-    shearMag: Double,
-    shearAngle: Double,
-    dTheta: Double,
-    centerX: Double,
-    centerY: Double,
-    width: Int,
-    height: Int,
-    ctx: JavaRDD[Int]): Unit = {
-    val sc = ctx.context
-    val session = SparkSession.builder().config(sc.getConf).getOrCreate()
-
-    val schema = StructType(
-      Array(
-        StructField("long", LongType)))
-    //    val df = session.range(start, end)
-
-    val stars = scala.io.Source.fromFile(starsfile).getLines().toArray.map { row =>
-      val starInfoArr = row.split(",").map(_.toDouble)
-      (starInfoArr(0), starInfoArr(1), starInfoArr(2))
-    }
-    //Construction of RDD, mapping of RDD to ray-traced source plane locations
-    val rayTracer = new DataFrameRayTracer()
-    val pixels = sc.range(0, (width * height).toLong, 1, 768).map(Row(_))
-
-    val pixelFrame = session.createDataFrame(pixels, schema)
-    val parameters = RayParameters(
-      stars,
-      pointConstant,
-      sisConstant,
-      shearMag,
-      shearAngle,
-      dTheta,
-      centerX,
-      centerY,
-      width.toDouble,
-      height.toDouble)
-
-    val broadParams = sc.broadcast(parameters)
-    val rayTraceUDF = session.udf.register("raytrace", (x: Long) => rayTracer(x, broadParams))
-
-    //Now need to construct the grid
-    // val partitioner = new ColumnPartitioner()
-    val partitioner = new BalancedColumnPartitioner
-
-    val mappedPixels = pixelFrame.select(callUDF("raytrace", col("sourceplane")))
-    print(mappedPixels.schema.toString())
-    val rdd = mappedPixels.rdd.map { case Row(x: Double, y: Double) => (x, y) }
-    rddGrid = new RDDGrid(rdd, partitioner)
-    broadParams.unpersist()
-  }
-
   def queryPoints(x0: Double, y0: Double, x1: Double, y1: Double, xDim: Int, yDim: Int, radius: Double, ctx: JavaRDD[Int], verbose: Boolean = false) = {
     val sc = ctx.context
     val generator = new GridGenerator(x0, y0, x1, y1, xDim, yDim)
-    val retArr = rddGrid.queryPoints(generator, radius, sc, verbose = verbose)
+    val retArr = rddGrid.queryPointsFromGen(generator, radius, sc, verbose = verbose)
     rddGrid.printSuccess
     writeFile(retArr)
+  }
+  
+  def sampleLightCurves(filename:String,radius:Double,ctx:JavaRDD[Int]) {
+    val sc = ctx.context
+    val lightCurves = scala.io.Source.fromFile(filename).getLines().toArray.map{row =>
+      val queryLine = row.split(",").map{elem =>
+        val pair = elem.split(":").map(_.toDouble)
+        (pair.head,pair.last)
+      }
+      queryLine
+    }
+    val retArr = rddGrid.queryPoints(lightCurves,radius,sc,false)
+    writeFile(retArr)
+    
   }
 
   private def writeFile(data: Array[Array[Int]]): Unit = {

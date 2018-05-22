@@ -9,6 +9,10 @@ cdef class CalculationDelegate:
     cpdef object make_light_curve(self,object mmin, object mmax, int resolution):
         raise NotImplementedError
     
+    cpdef object sample_light_curves(self, object pts, double radius):
+        raise NotImplementedError
+
+    
     cpdef object make_mag_map(self,object center, object dims, object resolution):
         raise NotImplementedError
     
@@ -46,6 +50,9 @@ cdef class CalculationDelegate:
 #     def make_mag_map(self,center, dims, resolution):
 #         raise NotImplementedError
 #     
+#     def sample_light_curves(self, pts, radius):
+#         raise NotImplementedError
+#
 #     def get_frame(self,x, y, r):
 #         raise NotImplementedError
 #     

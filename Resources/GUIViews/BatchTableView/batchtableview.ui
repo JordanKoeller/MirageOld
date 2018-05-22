@@ -52,7 +52,7 @@
             <x>0</x>
             <y>0</y>
             <width>826</width>
-            <height>242</height>
+            <height>288</height>
            </rect>
           </property>
          </widget>
@@ -166,6 +166,80 @@ newParams = copy.deepcopy(oldParams)</string>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
+          <widget class="QGroupBox" name="verticalGroupBox_3">
+           <property name="title">
+            <string>Light Curve</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="QCheckBox" name="enableLightCurve">
+                <property name="text">
+                 <string>Enabled</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_4">
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>Sample Density</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QSpinBox" name="lightCurveCountEntry">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+                <property name="value">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>Number of Lines</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QSpinBox" name="sampleDensityEntry">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Samples/uas</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <widget class="QGroupBox" name="verticalGroupBox_2">
            <property name="title">
             <string>Magnification Map</string>
@@ -238,103 +312,6 @@ newParams = copy.deepcopy(oldParams)</string>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="verticalGroupBox_3">
-           <property name="title">
-            <string>Light Curve</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <item>
-             <widget class="QCheckBox" name="enableLightCurve">
-              <property name="text">
-               <string>Enabled</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <layout class="QGridLayout" name="gridLayout_4">
-              <item row="1" column="3">
-               <widget class="QLabel" name="unitLabel_4">
-                <property name="text">
-                 <string>arcsec </string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_32">
-                <property name="text">
-                 <string> Quasar Path Finish</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2">
-               <widget class="QLineEdit" name="quasarPathEnd">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>(50,0)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="3">
-               <widget class="QLabel" name="unitLabel_3">
-                <property name="text">
-                 <string>arcsec </string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QLineEdit" name="quasarPathStart">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>(-50,0)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_31">
-                <property name="text">
-                 <string> Quasar Path Start</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_33">
-                <property name="text">
-                 <string> Number of Data Points</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="2">
-               <widget class="QSpinBox" name="dataPointSpinBox">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="accelerated">
-                 <bool>true</bool>
-                </property>
-                <property name="minimum">
-                 <number>100</number>
-                </property>
-                <property name="maximum">
-                 <number>1000000000</number>
-                </property>
-                <property name="singleStep">
-                 <number>50</number>
-                </property>
-                <property name="value">
-                 <number>1000</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
           </widget>
          </item>
         </layout>
@@ -434,30 +411,62 @@ newParams = copy.deepcopy(oldParams)</string>
  <resources/>
  <connections>
   <connection>
-   <sender>enableMagMap</sender>
+   <sender>enableLightCurve</sender>
    <signal>toggled(bool)</signal>
-   <receiver>magMapDimEntry</receiver>
+   <receiver>sampleDensityEntry</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>217</x>
-     <y>304</y>
+     <x>152</x>
+     <y>613</y>
     </hint>
     <hint type="destinationlabel">
-     <x>246</x>
-     <y>347</y>
+     <x>163</x>
+     <y>673</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>enableMagMap</sender>
+   <sender>enableLightCurve</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lightCurveCountEntry</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>152</x>
+     <y>613</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>163</x>
+     <y>643</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>enableLightCurve</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>enableMagMap</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>152</x>
+     <y>613</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>564</x>
+     <y>612</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>enableLightCurve</sender>
    <signal>toggled(bool)</signal>
    <receiver>magMapResolutionEntry</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>217</x>
-     <y>304</y>
+     <x>152</x>
+     <y>613</y>
     </hint>
     <hint type="destinationlabel">
      <x>246</x>
@@ -468,48 +477,48 @@ newParams = copy.deepcopy(oldParams)</string>
   <connection>
    <sender>enableLightCurve</sender>
    <signal>toggled(bool)</signal>
-   <receiver>quasarPathEnd</receiver>
+   <receiver>magMapDimEntry</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>638</x>
-     <y>304</y>
+     <x>152</x>
+     <y>613</y>
     </hint>
     <hint type="destinationlabel">
-     <x>698</x>
-     <y>370</y>
+     <x>246</x>
+     <y>347</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>enableLightCurve</sender>
+   <sender>enableMagMap</sender>
    <signal>toggled(bool)</signal>
-   <receiver>quasarPathStart</receiver>
+   <receiver>magMapDimEntry</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>638</x>
-     <y>304</y>
+     <x>564</x>
+     <y>612</y>
     </hint>
     <hint type="destinationlabel">
-     <x>698</x>
-     <y>336</y>
+     <x>586</x>
+     <y>642</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>enableLightCurve</sender>
+   <sender>enableMagMap</sender>
    <signal>toggled(bool)</signal>
-   <receiver>dataPointSpinBox</receiver>
+   <receiver>magMapResolutionEntry</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>638</x>
-     <y>304</y>
+     <x>564</x>
+     <y>612</y>
     </hint>
     <hint type="destinationlabel">
-     <x>698</x>
-     <y>404</y>
+     <x>586</x>
+     <y>672</y>
     </hint>
    </hints>
   </connection>

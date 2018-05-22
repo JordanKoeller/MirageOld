@@ -24,9 +24,11 @@ class WindowView(QMainWindow, SignalRepo):
     _exitSignal = pyqtSignal(bool)
     _plot_pane = pyqtSignal(bool)
     _mm_pane = pyqtSignal(bool)
-    _param_pane = pyqtSignal(bool)
+    _param_pane = pyqtSignal(bool,bool)
     _image_pane = pyqtSignal(bool)
     _table_pane = pyqtSignal(bool)
+    _destroy_all = pyqtSignal()
+    _scale_magMap = pyqtSignal(str)
 
     def __init__(self, *args, **kwargs):
         '''
@@ -36,13 +38,12 @@ class WindowView(QMainWindow, SignalRepo):
         SignalRepo.__init__(self)
         uic.loadUi(mainUIFile, self)
         self.perspectiveManager = PerspectiveManager(self)
-        self.perspectiveManager.showPerspective(True)
         self.dockArea = DockArea()
         self.gridLayout_10.addWidget(self.dockArea)
-        self.actionPlotPane.toggled.connect(self.perspectiveManager.showPlot)
-        self.actionMagMapPane.toggled.connect(self.perspectiveManager.showMagMap)
-        self.actionParametersPane.toggled.connect(self.perspectiveManager.showParameters)
-        self.actionImagePane.toggled.connect(self.perspectiveManager.showImage)
+        self.actionPlotPane.toggled.connect(lambda: self.getPerspective().showPlot())
+        self.actionMagMapPane.toggled.connect(lambda: self.getPerspective().showMagMap())
+        self.actionParametersPane.toggled.connect(lambda: self.getPerspective().showParameters())
+        self.actionImagePane.toggled.connect(lambda: self.getPerspective().showImage())
         self._removeView.connect(self.removeView)
         self.addSignals(exit_signal = self.shutdown.triggered,
                         play_signal = self.playPauseAction.triggered,
@@ -60,12 +61,19 @@ class WindowView(QMainWindow, SignalRepo):
                         toggle_table_signal = self._table_pane,
                         to_analysis_perspective = self.actionAnalysisPerspective.triggered,
                         to_explore_perspective = self.actionExplorePerspective.triggered,
-                        to_table_perspective = self.actionTablePerspective.triggered)
+                        to_table_perspective = self.actionTablePerspective.triggered,
+                        destroy_all = self._destroy_all,
+                        scale_mag_map = self._scale_magMap)
+        self.perspectiveManager.showPerspective(True)
         self.bind_menubar_signals()
         
     def setPerspective(self,Perspective):
-        self.dockArea.clear()
-        self.perspective = Perspective(self, auto_configure = True)
+        self.signals['destroy_all'].emit()
+        self.perspectiveManager.clearMenu()
+        self.perspectiveManager = Perspective(self, auto_configure = True)
+    
+    def getPerspective(self):
+        return self.perspectiveManager
         
     def bind_menubar_signals(self):
         self.actionExplorePerspective.triggered.connect(lambda: self.setPerspective(ExplorePerspectiveManager))
@@ -82,9 +90,7 @@ class WindowView(QMainWindow, SignalRepo):
             dock.close()
         else:
             pass
-#            print("Could not find a " + str(ViewType))
-#            print(docks.values())
-            
+            print("Escaped the removeView method in WindowView")
     def addView(self,view):
         assert isinstance(view,Dock)
         self.dockArea.addDock(view)
@@ -98,11 +104,13 @@ class PerspectiveManager(object):
     def __init__(self, mainview, auto_configure=False):
         self.v = mainview
         self.signals = self.v.signals
+        self.menuExtras = []
+        print("Just defined menuExtas as []")
         if auto_configure:
             self.showPerspective(True)
         
     def showParameters(self, state=True):
-        self.signals['param_pane_signal'].emit(state)
+        self.signals['param_pane_signal'].emit(state,False)
     
     def showTable(self, state=True):
         print("Need to bind for making a tableview")
@@ -118,7 +126,25 @@ class PerspectiveManager(object):
     
     def showPerspective(self, state=True):
         self._disableMenuBar()
-    
+        self.appendOptions()
+        
+    def addPerspectiveMenu(self,label,fn):
+        item = self.v.menuModel.addAction(label)
+        item.triggered.connect(fn)
+        self.menuExtras.append(item)
+        print("Just added " + label)
+        
+    def clearMenu(self):
+        print("Clearing Menu")
+        print(self.menuExtras)
+        for item in self.menuExtras:
+            item.setVisible(False)
+            item.setEnabled(False)
+            item.deleteLater()
+        self.menuExtras = []
+        
+    def appendOptions(self):
+        pass
 
     def _disableMenuBar(self):
         self.v.saveTableAction.setDisabled(True)
@@ -138,6 +164,8 @@ class PerspectiveManager(object):
         self.v.actionExplorePerspective.setChecked(False)
         self.v.actionAnalysisPerspective.setChecked(False)
         self.v.actionAnalysisPerspective.setChecked(False)
+        self.clearMenu()
+
         
 class ExplorePerspectiveManager(PerspectiveManager):
     
@@ -146,7 +174,7 @@ class ExplorePerspectiveManager(PerspectiveManager):
     
     
     def showPerspective(self, state=True):
-        self._disableMenuBar()
+        PerspectiveManager.showPerspective(self, state)
         self.v.parametersEntryHelpAction.setEnabled(True)
         self.v.actionPlotPane.setEnabled(True)
         self.v.actionImagePane.setEnabled(True)
@@ -164,7 +192,7 @@ class AnalysisPerspectiveManager(PerspectiveManager):
 
     
     def showPerspective(self, state=True):
-        self._disableMenuBar()
+        PerspectiveManager.showPerspective(self, state)
         self.v.actionPlotPane.setEnabled(True)
         self.v.actionImagePane.setEnabled(True)
         self.v.actionMagMapPane.setEnabled(True)
@@ -173,6 +201,19 @@ class AnalysisPerspectiveManager(PerspectiveManager):
         self.v.playPauseAction.setEnabled(True)
         self.v.resetAction.setEnabled(True)
         self.v.actionAnalysisPerspective.setChecked(True)
+        self.v.actionParametersPane.setEnabled(True)
+        
+    def showParameters(self, state=True):
+        self.signals['param_pane_signal'].emit(state,True)
+        
+    def showMagMap(self, state=True):
+        self.signals['mm_pane_signal'].emit(state)
+        
+    def appendOptions(self):
+        self.addPerspectiveMenu("Logarithmic Scaling", lambda:self.signals['scale_mag_map'].emit("log10"))
+        self.addPerspectiveMenu("Linear Scaling", lambda:self.signals['scale_mag_map'].emit("linear"))
+        self.addPerspectiveMenu("Sqrt Scaling", lambda:self.signals['scale_mag_map'].emit("sqrt"))
+        self.addPerspectiveMenu("Sinh Scaling", lambda:self.signals['scale_mag_map'].emit("sinh"))
 
 class TablePerspectiveManager(PerspectiveManager):
     def __init__(self, mainview, auto_configure=False):
@@ -180,13 +221,13 @@ class TablePerspectiveManager(PerspectiveManager):
 
     
     def showPerspective(self, state=True):
-        self._disableMenuBar()
+        PerspectiveManager.showPerspective(self, state)
         self.v.saveTableAction.setEnabled(True)
         self.v.loadTableAction.setEnabled(True)
         self.v.parametersEntryHelpAction.setEnabled(True)
         self.v.load_setup.setEnabled(True)
         self.v.actionTablePerspective.setChecked(True)
         self.v.signals['toggle_table_signal'].emit(True)
-        self.v.signals['param_pane_signal'].emit(True)
+        self.v.signals['param_pane_signal'].emit(True,False)
         
         

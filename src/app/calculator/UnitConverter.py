@@ -26,7 +26,6 @@ def generateSpecialUnits(qMass,qR,gR):
 	angleRg = linearRg/cosmo.angular_diameter_distance(qR)
 	rgUnit = u.def_unit('r_g',angleRg.value*u.rad)
 	thetaE = 4*const.G*u.Quantity(0.5,'solMass').to('kg')*_scaleFactor(qR,gR)/const.c/const.c
-	print("From converter thetaE = "+str(thetaE))
 	thetaEUnit = u.def_unit('theta_E',math.sqrt(thetaE.value)*u.rad)
 	return [thetaEUnit,rgUnit]
 	

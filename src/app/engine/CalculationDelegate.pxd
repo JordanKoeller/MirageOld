@@ -6,6 +6,8 @@ cdef class CalculationDelegate:
     
     cpdef object make_light_curve(self,object mmin, object mmax, int resolution)
     
+    cpdef object sample_light_curves(self, object pts, double radius)
+    
     cpdef object make_mag_map(self,object center, object dims, object resolution)
     
     cpdef object get_frame(self,object x, object y, object r)

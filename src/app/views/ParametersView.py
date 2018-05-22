@@ -193,6 +193,25 @@ class _ParametersViewWidget(GraphicsLayoutWidget):
             y = y.split(' ')[0]
         return Vector2D(float(x), float(y), unit)
     
+    def _read_only(self, state):
+        self.qVelocity.setReadOnly(state)
+        self.qPosition.setReadOnly(state)
+        self.gCenter.setReadOnly(state)
+        self.qRadius.setReadOnly(state)
+        self.qRedshift.setReadOnly(state)
+        self.gRedshift.setReadOnly(state)
+        self.gVelDispersion.setReadOnly(state)
+        self.gNumStars.setReadOnly(state)
+        self.gShearMag.setReadOnly(state)
+        self.gShearAngle.setReadOnly(state)
+        self.gPositionEntry.setReadOnly(state)
+        self.gStarStdDev.setReadOnly(state)
+        self.scaleInput.setReadOnly(state)
+        self.dimensionInput.setReadOnly(state)
+        self.quasarBHMassEntry.setReadOnly(state)
+        self.regenerateStars.setDisabled(state)
+        self.qVelRandomizer.setDisabled(state)
+    
 
 class ParametersView(View):
     '''
@@ -239,3 +258,6 @@ class ParametersView(View):
     
     def getParameters(self):
         self.signals['send_parameters'].emit(self._buildObjectHelper())
+        
+    def set_read_only(self, state):
+        self.widget._read_only(state)

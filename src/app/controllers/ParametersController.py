@@ -18,7 +18,7 @@ class ParametersController(Controller):
     _destroy_signal = pyqtSignal()
     _setUnits = pyqtSignal(str)
     _modelRegenStars = pyqtSignal()
-
+    _setReadOnly = pyqtSignal(bool)
     def __init__(self):
         '''
         Constructor
@@ -30,13 +30,15 @@ class ParametersController(Controller):
         self.addSignals(view_update_signal=self._update_signal,
                         destroy_view=self._destroy_signal,
                         set_input_units=self._setUnits,
-                        regenerate_stars=self._modelRegenStars)
+                        regenerate_stars=self._modelRegenStars,
+                        set_read_only = self._setReadOnly)
         
     def bind_view_signals(self, view):
         assert isinstance(view, self._viewType), "view must be a ParametersView instance for ParametersController to bind to it."
         self.signals['view_update_signal'].connect(view.update_slot)
         self.signals['destroy_view'].connect(view.destroy)
         self.signals['request_parameters'].connect(view.getParameters)
+        self.signals['set_read_only'].connect(view.set_read_only)
         view.signals['send_parameters'].connect(self.receive_parameters)
         view.signals['regenerate_stars'].connect(self.regenStars)
         view.signals['set_input_units'].connect(self.updateUnits)
@@ -85,3 +87,7 @@ class ParametersController(Controller):
             params = filemanager.load()
             filemanager.close()
             self.update(params)
+            
+    def read_only(self,state):
+        self.signals['set_read_only'].emit(state)
+        print("Set as read-only parameters controller")

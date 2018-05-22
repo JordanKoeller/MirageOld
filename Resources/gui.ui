@@ -58,9 +58,6 @@
        <property name="title">
         <string>View</string>
        </property>
-       <addaction name="actionTablePerspective"/>
-       <addaction name="actionExplorePerspective"/>
-       <addaction name="actionAnalysisPerspective"/>
        <addaction name="separator"/>
        <addaction name="actionPlotPane"/>
        <addaction name="actionImagePane"/>
@@ -72,7 +69,10 @@
         <string>Perspective</string>
        </property>
        <addaction name="separator"/>
-       <addaction name="actionDEPRECATED"/>
+       <addaction name="actionTablePerspective"/>
+       <addaction name="actionExplorePerspective"/>
+       <addaction name="actionAnalysisPerspective"/>
+       <addaction name="separator"/>
       </widget>
       <addaction name="menuFile"/>
       <addaction name="menuView"/>
@@ -145,7 +145,7 @@
       <bool>true</bool>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="text">
       <string>Explore Perspective</string>

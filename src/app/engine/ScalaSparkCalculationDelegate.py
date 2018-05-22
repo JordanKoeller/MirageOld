@@ -10,6 +10,7 @@ import numpy as np
 
 from .CalculationDelegate import CalculationDelegate
 
+import os
 
 _sc = None
 
@@ -82,6 +83,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         print("Calling JVM to ray-trace.")
         self.sc._jvm.main.Main.createRDDGrid(*args)
         print("Finished ray-tracing.")
+        os.remove('/tmp/stars')
         
             
     def query_data_length(self,x,y,radius):
@@ -92,12 +94,41 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         ctx = self.sc.emptyRDD()._jrdd
         self.sc._jvm.main.Main.setFile("/tmp/magData")
         self.sc._jvm.main.Main.queryPoints(x0,y0,x0,y0,1,1,radius,ctx,False)
+        ret = None 
         with open("/tmp/magData") as file:
             data = file.read()
             stringArr = list(map(lambda row: row.split(','), data.split(':')))
             numArr = [list(map(lambda s:float(s),row)) for row in stringArr]
             npArr = np.array(numArr,dtype = float)
-            return npArr   
+            ret =  npArr
+        os.remove('/tmp/magData')
+        return ret
+
+    def sample_light_curves(self, pts, radius):
+        with open('/tmp/queryPoints','w+') as file:
+            for line in pts:
+                for x,y in line:
+                    file.write(str(x) + ":" + str(y) + ",")
+                file.write('\n')
+        self.sc._jvm.main.Main.setFile('/tmp/lightCurves')
+        ctx = self.sc.emptyRDD()._jrdd
+        self.sc._jvm.main.Main.sampleLightCurves('/tmp/queryPoints',radius,ctx)
+        ret = []
+        with open('/tmp/lightCurves') as file:
+            data = file.read()
+            stringArr = list(map(lambda row: row.split(','), data.split(':')))
+            #String arr is of type [[str]]
+            for curveInd in range(len(stringArr)):
+                curve = stringArr[curveInd]
+                doubles = list(map(lambda x:int(x), curve))
+                startPt = pts[curveInd][0]
+                endPt = pts[curveInd][-1]
+                ends = np.array([list(startPt),list(endPt)])
+                doubles = np.array(doubles,dtype=np.int32)
+                ret.append([doubles.flatten(),ends])
+        os.remove('/tmp/lightCurves')
+        os.remove('/tmp/queryPoints')
+        return ret
             
     def make_light_curve(self,mmin,mmax,resolution):
         raise NotImplementedError

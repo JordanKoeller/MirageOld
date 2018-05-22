@@ -50,18 +50,21 @@ class ExperimentResultCalculator(object):
         signals: (defualt NullSignal) dict. Signals to be emitted upon completions of various calculations. If none are provided, NullSignal is used, sending all text to standard
         output.
         '''
-        from app.parameters.ExperimentParams import MagMapParameters, LightCurveParameters, StarFieldData
+        from app.parameters.ExperimentParams import MagMapParameters, LightCurveParameters, StarFieldData, BatchLightCurveParameters
         expTypes = parameters.extras.desiredResults
         self.signals = signals
         #Parse expTypes to functions to run.
         self.experimentRunners = []
         for exp in expTypes:
+            print(type(exp))
             if isinstance(exp, LightCurveParameters):
                 self.experimentRunners.append(self.__LIGHT_CURVE)
             if isinstance(exp,MagMapParameters):
                 self.experimentRunners.append(self.__MAGMAP)
             if isinstance(exp,StarFieldData):
                 self.experimentRunners.append(self.__STARFIELD)
+            if isinstance(exp,BatchLightCurveParameters):
+                self.experimentRunners.append(self.__BATCH_LIGHTCURVE)
         
         
     def runExperiment(self,model):
@@ -69,16 +72,8 @@ class ExperimentResultCalculator(object):
         Function to call to calculate results. Returns a list of the resultant data.
         '''
         ret = []
-        from datetime import datetime as DT
-        starttime = DT.now()
         for exp in range(0,len(self.experimentRunners)):
             ret.append(self.experimentRunners[exp](exp,model))
-        endTime = DT.now()
-        dSec = (endTime - starttime).seconds
-        hrs = dSec // 3600
-        mins = (dSec // 60) % 60
-        secs = dSec % 60
-        timeString = str(hrs)+" hours, " + str(mins) + " minutes, and " + str(secs) + " seconds"
         return ret
 
 
@@ -97,6 +92,7 @@ class ExperimentResultCalculator(object):
         Internal Function. Instructs the engine to make a magnification map and returns the data.
 
         '''
+        print("Magmapping")
         special = model.parameters.extras.desiredResults[index]
         ret = model.engine.make_mag_map(special.center,special.dimensions,special.resolution) #Assumes args are (topleft,height,width,resolution)
 #         rawMag = Model['exptModel'].engine.rawMagnification(special.center.to('rad').x,special.center.to('rad').y)
@@ -105,7 +101,13 @@ class ExperimentResultCalculator(object):
 
     def __STARFIELD(self,index,model):
         return model.parameters.galaxy.stars 
-
+    
+    def __BATCH_LIGHTCURVE(self,index,model):
+        print("Now lightcurving")
+        special = model.parameters.extras.desiredResults[index]
+        ret = model.engine.sample_light_curves(special.lines,special.bounding_box,special.resolution)
+        return np.array(ret)
+    
     def __VIDEO(self):
         pass################################### MAY IMPLIMENT LATER
             

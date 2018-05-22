@@ -106,6 +106,7 @@ class TrialModel(_AbstractModel):
     def magnification_map(self):
         return self._trial.magMap
     
+
     def specify_light_curve(self,start,end):
         if not 'lightcurve' in self.parameters.extras:
             from app.parameters.ExperimentParams import LightCurveParameters
@@ -113,9 +114,7 @@ class TrialModel(_AbstractModel):
         start = self.parameters.extras['magmap'].pixelToAngle(start)
         end = self.parameters.extras['magmap'].pixelToAngle(end)
         self.parameters.extras['lightcurve'].update(start = start, end = end)
-        print("Start = " + str(start))
-        print("End = " + str(end))
-        
+
         
         
 class ClusterModel(_AbstractModel):

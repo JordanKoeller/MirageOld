@@ -43,6 +43,14 @@ class MasterController(Controller):
                         warning=self._warningLabel)
         self.addSignals(view_update_signal=self._update_signal,
                         destroy_view=self._destroy_signal)
+        
+    def clear_perspective(self):
+        print("Destroyed all views")
+        self.lightCurveController.signals['destroy_view'].emit()
+        self.lensedImageController.signals['destroy_view'].emit()
+        self.tableController.signals['destroy_view'].emit()
+        self.parametersController.signals['destroy_view'].emit()
+        self.magMapController.signals['destroy_view'].emit()
     
     def bind_to_model(self, model):
         self.model = model
@@ -69,6 +77,8 @@ class MasterController(Controller):
         signals['to_analysis_perspective'].connect(self.enableAnalysis)
         signals['to_explore_perspective'].connect(self.disableAnalysis)
         signals['to_table_perspective'].connect(self.disableAnalysis)
+        signals['destroy_all'].connect(self.clear_perspective)
+        signals['scale_mag_map'].connect(self.magMapController.setScaling)
         self.signals['add_view_signal'].connect(viewSignals.addView)
         self.signals['warning'].connect(self.raise_warning)
         
@@ -76,6 +86,10 @@ class MasterController(Controller):
         if self.updateModel():
             self.runner.trigger(self.model, self)
 #             self.signals['trigger_calculation'].emit(self.model,self)
+
+    def read_only_entry(self,state):
+        print("Setting as read_only")
+        self.parametersController.read_only(state)
         
     def updateModel(self):
         parameters = self.parametersController.getParameters()
@@ -151,13 +165,14 @@ class MasterController(Controller):
             self.magMapController.signals['destroy_view'].emit()
     
     
-    def toggleParamPane(self, state):
+    def toggleParamPane(self, state,read_only):
         from ..views import ParametersView
         if state is True:
             view = ParametersView()
             self.parametersController.bind_view_signals(view)
             self.signals['add_view_signal'].emit(view)
             self.parametersController.update(self.model.parameters)
+            self.read_only_entry(read_only)
         else:
             self.parametersController.signals['destroy_view'].emit()
     

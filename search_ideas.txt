@@ -1,0 +1,19 @@
+This file describes HOW to search for matching curves or similar curves.
+
+It's going to take multiple approaches to narrow down the sample space to put it in something I can manage.
+
+FIRST PRIORITY: Finding a good slice.
+
+
+Order of searches:
+
+0) Search for curves with the correct range of y-values, within some error.
+	Maybe skip this?
+1) From each curve, calculate a sequence of slopes as positive or negative.
+	To find a good slice, look for matching sequences of positive and negative slopes
+	To avoid over-fitting, allow it to skip over one or two mismatches in the sequence
+2) From here, find the extrema of the curve. Using the first extremum as a pivot point, rescale the x-axis of the simulated data to minimize least squares of maxima.
+	Threshold here for how well they match up, by comparing the sum of squares in offset to the length of the x-axis?
+3) Lastly, use some type of error calculation between the data for the two lines. May need to interpolate or down-sample the two curves to make sure I'm not comparing apples to oranges.
+
+A THOUGHT: Can describe a microlensing event by a polynomial thresholded by a gaussian? Or probably more descriptive to describe as a sum of gaussians.
