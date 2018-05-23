@@ -59,21 +59,21 @@
             },
             "radius": {
                 "unit": "r_g",
-                "value": 8.0
+                "value": 30.0
             },
             "redshift": 1.69,
             "colorKey": 3
         },
-        "canvasDim": 30000,
+        "canvasDim": 5000,
         "dTheta": {
             "unit": "theta_E",
             "value": 300.0
         },
         "extraParameters": {
-            "name": "22big37_imageC_10pcnt_test_small",
+            "name": "Micro_Test_curves",
             "description": "imageC 2237 run at 10% of mass in stars. Set up to be the same dimensions of those specified in Pooley et al. 10,000^2 canvas, drawing to a 2000x2000 magnification map.",
             "numTrials": 1,
-            "trialVariance": "newParams = copy.deepcopy(oldParams)\nnewParams.galaxy.update(percentStars=100.0)",
+            "trialVariance": "newParams = copy.deepcopy(oldParams)\nnewParams.galaxy.update(percentStars=10.0)",
             "resultList": {
                 "magmap": {
                     "center": {

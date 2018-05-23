@@ -110,7 +110,8 @@ class Engine(object):
         print(lightCurves[0][0].shape)
         print(lightCurves[0][1].shape)
         for curve in lightCurves:
-            c = self.normalize_magnification(curve[0])
+            #c = self.normalize_magnification(curve[0])
+            c = curve[0]
             ret.append([c,curve[1]])
         return ret
         print(ret[0][0].shape)
@@ -130,7 +131,8 @@ class Engine(object):
     def make_mag_map(self,center,dims,resolution):
         center = self.get_center_coords(self.parameters)
         ret = self._calcDel.make_mag_map(center,dims,resolution)
-        return self.normalize_magnification(ret)
+        return ret
+        #return self.normalize_magnification(ret)
 
     def get_frame(self,x=None,y=None,r=None):
         return self._calcDel.get_frame(x,y,r)
