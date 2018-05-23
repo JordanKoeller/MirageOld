@@ -163,7 +163,7 @@ class Engine(object):
             shearAngle = parameters.galaxy.shear.angle.value
             centerX = parameters.galaxy.position.to('rad').x
             centerY = parameters.galaxy.position.to('rad').y
-            sis_constant =     np.float64(4 * math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
+            sis_constant =     np.float64(4 *  math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
             pi2 = math.pi / 2
 
             # Calculation variables
