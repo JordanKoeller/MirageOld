@@ -1,4 +1,4 @@
-cd ../spark_impl
+ cd ../spark_impl
 sbt assembly 
 cd ../src
 spark-submit --driver-memory 28g --executor-memory 20g --conf "spark.executor.extraJavaOptions=-verbose:gc -Xms10g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+UseG1GC" --conf spark.driver.maxResultSize=5g --jars ../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar --master spark://pandora00:7077[320] --verbose Main.py --run ../Test/cluster_test.params ../Test/ --log test_local.log
