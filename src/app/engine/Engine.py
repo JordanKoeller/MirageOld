@@ -44,7 +44,17 @@ class Engine(object):
     def reconfigure(self):
         self._center = None
         self._rawMag = None
+        backup = copy.deepcopy(self.parameters)
+        cp = copy.deepcopy(self.parameters)
+        cp.galaxy.update(percentStars=0)
+        self._calcDel.reconfigure(cp)
+        self._center = self.get_center_coords()
+        x = self._center.x 
+        y = self._center.y
+        self._rawMag = self._calcDel.query_data_length(x,y,cp.queryQuasarRadius)
         return self._calcDel.reconfigure(self.parameters)
+
+
     
     def make_light_curve(self,mmin,mmax,resolution):
         ret = self._calcDel.make_light_curve(mmin,mmax,resolution)
@@ -194,18 +204,7 @@ class Engine(object):
         '''Returns the apparent radius of the quasar in units of pixels^2'''
         return math.pi * (self.parameters.quasar.radius.value / self.parameters.dTheta.value) ** 2
 
-    def raw_magnification(self, x, y):
-        if not self._rawMag:
-            # print("\n\n\n MAY BE BROKEN IN NORMALIZING MAGNIFICATION. NEED TO DOUBLE CHECK LATER \n\n\n")
-            import copy
-            backup = copy.deepcopy(self.parameters)
-            cp = copy.deepcopy(self.parameters)
-            cp.galaxy.update(percentStars=0)
-            self.update_parameters(cp)
-            rawMag = self._calcDel.query_data_length(x, y, cp.queryQuasarRadius)
-            self._rawMag = rawMag
-            self.update_parameters(backup)
-        return self._rawMag
+
     
     def update_parameters(self, parameters):
         """Provides an interface for updating the parameters describing the lensed system to be modeled.
@@ -232,9 +231,10 @@ class Engine(object):
             
     def normalize_magnification(self,values):
         assert isinstance(values, np.ndarray) or isinstance(values,float) or isinstance(values,int), "values must be a numeric type or numpy array."
-        center = self.get_center_coords()
-        rawMag = self.raw_magnification(center.x, center.y)
-        return values / rawMag
+        if self._rawMag:
+            return values / rawMag
+        else:
+            raise ValueError("Did not contain a raw magnification value")
             
 
 
