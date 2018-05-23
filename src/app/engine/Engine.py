@@ -232,7 +232,7 @@ class Engine(object):
     def normalize_magnification(self,values):
         assert isinstance(values, np.ndarray) or isinstance(values,float) or isinstance(values,int), "values must be a numeric type or numpy array."
         if self._rawMag:
-            return values / rawMag
+            return values / self._rawMag
         else:
             raise ValueError("Did not contain a raw magnification value")
             
