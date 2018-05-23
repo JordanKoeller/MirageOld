@@ -11,6 +11,7 @@ from astropy import units as u
 from app.utility import Vector2D
 
 from .CalculationDelegate import CalculationDelegate
+import copy
 
 class Engine(object):
     '''
