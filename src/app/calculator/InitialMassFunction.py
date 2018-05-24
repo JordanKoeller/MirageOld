@@ -19,6 +19,8 @@ import numpy as np
 
 
 log = logging.getLogger('imf')
+_random_number_generator = np.random.RandomState()
+
 
 class IMF(object):
     def __init__(self, massLimits=np.array([0.1, 150]), multiplicity=None):
@@ -34,6 +36,10 @@ class IMF(object):
             self.make_multiples = True
 
         return
+
+    @property
+    def random_number_generator(self):
+        return _random_number_generator
             
 
     def generate_cluster(self, totalMass):
@@ -87,7 +93,7 @@ class IMF(object):
 
         while totalMassTally < totalMass:
             # Generate a random number array.
-            uniX = np.random.rand(int(newStarCount))
+            uniX = _random_number_generator.rand(int(newStarCount))
 
             # Convert into the IMF from the inverted CDF
             newMasses = self.dice_star_cl(uniX)
@@ -107,7 +113,7 @@ class IMF(object):
                 MF = self._multi_props.multiplicity_fraction(newMasses)
                 CSF = self._multi_props.companion_star_fraction(newMasses)
                 
-                newIsMultiple = np.random.rand(int(newStarCount)) < MF
+                newIsMultiple = _random_number_generator.rand(int(newStarCount)) < MF
 
                 # Copy over the primary masses. Eventually add the companions.
                 newSystemMasses = newMasses.copy()
@@ -133,10 +139,10 @@ class IMF(object):
                     for ii in range(len(newMasses)):
                         if newIsMultiple[ii]:
                             # determine number of companions
-                            n_comp = 1 + np.random.poisson((CSF[ii] / MF[ii]) - 1)
+                            n_comp = 1 + _random_number_generator.poisson((CSF[ii] / MF[ii]) - 1)
 
                             # Determine the mass ratios of the companions
-                            q_values = self._multi_props.random_q(np.random.rand(n_comp))
+                            q_values = self._multi_props.random_q(_random_number_generator.rand(n_comp))
 
                             # Determine the masses of the companions
                             m_comp = q_values * newMasses[ii]
@@ -197,7 +203,7 @@ class IMF(object):
         # Identify multiple systems, calculate number of companions for
         # each 
         idx = np.where(newIsMultiple == True)[0]
-        n_comp_arr = 1 + np.random.poisson((CSF[idx] / MF[idx]) - 1)
+        n_comp_arr = 1 + _random_number_generator.poisson((CSF[idx] / MF[idx]) - 1)
         primary = newMasses[idx]
 
         # We will deal with each number of multiple system independently. This is
@@ -208,7 +214,7 @@ class IMF(object):
             
             if ii == 1:
                 # Single companion case
-                q_values = self._multi_props.random_q(np.random.rand(len(tmp)))
+                q_values = self._multi_props.random_q(_random_number_generator.rand(len(tmp)))
                 
                 # Calculate mass of companion
                 m_comp = q_values * primary[tmp]
@@ -224,7 +230,7 @@ class IMF(object):
                 newIsMultiple[idx[tmp[bad]]] = False                
             else:
                 # Multple companion case
-                q_values = self._multi_props.random_q(np.random.rand(len(tmp), ii))
+                q_values = self._multi_props.random_q(_random_number_generator.rand(len(tmp), ii))
 
                 # Calculate masses of companions
                 m_comp = np.multiply(q_values, np.transpose([primary[tmp]]))
@@ -609,6 +615,10 @@ class Evolved_IMF(object):
                 k = float(k)
             self.__conversions.append((k,v))
 
+    @property
+    def random_number_generator(self):
+        return _random_number_generator
+
     def generate_cluster(self, totalMass):
         """
         Generate a cluster of stellar systems with the specified IMF.
@@ -650,6 +660,26 @@ class Evolved_IMF(object):
                     massCounter += self.__conversions[max(index-1,0)][1]
         ret = np.ascontiguousarray(retArr)
         return (ret,'formatting')
+
+class Seeding_Decorator(object):
+    """
+    Decorator of an IMF object, that accepts a seed argument.
+    Every time `generate_cluster` is called, it resets the seed of the random
+    number generator to ensure the same random distribution is generated until
+    the next seed is set.  """
+    def __init__(self, obj,seed):
+        self._obj = obj
+        self._seed = seed
+
+    def generate_cluster(self,*args,**kwargs):
+        _random_number_generator.seed(self._seed)
+        return self._obj.generate_cluster(*args,**kwargs)
+
+    @property
+    def random_number_generator(self):
+        return _random_number_generator
+    
+        
 
 
 ##################################################

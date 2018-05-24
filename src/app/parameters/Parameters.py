@@ -204,9 +204,9 @@ class Quasar:<br>
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
 		print("Smooth mass = "+str(self.smoothMassOnScreen))
 		print("Percent Stars mass = "+str(self.__galaxy.percentStars))
-		from app.calculator import MassFunction
-		generator = MassFunction 
-		print("Using the massFunction " + str(MassFunction))
+		from app.calculator import getMassFunction
+		generator = getMassFunction()
+		random_number_generator = generator.random_number_generator
 		m_stars = m_stars.value
 		if m_stars < 1.0:
 			print("NOT ENOUGH MASS FOR STAR FIELD. GENERATION TERMINATED")
@@ -216,7 +216,7 @@ class Quasar:<br>
 			velocityMag = norm.rvs(loc = self.galaxy.starVelocityParams[0],
 							scale = self.galaxy.starVelocityParams[1],
 							size = len(starMasses)) #Loc = mean, scale = sigma, size = number
-			velocityDir = np.random.rand(len(velocityMag),3) - 0.5
+			velocityDir = random_number_generator.rand(len(velocityMag),3) - 0.5
 			velocityDirMag = np.sqrt(velocityDir[:,0]**2 + velocityDir[:,1]**2+velocityDir[:,2]**2)
 			for i in range(0,len(starMasses)):
 				velocityDir[i,0] = velocityDir[i,0]/velocityDirMag[i]
@@ -227,16 +227,16 @@ class Quasar:<br>
 			velocities = velocities/self.galaxy.angDiamDist.to('km').value
 			starArray = np.ndarray((len(starMasses),5))
 			for i in range(0,len(starMasses)): #PROTOCOL of X, Y, Mass, Vx, Vy
-				x = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
-				y = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
+				x = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
+				y = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
 				starArray[i] = [x,y, starMasses[i],velocities[i,0],velocities[i,1]]
 			self.__galaxy.update(stars=starArray)
 			return starArray
 		else:
 			starArray = np.ndarray((len(starMasses),3))
 			for i in range(0,len(starMasses)):
-				x = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
-				y = (rand.random() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
+				x = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
+				y = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
 				starArray[i] = [x,y, starMasses[i]]
 			self.__galaxy.update(stars=starArray)
 

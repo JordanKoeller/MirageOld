@@ -182,7 +182,10 @@ class BatchLightCurveParameters(object):
         if self._lines:
             return self._lines
         else:
-            scaled = np.random.rand(self.num_curves,4) - 0.5
+            from app.preferences import GlobalPreferences
+            seed = GlobalPreferences['light_curve_generator_seed']
+            rng = np.random.RandomState(seed)
+            scaled = rng.rand(self.num_curves,4) - 0.5
             #np.random.rand returns an array of (number,4) dimension of doubles over interval [0,1).
             #I subtract 0.5 to center on 0.0
             center = self.bounding_box.center.to('rad')

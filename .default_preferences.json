@@ -1,6 +1,6 @@
 {
 
-	"calculation_device":"spark",
+	"calculation_device":"cpu",
 	
 	"use_openCL":true,
 	
@@ -30,7 +30,7 @@
 		"visualization"
 	],
 
-	"mass_function":"Pooley_2011",
+	"mass_function":"Kroupa_2001",
 
 	"auto_normalize_magmap":false,
 
@@ -52,6 +52,8 @@
 
 	"light_curve_export_resolution":200,
 
-	"RNG_seed":null
+	"star_generator_seed":null,
+
+	"light_curve_generator_seed":null
 
 }

@@ -36,46 +36,49 @@ class _PreferencesParser(object):
         
     def updatePreferences(self,kv):
         self._prefMap.update(kv)
-        json.dump(self._prefMap, open(self.fileLoc,'w+'))
+
+    def items(self):
+        return self._prefMap.items()
         
 
 
 class _GlobalPreferences(_PreferencesParser):
     """docstring for _GlobalPreferences"""
-    def __init__(self):
-        _PreferencesParser.__init__(self,os.environ['projectDir']+'.custom_preferences.json')
-        if not self['RNG_seed']:
-            import random
-            random.seed(self['RNG_seed'])
+    def __init__(self,path):
+        _PreferencesParser.__init__(self,path)
+        defaults = _PreferencesParser(os.environ['projectDir']+'.default_preferences.json')
+        #Load in defaults
+        for k,v in defaults.items():
+            if k not in self._prefMap:
+                self._prefMap[k] = v
+
+        #Convert from keywords to settings, etc.
         if self['core_count'] == 'all':
             self._prefMap['core_count'] = multiprocessing.cpu_count()
         if self['use_openCL']:
             if self['cl_device'] != 'discover':
                 os.environ['PYOPENCL_CTX'] = str(self['cl_device'])
-        if self['color_scheme']:
-            lookup = {
-                'minimum':1,
-                'saddle_pt':5,
-                'galaxy':4,
-                'star':2,
-                'quasar':3,
-                'background':0
-                }
-            global ColorMap
-            for color in self['color_scheme'].items():
-                c = color[1][1:]
-                c1 = c[0:2]
-                c2 = c[2:4]
-                c3 = c[4:6]
-                r = int(c1,16)
-                g = int(c2,16)
-                b = int(c3,16)
-                ColorMap[lookup[color[0]]] = [r,g,b]
-        if self['mass_function']:
-            from app.calculator import setMassFunction
-            setMassFunction(self['mass_function'])
+        lookup = {
+            'minimum':1,
+            'saddle_pt':5,
+            'galaxy':4,
+            'star':2,
+            'quasar':3,
+            'background':0
+            }
+        global ColorMap
+        for color in self['color_scheme'].items():
+            c = color[1][1:]
+            c1 = c[0:2]
+            c2 = c[2:4]
+            c3 = c[4:6]
+            r = int(c1,16)
+            g = int(c2,16)
+            b = int(c3,16)
+            ColorMap[lookup[color[0]]] = [r,g,b]
 
 
 
 ColorMap = np.ndarray((6,3), dtype = np.uint8)
-GlobalPreferences = _GlobalPreferences()
+GlobalPreferences = _GlobalPreferences(os.environ['projectDir']+'.custom_preferences.json')
+

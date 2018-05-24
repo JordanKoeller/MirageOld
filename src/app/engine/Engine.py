@@ -44,8 +44,6 @@ class Engine(object):
     
     def reconfigure(self):
         import random
-        print(random.random())
-        print("Random number above")
         self._center = None
         self._rawMag = None
         backup = copy.deepcopy(self.parameters)
@@ -117,8 +115,8 @@ class Engine(object):
         
         slices = []
         for row in lines.value:
-            slice= __slice_line(row,bounding_box,resolution)
-            slices.append(np.array(slice).T)
+            slc= __slice_line(row,bounding_box,resolution)
+            slices.append(np.array(slc).T)
         lightCurves = self._calcDel.sample_light_curves(slices,self.parameters.queryQuasarRadius)
         ret = []
         print(lightCurves[0][0].shape)
