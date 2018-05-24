@@ -31,6 +31,8 @@ def run_simulation(files):
     secs = dSec % 60
     timeString = str(hrs)+" hours, " + str(mins) + " minutes, and " + str(secs) + " seconds"
     logging.info('\n\n Caluations Finished in ' + timeString)
+    import random
+    print(random.random())
     sys.exit()
 
 def visualize():

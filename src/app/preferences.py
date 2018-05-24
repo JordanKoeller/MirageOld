@@ -8,7 +8,7 @@ import json
 import multiprocessing
 import os
 import numpy as np
-
+import random 
 class _PreferencesParser(object):
     '''
     classdocs
@@ -44,6 +44,9 @@ class _GlobalPreferences(_PreferencesParser):
     """docstring for _GlobalPreferences"""
     def __init__(self):
         _PreferencesParser.__init__(self,os.environ['projectDir']+'.custom_preferences.json')
+        if not self['RNG_seed']:
+            import random
+            random.seed(self['RNG_seed'])
         if self['core_count'] == 'all':
             self._prefMap['core_count'] = multiprocessing.cpu_count()
         if self['use_openCL']:

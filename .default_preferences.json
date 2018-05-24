@@ -50,6 +50,8 @@
 
 	"draw_stars":true,
 
-	"light_curve_export_resolution":200
+	"light_curve_export_resolution":200,
+
+	"RNG_seed":null
 
 }
