@@ -43,6 +43,9 @@ class Engine(object):
 #         self._calcDel.bind_manager(self)
     
     def reconfigure(self):
+        import random
+        print(random.random())
+        print("Random number above")
         self._center = None
         self._rawMag = None
         backup = copy.deepcopy(self.parameters)
