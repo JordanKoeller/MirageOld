@@ -36,6 +36,7 @@ class MagMapController(Controller):
         self.signals['destroy_view'].connect(view.destroy)
         self.signals['set_magmap'].connect(view.setMagMap)
         view.signals['ROI_set'].connect(self.setROI)
+        self.signals['set_ROI'].connect(view.setROI)
         self.signals['set_magmap'].emit(self._modelRef.magnification_map)
         
     def setScaling(self,name):
@@ -69,10 +70,10 @@ class MagMapController(Controller):
             print("Exception in binding magmapmodel")
         
     def setROI(self,start,end):
-        print(type(start))
         vstart = Vector2D(start[0],start[1])
         vend = Vector2D(end[0],end[1])
         self._modelRef.specify_light_curve(vstart,vend)
+        self.signals['set_ROI'].emit(start,end)
         
 
 #Scaling Types:

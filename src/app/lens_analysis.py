@@ -578,7 +578,7 @@ def visualizeMagMap(model=None,trial_number=None):
         - `trial_number` (:class:`int`) : If `model` is a string specifying a `.dat` file, `trial_number` is used to specify which trial in the data file to visualize. 
     '''
     from app.views import WindowView, AnalysisPerspectiveManager
-    from app.controllers import MasterController
+    from app.controllers import MasterController, CommandLineController
     view = WindowView()
     controller = MasterController()
     controller.bind_view_signals(view)
@@ -596,5 +596,5 @@ def visualizeMagMap(model=None,trial_number=None):
     view.signals['plot_pane_signal'].emit(True)
     view.signals['mm_pane_signal'].emit(True)
     view.show()
-    return (model,controller)
+    return CommandLineController(model,view,controller)
 

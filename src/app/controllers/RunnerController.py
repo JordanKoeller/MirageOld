@@ -140,3 +140,15 @@ class LightCurveRunner(Runner):
         model.parameters.incrementTime(model.parameters.dt)
         QApplication.processEvents()
         
+
+    def plotFromLightCurve(self,mastercontroller,lightcurve,x_axis_unit,bounding_box):
+        from app.models import LightCurve 
+        if isinstance(lightcurve,LightCurve):
+            x,y = lightcurve.plottable(x_axis_unit)
+            qpts = lightcurve.query_points.to('rad').value
+            pixels = bounding_box.angleToPixel(qpts)
+            start_trace,end_trace = (pixels[0],pixels[-1])
+            mastercontroller.lightCurveController.plot_xy(x,y)
+            mastercontroller.magMapController.setROI(start_trace,end_trace)
+        else:
+            raise ValueError("lightcurve must be an instance of the LightCurve type")

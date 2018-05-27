@@ -8,5 +8,6 @@ from .TableController import TableController
 from .RunnerController import Runner, AnimationRunner, FrameRunner
 
 from .MasterController import MasterController
+from .CommandLineController import CommandLineController
 
 

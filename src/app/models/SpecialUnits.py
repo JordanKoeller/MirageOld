@@ -1,6 +1,6 @@
 from astropy import units as u
 
-class SpecialUnitList(list):
+class SpecialUnitsList(list):
 	"""A special list for lists of instances of `astropy.unit` instances. Provides a method to easily
 	register all contained units"""
 	def __init__(self, *args,**kwargs):
@@ -24,5 +24,6 @@ class SpecialUnitList(list):
 	def register(self):
 		for elem in self:
 			u.add_enabled_units(elem)
+
 
 		

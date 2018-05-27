@@ -273,7 +273,7 @@ class Quasar:<br>
 	@property
 	def specialUnits(self):
 		from app.models import SpecialUnitsList
-		return SpecialUnitsList([self.avgMassEinsteinRadius,self.gravitationalRadius])
+		return SpecialUnitsList(self.avgMassEinsteinRadius,self.gravitationalRadius)
 
 	@staticmethod
 	def calculateAvgMassEinsteinRadius(gz,qz):
