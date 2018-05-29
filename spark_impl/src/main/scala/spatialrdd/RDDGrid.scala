@@ -56,8 +56,8 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
       var rett:List[PixelValue] = Nil
       for (i <- 0 until queryPts.value.length) {
         for (j <- 0 until queryPts.value(i).length) {
-          if (grid.intersects(queryPts.value(i)(j)._1, queryPts.value(i)(j)._2, r.value)) {
-            val num = grid.query_point_count(queryPts.value(i)(j)._1, queryPts.value(i)(j)._2, r.value)
+          if (grid.intersects(queryPts.value(i)(j)._2, queryPts.value(i)(j)._1, r.value)) {
+            val num = grid.query_point_count(queryPts.value(i)(j)._2, queryPts.value(i)(j)._1, r.value)
             if (num != 0) rett ::= pixelConstructor(i, j, num) 
           }
         }

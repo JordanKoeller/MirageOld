@@ -105,7 +105,6 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         return ret
 
     def sample_light_curves(self, pts, radius):
-        # from matplotlib import pyplot as plt
         with open('/tmp/queryPoints','w+') as file:
             for i in range(len(pts)):
                 arr = pts[i]
@@ -114,19 +113,6 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                     y = arr[iterator,1]
                     file.write(str(x)+":"+str(y) + ",")
                 file.write("\n")
-            # px = []
-            # py = []
-            # ty = [1,2,3]
-            # tx = [0,0,0]
-            # plt.plot(tx,ty)
-            # plt.show()
-            # for line in pts:
-            #     for x,y in line:
-            #         file.write(str(x) + ":" + str(y) + ",")
-            #         px.append(x)
-            #         py.append(y)
-            #     plt.plot(px,py)
-                # file.write('\n')
         self.sc._jvm.main.Main.setFile('/tmp/lightCurves')
         ctx = self.sc.emptyRDD()._jrdd
         self.sc._jvm.main.Main.sampleLightCurves('/tmp/queryPoints',radius,ctx)
@@ -143,9 +129,8 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                 ends = np.array([list(startPt),list(endPt)])
                 doubles = np.array(doubles,dtype=np.int32)
                 ret.append([doubles.flatten(),ends])
-            print("Principal axes size is of " + str(len(ret)))
-        os.remove('/tmp/lightCurves')
-        os.remove('/tmp/queryPoints')
+        # os.remove('/tmp/lightCurves')
+        # os.remove('/tmp/queryPoints')
         return ret
             
     def make_light_curve(self,mmin,mmax,resolution):
