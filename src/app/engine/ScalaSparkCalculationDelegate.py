@@ -126,6 +126,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                 ends = np.array([list(startPt),list(endPt)])
                 doubles = np.array(doubles,dtype=np.int32)
                 ret.append([doubles.flatten(),ends])
+            print("Principal axes size is of " + str(len(ret)))
         os.remove('/tmp/lightCurves')
         os.remove('/tmp/queryPoints')
         return ret
