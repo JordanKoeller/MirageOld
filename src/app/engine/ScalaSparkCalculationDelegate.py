@@ -105,10 +105,27 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         return ret
 
     def sample_light_curves(self, pts, radius):
+        from matplotlib import pyplot as plt
         with open('/tmp/queryPoints','w+') as file:
-            for line in pts:
-                for x,y in line:
-                    file.write(str(x) + ":" + str(y) + ",")
+            for i in range(len(pts)):
+                arr = pts[i]
+                for iterator in range(len(arr)):
+                    x = arr[iterator,0]
+                    y = arr[iterator,1]
+                    file.write(str(x)+":"+str(y) + ",")
+                file.write("\n")
+            # px = []
+            # py = []
+            # ty = [1,2,3]
+            # tx = [0,0,0]
+            # plt.plot(tx,ty)
+            # plt.show()
+            # for line in pts:
+            #     for x,y in line:
+            #         file.write(str(x) + ":" + str(y) + ",")
+            #         px.append(x)
+            #         py.append(y)
+            #     plt.plot(px,py)
                 file.write('\n')
         self.sc._jvm.main.Main.setFile('/tmp/lightCurves')
         ctx = self.sc.emptyRDD()._jrdd
