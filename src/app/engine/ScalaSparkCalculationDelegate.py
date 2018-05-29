@@ -46,7 +46,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         radius = self.parameters.queryQuasarRadius
         ctx = self.sc.emptyRDD()._jrdd
         self.sc._jvm.main.Main.setFile("/tmp/magData")
-        self.sc._jvm.main.Main.queryPoints(x0,y0,x0+dims.to('rad').x,y0+dims.to('rad').y,int(resx),int(resy),radius,ctx,False)
+        self.sc._jvm.main.Main.queryPoints(x0,y0,x0+dims.to('rad').x,y0-dims.to('rad').y,int(resx),int(resy),radius,ctx,False)
         with open("/tmp/magData") as file:
             data = file.read()
             stringArr = list(map(lambda row: row.split(','), data.split(':')))

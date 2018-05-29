@@ -31,7 +31,6 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
   }
 
   def queryPointsFromGen(gen: GridGenerator, radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
-    println("Broadcasting generator")
     val bgen = sc.broadcast(gen)
     val r = sc.broadcast(radius)
     val queries = rdd.flatMap { grid =>
@@ -51,21 +50,19 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
     ret
   }
   def queryPoints(pts: Array[Array[DoublePair]], radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Index]] = {
-    println("Size = " + pts.size)
     val r = sc.broadcast(radius)
     val queryPts = sc.broadcast(pts)
     val queries = rdd.flatMap { grid =>
-      var ret: List[PixelValue] = Nil
-      for (line <- 0 until queryPts.value.length) {
-        for (qpt <- 0 until queryPts.value(line).length) {
-          if (grid.intersects(queryPts.value(line)(qpt)._1, queryPts.value(line)(qpt)._2, r.value)) {
-            val num = grid.query_point_count(queryPts.value(line)(qpt)._1, queryPts.value(line)(qpt)._2, r.value)
-            if (num != 0) ret ::= pixelConstructor(line, qpt, num)
+      var rett:List[PixelValue] = Nil
+      for (i <- 0 until queryPts.value.length) {
+        for (j <- 0 until queryPts.value(i).length) {
+          if (grid.intersects(queryPts.value(i)(j)._1, queryPts.value(i)(j)._2, r.value)) {
+            val num = grid.query_point_count(queryPts.value(i)(j)._1, queryPts.value(i)(j)._2, r.value)
+            if (num != 0) rett ::= pixelConstructor(i, j, num) 
           }
         }
       }
-      ret
-
+      rett
     }
     val collected = queries.collect()
     val ret = Array.fill(pts.length)(Array[Int]())

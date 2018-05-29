@@ -119,14 +119,10 @@ class Engine(object):
             slices.append(np.array(slc).T)
         lightCurves = self._calcDel.sample_light_curves(slices,self.parameters.queryQuasarRadius)
         ret = []
-        print(lightCurves[0][0].shape)
-        print(lightCurves[0][1].shape)
         for curve in lightCurves:
             c = self.normalize_magnification(curve[0])
             ret.append([c,curve[1]])
         return ret
-        print(ret[0][0].shape)
-        print(ret[0][1].shape)
         #slices is a list of numpy arrays.
         #Each numpy array is of shape (N,2)
         #So arr[:,0]  gives xvals, arr[:,1] gives yvals
@@ -164,17 +160,14 @@ class Engine(object):
             shearAngle = parameters.galaxy.shear.angle.value
             centerX = parameters.galaxy.position.to('rad').x
             centerY = parameters.galaxy.position.to('rad').y
-            sis_constant =     np.float64(4 *  math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
+            sis_constant = np.float64(4 *  math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
             pi2 = math.pi / 2
-
             # Calculation variables
             resx = 0
             resy = 0
-
             # Calculation is Below
             incident_angle_x = 0.0
             incident_angle_y = 0.0
-            
             try:
                 # SIS
                 deltaR_x = incident_angle_x - centerX
