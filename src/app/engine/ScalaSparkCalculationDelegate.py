@@ -129,8 +129,8 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                 ends = np.array([list(startPt),list(endPt)])
                 doubles = np.array(doubles,dtype=np.int32)
                 ret.append([doubles.flatten(),ends])
-        # os.remove('/tmp/lightCurves')
-        # os.remove('/tmp/queryPoints')
+        os.remove('/tmp/lightCurves')
+        os.remove('/tmp/queryPoints')
         return ret
             
     def make_light_curve(self,mmin,mmax,resolution):
