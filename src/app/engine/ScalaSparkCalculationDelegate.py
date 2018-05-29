@@ -76,8 +76,8 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                 self.parameters.dTheta.to('rad').value,
                 self.parameters.galaxy.position.to('rad').x,
                 self.parameters.galaxy.position.to('rad').y,
-                _width,
-                _height,
+                int(_width),
+                int(_height),
                 self.sc.emptyRDD()._jrdd
                 )
         print("Calling JVM to ray-trace.")
@@ -105,7 +105,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         return ret
 
     def sample_light_curves(self, pts, radius):
-        from matplotlib import pyplot as plt
+        # from matplotlib import pyplot as plt
         with open('/tmp/queryPoints','w+') as file:
             for i in range(len(pts)):
                 arr = pts[i]
@@ -126,7 +126,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
             #         px.append(x)
             #         py.append(y)
             #     plt.plot(px,py)
-                file.write('\n')
+                # file.write('\n')
         self.sc._jvm.main.Main.setFile('/tmp/lightCurves')
         ctx = self.sc.emptyRDD()._jrdd
         self.sc._jvm.main.Main.sampleLightCurves('/tmp/queryPoints',radius,ctx)
