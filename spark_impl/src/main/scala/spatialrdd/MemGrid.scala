@@ -156,14 +156,11 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
 
 object MemGrid {
 
-  val bucketFactor = 2
+  val bucketFactor = 4
   def apply(data: IndexedSeq[DoublePair]): MemGrid = {
     val xHashPair = hashDehashPair(data, (l: DoublePair) => l._1, math.sqrt(data.size).toInt * bucketFactor)
     val yHashPair = hashDehashPair(data, (l: DoublePair) => l._2, math.sqrt(data.size).toInt * bucketFactor)
-    //    val _hashX = equalHashing(data, (l: (Double, Double)) => l._1, math.sqrt(data.size).toInt * bucketFactor)
-    //    val _hashY = equalHashing(data, (l: (Double, Double)) => l._2, math.sqrt(data.size).toInt * bucketFactor)
     val grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Double]]] = mutable.Map()
-    //    val grid = Array.fill(numBucs)(Array.fill(numBucs)(mutable.ArrayBuffer[Double]()))
     var rover = 0
     var xMin = Double.MaxValue
     var xMax = -Double.MaxValue

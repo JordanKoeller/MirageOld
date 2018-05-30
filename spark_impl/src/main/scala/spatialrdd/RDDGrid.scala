@@ -26,7 +26,7 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
     val rddTraced = rddProfiled.partitionBy(partitioner)
     val glommed = rddTraced.glom()
     //    println (glommed.map(_.length).collect.mkString(","))
-    val ret = glommed.map(arr => nodeStructure(arr)).persist(StorageLevel.MEMORY_ONLY)
+    val ret = glommed.map(arr => nodeStructure(arr)).persist(StorageLevel.MEMORY_AND_DISK)
     ret
   }
 
