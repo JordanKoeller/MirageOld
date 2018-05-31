@@ -6,7 +6,12 @@
 	
 	"cl_device":3,
 
-	"memory_warning_threshold":5,
+	"spark_configuration":{
+		"master":"local[*]",
+		"driver-memory":"1g",
+		"executor-memory":"1g",
+		"command-line-args":null
+	},
 
 	"core_count":"all",
 
@@ -32,25 +37,15 @@
 
 	"mass_function":"Kroupa_2001",
 
-	"auto_normalize_magmap":false,
-
 	"animate_motion":false,
 
-	"lightCurve_resolution":200,
-
 	"ray_trace_on_load":true,
-
-	"precise_light_curve":false,
-
-	"fast_generate_light_curve":false,
 
 	"draw_quasar":true,
 
 	"draw_galaxy":true,
 
 	"draw_stars":true,
-
-	"light_curve_export_resolution":200,
 
 	"star_generator_seed":null,
 

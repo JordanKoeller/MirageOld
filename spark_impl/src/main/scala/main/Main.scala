@@ -41,16 +41,18 @@ object Main extends App {
     centerY: Double,
     width: Int,
     height: Int,
-    ctx: JavaRDD[Int]): Unit = {
+    ctx: JavaRDD[Int],
+    partitionCount:Int): Unit = {
     if (rddGrid != null) rddGrid.destroy()
     val sc = ctx.context
+    sc.setLogLevel("WARN")
     val stars = scala.io.Source.fromFile(starsfile).getLines().toArray.map { row =>
       val starInfoArr = row.split(",").map(_.toDouble)
       (starInfoArr(0), starInfoArr(1), starInfoArr(2))
     }
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
-    val pixels = sc.range(0, (width * height).toLong, 1,768)
+    val pixels = sc.range(0, (width * height).toLong,1,partitionCount)
     val parameters = RayParameters(
       stars,
       pointConstant,

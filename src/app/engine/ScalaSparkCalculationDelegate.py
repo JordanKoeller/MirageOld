@@ -9,7 +9,7 @@ from astropy import constants as const
 import numpy as np
 
 from .CalculationDelegate import CalculationDelegate
-
+from app.preferences import GlobalPreferences
 import os
 
 _sc = None
@@ -78,7 +78,8 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                 self.parameters.galaxy.position.to('rad').y,
                 int(_width),
                 int(_height),
-                self.sc.emptyRDD()._jrdd
+                self.sc.emptyRDD()._jrdd,
+                GlobalPreferences['core_count']
                 )
         print("Calling JVM to ray-trace.")
         self.sc._jvm.main.Main.createRDDGrid(*args)
@@ -146,9 +147,15 @@ def _get_or_create_context(p):
     if not _sc:
         from pyspark.conf import SparkConf
         from pyspark.context import SparkContext
-
+        settings = GlobalPreferences['spark_configuration']
+        JARS = "--jars " + GlobalPreferences['path']+"/spark_impl//target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar"
+        os.environ['PYSPARK_SUBMIT_ARGS'] = JARS
+        SparkContext.setSystemProperty("spark.executor.memory",settings['executor-memory'])
+        SparkContext.setSystemProperty("spark.driver.memory",settings['driver-memory'])
         conf = SparkConf().setAppName(p.jsonString)
-        conf = (conf)
+        conf = conf.setMaster(settings['master'])
+        conf = conf.set('spark.driver.maxResultSize',settings['driver-memory'])
+        conf = conf.set()
         _sc = SparkContext(conf=conf)
         _sc.setLogLevel("WARN")
     return _sc

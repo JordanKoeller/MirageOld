@@ -51,7 +51,7 @@ class _GlobalPreferences(_PreferencesParser):
         for k,v in defaults.items():
             if k not in self._prefMap:
                 self._prefMap[k] = v
-
+        self._prefMap['path'] = os.environ['projectDir']
         #Convert from keywords to settings, etc.
         if self['core_count'] == 'all':
             self._prefMap['core_count'] = multiprocessing.cpu_count()
