@@ -46,6 +46,7 @@ object Main extends App {
     if (rddGrid != null) rddGrid.destroy()
     val sc = ctx.context
     sc.setLogLevel("WARN")
+    println(sc.getConf.toDebugString)
     val stars = scala.io.Source.fromFile(starsfile).getLines().toArray.map { row =>
       val starInfoArr = row.split(",").map(_.toDouble)
       (starInfoArr(0), starInfoArr(1), starInfoArr(2))
