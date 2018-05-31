@@ -45,16 +45,14 @@ class MagMapViewWidget(GraphicsLayoutWidget):
         gradient = self.gradientWidget.getLookupTable(500,alpha=False)
         self._imgItem.setLookupTable(gradient,True)
         
-    def setMagMap(self,img,baseMag=10):
-#         baseMag = baseMag/img.max()
-        baseMag = 0.1
+    def setMagMap(self,img,baseMag):
         self._imgStatic = img.copy()
         self._imgItem.setImage(self._imgStatic)
+        span = img.max() - img.min()
         self.gradientWidget.restoreState(self._getCenteredGradient(baseMag))
-        self._baseMag = int(baseMag)
                 
     def _getCenteredGradient(self,center):
-        default = {'ticks':[(0.0, (0, 255, 255, 255)), (0.2, (255, 255, 0, 255)), (0.05, (0, 0, 0, 255)), (0.1, (0, 0, 255, 255)), (0.1, (255, 0, 0, 255))],'mode':'rgb'}
+        default = {'ticks':[(0.0, (204, 51, 0,255)), (center, (255, 255, 255, 255)), (1, (0, 0, 153,255))],'mode':'rgb'}
         return default
                 
     def setROI(self,begin,end):

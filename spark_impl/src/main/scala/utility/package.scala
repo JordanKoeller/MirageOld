@@ -31,7 +31,7 @@ package object utility {
     }
     
     
-    class PixelValue(val _hidden:Long=0L) extends AnyVal with Serializable {
+    class PixelValue(val _hidden:Long) extends AnyVal {
       
       def x:Int = {
         (_hidden >> 48).toInt 
@@ -49,8 +49,16 @@ package object utility {
       }
     }
     
-    def pixelConstructor(x:Int=0,y:Int=0,value:Int=0):PixelValue = {
+    def pixelConstructor(x:Int,y:Int,value:Int):PixelValue = {
+      pixelConstructor(pixelLongConstructor(x,y,value))
+    }
+    
+    def pixelConstructor(l:Long):PixelValue = {
+      new PixelValue(l)
+    }
+    
+    def pixelLongConstructor(x:Int,y:Int,value:Int):Long = {
       val pos = (x << 16) + y
-      new PixelValue((pos.toLong << 32) + value.toLong)
+      (pos.toLong << 32) + value.toLong
     }
 }

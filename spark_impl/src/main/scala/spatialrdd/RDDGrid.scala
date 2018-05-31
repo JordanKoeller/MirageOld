@@ -16,6 +16,7 @@ import utility.mkPair
 import utility.Index
 import utility.PixelValue
 import utility.pixelConstructor
+import utility.pixelLongConstructor
 import spatialrdd.partitioners.BalancedColumnPartitioner
 
 class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = new BalancedColumnPartitioner, nodeStructure: IndexedSeq[(Double, Double)] => SpatialData = MemGrid.apply) extends RDDGridProperty {
@@ -37,14 +38,15 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
       gen.flatMap { qPt =>
         if (grid.intersects(qPt.x, qPt.y, r.value)) {
           val num = grid.query_point_count(qPt.x, qPt.y, r.value)
-          if (num != 0) pixelConstructor(qPt.px, qPt.py, num) :: Nil else Nil
+          if (num != 0) pixelLongConstructor(qPt.px, qPt.py, num) :: Nil else Nil
         } else Nil
       }
     }
 
     val collected = queries.collect()
     val ret = Array.fill(gen.xDim, gen.yDim)(0)
-    collected.foreach { elem =>
+    collected.foreach { el =>
+      val elem = pixelConstructor(el)
       ret(elem.x)(elem.y) += elem.value
     }
     ret
@@ -53,12 +55,12 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
     val r = sc.broadcast(radius)
     val queryPts = sc.broadcast(pts)
     val queries = rdd.flatMap { grid =>
-      var rett:List[PixelValue] = Nil
+      var rett:List[Long] = Nil
       for (i <- 0 until queryPts.value.length) {
         for (j <- 0 until queryPts.value(i).length) {
           if (grid.intersects(queryPts.value(i)(j)._1, queryPts.value(i)(j)._2, r.value)) {
             val num = grid.query_point_count(queryPts.value(i)(j)._1, queryPts.value(i)(j)._2, r.value)
-            if (num != 0) rett ::= pixelConstructor(i, j, num) 
+            if (num != 0) rett ::= pixelLongConstructor(i, j, num) 
           }
         }
       }
@@ -67,7 +69,8 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
     val collected = queries.collect()
     val ret = Array.fill(pts.length)(Array[Int]())
     for (i <- 0 until pts.length) ret(i) = Array.fill(pts(i).length)(0)
-    collected.foreach { elem =>
+    collected.foreach { el =>
+      val elem = pixelConstructor(el)
       ret(elem.x)(elem.y) += elem.value
     }
     ret

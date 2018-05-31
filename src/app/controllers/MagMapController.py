@@ -17,7 +17,7 @@ class MagMapController(Controller):
     '''
     _update_signal = pyqtSignal(object)
     _destroy_signal = pyqtSignal()
-    _set_img = pyqtSignal(object)
+    _set_img = pyqtSignal(object,float)
     _set_ROI = pyqtSignal(object,object)
     
     def __init__(self):
@@ -37,7 +37,8 @@ class MagMapController(Controller):
         self.signals['set_magmap'].connect(view.setMagMap)
         view.signals['ROI_set'].connect(self.setROI)
         self.signals['set_ROI'].connect(view.setROI)
-        self.signals['set_magmap'].emit(self._modelRef.magnification_map)
+        self.signals['set_magmap'].emit(*self.getPrettyMagMap())
+        # self.signals['set_magmap'].emit(self._modelRef.magnification_map)
         
     def setScaling(self,name):
         print("Scaling is now set to " + name)
@@ -51,20 +52,20 @@ class MagMapController(Controller):
             self._scalingFunc = Sinh
         else:
             print("Error: Scaling Key code not found")
-        scaled = self.getPrettyMagMap()
-        print(scaled)
-        self.signals['set_magmap'].emit(scaled)
+        scaled,base = self.getPrettyMagMap()
+        self.signals['set_magmap'].emit(scaled,base)
         
     def getPrettyMagMap(self):
         scaled = self._scalingFunc(self._modelRef.magnification_map)
+        scaledBase = self._scalingFunc(1)
         minimum = scaled.min()
-        range = scaled.max() - scaled.min()
-        return (scaled + minimum)/range
+        span = scaled.max() - scaled.min()
+        return ((scaled + minimum),scaledBase/span)
         
     def bind_to_model(self,modelRef):
         try:
             self._modelRef = modelRef
-            self.signals['set_magmap'].emit(self.getPrettyMagMap())
+            self.signals['set_magmap'].emit(*self.getPrettyMagMap())
         except:
             pass
             print("Exception in binding magmapmodel")
