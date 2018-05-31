@@ -155,7 +155,7 @@ def _get_or_create_context(p):
         conf = conf.setMaster(settings['master'])
         conf = conf.set('spark.driver.maxResultSize',settings['driver-memory'])
         _sc = SparkContext(conf=conf)
-        _sc._jsc.sc().addJAR(jarpath)
+        _sc._jsc.sc().addJar(jarpath)
         _sc.setLogLevel("WARN")
     return _sc
         
