@@ -148,12 +148,13 @@ def _get_or_create_context(p):
         from pyspark.conf import SparkConf
         from pyspark.context import SparkContext
         settings = GlobalPreferences['spark_configuration']
-        # jarpath = GlobalPreferences['path']+"/spark_impl//target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar"
+        jarpath = GlobalPreferences['path']+"/spark_impl//target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar"
         SparkContext.setSystemProperty("spark.executor.memory",settings['executor-memory'])
         SparkContext.setSystemProperty("spark.driver.memory",settings['driver-memory'])
         conf = SparkConf().setAppName(p.jsonString)
         conf = conf.setMaster(settings['master'])
         conf = conf.set('spark.driver.maxResultSize',settings['driver-memory'])
+        conf = conf.set('spark.jars',jarpath)
         _sc = SparkContext(conf=conf)
         _sc.setLogLevel("WARN")
     return _sc
