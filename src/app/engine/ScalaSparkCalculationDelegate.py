@@ -55,7 +55,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
             return npArr    
 
     def ray_trace(self):
-        if 'datafile' in self.parameters.extras and self.parameters.getExtras['datafile'].num_partitions != 0:
+        if 'datafile' in self.parameters.extras and self.parameters.getExtras('datafile').num_partitions != 0:
             print("Found parameters for a data file. Loading in RDD from disk.")
             file_descriptions = self.parameters.getExtras('datafile')
             num_parts = file_descriptions.num_partitions
