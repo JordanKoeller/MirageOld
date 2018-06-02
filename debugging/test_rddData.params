@@ -94,7 +94,7 @@
                 },
 		"datafile": {
 			"filename":"/tmp/rdd_saving_testfile.rddata",
-			"num_partitions":768
+			"num_partitions":0
 		},
                 "starfield": [],
                 "batch_lightcurve": {
