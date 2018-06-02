@@ -94,7 +94,6 @@ class ExperimentResultCalculator(object):
         Internal Function. Instructs the engine to make a magnification map and returns the data.
 
         '''
-        print("Magmapping")
         special = model.parameters.extras.desiredResults[index]
         ret = model.engine.make_mag_map(special.center,special.dimensions,special.resolution) #Assumes args are (topleft,height,width,resolution)
 #         rawMag = Model['exptModel'].engine.rawMagnification(special.center.to('rad').x,special.center.to('rad').y)
@@ -105,7 +104,6 @@ class ExperimentResultCalculator(object):
         return model.parameters.galaxy.stars 
     
     def __BATCH_LIGHTCURVE(self,index,model):
-        print("Now lightcurving")
         special = model.parameters.extras.desiredResults[index]
         ret = model.engine.sample_light_curves(special.lines,special.bounding_box,special.resolution)
         return np.array(ret)

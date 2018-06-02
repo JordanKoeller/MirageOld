@@ -253,7 +253,7 @@ class RDDFileInfo(object):
     object file, for use by a cluster."""
     def __init__(self, fname,num_partitions):
         super(RDDFileInfo, self).__init__()
-        self.fname = fname
+        self.filename = fname
         self.num_partitions = num_partitions
 
     def set_numParts(self,nparts):
@@ -265,7 +265,7 @@ class RDDFileInfo(object):
 
     @property 
     def jsonString(self):
-        return {"filename":self.fname,"num_partitions":self.num_partitions}
+        return {"filename":self.filename,"num_partitions":self.num_partitions}
 
 class RDDFileInfoJSONDecoder(object):
     def __init__(self):

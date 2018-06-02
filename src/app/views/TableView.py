@@ -150,6 +150,8 @@ class TableViewWidget(GraphicsLayoutWidget):
                 ret['datasets']['magmap'] = {}
                 ret['datasets']['magmap']['magmapdims'] = self.vectorFromQString(self.magMapDimEntry.text(),unit=inputUnit)
                 ret['datasets']['magmap']['magmapres'] = self.vectorFromQString(self.magMapResolutionEntry.text(),None)
+            if self.saveRayData.isChecked():
+                ret['datasets']['datafile'] = True
             if self.queueSaveStarfield.isChecked():
                 ret['datasets']['starfield'] = True
             else:
