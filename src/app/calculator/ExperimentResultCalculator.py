@@ -116,6 +116,7 @@ class ExperimentResultCalculator(object):
         fname = special.filename
         num_parts = GlobalPreferences['core_count']
         model.parameters.extras.desiredResults[index].set_numParts(num_parts)
+        model.engine.save_rays(fname)
         return np.array([0])
     
     def __VIDEO(self):

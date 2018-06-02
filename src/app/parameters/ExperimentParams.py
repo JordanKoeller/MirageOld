@@ -54,7 +54,7 @@ class ExperimentParamsJSONDecoder(object):
                 decoder = RDDFileInfoJSONDecoder()
                 resultParams.append(decoder.decode(data))
         return ExperimentParams(name,desc,nt,tv,resultParams)
-        
+
 class ExperimentParams(dict):
     '''
     classdocs
@@ -265,7 +265,7 @@ class RDDFileInfo(object):
 
     @property 
     def jsonString(self):
-        return {"filename":self.fname,"num_partitions",self.num_partitions}
+        return {"filename":self.fname,"num_partitions":self.num_partitions}
 
 class RDDFileInfoJSONDecoder(object):
     def __init__(self):

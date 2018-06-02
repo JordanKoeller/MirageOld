@@ -160,6 +160,10 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         os.remove('/tmp/lightCurve')
         os.remove('/tmp/curvePoints')
         return np.array(values).flatten()
+
+
+    def save_rays(self,fname):
+        self.sc._jvm.main.Main.storeRDDFile(fname)
     
     def get_frame(self,x,y,r):
         raise NotImplementedError
