@@ -98,7 +98,7 @@ class TableController(Controller):
         if extras['datasets']['starfield']:
             extraObjects.append(StarFieldData())
         if 'datafile' in extras['datasets']:
-            directory = QfileDialog.getSaveFileName()[0] or '/tmp'
+            directory = QfileDialog.getExistingDirectory()[0] or '/tmp'
             fname = directory + extras['name']+'.raydata'
             extraObjects.append(RDDDataInfo(fname,0))
         if 'magmap' in extras['datasets']:

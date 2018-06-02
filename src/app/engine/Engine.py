@@ -192,8 +192,8 @@ class Engine(object):
             self._center =  Vector2D(resx, resy, 'rad')
         return self._center
 
-    def save_rays(self):
-        self._calcDel.save_rays()
+    def save_rays(self,fname):
+        self._calcDel.save_rays(fname)
     
     
     @property
