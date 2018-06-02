@@ -64,7 +64,7 @@
             "redshift": 1.69,
             "colorKey": 3
         },
-        "canvasDim": 10000,
+        "canvasDim": 2000,
         "dTheta": {
             "unit": "theta_E",
             "value": 300.0
@@ -93,8 +93,8 @@
                     }
                 },
 		"datafile": {
-			"filename":"/tmp/rdd_saving_testfile.rddata",
-			"num_partitions":1024
+			"filename":"/data/BigData/students/eherbert/moocher/data.ray_data",
+			"num_partitions":0
 		},
                 "starfield": [],
                 "batch_lightcurve": {
