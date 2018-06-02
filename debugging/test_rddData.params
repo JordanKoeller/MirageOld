@@ -87,13 +87,13 @@
                         "unit": "theta_E"
                     },
                     "resolution": {
-                        "x": 1000.0,
-                        "y": 1000.0,
+                        "x": 100.0,
+                        "y": 100.0,
                         "unit": ""
                     }
                 },
 		"datafile": {
-			"filename":"/data/BigData/students/eherbert/moocher/data.ray_data",
+			"filename":"/tmp/data.ray_data",
 			"num_partitions":0
 		},
                 "starfield": [],
