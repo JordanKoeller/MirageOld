@@ -114,6 +114,7 @@ class ExperimentResultCalculator(object):
         from app.preferences import GlobalPreferences
         special = model.parameters.extras.desiredResults[index]
         fname = special.filename
+        print("Saving data to the file " + fname)
         num_parts = GlobalPreferences['core_count']
         model.parameters.extras.desiredResults[index].set_numParts(num_parts)
         model.engine.save_rays(fname)
