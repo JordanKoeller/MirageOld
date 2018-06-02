@@ -19,17 +19,9 @@ import utility.pixelConstructor
 import utility.pixelLongConstructor
 import spatialrdd.partitioners.BalancedColumnPartitioner
 
-class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = new BalancedColumnPartitioner, nodeStructure: IndexedSeq[(Double, Double)] => SpatialData = MemGrid.apply) extends RDDGridProperty {
-  private val rdd = _init(data, partitioner)
+class RDDGrid(rdd: RDD[SpatialData]) extends RDDGridProperty {
+ 
 
-  def _init(data: RDD[(Double, Double)], partitioner: SpatialPartitioning) = {
-    val rddProfiled = partitioner.profileData(data)
-    val rddTraced = rddProfiled.partitionBy(partitioner)
-    val glommed = rddTraced.glom()
-    //    println (glommed.map(_.length).collect.mkString(","))
-    val ret = glommed.map(arr => nodeStructure(arr)).persist(StorageLevel.MEMORY_AND_DISK)
-    ret
-  }
 
   def queryPointsFromGen(gen: GridGenerator, radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]] = {
     val bgen = sc.broadcast(gen)
@@ -55,12 +47,12 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
     val r = sc.broadcast(radius)
     val queryPts = sc.broadcast(pts)
     val queries = rdd.flatMap { grid =>
-      var rett:List[Long] = Nil
+      var rett: List[Long] = Nil
       for (i <- 0 until queryPts.value.length) {
         for (j <- 0 until queryPts.value(i).length) {
           if (grid.intersects(queryPts.value(i)(j)._1, queryPts.value(i)(j)._2, r.value)) {
             val num = grid.query_point_count(queryPts.value(i)(j)._1, queryPts.value(i)(j)._2, r.value)
-            if (num != 0) rett ::= pixelLongConstructor(i, j, num) 
+            if (num != 0) rett ::= pixelLongConstructor(i, j, num)
           }
         }
       }
@@ -76,6 +68,27 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
     ret
   }
 
+  def query_curve(pts: Array[DoublePair], radius: Double, sc: SparkContext): Array[Int] = {
+    val r = sc.broadcast(radius)
+    val queryPts = sc.broadcast(pts)
+    val queries = rdd.flatMap{grid =>
+      var rett:List[Long] = Nil
+      for (i <- 0 until queryPts.value.length) {
+        if (grid.intersects(queryPts.value(i)._1,queryPts.value(i)._2,r.value)) {
+          val num = grid.query_point_count(queryPts.value(i)._1, queryPts.value(i)._2, r.value)
+          rett ::= pixelLongConstructor(i,0,num)
+        }
+      }
+      rett
+    }
+    val ret = Array.fill(pts.length)(0)
+    queries.collect().foreach{elem =>
+     val e = pixelConstructor(elem)
+     ret(e.x) = e.value
+    }
+    ret
+  }
+
   def count: Long = rdd.count()
 
   def destroy(): Unit = {
@@ -85,5 +98,24 @@ class RDDGrid(data: RDD[(Double, Double)], partitioner: SpatialPartitioning = ne
   def printSuccess: Unit = {
     rdd.foreach(i => println("Finished Successfully"))
   }
+  
+  def saveToFile(fname:String):Unit = {
+    rdd.saveAsObjectFile(fname)
+  }
 
+}
+
+object RDDGrid {
+  def apply(data:RDD[(Double,Double)],partitioner:SpatialPartitioning=new BalancedColumnPartitioner,nodeStructure: IndexedSeq[(Double, Double)] => SpatialData = MemGrid.apply):RDDGrid = {
+			  val rddProfiled = partitioner.profileData(data)
+					  val rddTraced = rddProfiled.partitionBy(partitioner)
+					  val glommed = rddTraced.glom()
+					  //    println (glommed.map(_.length).collect.mkString(","))
+					  val ret = glommed.map(arr => nodeStructure(arr)).persist(StorageLevel.MEMORY_AND_DISK)
+					  new RDDGrid(ret)
+  }
+  def fromFile(file:String,numPartitions:Int,sc:SparkContext):RDDGrid = {
+    val rdd = sc.objectFile[SpatialData](file, numPartitions)
+    new RDDGrid(rdd)
+  }
 }

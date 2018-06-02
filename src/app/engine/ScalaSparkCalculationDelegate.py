@@ -55,36 +55,44 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
             return npArr    
 
     def ray_trace(self):
-        _width = self.parameters.canvasDim
-        _height = self.parameters.canvasDim
+        if 'datafile' in self.parameters.extraParams:
+            print("Found parameters for a data file. Loading in RDD from disk.")
+            file_descriptions = self.parameters.getExtras('datafile')
+            num_parts = file_descriptions.num_partitions
+            filename = file_descriptions.filename
+            ctx = self.sc.emptyRDD()._jrdd
+            self.sc._jvm.main.Main.rddFromFile(filename,num_parts,ctx)
+        else:
+            _width = self.parameters.canvasDim
+            _height = self.parameters.canvasDim
 
-        dS = self.parameters.quasar.angDiamDist.to('lyr').value
-        dL = self.parameters.galaxy.angDiamDist.to('lyr').value
-        dLS = self.parameters.dLS.to('lyr').value
-        stars = self.parameters.stars
-        starFile = open("/tmp/stars",'w+')
-        for star in stars:
-            strRow = str(star[0]) + "," + str(star[1]) + "," + str(star[2])
-            starFile.write(strRow)
-            starFile.write("\n")
-        starFile.close()
-        args = ("/tmp/stars",
-                (4*(const.G/const.c/const.c).to('lyr/solMass').value*dLS/dS/dL),
-                (4*math.pi*self.parameters.galaxy.velocityDispersion**2*(const.c**-2).to('s2/km2').value*dLS/dS).value,
-                self.parameters.galaxy.shear.magnitude,
-                self.parameters.galaxy.shear.angle.to('rad').value,
-                self.parameters.dTheta.to('rad').value,
-                self.parameters.galaxy.position.to('rad').x,
-                self.parameters.galaxy.position.to('rad').y,
-                int(_width),
-                int(_height),
-                self.sc.emptyRDD()._jrdd,
-                GlobalPreferences['core_count']
-                )
-        print("Calling JVM to ray-trace.")
-        self.sc._jvm.main.Main.createRDDGrid(*args)
-        print("Finished ray-tracing.")
-        os.remove('/tmp/stars')
+            dS = self.parameters.quasar.angDiamDist.to('lyr').value
+            dL = self.parameters.galaxy.angDiamDist.to('lyr').value
+            dLS = self.parameters.dLS.to('lyr').value
+            stars = self.parameters.stars
+            starFile = open("/tmp/stars",'w+')
+            for star in stars:
+                strRow = str(star[0]) + "," + str(star[1]) + "," + str(star[2])
+                starFile.write(strRow)
+                starFile.write("\n")
+            starFile.close()
+            args = ("/tmp/stars",
+                    (4*(const.G/const.c/const.c).to('lyr/solMass').value*dLS/dS/dL),
+                    (4*math.pi*self.parameters.galaxy.velocityDispersion**2*(const.c**-2).to('s2/km2').value*dLS/dS).value,
+                    self.parameters.galaxy.shear.magnitude,
+                    self.parameters.galaxy.shear.angle.to('rad').value,
+                    self.parameters.dTheta.to('rad').value,
+                    self.parameters.galaxy.position.to('rad').x,
+                    self.parameters.galaxy.position.to('rad').y,
+                    int(_width),
+                    int(_height),
+                    self.sc.emptyRDD()._jrdd,
+                    GlobalPreferences['core_count']
+                    )
+            print("Calling JVM to ray-trace.")
+            self.sc._jvm.main.Main.createRDDGrid(*args)
+            print("Finished ray-tracing.")
+            os.remove('/tmp/stars')
         
             
     def query_data_length(self,x,y,radius):
@@ -134,8 +142,24 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         os.remove('/tmp/queryPoints')
         return ret
             
-    def make_light_curve(self,mmin,mmax,resolution):
+    def make_light_curve(self,points,resolution):
         raise NotImplementedError
+
+    def generate_light_curve(self,query_points,radius):
+        self.sc._jvm.main.Main.setFile("/tmp/lightCurve")
+        with open('/tmp/curvePoints','w+') as file:
+            for x,y in query_points:
+                file.write(str(x)+","+str(y))
+                file.write("\n")
+        ctx = self.sc.emptyRDD()._jrdd
+        self.sc._jvm.main.Main.querySingleCurve("/tmp/curvePoints",radius,ctx)
+        values = None
+        with open('/tmp/lightCurve') as file:
+            data = file.read()
+            values = list(map(lambda row: int(row),data.split('\n')))
+        os.remove('/tmp/lightCurve')
+        os.remove('/tmp/curvePoints')
+        return np.array(values).flatten()
     
     def get_frame(self,x,y,r):
         raise NotImplementedError

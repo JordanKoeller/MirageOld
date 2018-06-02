@@ -229,6 +229,7 @@ class Engine(object):
             return values / self._rawMag
         else:
             raise ValueError("Did not contain a raw magnification value")
+
             
 
 

@@ -9,8 +9,12 @@ trait RDDGridProperty extends Serializable {
 
   def count: Long
   def queryPointsFromGen(gen: GridGenerator, radius: Double, sc: SparkContext, verbose: Boolean = false): Array[Array[Int]]
+  
+  def query_curve(pts:Array[DoublePair], radius:Double, sc:SparkContext):Array[Int]
 
   def destroy():Unit
   
   def printSuccess:Unit
+  
+  def saveToFile(fname:String):Unit
 }

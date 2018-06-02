@@ -23,6 +23,7 @@ Below is an example of how to use the module for getting a magnification map as 
  
 '''
 
+import numpy as np
 import copy
 import glob
 import os
@@ -30,8 +31,8 @@ import sys
 
 from .parameters.ExperimentParams import LightCurveParameters, \
     MagMapParameters, StarFieldData, BatchLightCurveParameters
-import numpy as np
 from .calculator.ExperimentResultCalculator import varyTrial
+
 
 sys.path.append(os.path.abspath('.'))
 
@@ -42,6 +43,16 @@ def __EventLoopActive():
     if QtWidgets.QApplication.instance():
         return True
     else:
+        return False
+
+def __ClusterEnabled():
+    try:
+        from pyspark.context import SparkContext
+        if SparkContext._active_spark_context:
+            return True 
+        else:
+            return False
+    except:
         return False
 
 def _requiresGUI(fn):
@@ -64,6 +75,16 @@ def _requiresDtype(dtype):
             raise AttributeError("Trial does not contain "+str(dtype) +" data.")
         setattr(decorated,'__doc__',getattr(fn, '__doc__'))
         return decorated
+    return decorator
+
+def _requiresCalculationEngine(fn):
+    def decorator(*args,**kwargs):
+        if __ClusterEnabled():
+            return fn(*args,**kwargs)
+        else:
+            print("ERROR: This method requres a pyspark session be active with cluster communication.")
+            print("Please restart your REPL from the lens_analysis.sh script or create a SParkContext through pyspark.")
+    setattr(decorator,'__doc__',getattr(fn,'__doc__'))
     return decorator
 
 
@@ -504,6 +525,18 @@ class Trial(AbstractFileWrapper):
         curves_array = self._getDataSet(ind)
         return LightCurveBatch(curves_array)
 
+
+    #NEED TO WORK ON THIS METHOD
+    @property
+    @_requiresCalculationEngine
+    @_requiresDtype(BatchLightCurveParameters)
+    def curve_with_radius(self,i,ind,radius):
+        curves = self.lightcurves
+        curve = curves[ind]
+        from app.model import CalculationModel
+        engine = CalculationModel(self.parameters)
+        curve = self.lightcurves[ind]
+        engine.generate_light_curve(curve,radius)
     
 
 

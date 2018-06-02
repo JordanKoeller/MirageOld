@@ -50,7 +50,7 @@ class ExperimentResultCalculator(object):
         signals: (defualt NullSignal) dict. Signals to be emitted upon completions of various calculations. If none are provided, NullSignal is used, sending all text to standard
         output.
         '''
-        from app.parameters.ExperimentParams import MagMapParameters, LightCurveParameters, StarFieldData, BatchLightCurveParameters
+        from app.parameters.ExperimentParams import MagMapParameters, LightCurveParameters,StarFieldData, BatchLightCurveParameters, RDDFileInfo
         expTypes = parameters.extras.desiredResults
         self.signals = signals
         #Parse expTypes to functions to run.
@@ -65,6 +65,8 @@ class ExperimentResultCalculator(object):
                 self.experimentRunners.append(self.__STARFIELD)
             if isinstance(exp,BatchLightCurveParameters):
                 self.experimentRunners.append(self.__BATCH_LIGHTCURVE)
+            if isinstance(exp,RDDFileInfo):
+                self.experimentRunners.append(self.__DATA_FILE)
         
         
     def runExperiment(self,model):
@@ -107,6 +109,14 @@ class ExperimentResultCalculator(object):
         special = model.parameters.extras.desiredResults[index]
         ret = model.engine.sample_light_curves(special.lines,special.bounding_box,special.resolution)
         return np.array(ret)
+
+    def __DATA_FILE(self,index,model):
+        from app.preferences import GlobalPreferences
+        special = model.parameters.extras.desiredResults[index]
+        fname = special.filename
+        num_parts = GlobalPreferences['core_count']
+        model.parameters.extras.desiredResults[index].set_numParts(num_parts)
+        return np.array([0])
     
     def __VIDEO(self):
         pass################################### MAY IMPLIMENT LATER

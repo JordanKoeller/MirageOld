@@ -50,7 +50,11 @@ class ExperimentParamsJSONDecoder(object):
             elif kind == "batch_lightcurve":
                 decoder = BatchLightCurveJSONDecoder()
                 resultParams.append(decoder.decode(data))
+            elif kind == 'datafile':
+                decoder = RDDFileInfoJSONDecoder()
+                resultParams.append(decoder.decode(data))
         return ExperimentParams(name,desc,nt,tv,resultParams)
+        
 class ExperimentParams(dict):
     '''
     classdocs
@@ -244,7 +248,34 @@ class BatchLightCurveJSONDecoder():
             pts = qd.decode(js['query_points'])
         return BatchLightCurveParameters(num_curves,resolution,bounding_box,pts)
          
+class RDDFileInfo(object):
+    """"Object for storing info about a GridRDD saved in a Scala
+    object file, for use by a cluster."""
+    def __init__(self, fname,num_partitions):
+        super(RDDFileInfo, self).__init__()
+        self.fname = fname
+        self.num_partitions = num_partitions
+
+    def set_numParts(self,nparts):
+        self.num_partitions = nparts
         
+    @property 
+    def keyword(self):
+        return "datafile"
+
+    @property 
+    def jsonString(self):
+        return {"filename":self.fname,"num_partitions",self.num_partitions}
+
+class RDDFileInfoJSONDecoder(object):
+    def __init__(self):
+        pass
+
+    def decode(self,js):
+        fname = js['filename']
+        num_partitions = js['num_partitions']
+        return RDDFileInfo(fname,num_partitions)
+
 
 class MagMapJSONEncoder(object):
     """docstring for MagMapJSONEncoder"""

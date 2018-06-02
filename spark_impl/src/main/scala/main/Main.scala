@@ -72,8 +72,17 @@ object Main extends App {
     // val partitioner = new ColumnPartitioner()
     val partitioner = new BalancedColumnPartitioner
 
-    rddGrid = new RDDGrid(mappedPixels, partitioner)
+    rddGrid = RDDGrid(mappedPixels, partitioner)
     broadParams.unpersist()
+  }
+  
+  def rddFromFile(fname:String,numPartitions:Int,ctx:JavaRDD[Int]) = {
+    val sc = ctx.sparkContext 
+    rddGrid = RDDGrid.fromFile(fname,numPartitions,sc)
+  }
+  
+  def storeRDDFile(fname:String) = {
+    if (rddGrid != null) rddGrid.saveToFile(fname)
   }
 
   def queryPoints(x0: Double, y0: Double, x1: Double, y1: Double, xDim: Int, yDim: Int, radius: Double, ctx: JavaRDD[Int], verbose: Boolean = false) = {
@@ -97,6 +106,20 @@ object Main extends App {
     writeFile(retArr)
     
   }
+  
+  def querySingleCurve(fname:String,radius:Double,ctx:JavaRDD[Int]) {
+    val sc = ctx.context
+    val lightCurves = scala.io.Source.fromFile(fname).getLines().toArray.map{elem =>
+      val pair = elem.split(",").map(_.toDouble)
+      (pair.head,pair.last)
+    }
+    val retArr = rddGrid.query_curve(lightCurves, radius, sc)
+    val writer = new PrintWriter(new File(filename))
+    val dString = retArr.mkString("\n")
+    writer.write(dString)
+    writer.close()
+  }
+  
 
   private def writeFile(data: Array[Array[Int]]): Unit = {
     val writer = new PrintWriter(new File(filename))

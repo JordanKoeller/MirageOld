@@ -18,6 +18,10 @@ class CommandLineController(object):
 			curveParams = self._trial.parameters.getExtras('batch_lightcurve').bounding_box
 			self._masterController.runner.plotFromLightCurve(controller,curve,x_axis_unit,curveParams)
 
+	def getCurveOfRadius(self,index,radius,x_axis_unit='uas'):
+		with u.add_enabled_units(self.model.parameters.specialUnits):
+			calculationModel = calculationModel()
+
 	@property
 	def controller(self):
 		return self._masterController
