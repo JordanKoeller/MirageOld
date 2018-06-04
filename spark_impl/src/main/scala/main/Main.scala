@@ -46,7 +46,6 @@ object Main extends App {
     if (rddGrid != null) rddGrid.destroy()
     val sc = ctx.context
     sc.setLogLevel("WARN")
-    println(sc.getConf.toDebugString)
     val stars = scala.io.Source.fromFile(starsfile).getLines().toArray.map { row =>
       val starInfoArr = row.split(",").map(_.toDouble)
       (starInfoArr(0), starInfoArr(1), starInfoArr(2))
@@ -89,7 +88,6 @@ object Main extends App {
     val sc = ctx.context
     val generator = new GridGenerator(x0, y0, x1, y1, xDim, yDim)
     val retArr = rddGrid.queryPointsFromGen(generator, radius, sc, verbose = verbose)
-    rddGrid.printSuccess
     writeFile(retArr)
   }
   

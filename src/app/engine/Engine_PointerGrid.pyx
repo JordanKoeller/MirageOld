@@ -56,8 +56,6 @@ cdef class Engine_PointerGrid(Engine):
 		return self.__grid.find_within_count(x, y, radius)
 
 	def reconfigure(self):
-		print("Reconfiguring")
-		print(self.__parameters)
 		self.__grid = PointerGrid()
 		begin = time.clock()
 		self.__preCalculating = True
@@ -65,7 +63,6 @@ cdef class Engine_PointerGrid(Engine):
 		self.build_data(finalData[0], finalData[1],int(2*finalData[0].shape[0]**2))
 		del(finalData)
 		self.__preCalculating = False
-		print("Time calculating = " + str(time.clock() - begin) + " seconds.")
 # 		time.sleep(3)
 
 
@@ -77,9 +74,7 @@ cdef class Engine_PointerGrid(Engine):
 		"""
 		#Possible optimization by using vector data rather than copy?
 		while self.__preCalculating:
-			print("waiting")
 			time.sleep(0.1)
-		begin = time.clock()
 		cdef double qx = 0
 		cdef double qy = 0
 		cdef double qr = 0
@@ -94,6 +89,5 @@ cdef class Engine_PointerGrid(Engine):
 			for i in range(0, retf):
 				fret[i,0] = <int> ret[i].first
 				fret[i,1] = <int> ret[i].second
-# 		print(1/(time.clock()-begin))
 		return fret
 

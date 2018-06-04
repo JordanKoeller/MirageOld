@@ -34,7 +34,6 @@
                 }
             },
             "pcntStars": 0.0,
-            "colorKey": 4,
             "avgStarMass": 0.5
         },
         "quasar": {
@@ -59,40 +58,27 @@
             },
             "radius": {
                 "unit": "rad",
-                "value": 4.84813681109536e-06
+                "value": 4.848136811095361e-06
             },
             "redshift": 2.0,
             "colorKey": 3
         },
-        "canvasDim": 1000,
+        "canvasDim": 2000,
         "dTheta": {
             "unit": "rad",
-            "value": 0.001454441043328608
+            "value": 9.69627362219072e-07
         },
         "extraParameters": {
-            "name": "macrolensings_test_data",
-            "description": "Macrolensing system, for testing purposes only.",
+            "name": "Untitled",
+            "description": "Description",
             "numTrials": 1,
             "trialVariance": "# numpy as np, astropy.units as u, trialNumber are in scope\n###fill in trial variance code here###\nnewParams = copy.deepcopy(oldParams)",
             "resultList": {
-                "magmap": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "unit": "rad"
-                    },
-                    "dimensions": {
-                        "x": 50.0,
-                        "y": 50.0,
-                        "unit": "arcsec"
-                    },
-                    "resolution": {
-                        "x": 1024.0,
-                        "y": 1024.0,
-                        "unit": ""
-                    }
-                },
-                "starfield": []
+                "starfield": [],
+                "datafile": {
+                    "filename": "/home/raqmu/Documents/Research/lensing_simulator/debugging/testData/Untitled.raydata",
+                    "num_partitions": 0
+                }
             }
         }
     }

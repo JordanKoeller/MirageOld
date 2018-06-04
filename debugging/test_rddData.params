@@ -93,7 +93,7 @@
                     }
                 },
 		"datafile": {
-			"filename":"/data/BigData/students/eherbert/moocher/data.ray_data",
+			"filename":"/tmp/data2.ray_data",
 			"num_partitions":0
 		},
                 "starfield": [],

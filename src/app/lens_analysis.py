@@ -463,15 +463,6 @@ class Trial(AbstractFileWrapper):
         params = self.regenerateParameters()
         return (magnifications,params)
         
-    # def saveParameters(self,filename=None):
-    #     '''DEPRECATED'''
-    #     from ..Controllers.FileManagerImpl import ParametersFileManager
-    #     saver = ParametersFileManager()
-    #     if filename:
-    #         saver.write(copy.deepcopy(self.parameters),filename)
-    #     else:
-    #         saver.write(copy.deepcopy(self.parameters))
-    #     print("parameters Saved")
         
     @property
     def trialNumber(self):
@@ -480,15 +471,6 @@ class Trial(AbstractFileWrapper):
         '''
         return self.__trialNo
 
-#    @property
-#    def parameters(self):
-#        '''
-#        See :class:`regenerateParameters`
-#        '''
-#        try:
-#            return self.regenerateParameters()
-#        except AttributeError:
-#            return AbstractFileWrapper.parameters
 
     
     

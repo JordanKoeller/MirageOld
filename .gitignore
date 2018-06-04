@@ -183,9 +183,10 @@ project/plugins/project/
 *.log
 *.cache
 *.classpath
-
+**/.nfs*
 ### Spark-related things ###
-/src/metastore_db/
+**/metastore_db/
+**/derby.log
 # End of https://www.gitignore.io/api/sbt,scala
 
 *.deb

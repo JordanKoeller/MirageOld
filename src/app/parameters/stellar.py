@@ -280,7 +280,6 @@ class PointLenser(Movable):
         return not self.__eq__(other)
 
     def draw(self, img, parameters):
-        print("Calling this")
         center = (self.position) / parameters.dTheta.value
         center = Vector2D(int(center.x + parameters.canvasDim / 2), int(center.y + parameters.canvasDim / 2))
         radius = int(math.sqrt(self.mass.value + 2))
@@ -428,8 +427,6 @@ class Galaxy(Drawable, Cosmic):
         self.skyCoords = skyCoords
         self.velocity = velocity
         self.__stars = stars
-        if stars != []:
-            print("Came with stars")
 
     def drawStars(self, img, model):
         if len(self.__stars) != 0:

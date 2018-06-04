@@ -96,7 +96,7 @@ class RDDGrid(rdd: RDD[SpatialData]) extends RDDGridProperty {
   }
 
   def printSuccess: Unit = {
-    rdd.foreach(i => println("Finished Successfully"))
+    return
   }
   
   def saveToFile(fname:String):Unit = {
@@ -110,7 +110,6 @@ object RDDGrid {
 			  val rddProfiled = partitioner.profileData(data)
 					  val rddTraced = rddProfiled.partitionBy(partitioner)
 					  val glommed = rddTraced.glom()
-					  //    println (glommed.map(_.length).collect.mkString(","))
 					  val ret = glommed.map(arr => nodeStructure(arr)).persist(StorageLevel.MEMORY_AND_DISK)
 					  new RDDGrid(ret)
   }

@@ -22,7 +22,6 @@ class GridGenerator(x0: Double, y0: Double, x1: Double, y1: Double,val xDim: Int
       currY += 1
     }
     else currX += 1
-//    println("Querying " + currX + "," + currY)
     ret
   }
 }

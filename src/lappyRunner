@@ -1,1 +1,1 @@
-/home/raqmu/Desktop/spark-2.2.0-bin-hadoop2.7/bin/spark-submit --driver-memory 8g --executor-memory 8g --jars ../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar --conf spark.driver.maxResultSize=8g --master local[4] --verbose Main.py --run $1 $2
+spark-submit --driver-memory 8g --executor-memory 8g --jars ../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar --conf spark.driver.maxResultSize=8g --master local[4] --verbose Main.py --run $1 $2

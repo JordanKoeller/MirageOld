@@ -68,7 +68,6 @@ class Engine_Spark(Engine):
                 _height,
                 sc.emptyRDD()._jrdd
                 )
-        print("Calling JVM to ray-trace.")
         sc._jvm.main.Main.createRDDGrid(*args)
         print("Finished ray-tracing.")
         
@@ -87,7 +86,6 @@ class Engine_Spark(Engine):
         Returns:
             np.ndarray[shape=resolution, dtype=int] -- An array of the ratio of the magnification of the image, with and without microlensing.
         """
-        print("Now querying the source plane to calculate the magnification map.")
         resx = resolution.x
         resy = resolution.y
         start = center - dims/2
@@ -97,7 +95,6 @@ class Engine_Spark(Engine):
         ctx = sc.emptyRDD()._jrdd
         sc._jvm.main.Main.setFile("/tmp/magData")
         sc._jvm.main.Main.queryPoints(x0,y0,x0+dims.to('rad').x,y0+dims.to('rad').y,int(resx),int(resy),radius,ctx,False)
-        print("Done.")
         with open("/tmp/magData") as file:
             data = file.read()
             stringArr = list(map(lambda row: row.split(','), data.split(':')))

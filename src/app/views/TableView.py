@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QPushButton
 from pyqtgraph.widgets.GraphicsLayoutWidget import GraphicsLayoutWidget
 from pyqtgraph.widgets.TableWidget import TableWidget
 
+
 from astropy import units as u
 
 from app import tableUIFile

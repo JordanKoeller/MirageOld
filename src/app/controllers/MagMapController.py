@@ -41,7 +41,6 @@ class MagMapController(Controller):
         # self.signals['set_magmap'].emit(self._modelRef.magnification_map)
         
     def setScaling(self,name):
-        print("Scaling is now set to " + name)
         if name == "linear":
             self._scalingFunc = Linear
         elif name == "log10":
@@ -68,7 +67,6 @@ class MagMapController(Controller):
             self.signals['set_magmap'].emit(*self.getPrettyMagMap())
         except:
             pass
-            print("Exception in binding magmapmodel")
         
     def setROI(self,start,end):
         vstart = Vector2D(start[0],start[1])

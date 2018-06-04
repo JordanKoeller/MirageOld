@@ -31,6 +31,8 @@ class ParametersJSONEncoder(object):
 			res['quasar'] = o.quasar.jsonString
 			res['canvasDim'] = o.canvasDim
 			res['dTheta'] = quantEncoder.encode(o.dTheta*o.canvasDim)
+			if o._rawMag != None:
+				res['rawMagnification'] = o._rawMag
 			if o.extras is None:
 				res['extraParameters'] = None
 			else:
@@ -57,6 +59,8 @@ class ParametersJSONDecoder(object):
 			dTheta = qDecode.decode(js['dTheta'])
 			# print(str(dTheta)+str("DTHETA HERE"))
 			parameters = Parameters(galaxy,quasar,dTheta,canvasDim)
+			if 'rawMagnification' in js:
+				parameters.setRawMag(js['rawMagnification'])
 			if js['extraParameters']:
 				decoder = ExperimentParamsJSONDecoder()
 				extras = decoder.decode(js['extraParameters'])
@@ -171,6 +175,7 @@ class Quasar:<br>
 		self.numStars = numStars
 		self.dt = 2.6e7
 		self.time = 0
+		self._rawMag = None
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
 
 	def update(self,galaxy=None,quasar=None,dTheta=None,canvasDim=None,extras=None,dt=None):
@@ -202,8 +207,6 @@ class Quasar:<br>
 
 	def regenerateStars(self):
 		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
-		print("Smooth mass = "+str(self.smoothMassOnScreen))
-		print("Percent Stars mass = "+str(self.__galaxy.percentStars))
 		from app.calculator import getMassFunction
 		generator = getMassFunction()
 		random_number_generator = generator.random_number_generator
@@ -302,6 +305,10 @@ class Quasar:<br>
 		return self.galaxy._Galaxy__stars
 
 	@property
+	def raw_magnification(self):
+		return self._rawMag
+
+	@property
 	def relativeShearAngle(self):
 		trajectory = None
 		if self.extras:
@@ -325,7 +332,6 @@ class Quasar:<br>
 		l = (self.dTheta*self.canvasDim).to('rad').value*self.__galaxy.angDiamDist.to('m')
 		r_in = self.__galaxy.position.to('rad').magnitude()*self.__galaxy.angDiamDist.to('m')
 		ret = ((self.__galaxy.velocityDispersion**2)*l*l/2/const.G/r_in).to('solMass')
-		print("Mass = "+str(ret))
 		return ret
 	
 	@property
@@ -386,8 +392,13 @@ class Quasar:<br>
 		s2 = -b*v.x*v.y/((v.x*v.x+v.y*v.y)**(1.5))+gam*math.sin(2*p)
 		return math.sqrt(s1*s1+s2*s2)
 
-
+	def magnification(self,position):
+		#Comes from the inverse of the determinant of the Jacobian matrix.
+		#1/((1-convergence)**2 - shear**2)
+		return 1/((1-self.convergence(position))**2 - self.shear(position)**2)
 	
+	def setRawMag(self,value):
+		self._rawMag = value
 
 	def setStars(self,stars):
 		self.__galaxy.update(stars = stars)

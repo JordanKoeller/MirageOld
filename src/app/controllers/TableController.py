@@ -5,12 +5,14 @@ Created on Dec 22, 2017
 '''
 from app.calculator.ExperimentResultCalculator import varyTrial
 from app.parameters.ExperimentParams import LightCurveParameters, \
-    MagMapParameters, StarFieldData, ExperimentParams, BatchLightCurveParameters
+    MagMapParameters, StarFieldData, ExperimentParams, BatchLightCurveParameters, \
+    RDDFileInfo
 from app.utility.ParametersError import ParametersError
 
 from . import Controller
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QFileDialog
 
 
 
@@ -98,9 +100,9 @@ class TableController(Controller):
         if extras['datasets']['starfield']:
             extraObjects.append(StarFieldData())
         if 'datafile' in extras['datasets']:
-            directory = QfileDialog.getExistingDirectory()[0] or '/tmp'
-            fname = directory + extras['name']+'.raydata'
-            extraObjects.append(RDDDataInfo(fname,0))
+            directory = QFileDialog.getExistingDirectory() or '/tmp'
+            fname = directory +'/' + extras['name'] +'.raydata'
+            extraObjects.append(RDDFileInfo(fname,0))
         if 'magmap' in extras['datasets']:
             extraObjects.append(MagMapParameters(extras['datasets']['magmap']['magmapdims'],
                                                       extras['datasets']['magmap']['magmapres']))

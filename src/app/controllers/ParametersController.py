@@ -90,4 +90,3 @@ class ParametersController(Controller):
             
     def read_only(self,state):
         self.signals['set_read_only'].emit(state)
-        print("Set as read-only parameters controller")

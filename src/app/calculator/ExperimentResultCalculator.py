@@ -13,7 +13,6 @@ from ..utility.ParametersError import ParametersError
 
 # from Controllers.QueueController import exptModelVariance
 def exptModelVariance(params,trialNo):
-    print("exptModeling")
     return params
 
 def varyTrial(params,trialNo):
@@ -56,7 +55,6 @@ class ExperimentResultCalculator(object):
         #Parse expTypes to functions to run.
         self.experimentRunners = []
         for exp in expTypes:
-            print(type(exp))
             if isinstance(exp, LightCurveParameters):
                 self.experimentRunners.append(self.__LIGHT_CURVE)
             if isinstance(exp,MagMapParameters):
@@ -96,7 +94,7 @@ class ExperimentResultCalculator(object):
         '''
         special = model.parameters.extras.desiredResults[index]
         ret = model.engine.make_mag_map(special.center,special.dimensions,special.resolution) #Assumes args are (topleft,height,width,resolution)
-#         rawMag = Model['exptModel'].engine.rawMagnification(special.center.to('rad').x,special.center.to('rad').y)
+        # rawMag = Model['exptModel'].engine.rawMagnification(special.center.to('rad').x,special.center.to('rad').y)
         return ret
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
 
@@ -109,14 +107,17 @@ class ExperimentResultCalculator(object):
         return np.array(ret)
 
     def __DATA_FILE(self,index,model):
-        from app.preferences import GlobalPreferences
         special = model.parameters.extras.desiredResults[index]
         fname = special.filename
         print("Saving data to the file " + fname)
-        num_parts = GlobalPreferences['core_count']
-        model.parameters.extras.desiredResults[index].set_numParts(num_parts)
-        model.engine.save_rays(fname)
-        return np.array([0])
+        num_parts = model.engine.core_count
+        model.engine.save_rays(directory.name)
+        #Now that it's saved data into a diretory named fname, I
+        #should add a file for specifying the number of cores,
+        #as well as the parameters?
+        #Lastly, zip up the file and save it together
+        ret = np.array([num_parts])
+        return ret
     
     def __VIDEO(self):
         pass################################### MAY IMPLIMENT LATER

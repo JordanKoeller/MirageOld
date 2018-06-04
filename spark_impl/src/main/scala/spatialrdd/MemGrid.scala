@@ -42,10 +42,6 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
       } else 0
 
     } else 0
-
-    //    if (grid.contains(i) && grid(i).contains(j)) {
-    //      } else 0
-    //    } else 0
   }
 
   private def query_type(i: Int, j: Int, r2: Double, x: Double, y: Double): Int = {
@@ -95,7 +91,6 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
     val center = _hashFunction(x, y)
     val intRX = _hashX(x + r) + 2 - center._1
     var intRY = _hashY(y + r) + 2 - center._2
-    //    println("Query length = " + (3.14*(intRX.toDouble*intRX.toDouble+intRY.toDouble*intRY.toDouble)))
     val r2 = r * r
     var counter = 0
     var i = 1
@@ -133,18 +128,6 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
     counter
   }
 
-  //  override def query_point_count2(x: Double, y: Double, r: Double): Int = {
-  //    val center = _hashFunction(x, y)
-  //    val intRX = _hashX(x + r) + 1 - center._1
-  //    var intRY = _hashY(y + r) + 1 - center._2
-  //    val r2 = r * r
-  //    var counter = 0
-  //    var i = 1
-  //    var j = 1
-  //    counter += _query_bucket(center,i,j, x, y, r2) //Query center
-  //
-  //    counter
-  //  }
 
   override def query_points(pts: Iterator[((Int, Int), DoublePair)], r: Double): Iterator[((Int, Int), Index)] = {
     pts.map(pt => pt._1 -> query_point_count(pt._2._1, pt._2._2, r))

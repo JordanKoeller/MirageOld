@@ -37,7 +37,6 @@ class Runner(Controller):
                     self._initialized = False
                 
     def halt(self):
-        print("Halting")
         self._runningBool = False
         
     def reset(self):
@@ -53,7 +52,6 @@ class Runner(Controller):
         QApplication.processEvents()
         
     def initialize(self, model, masterController):
-        print("Calling initialize")
         self._initialized = True
             
     def generator(self, model, masterController):

@@ -22,7 +22,6 @@ class View(Dock, SignalRepo):
         pass
     
     def destroy(self):
-        print("Destroying " + str(self))
         try:
             self.sigClosed.emit(self)
             self.close()

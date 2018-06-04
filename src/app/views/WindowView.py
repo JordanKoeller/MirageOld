@@ -90,7 +90,6 @@ class WindowView(QMainWindow, SignalRepo):
             dock.close()
         else:
             pass
-            print("Escaped the removeView method in WindowView")
     def addView(self,view):
         assert isinstance(view,Dock)
         self.dockArea.addDock(view)
@@ -105,7 +104,6 @@ class PerspectiveManager(object):
         self.v = mainview
         self.signals = self.v.signals
         self.menuExtras = []
-        print("Just defined menuExtas as []")
         if auto_configure:
             self.showPerspective(True)
         
@@ -132,11 +130,8 @@ class PerspectiveManager(object):
         item = self.v.menuModel.addAction(label)
         item.triggered.connect(fn)
         self.menuExtras.append(item)
-        print("Just added " + label)
         
     def clearMenu(self):
-        print("Clearing Menu")
-        print(self.menuExtras)
         for item in self.menuExtras:
             item.setVisible(False)
             item.setEnabled(False)

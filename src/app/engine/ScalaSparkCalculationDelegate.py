@@ -25,19 +25,23 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         Constructor
         '''
         CalculationDelegate.__init__(self)
+        self._core_count = GlobalPreferences['core_count']
+        self.sc = _get_or_create_context()
         
     @property
     def parameters(self):
         return self._parameters
 
+    @property
+    def core_count(self):
+        return self._core_count
+    
+
     def reconfigure(self,parameters):
         self._parameters = parameters
-        self.sc = _get_or_create_context(parameters)
         self.ray_trace()
     
     def make_mag_map(self,center,dims,resolution):
-        print("Now querying the source plane to calculate the magnification map.")
-        #return
         resx = resolution.x
         resy = resolution.y
         start = center - dims/2
@@ -87,16 +91,13 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                     int(_width),
                     int(_height),
                     self.sc.emptyRDD()._jrdd,
-                    GlobalPreferences['core_count']
+                    self.core_count
                     )
-            print("Calling JVM to ray-trace.")
             self.sc._jvm.main.Main.createRDDGrid(*args)
-            print("Finished ray-tracing.")
             os.remove('/tmp/stars')
         
             
     def query_data_length(self,x,y,radius):
-        print("Now querying the source plane to calculate the magnification map.")
         x0 = x
         y0 = y
         radius = radius or self.parameters.queryQuasarRadius
@@ -170,7 +171,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
     
     
     
-def _get_or_create_context(p):
+def _get_or_create_context():
     global _sc
     if not _sc:
         from pyspark.conf import SparkConf
@@ -178,7 +179,7 @@ def _get_or_create_context(p):
         settings = GlobalPreferences['spark_configuration']
         SparkContext.setSystemProperty("spark.executor.memory",settings['executor-memory'])
         SparkContext.setSystemProperty("spark.driver.memory",settings['driver-memory'])
-        conf = SparkConf().setAppName(p.jsonString)
+        conf = SparkConf()
         conf = conf.setMaster(settings['master'])
         conf = conf.set('spark.driver.maxResultSize',settings['driver-memory'])
         _sc = SparkContext.getOrCreate(conf=conf)

@@ -3,7 +3,6 @@ from .CalculationDelegate import CalculationDelegate
 from .PointerGridCalculationDelegate import PointerGridCalculationDelegate
 from .ScalaSparkCalculationDelegate import ScalaSparkCalculationDelegate
 from .MagMapCalculationDelegate import MagMapCalculationDelegate
-from .PySparkCalculationDelegate import PySparkCalculationDelegate
 from .Engine import Engine
 
 Engine_PointerGrid = lambda: Engine(PointerGridCalculationDelegate())

@@ -28,6 +28,7 @@ class _AbstractModel(object):
         except:
             print("Failed to regenerate stars")
 
+
     @property
     def parameters(self):
         return self._parameters

@@ -26,8 +26,12 @@ class Engine(object):
         self.bind_calculation_delegate(calculation_delegate)
         self._parameters = None
         self._preCalculating = False
-        self._rawMag = None
         self._center = None
+
+    @property
+    def core_count(self):
+        return self._calcDel.core_count
+    
         
     @property
     def parameters(self):
@@ -45,15 +49,19 @@ class Engine(object):
     def reconfigure(self):
         import random
         self._center = None
-        self._rawMag = None
-        backup = copy.deepcopy(self.parameters)
-        cp = copy.deepcopy(self.parameters)
-        cp.galaxy.update(percentStars=0)
-        self._calcDel.reconfigure(cp)
         self._center = self.get_center_coords()
-        x = self._center.x 
-        y = self._center.y
-        self._rawMag = self._calcDel.query_data_length(x,y,cp.queryQuasarRadius)
+        if self.parameters.raw_magnification is None:
+            print("Need to get raw magnification")
+            x = self._center.x 
+            y = self._center.y
+            backup = copy.deepcopy(self.parameters)
+            cp = copy.deepcopy(self.parameters)
+            cp.galaxy.update(percentStars=0)
+            self._calcDel.reconfigure(cp)  
+            rawMag = self._calcDel.query_data_length(x,y,cp.queryQuasarRadius)
+            self.parameters.setRawMag(rawMag)
+        else:
+            print("Found a rawmag value. Using that.")
         return self._calcDel.reconfigure(self.parameters)
 
 
@@ -76,7 +84,6 @@ class Engine(object):
         '''
         bounding_box.center = self.get_center_coords()
         
-        print("Sampling many curves")
         def __slice_line(pts,bounding_box,resolution):
             #pts is an array of [x1,y1,x2,y2]
             #Bounding box is a MagMapParameters instance
@@ -228,9 +235,9 @@ class Engine(object):
             
     def normalize_magnification(self,values):
         assert isinstance(values, np.ndarray) or isinstance(values,float) or isinstance(values,int), "values must be a numeric type or numpy array."
-        self._rawMag = 100
-        if self._rawMag:
-            return values / self._rawMag
+        # self._rawMag = 100
+        if self.parameters.raw_magnification:
+            return values / self.parameters.raw_magnification
         else:
             raise ValueError("Did not contain a raw magnification value")
 

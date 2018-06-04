@@ -6,7 +6,10 @@ Created on Dec 26, 2017
 
 import json
 import numpy as np
-
+import tempfile
+import zipfile
+import shutil
+import os 
 
 from app.preferences import GlobalPreferences
 from app.utility import asynchronous
@@ -193,7 +196,6 @@ class RecordingFileManager(FileWriter):
             
     @asynchronous
     def close(self):
-        print("File saved")
         if self._bufferFrames:
             for frame in self._frames:
                 img = self._asNPArray(frame)
@@ -240,7 +242,6 @@ class ParametersFileReader(FileReader):
 
     def open(self, filename=None):
         ret = FileReader.open(self,filename)
-        print(ret)
         return ret
 
     def load(self):
@@ -467,7 +468,6 @@ class ExperimentDataFileReader(FileReader):
 
     def load(self):
         with open(self._filename,'rb+') as file:
-            import tempfile
             from app.parameters.Parameters import ParametersJSONDecoder
             paramsJSON, data = file.read().split(b'\x93',maxsplit=1)
             dataFile = tempfile.TemporaryFile()
@@ -513,3 +513,50 @@ class FITSFileWriter(FileWriter):
     @property
     def fileextension(self):
         return ".fits"
+
+class RayArchiveManager(object):
+
+
+    def __init__(self):
+        self._extension = '.raydata'
+
+    def _dressName(self,fname):
+        if self._extension in fname:
+            return fname
+        else:
+            return fname + self._extension
+
+    def write(self,filename,num_partitions,parameters):
+        filename = self._dressName(filename)
+        directory = filename
+        #write a parameters file.
+        pwriter = ParametersFileManager()
+        pwriter.open(directory+"/params.param")
+        pwriter.write(parameters)
+        pwriter.close()
+        #And now write the partition count in a file
+        with open(directory+"/num_parts", 'w+') as partFile:
+            partFile.write(str(num_partitions))
+        tmp = tempfile.mkstemp()[1]
+        zipper = zipfile.ZipFile(tmp,'a',zipfile.ZIP_DEFLATED)
+        self._zipdir(directory,zipper)
+        shutil.rmtree(directory)
+        shutil.move(tmp,directory)
+        #NOTE: I think I can delete the hidden .crc files.
+
+    def open(self,filename):
+        #TODO
+        #Note: I don't need to clean up the directory. Just untarring it is enough.
+        filename = self._dressName(filename)
+        tmpname = tempfile.mkstemp()[1]
+        shutil.move(filename,tmpname)
+        zipper = zipfile.ZipFile(tmpname,'a',zipfile.ZIP_DEFLATED)
+        shutil.mkdir(filename)
+        zipper.extractall(filename)
+
+
+    def _zipdir(self,path, ziph):
+        # ziph is zipfile handle
+        with os.scandir(path) as e:
+            for dirobj in e:
+                ziph.write(dirobj.path,dirobj.name)

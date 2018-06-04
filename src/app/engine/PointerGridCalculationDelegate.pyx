@@ -39,10 +39,8 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         self._parameters = None
         self.__preCalculating = False
         self.core_count = GlobalPreferences['core_count']
-        print("Core count found as " + str(self.core_count))
 
     cpdef void reconfigure(self, object parameters):
-        print("Reconfiguring")
         self._parameters = parameters
         self.__grid = PointerGrid()
         begin = time.clock()
@@ -220,7 +218,6 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef double pi2 = math.pi / 2
         cdef int x, y, i
         cdef double incident_angle_x, incident_angle_y, r, deltaR_x, deltaR_y, phi
-        print("Now ray-tracing")
         for x in prange(0, width * 2, 1, nogil=True, schedule='static', num_threads=self.core_count):
             for y in range(0, height * 2):
                 incident_angle_x = (x - width) * dTheta
@@ -249,6 +246,5 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
                 result_nparray_x[x, y] = deltaR_x - result_nparray_x[x, y]
                 result_nparray_y[x, y] = deltaR_y - result_nparray_y[x, y]
                 
-        print("Time Ray-Tracing = " + str(time.clock() - begin))            
         return (result_nparray_x, result_nparray_y)
     

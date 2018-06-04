@@ -45,7 +45,6 @@ class MasterController(Controller):
                         destroy_view=self._destroy_signal)
         
     def clear_perspective(self):
-        print("Destroyed all views")
         self.lightCurveController.signals['destroy_view'].emit()
         self.lensedImageController.signals['destroy_view'].emit()
         self.tableController.signals['destroy_view'].emit()
@@ -88,7 +87,6 @@ class MasterController(Controller):
 #             self.signals['trigger_calculation'].emit(self.model,self)
 
     def read_only_entry(self,state):
-        print("Setting as read_only")
         self.parametersController.read_only(state)
         
     def updateModel(self):
@@ -122,7 +120,6 @@ class MasterController(Controller):
             if trial:
                 trial = trial[0]
             else:
-                print("Analysis Aborted")
                 return
         model = TrialModel(trial)
         self.runner = LightCurveRunner()
@@ -184,7 +181,6 @@ class MasterController(Controller):
             self.signals['add_view_signal'].emit(view)
         else:
             self.lensedImageController.signals['destroy_view'].emit()
-            print("Toggling imagePane off")
             
     def toggleTablePane(self, state):
         from ..views import TableView
