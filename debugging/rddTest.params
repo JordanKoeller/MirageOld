@@ -64,11 +64,7 @@
             "redshift": 1.69,
             "colorKey": 3
         },
-<<<<<<< HEAD
-        "canvasDim": 10000,
-=======
-        "canvasDim": 600,
->>>>>>> 537f21670b632d470932adcd34b3eff9fb97c902
+        "canvasDim": 1000,
         "dTheta": {
             "unit": "theta_E",
             "value": 300.0
@@ -91,22 +87,13 @@
                         "unit": "theta_E"
                     },
                     "resolution": {
-<<<<<<< HEAD
-                        "x": 1000.0,
-                        "y": 1000.0,
-=======
                         "x": 10.0,
                         "y": 10.0,
->>>>>>> 537f21670b632d470932adcd34b3eff9fb97c902
                         "unit": ""
                     }
                 },
 		"datafile": {
-<<<<<<< HEAD
-			"filename":"/data/bigData/students/eherbert/moocher/test3.raydata",
-=======
-			"filename":"/tmp/data3.ray_data",
->>>>>>> 537f21670b632d470932adcd34b3eff9fb97c902
+			"filename":"/tmp/data6.raydata",
 			"num_partitions":0
 		},
                 "starfield": [],
