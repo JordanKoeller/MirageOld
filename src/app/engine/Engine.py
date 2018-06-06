@@ -51,7 +51,6 @@ class Engine(object):
         self._center = None
         self._center = self.get_center_coords()
         if self.parameters.raw_magnification is None:
-            print("Need to get raw magnification")
             x = self._center.x 
             y = self._center.y
             backup = copy.deepcopy(self.parameters)
@@ -61,8 +60,7 @@ class Engine(object):
             rawMag = self._calcDel.query_data_length(x,y,cp.queryQuasarRadius)
             self.parameters.setRawMag(int(rawMag))
         else:
-            print("Found a rawmag value. Using that.")
-        return self._calcDel.reconfigure(self.parameters)
+         return self._calcDel.reconfigure(self.parameters)
 
 
     
@@ -74,7 +72,7 @@ class Engine(object):
         '''
         Function for randomly sampling many light curves out of a starfield at once.
         
-        Works as follows:
+        Works as follows: 
         
         To make a line, need two points. Thus, we start with a numpy array of (number,4) dimension.
         It has number many rows, to specify number many coordinates.

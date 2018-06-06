@@ -225,7 +225,7 @@ class BatchLightCurveJSONEncoder():
         qe = QuantityJSONEncoder()
         res['resolution'] = qe.encode(obj.resolution)
         res['bounding_box'] = obj.bounding_box.jsonString
-        if obj._lines:
+        if len(obj._lines) > 0:
             res['query_points'] = qe.encode(obj._lines)
         else:
             res['query_points'] = None

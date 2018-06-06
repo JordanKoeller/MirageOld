@@ -405,7 +405,6 @@ class ExperimentDataFileWriter(FileWriter):
         with open(self._directory + "/" + parameters.extras.name + '.dat','wb+') as file:
             self._parametersWriter.open(file_object=file)
             self._parametersWriter.write(parameters)
-            # file.write(b'\x93q')
             np.save(file,self._locationArray)
             #Now need to copy over tempfile contents
             self.tempfile.seek(0)

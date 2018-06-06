@@ -11,7 +11,10 @@ class QuantityJSONEncoder(object):
 		if isinstance(o,u.Quantity):
 			res = {}
 			res['unit'] = o.unit.to_string()
-			res['value'] = o.value
+			if isinstance(o.value,int) or isinstance(o.value,float):
+				res['value'] = o.value
+			else:
+				res['value'] = o.value.tolist()
 			return res
 		else:
 			raise TypeError("Argument o must be an astropy.units.Quantity instance")
