@@ -552,7 +552,7 @@ class RayArchiveManager(object):
         #TODO
         #Note: I don't need to clean up the directory. Just untarring it is enough.
         tmpname = tempfile.mkstemp()[1]
-        shutil.move(filename,tmpname)
+        shutil.move(filename,filename+".zip")
         zipper = zipfile.ZipFile(tmpname,'a',zipfile.ZIP_DEFLATED)
         os.mkdir(filename)
         zipper.extractall(filename)
