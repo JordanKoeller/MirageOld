@@ -59,7 +59,7 @@ class Engine(object):
             cp.galaxy.update(percentStars=0)
             self._calcDel.reconfigure(cp)  
             rawMag = self._calcDel.query_data_length(x,y,cp.queryQuasarRadius)
-            self.parameters.setRawMag(rawMag)
+            self.parameters.setRawMag(int(rawMag))
         else:
             print("Found a rawmag value. Using that.")
         return self._calcDel.reconfigure(self.parameters)

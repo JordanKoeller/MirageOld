@@ -32,7 +32,7 @@ class ExperimentTableRunner(object):
             ctr += 1
             # self.signals['progressLabel'].emit("Experiment "+str(ctr-1)+" of "+len(self.experimentQueue) " finished.")
             numTrials = params.extras.numTrials 
-            self.filemanager.newExperiment(params) #NEED TO IMPLIMENT
+            self.filemanager.newExperiment(numTrials,len(params.extras.desiredResults)) #NEED TO IMPLIMENT
             exptRunner = ExperimentResultCalculator(params,self.signals)
             from datetime import datetime as DT
             for expt in range(0,numTrials):
@@ -50,7 +50,6 @@ class ExperimentTableRunner(object):
                 secs = dSec % 60
                 timeString = str(hrs)+" hours, " + str(mins) + " minutes, and " + str(secs) + " seconds"
                 print("Experiment Finished in " + timeString)
-            self.filemanager.closeExperiment()
-        self.filemanager.flush()
+            self.filemanager.closeExperiment(model.parameters)
         self.filemanager.close()
         self.signals['progressLabel'].emit("All experiments going in " + self.filemanager.prettyName + " are finished.")

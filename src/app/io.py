@@ -215,17 +215,25 @@ class ParametersFileManager(FileWriter):
         '''
         FileWriter.__init__(self)
 
-    def open(self, filename=None):
-        FileWriter.open(self, filename)
-        if self._filename:
-            self._file = open(self._filename,'w+')
+    def open(self, filename=None,file_object=None):
+        if file_object:
+            self._filename = file_object.name
+            self._file = file_object
             return True
         else:
-            return False
+            FileWriter.open(self, filename)
+            if self._filename:
+                self._file = open(self._filename,'wb+')
+                return True
+            else:
+                return False
         
     def write(self, data):
         jsonString = _formatJson(data.jsonString)
-        self._file.write(jsonString)
+        self._file.write(bytes(jsonString,'utf-8'))
+        if len(data.galaxy.stars) > 0:
+            stars = data.galaxy.stars
+            np.save(self._file,stars)
 
     def close(self):
         self._file.close()
@@ -244,14 +252,44 @@ class ParametersFileReader(FileReader):
         ret = FileReader.open(self,filename)
         return ret
 
-    def load(self):
-        self._filename = self._filename or self.open()
+    def load(self,file_object=None):
+        if not file_object:
+            self._filename = self._filename or self.open()
+            self._file = open(self._filename,'rb')
+        else:
+            self._file = file_object
+        stars = None
+        retPt = self._file.tell()
+        bits = self._file.read()
+        params,index = self.loadBytes(bits)
+        try:
+            self._file.seek(index)
+            stars = np.load(self._file)
+            if stars.shape[1] == 3:
+                print("Found stars")
+                params.setStars(stars)
+        finally:
+            return params
+        # decoder = ParametersJSONDecoder()
+        # model = json.load(self._file)
+        # model = decoder.decode(model)
+        # try:
+        #     stars = np.load(self._file)
+        #     if stars:
+        #         print("Found stars")
+        #         model.setStars(stars)
+        # finally:
+        #     return model
+
+    def loadBytes(self,bites):
         from app.parameters.Parameters import ParametersJSONDecoder
-        self._file = open(self._filename)
-        model = json.load(self._file)
-        decoder = ParametersJSONDecoder()
-        model = decoder.decode(model)
-        return model
+        decoder = json.JSONDecoder()
+        string = str(bites,'utf-8',errors='ignore')
+        jsonstr,index = decoder.raw_decode(string)
+        jsonDecoder = ParametersJSONDecoder()
+        model = jsonDecoder.decode(jsonstr)
+        return (model,index)
+
 
     def close(self):
         self._file.close()
@@ -296,7 +334,7 @@ class TableFileReader(FileReader):
         if self._filename:
             from app.parameters.Parameters import ParametersJSONDecoder
             decoder = ParametersJSONDecoder()
-            self._file = open(self._filename,'rb+')
+            self._file = open(self._filename,'rb')
             data = self._file.read()
             paramList = json.loads(data)
             ret = []
@@ -335,22 +373,6 @@ class ModelFileReader(FileReader):
     def _fileextension(self):
         return '.param'
 
-# class ModelFileWriter(FileWriter):
-#     """class for reading model configurations. Can accept .dat, .param, and .params files and parse to a model"""
-#     def __init__(self):
-#         super(ModelFileWriter, self).__init__()
-        
-#     @property
-#     def _fileextension(self):
-#         return '.param'
-
-#     def write(self,data):
-#         if self._filename:
-#             self._file = open(self._filename,'wb+')
-#             pickle.dump(data,self._file)
-#         else:
-#             self.open()
-#             self.write(data)
 
 class ExperimentDataFileWriter(FileWriter):
     """docstring for ExperimentDataFileWriter"""
@@ -359,65 +381,50 @@ class ExperimentDataFileWriter(FileWriter):
         
     def open(self,filename=None):
         self._directory = filename or self.getDirectory()
-        self.exptFile = None
-        self.pickledParams = None
-        self.dataSizeArray = None
-        self.dataSizeLoc = None
         self.trialCount = 0
         self.experimentCount = 0 #Specifies which row in the table to be written next
-        self._name = self._directory
         self._parametersWriter = ParametersFileManager()
+        self._locationArray = None
 
     def getDirectory(self):
         from PyQt5 import QtWidgets
         directory = QtWidgets.QFileDialog.getExistingDirectory()
         return directory
 
-    def newExperiment(self,params):
-        name = params.extras.name
-        filename = self.directory+'/'+name+'.dat'
-        self.exptFile = open(filename,'wb+')
-        self.dataSizeArray = self.getDataSizeArray(params) #TODO
-        jsonString = _formatJson(params.jsonString)
-        self.exptFile.write(bytes(jsonString,'utf-8'))
-        self.exptFile.write(b'\x93')
-        self.parametersEndLoc = self.exptFile.tell()
+    def newExperiment(self,num_trials,num_results):
+        self.tempfile = tempfile.TemporaryFile()
+        self._locationArray = self.getDataSizeArray(num_trials,num_results)
         self.trialCount = 0
-        np.save(self.exptFile,self.dataSizeArray)
+        with tempfile.TemporaryFile() as tempfile2:
+            np.save(tempfile2,self._locationArray)
+            self._zeroMark = tempfile2.tell()
 
-    def closeExperiment(self):
-        self._updateDataSizeArray()
-        self.exptFile.flush()
-        self.exptFile.close()
-        #Class data cleanup
-        self.exptFile = None
-        self.pickledParams = None
-        self.dataSizeArray = None
-        self.dataSizeLoc = None
+
+    def closeExperiment(self,parameters):
+        self.tempfile.flush()
+        with open(self._directory + "/" + parameters.extras.name + '.dat','wb+') as file:
+            self._parametersWriter.open(file_object=file)
+            self._parametersWriter.write(parameters)
+            # file.write(b'\x93q')
+            np.save(file,self._locationArray)
+            #Now need to copy over tempfile contents
+            self.tempfile.seek(0)
+            file.write(self.tempfile.read())
+        self.tempfile.close()
+        self._locationArray = None
+        self._zeroMark = 0
         self.trialCount = 0
         self.experimentCount += 1
 
-    def getDataSizeArray(self,params):
-        numtrials = params.extras.numTrials
-        numDataPoints = len(params.extras.desiredResults)
+    def getDataSizeArray(self,numtrials,numDataPoints):
         ret = np.zeros((numtrials,numDataPoints),dtype=np.int64)
         return ret
-
-    def _updateDataSizeArray(self):
-        self.exptFile.flush()
-        tmploc = self.exptFile.tell()
-        self.exptFile.seek(self.parametersEndLoc,0)
-        np.save(self.exptFile,self.dataSizeArray)
-        #Stream cleanup
-        self.exptFile.flush()
-        self.exptFile.seek(tmploc,0)
 
 
     def write(self,data):
         for i in range(0,len(data)):
-            self.dataSizeArray[self.trialCount,i] = self.exptFile.tell() - self.parametersEndLoc
-            np.save(self.exptFile,data[i])
-        self._updateDataSizeArray()
+            self._locationArray[self.trialCount,i] = self.tempfile.tell() + self._zeroMark
+            np.save(self.tempfile,data[i])
         self.trialCount += 1
 
     def getPretty(self,string):
@@ -426,14 +433,8 @@ class ExperimentDataFileWriter(FileWriter):
         last = divisions[len(divisions)-1]
         return last
 
-    def flush(self):
-        if self.exptFile:
-            self.exptFile.flush()
-            
     def close(self):
-        if self.exptFile:
-            self.exptFile.flush()
-            self.exptFile.close()
+        pass
 
     @property
     def _fileextension(self):
@@ -441,20 +442,19 @@ class ExperimentDataFileWriter(FileWriter):
 
     @property
     def name(self):
-        return self._name 
+        return self._directory
     
     @property
     def directory(self):
         return self._directory
+
 
     @property
     def prettyName(self):
         return self.getPretty(self.name)
 
     def __del__(self):
-        if self.exptFile:
-            self.exptFile.flush()
-            self.exptFile.close()
+        pass
             
         
 class ExperimentDataFileReader(FileReader):
@@ -467,14 +467,20 @@ class ExperimentDataFileReader(FileReader):
         self._filename = filename or self.getFile()
 
     def load(self):
-        with open(self._filename,'rb+') as file:
-            from app.parameters.Parameters import ParametersJSONDecoder
-            paramsJSON, data = file.read().split(b'\x93',maxsplit=1)
+        with open(self._filename,'rb') as file:
+            preader = ParametersFileReader()
+            # preader.open(file)
+            params = preader.load(file_object=file)
+            print("GOT PARAMS")
+            # paramsJSON, data = file.read().split(b'\x93',maxsplit=1)
+            # paramFile = tempfile.TemporaryFile()
+            # paramFile.write(paramsJSON)
+            # paramFile.seek(0)
+            # params = preader.load(file_object=paramFile)
+            # print("Constructed params")
+            # print(str(params))
             dataFile = tempfile.TemporaryFile()
-            dataFile.write(data)
-            decoder = ParametersJSONDecoder()
-            paramsDict = json.loads(paramsJSON)
-            params = decoder.decode(paramsDict)
+            dataFile.write(file.read())
             dataFile.seek(0)
             return (params,dataFile)
 

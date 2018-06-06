@@ -47,6 +47,7 @@ class ParametersJSONDecoder(object):
 		super(ParametersJSONDecoder, self).__init__()
 		
 	def decode(self,js):
+		print(js)
 		gd = GalaxyJSONDecoder()
 		qd = QuasarJSONDecoder()
 		qDecode = QuantityJSONDecoder()

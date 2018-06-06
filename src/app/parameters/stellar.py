@@ -37,9 +37,9 @@ class GalaxyJSONEncoder(object):
             res['shearAngle'] = quantDecoder.encode(o.shearAngle)
             res['shearMag'] = o.shearMag
             m, x, y = o.starArray
-            res['starMasses'] = m
-            res['starXPos'] = x 
-            res['starYPos'] = y
+            # res['starMasses'] = m.tolist()
+            # res['starXPos'] = x.tolist()
+            # res['starYPos'] = y.tolist()
             x = quantDecoder.encode(o.velocity.x)
             y = quantDecoder.encode(o.velocity.y)
             z = quantDecoder.encode(o.velocity.z)
@@ -47,6 +47,7 @@ class GalaxyJSONEncoder(object):
             res['pcntStars'] = o.percentStars
             # res['skyCoords'] = o.skyCoords #WILL NEED HELP HERE
             res['avgStarMass'] = o.averageStarMass
+            print("From Galaxy" + str(res))
             return res
         else:
             raise TypeError("parameter o must be Galaxy instance.")
@@ -66,36 +67,36 @@ class GalaxyJSONDecoder(object):
         redshift = js['redshift']
         shearAngle = qd.decode(js['shearAngle'])
         shearMag = js['shearMag']
-        starm = js['starMasses']
-        starx = js['starXPos']
-        stary = js['starYPos']
+        # starm = js['starMasses']
+        # starx = js['starXPos']
+        # stary = js['starYPos']
         vx = qd.decode(js['velocity']['x'])
         vy = qd.decode(js['velocity']['y'])
         vz = qd.decode(js['velocity']['z'])
         velocity = CR(vx, vy, vz)
         pcntStars = js['pcntStars'] / 100
         # skyCoords = #NEED HELP HERE
-        if len(starm) > 0:
-            stars = np.ndarray((len(starm), 3))
-            stars[:0] = starm
-            stars[:1] = starx
-            stars[:2] = stary
-            return Galaxy(redshift=redshift,
-                          velocityDispersion=velD,
-                          shearMag=shearMag,
-                          shearAngle=shearAngle,
-                          percentStars=pcntStars,
-                          center=position,
-                          velocity=velocity,
-                          stars=stars)
-        else:
-            return Galaxy(redshift=redshift,
-                          velocityDispersion=velD,
-                          shearMag=shearMag,
-                          shearAngle=shearAngle,
-                          percentStars=pcntStars,
-                          center=position,
-                          velocity=velocity)
+        # if len(starm) > 0:
+        #     stars = np.ndarray((len(starm), 3))
+        #     stars[:0] = starm
+        #     stars[:1] = starx
+        #     stars[:2] = stary
+        #     return Galaxy(redshift=redshift,
+        #                   velocityDispersion=velD,
+        #                   shearMag=shearMag,
+        #                   shearAngle=shearAngle,
+        #                   percentStars=pcntStars,
+        #                   center=position,
+        #                   velocity=velocity,
+        #                   stars=stars)
+        # else:
+        return Galaxy(redshift=redshift,
+                      velocityDispersion=velD,
+                      shearMag=shearMag,
+                      shearAngle=shearAngle,
+                      percentStars=pcntStars,
+                      center=position,
+                      velocity=velocity)
 
 
 class QuasarJSONEncoder(object):
