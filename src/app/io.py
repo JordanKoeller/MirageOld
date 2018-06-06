@@ -554,7 +554,7 @@ class RayArchiveManager(object):
         tmpname = tempfile.mkstemp()[1]
         shutil.move(filename,tmpname)
         zipper = zipfile.ZipFile(tmpname,'a',zipfile.ZIP_DEFLATED)
-        shutil.mkdir(filename)
+        os.mkdir(filename)
         zipper.extractall(filename)
 
 
