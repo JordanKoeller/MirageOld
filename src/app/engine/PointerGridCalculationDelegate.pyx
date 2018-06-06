@@ -122,18 +122,18 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
                 counts = self.__grid.find_within_count(x, y, radius)
                 ret_pts[i,j] = counts
         retLines = []
-        queryEnds = []
+        # queryEnds = []
         for i in range(0, len(pts)):
             lineCounts = np.ndarray(curve_lengths[i],dtype=np.int32)
-            queriedPts = pts[i]
-            startLine = queriedPts[0]
-            last = queriedPts.shape[0]
-            endLine = queriedPts[last-1]
-            q = np.array([list(startLine),list(endLine)])
-            queryEnds.append(q)
+            # queriedPts = pts[i]
+            # startLine = queriedPts[0]
+            # last = queriedPts.shape[0]
+            # endLine = queriedPts[last-1]
+            # q = np.array([list(startLine),list(endLine)])
+            # queryEnds.append(q)
             for j in range(0,curve_lengths[i]):
                 lineCounts[j] = ret_pts[i,j]
-            retLines.append([lineCounts,q])
+            retLines.append(lineCounts)
         return retLines
     
 

@@ -47,7 +47,6 @@ class GalaxyJSONEncoder(object):
             res['pcntStars'] = o.percentStars
             # res['skyCoords'] = o.skyCoords #WILL NEED HELP HERE
             res['avgStarMass'] = o.averageStarMass
-            print("From Galaxy" + str(res))
             return res
         else:
             raise TypeError("parameter o must be Galaxy instance.")

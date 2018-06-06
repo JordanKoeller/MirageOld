@@ -134,11 +134,11 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
             for curveInd in range(len(stringArr)):
                 curve = stringArr[curveInd]
                 doubles = list(map(lambda x:int(x), curve))
-                startPt = pts[curveInd][0]
-                endPt = pts[curveInd][-1]
-                ends = np.array([list(startPt),list(endPt)])
+                # startPt = pts[curveInd][0]
+                # endPt = pts[curveInd][-1]
+                # ends = np.array([list(startPt),list(endPt)])
                 doubles = np.array(doubles,dtype=np.int32)
-                ret.append([doubles.flatten(),ends])
+                ret.append(doubles.flatten())
         os.remove('/tmp/lightCurves')
         os.remove('/tmp/queryPoints')
         return ret

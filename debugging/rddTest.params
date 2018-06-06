@@ -101,7 +101,7 @@
                     "num_curves": 100,
                     "resolution": {
                         "unit": "uas",
-                        "value": 0.03
+                        "value": 0.3
                     },
                     "bounding_box": {
                     "center": {

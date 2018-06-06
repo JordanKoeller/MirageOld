@@ -109,11 +109,15 @@ class ExperimentResultCalculator(object):
         return np.array(ret)
 
     def __DATA_FILE(self,index,model):
+        from app.io import RayArchiveManager
         special = model.parameters.extras.desiredResults[index]
         fname = special.filename
         print("Saving data to the file " + fname)
         num_parts = model.engine.core_count
         model.engine.save_rays(fname)
+        saver = RayArchiveManager()
+        # saver.open(fname)
+        saver.write(fname,num_parts,model.parameters)
         #Now that it's saved data into a diretory named fname, I
         #should add a file for specifying the number of cores,
         #as well as the parameters?

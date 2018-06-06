@@ -124,9 +124,12 @@ class Engine(object):
             slices.append(np.array(slc).T)
         lightCurves = self._calcDel.sample_light_curves(slices,self.parameters.queryQuasarRadius)
         ret = []
-        for curve in lightCurves:
-            c = self.normalize_magnification(curve[0])
-            ret.append([c,curve[1]])
+        for curveInd in range(len(lightCurves)):
+            c = self.normalize_magnification(lightCurves[curveInd])
+            qPts = slices[curveInd]
+            begin = qPts[0]
+            end = qPts[-1]
+            ret.append([c,np.array([begin,end])])
         return ret
         #slices is a list of numpy arrays.
         #Each numpy array is of shape (N,2)

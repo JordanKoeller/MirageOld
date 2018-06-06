@@ -532,7 +532,6 @@ class RayArchiveManager(object):
             return fname + self._extension
 
     def write(self,filename,num_partitions,parameters):
-        filename = self._dressName(filename)
         directory = filename
         #write a parameters file.
         pwriter = ParametersFileManager()
@@ -552,7 +551,6 @@ class RayArchiveManager(object):
     def open(self,filename):
         #TODO
         #Note: I don't need to clean up the directory. Just untarring it is enough.
-        filename = self._dressName(filename)
         tmpname = tempfile.mkstemp()[1]
         shutil.move(filename,tmpname)
         zipper = zipfile.ZipFile(tmpname,'a',zipfile.ZIP_DEFLATED)
