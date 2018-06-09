@@ -56,6 +56,8 @@ class Engine(object):
             backup = copy.deepcopy(self.parameters)
             cp = copy.deepcopy(self.parameters)
             cp.galaxy.update(percentStars=0)
+            print("Magnficiation = ")
+            print(self.parameters.magnification(self._center))
             self._calcDel.reconfigure(cp)  
             rawMag = self._calcDel.query_data_length(x,y,cp.queryQuasarRadius)
             self.parameters.setRawMag(int(rawMag))

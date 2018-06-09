@@ -531,31 +531,52 @@ class RayArchiveManager(object):
         else:
             return fname + self._extension
 
-    def write(self,filename,num_partitions,parameters):
-        directory = filename
+    def write(self,directory,num_partitions):
         #write a parameters file.
-        pwriter = ParametersFileManager()
-        pwriter.open(directory+"/params.param")
-        pwriter.write(parameters)
-        pwriter.close()
         #And now write the partition count in a file
         with open(directory+"/num_parts", 'w+') as partFile:
             partFile.write(str(num_partitions))
-        tmp = tempfile.mkstemp()[1]
-        zipper = zipfile.ZipFile(tmp,'a',zipfile.ZIP_DEFLATED)
-        self._zipdir(directory,zipper)
-        shutil.rmtree(directory)
-        shutil.move(tmp,directory)
+        zipping = False
+        if zipping:
+            tmp = tempfile.mkstemp()[1]
+            zipper = zipfile.ZipFile(tmp,'a',zipfile.ZIP_DEFLATED)
+            self._zipdir(directory,zipper)
+            shutil.rmtree(directory)
+            shutil.move(tmp,directory)
         #NOTE: I think I can delete the hidden .crc files.
 
     def open(self,filename):
+        from app.parameters.ExperimentParams import RDDFileInfo
+        #Constructs and returns a RDDFileInfo instance.
         #TODO
         #Note: I don't need to clean up the directory. Just untarring it is enough.
-        tmpname = tempfile.mkstemp()[1]
-        shutil.move(filename,filename+".zip")
-        zipper = zipfile.ZipFile(tmpname,'a',zipfile.ZIP_DEFLATED)
-        os.mkdir(filename)
-        zipper.extractall(filename)
+        zipping = False
+        if zipping:
+            shutil.move(filename,filename+".zip")
+            zipper = zipfile.ZipFile(filename+".zip",'a',zipfile.ZIP_DEFLATED)
+            zipper.extractall(filename)
+            shutil.rm(filename+'.zip')
+        directory = filename
+        # ploader = ParametersFileReader()
+        # ploader.open(directory+'/params.param')
+        # params = ploader.load()
+        # ploader.close()
+        num_parts = 0
+        with open(directory+'/num_parts') as partFile:
+            num_parts = int(partFile.read())
+        return RDDFileInfo(directory,num_parts)
+
+    def get_directory_name(self,filename,trial_number):
+        fname = filename
+        directory = fname
+        tstring = None
+        if trial_number < 10:
+            tstring = "trial0"+str(trial_number)
+        else:
+            tstring = "trial"+str(trial_number)
+        savedir = directory + "/"+tstring + ".raydata"
+        print("Saving data to the directory " + savedir)
+        return savedir
 
 
     def _zipdir(self,path, ziph):

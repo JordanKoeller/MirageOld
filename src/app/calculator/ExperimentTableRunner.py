@@ -40,7 +40,7 @@ class ExperimentTableRunner(object):
                 newP = varyTrial(params,expt) #NEED TO IMPLIMENT
                 model = CalculationModel(newP)
                 model.bind_parameters()
-                data = exptRunner.runExperiment(model) #NEED TO IMPLIMENT
+                data = exptRunner.runExperiment(model,expt) #NEED TO IMPLIMENT
                 self.signals['progressLabel'].emit("Trial "+str(expt) +" of " + str(numTrials) + " from experiment " + str(ctr) +" of " + str(len(self.experimentQueue)) +" finished")
                 self.filemanager.write(data)
                 endTime = DT.now()

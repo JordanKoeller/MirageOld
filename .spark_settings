@@ -1,1 +1,0 @@
-/home/jkoeller/miniconda3/bin/spark-submit --driver-memory 2g --executor-memory 1g --conf "spark.executor.extraJavaOptions=-verbose:gc -Xms10g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+UseG1GC" --jars ../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar --master local[*] --verbose Main.py --run 

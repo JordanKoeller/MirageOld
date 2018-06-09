@@ -1,1 +1,0 @@
-mprof run --include-children Main.py --run ../Test/local_spark_test.params ../Test/ --log test_local.log

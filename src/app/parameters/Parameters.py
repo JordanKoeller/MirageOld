@@ -398,6 +398,7 @@ class Quasar:<br>
 		return 1/((1-self.convergence(position))**2 - self.shear(position)**2)
 	
 	def setRawMag(self,value):
+		print("RawMag set to" + str(value))
 		self._rawMag = value
 
 	def setStars(self,stars):

@@ -258,6 +258,9 @@ class RDDFileInfo(object):
 
     def set_numParts(self,nparts):
         self.num_partitions = nparts
+
+    def set_filename(self,name):
+        self.filename = name
         
     @property 
     def keyword(self):

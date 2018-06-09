@@ -59,12 +59,12 @@
             },
             "radius": {
                 "unit": "r_g",
-                "value": 60.0
+                "value": 80.0
             },
             "redshift": 1.69,
             "colorKey": 3
         },
-        "canvasDim": 1000,
+        "canvasDim": 2000,
         "dTheta": {
             "unit": "theta_E",
             "value": 300.0
@@ -93,7 +93,7 @@
                     }
                 },
 		"datafile": {
-			"filename":"/tmp/data6.raydata",
+			"filename":"/tmp/data9",
 			"num_partitions":0
 		},
                 "starfield": [],

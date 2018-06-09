@@ -10,7 +10,7 @@ import os
 import sys
 
 def run_simulation(files):
-#     sys.stdout = open(os.devnull,'w')
+    # sys.stdout = open(os.devnull,'w')
     from app.calculator import ExperimentTableRunner
     from app.io import TableFileReader, ExperimentDataFileWriter
     infile = files[0]

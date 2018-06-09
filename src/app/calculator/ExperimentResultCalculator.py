@@ -67,18 +67,18 @@ class ExperimentResultCalculator(object):
                 self.experimentRunners.append(self.__DATA_FILE)
         
         
-    def runExperiment(self,model):
+    def runExperiment(self,model,trial_number):
         '''
         Function to call to calculate results. Returns a list of the resultant data.
         '''
         ret = []
         for exp in range(0,len(self.experimentRunners)):
-            ret.append(self.experimentRunners[exp](exp,model))
+            ret.append(self.experimentRunners[exp](exp,model,trial_number))
         return ret
 
 
     
-    def __LIGHT_CURVE(self,index,model):
+    def __LIGHT_CURVE(self,index,model,trial_number):
         '''
         Internal Function. Instructs the engine to make a light curve and returns the data.
         '''
@@ -87,7 +87,7 @@ class ExperimentResultCalculator(object):
         res = special.resolution
         return model.engine.make_light_curve(start,finish,res)
         
-    def __MAGMAP(self,index,model):
+    def __MAGMAP(self,index,model,trial_number):
         '''
         Internal Function. Instructs the engine to make a magnification map and returns the data.
 
@@ -99,32 +99,26 @@ class ExperimentResultCalculator(object):
         return ret
         ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
 
-    def __STARFIELD(self,index,model):
+    def __STARFIELD(self,index,model,trial_number):
         return model.parameters.galaxy.stars 
     
-    def __BATCH_LIGHTCURVE(self,index,model):
+    def __BATCH_LIGHTCURVE(self,index,model,trial_number):
         print("Now tracing curves")
         special = model.parameters.extras.desiredResults[index]
         ret = model.engine.sample_light_curves(special.lines,special.bounding_box,special.resolution)
         return np.array(ret)
 
-    def __DATA_FILE(self,index,model):
+    def __DATA_FILE(self,index,model,trial_number):
         from app.io import RayArchiveManager
+        import os
         special = model.parameters.extras.desiredResults[index]
-        fname = special.filename
-        print("Saving data to the file " + fname)
         num_parts = model.engine.core_count
-        model.engine.save_rays(fname)
+        filename = special.filename
         saver = RayArchiveManager()
-        # saver.open(fname)
-        saver.write(fname,num_parts,model.parameters)
-        #Now that it's saved data into a diretory named fname, I
-        #should add a file for specifying the number of cores,
-        #as well as the parameters?
-        #Lastly, zip up the file and save it together
-        ret = np.array([num_parts])
+        savedir = saver.get_directory_name(filename,trial_number)
+        model.engine.save_rays(savedir)
+        saver.write(savedir,num_parts)
+        print("Saving data to the directory " + savedir)
+        ret = np.array([savedir])
         return ret
-    
-    def __VIDEO(self):
-        pass################################### MAY IMPLIMENT LATER
             
