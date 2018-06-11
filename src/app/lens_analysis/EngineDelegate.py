@@ -28,7 +28,11 @@ class EngineDelegate(object):
 		return _engineRef
 
 	def bind_trial(self,trial):
-		self.reconfigure(trial.parameters)
+		from .Trial import Trial
+		if isinstance(trial, Trial):
+			self.reconfigure(trial.parameters)
+		else:
+			self.reconfigure(trial)
 	
 
 	def reconfigure(self,parameters):
@@ -36,16 +40,17 @@ class EngineDelegate(object):
 		self.engine.update_parameters(parameters)
 
 	def query_point(self,x,y,r):
-		self.engine.query_point(x,y,r)
+		self.engine.query_line([[x,y]],r)
 
-	def query_line(pts,r):
+	def query_line(self,pts,r=None):
 		self.engine.query_line(pts,r)
 
-	def query_light_curves(pts,r):
-		self.engine.calculation_delegate.sample_light_curves(pts,r)
-
-	def query_area(area):
-		self.engine.make_mag_map(area.center,area.dimensions,area.resolution)
+	def query_light_curves(self,pts,r=None):
+		values = self.engine.calculation_delegate.sample_light_curves(pts,r)
+		self.engine.normalize_magnification(values,r)
+		
+	def query_area(self,area,radius=None):
+		self.engine.make_mag_map(area.center,area.dimensions,area.resolution,radius)
 
 
 

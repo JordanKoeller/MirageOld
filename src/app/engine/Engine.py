@@ -51,18 +51,25 @@ class Engine(object):
         self._center = None
         self._center = self.get_center_coords()
         if self.parameters.raw_magnification is None:
+            print("Trying to manually recalulate")
             x = self._center.x 
             y = self._center.y
             backup = copy.deepcopy(self.parameters)
             cp = copy.deepcopy(self.parameters)
             cp.galaxy.update(percentStars=0)
-            print("Magnficiation = ")
-            print(self.parameters.magnification(self._center))
-            self._calcDel.reconfigure(cp)  
-            rawMag = self._calcDel.query_data_length(x,y,cp.queryQuasarRadius)
+            # self._calcDel.reconfigure(cp)  
+            rawMag = self._calcDel.query_single_point(cp,x,y,cp.queryQuasarRadius)
+            print("Found " + str(rawMag) + " points")
             self.parameters.setRawMag(int(rawMag))
+            self._calcDel.reconfigure(self.parameters)
         else:
-         return self._calcDel.reconfigure(self.parameters)
+            return self._calcDel.reconfigure(self.parameters)
+
+    def query_line(self,pts,r=None):
+        values = self._calcDel.generate_light_curve(pts,r)
+        return self.normalize_magnification(values,r)
+
+
 
 
     
@@ -145,11 +152,11 @@ class Engine(object):
         
         
     
-    def make_mag_map(self,center,dims,resolution):
+    def make_mag_map(self,center,dims,resolution,radius=None):
         center = self.get_center_coords(self.parameters)
         ret = self._calcDel.make_mag_map(center,dims,resolution)
         # return ret
-        return self.normalize_magnification(ret)
+        return self.normalize_magnification(ret,radius)
 
     def get_frame(self,x=None,y=None,r=None):
         return self._calcDel.get_frame(x,y,r)
@@ -236,10 +243,13 @@ class Engine(object):
             parameters.setStars(self._parameters.stars)
             self._parameters = parameters
             
-    def normalize_magnification(self,values):
+    def normalize_magnification(self,values,radius = None):
         assert isinstance(values, np.ndarray) or isinstance(values,float) or isinstance(values,int), "values must be a numeric type or numpy array."
         # self._rawMag = 100
-        if self.parameters.raw_magnification:
+        if radius:
+            conversion_factor = self.parameters.approximate_raw_magnification(radius)
+            return values / conversion_factor
+        elif self.parameters.raw_magnification:
             return values / self.parameters.raw_magnification
         else:
             raise ValueError("Did not contain a raw magnification value")

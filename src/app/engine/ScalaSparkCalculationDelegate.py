@@ -66,7 +66,9 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
             filename = file_descriptions.filename
             ctx = self.sc.emptyRDD()._jrdd
             self.sc._jvm.main.Main.rddFromFile(filename,num_parts,ctx)
+            print("Done loading in file")
         else:
+            print("Had to start over")
             _width = self.parameters.canvasDim
             _height = self.parameters.canvasDim
 
@@ -95,6 +97,41 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                     )
             self.sc._jvm.main.Main.createRDDGrid(*args)
             os.remove('/tmp/stars')
+
+    def query_single_point(self,parameters,qx,qy,r):
+            _width = parameters.canvasDim
+            _height = parameters.canvasDim
+
+            dS = parameters.quasar.angDiamDist.to('lyr').value
+            dL = parameters.galaxy.angDiamDist.to('lyr').value
+            dLS = parameters.dLS.to('lyr').value
+            stars = parameters.stars
+            starFile = open("/tmp/stars",'w+')
+            for star in stars:
+                strRow = str(star[0]) + "," + str(star[1]) + "," + str(star[2])
+                starFile.write(strRow)
+                starFile.write("\n")
+            starFile.close()
+
+            args = ("/tmp/stars",
+                    (4*(const.G/const.c/const.c).to('lyr/solMass').value*dLS/dS/dL),
+                    (4*math.pi*parameters.galaxy.velocityDispersion**2*(const.c**-2).to('s2/km2').value*dLS/dS).value,
+                    parameters.galaxy.shear.magnitude,
+                    parameters.galaxy.shear.angle.to('rad').value,
+                    parameters.dTheta.to('rad').value,
+                    parameters.galaxy.position.to('rad').x,
+                    parameters.galaxy.position.to('rad').y,
+                    int(_width),
+                    int(_height),
+                    self.sc.emptyRDD()._jrdd,
+                    self.core_count,
+                    qx,
+                    qy,
+                    r
+                    )
+            count = self.sc._jvm.main.Main.query_single_point(*args)
+            os.remove('/tmp/stars')
+            return int(count)
         
             
     def query_data_length(self,x,y,radius):

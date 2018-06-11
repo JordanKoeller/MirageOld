@@ -342,6 +342,10 @@ class Quasar(Movable, Cosmic):
         return (self.__radius.to('rad') / dTheta).value
 
     @property
+    def area(self):
+        return math.pi*self.radius*self.radius
+
+    @property
     def radius(self):
         return self.__radius.to('rad')
     

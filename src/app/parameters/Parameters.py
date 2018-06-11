@@ -457,6 +457,16 @@ class Quasar:<br>
 			return False
 		return True
 
+	def approximate_raw_magnification(self,radius):
+		radius = radius.to('rad')
+		other_area = math.pi*radius*radius
+		this_area = self.quasar.area
+		area_ratios = other_area.value/this_area.value
+		#Based on ration o_r/t_r = o_p/t_p
+		#o_p = o_r*t_p/t_r
+		return area_ratios*self.raw_magnification 
+
+
 
 	@property
 	def jsonString(self):

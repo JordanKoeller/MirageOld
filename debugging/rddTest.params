@@ -75,28 +75,6 @@
             "numTrials": 1,
             "trialVariance": "newParams = copy.deepcopy(oldParams)\nnewParams.galaxy.update(percentStars=10.0)",
             "resultList": {
-                "magmap": {
-                    "center": {
-                        "x": -6.330435287558283e-08,
-                        "y": 1.5564473225556836e-07,
-                        "unit": "rad"
-                    },
-                    "dimensions": {
-                        "x": 40.0,
-                        "y": 40.0,
-                        "unit": "theta_E"
-                    },
-                    "resolution": {
-                        "x": 10.0,
-                        "y": 10.0,
-                        "unit": ""
-                    }
-                },
-		"datafile": {
-			"filename":"/tmp/data9",
-			"num_partitions":0
-		},
-                "starfield": [],
                 "batch_lightcurve": {
                     "num_curves": 100,
                     "resolution": {
@@ -121,6 +99,10 @@
                     }
                 },
                     "query_points": null
+                },
+		"datafile": {
+			"filename":"/tmp/data.raydata",
+			"num_partitions":0
                 }
 
             }

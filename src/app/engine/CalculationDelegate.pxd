@@ -13,7 +13,10 @@ cdef class CalculationDelegate:
     cpdef object get_frame(self,object x, object y, object r)
     
     cdef ray_trace(self)
+
+    cpdef int query_single_point(self, object parameters, double qx, double qy, double r)
     
     cpdef unsigned int query_data_length(self, object x, object y, object radius)
     
-    
+    cpdef object generate_light_curve(self,object query_points,double radius)
+

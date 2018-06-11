@@ -12,6 +12,9 @@ cdef class CalculationDelegate:
     cpdef object sample_light_curves(self, object pts, double radius):
         raise NotImplementedError
 
+    cpdef int query_single_point(self, object parameters, double qx, double qy, double r):
+        raise NotImplementedError
+
     
     cpdef object make_mag_map(self,object center, object dims, object resolution):
         raise NotImplementedError
@@ -25,7 +28,8 @@ cdef class CalculationDelegate:
     cpdef unsigned int query_data_length(self, object x, object y, object radius):
         raise NotImplementedError
 
-
+    cpdef object generate_light_curve(self,object query_points,double radius):
+        raise NotImplementedError
 # For regular python extensions, below is a template:
 
 
