@@ -66,7 +66,8 @@ class Engine(object):
             return self._calcDel.reconfigure(self.parameters)
 
     def query_line(self,pts,r=None):
-        values = self._calcDel.generate_light_curve(pts,r)
+        arr = np.array([pts.to('rad').value.tolist()])
+        values = self._calcDel.sample_light_curves(arr,r.to('rad').value)[0]
         return self.normalize_magnification(values,r)
 
 
@@ -248,6 +249,7 @@ class Engine(object):
         # self._rawMag = 100
         if radius:
             conversion_factor = self.parameters.approximate_raw_magnification(radius)
+            print("Conversion factor = " + str(conversion_factor))
             return values / conversion_factor
         elif self.parameters.raw_magnification:
             return values / self.parameters.raw_magnification
