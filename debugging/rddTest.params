@@ -59,12 +59,12 @@
             },
             "radius": {
                 "unit": "r_g",
-                "value": 80.0
+                "value": 18.0
             },
             "redshift": 1.69,
             "colorKey": 3
         },
-        "canvasDim": 2000,
+        "canvasDim": 16000,
         "dTheta": {
             "unit": "theta_E",
             "value": 300.0
@@ -75,8 +75,25 @@
             "numTrials": 1,
             "trialVariance": "newParams = copy.deepcopy(oldParams)\nnewParams.galaxy.update(percentStars=10.0)",
             "resultList": {
+                "magmap": {
+                    "center": {
+                        "x": -6.330435287558283e-08,
+                        "y": 1.5564473225556836e-07,
+                        "unit": "rad"
+                    },
+                    "dimensions": {
+                        "x": 40.0,
+                        "y": 40.0,
+                        "unit": "theta_E"
+                    },
+                    "resolution": {
+                        "x": 1000.0,
+                        "y": 1000.0,
+                        "unit": ""
+                    }
+                },
                 "batch_lightcurve": {
-                    "num_curves": 100,
+                    "num_curves": 10,
                     "resolution": {
                         "unit": "uas",
                         "value": 0.3
@@ -99,10 +116,6 @@
                     }
                 },
                     "query_points": null
-                },
-		"datafile": {
-			"filename":"/tmp/data.raydata",
-			"num_partitions":0
                 }
 
             }
