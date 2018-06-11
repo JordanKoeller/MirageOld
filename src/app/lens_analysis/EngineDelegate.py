@@ -40,17 +40,17 @@ class EngineDelegate(object):
 		self.engine.update_parameters(parameters)
 
 	def query_point(self,x,y,r):
-		self.engine.query_line([[x,y]],r)
+		return self.engine.query_line([[x,y]],r)
 
 	def query_line(self,pts,r=None):
-		self.engine.query_line(pts,r)
+		return self.engine.query_line(pts,r)
 
 	def query_light_curves(self,pts,r=None):
 		values = self.engine.calculation_delegate.sample_light_curves(pts,r)
-		self.engine.normalize_magnification(values,r)
-		
+		return self.engine.normalize_magnification(values,r)
+
 	def query_area(self,area,radius=None):
-		self.engine.make_mag_map(area.center,area.dimensions,area.resolution,radius)
+		return self.engine.make_mag_map(area.center,area.dimensions,area.resolution,radius)
 
 
 
