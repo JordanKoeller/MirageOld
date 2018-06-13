@@ -1,64 +1,53 @@
 package utility
 
 import org.apache.spark.util.AccumulatorV2
-class PixelAccumulator(width: Int, height: Int) extends AccumulatorV2[(Int, Int, Int), Array[Int]] {
+import utility._
 
-  type IN = (Int, Int, Int)
-  type OUT = Array[Int]
-
-  private val pixelGrid = Array.fill(width * height)(0)
-
-  private var isEmpty = true
-
-  def add(v: IN): Unit = {
-    isEmpty = false
-    pixelGrid(v._1 * width + v._2) +=  v._3
-    //    pixelGrid(v._1)(v._2) += v._3
+class PixelAccumulator(h: Int, w: Int) extends AccumulatorV2[Long, Array[Array[Int]]] {
+  private val arr: Array[Array[Int]] = Array.fill(w, h)(0)
+  private var iszer: Boolean = true
+  def add(v: Long): Unit = {
+    val tmp = pixelConstructor(v)
+    synchronized {
+      arr(tmp.x)(tmp.y) += tmp.value
+      iszer = false
+    }
   }
-  //   Takes the inputs and accumulates.
 
-  def copy(): AccumulatorV2[IN, OUT] = {
-    val ret = new PixelAccumulator(width, height)
-    val curr = this.value
-	for (i <- curr.indices) ret.add((i/width,i%width,curr(i)))
-    ret
+  def isZero: Boolean = iszer
+
+  def copy(): SetAcc = {
+    val cp = new SetAcc(h, w)
+    for (i <- 0 until w) {
+      for (j <- 0 until h) {
+        val tmp = pixelLongConstructor(i, j, arr(i)(j))
+        cp.add(tmp)
+      }
+    }
+    cp
   }
-  //		Creates a new copy of this accumulator.
 
-  def isZero: Boolean = {
-    isEmpty
-
+  def merge(other: AccumulatorV2[Long, Array[Array[Int]]]): Unit = {
+    for (i <- 0 until w) {
+      for (j <- 0 until h) {
+        val tmp = pixelLongConstructor(i, j, other.value(i)(j))
+        add(tmp)
+      }
+    }
   }
-  //Returns if this accumulator is zero value or not.
-
-  def merge(other: AccumulatorV2[IN, OUT]): Unit = {
-      for (i <- other.value.indices) pixelGrid(i) += other.value(i)
-  }
-  //Merges another same-type accumulator into this one and update its state, i.e.
 
   def reset(): Unit = {
-      for (i <- pixelGrid.indices) pixelGrid(i) = 0
-//    var rover = 0
-//    while (rover < width * height) {
-//      val w = rover / width
-//      val h = rover % width
-//      this.add((w, h, 0))
-//      rover += 1
-//    }
-    isEmpty = true
-  }
-  //Resets this accumulator, which is zero value.
-
-  def value: OUT = {
-    pixelGrid
-
+    synchronized {
+      for (i <- 0 until w) {
+        for (j <- 0 until h) {
+          val tmp = pixelLongConstructor(i, j, -arr(i)(j))
+          add(tmp)
+        }
+      }
+      iszer = true
+    }
   }
 
-  def getGrid(): Array[Array[Int]] = {
-    val ret = Array.fill(width, height)(0)
-    for (rover <- pixelGrid.indices) ret(rover/width)(rover%width) = pixelGrid(rover)
-    ret
-  }
-  //Defines the current value of this accumulator
+  def value: Array[Array[Int]] = arr
 
 }
