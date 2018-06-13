@@ -96,7 +96,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                     self.core_count
                     )
             self.sc._jvm.main.Main.createRDDGrid(*args)
-            os.remove('/tmp/stars')
+            # os.remove('/tmp/stars')
 
     def query_single_point(self,parameters,qx,qy,r):
             _width = parameters.canvasDim
@@ -130,7 +130,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                     r
                     )
             count = self.sc._jvm.main.Main.query_single_point(*args)
-            os.remove('/tmp/stars')
+            # os.remove('/tmp/stars')
             return int(count)
         
             
@@ -148,10 +148,11 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
             numArr = [list(map(lambda s:float(s),row)) for row in stringArr]
             npArr = np.array(numArr,dtype = float)
             ret =  npArr
-        os.remove('/tmp/magData')
+        # os.remove('/tmp/magData')
         return ret
 
     def sample_light_curves(self, pts, radius):
+        # file = tempfile.TemporaryFile()
         with open('/tmp/queryPoints','w+') as file:
             for i in range(len(pts)):
                 arr = pts[i]
@@ -176,8 +177,8 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                 # ends = np.array([list(startPt),list(endPt)])
                 doubles = np.array(doubles,dtype=np.int32)
                 ret.append(doubles.flatten())
-        os.remove('/tmp/lightCurves')
-        os.remove('/tmp/queryPoints')
+        # os.remove('/tmp/lightCurves')
+        # os.remove('/tmp/queryPoints')
         return ret
             
     def make_light_curve(self,points,resolution):
@@ -195,8 +196,8 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
         with open('/tmp/lightCurve') as file:
             data = file.read()
             values = list(map(lambda row: int(row),data.split('\n')))
-        os.remove('/tmp/lightCurve')
-        os.remove('/tmp/curvePoints')
+        # os.remove('/tmp/lightCurve')
+        # os.remove('/tmp/curvePoints')
         return np.array(values).flatten()
 
 
