@@ -10,8 +10,8 @@ JAR_LOC='../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly
 #export PYTHONSTARTUP='shell.py'
 
 #The command itself
-spark-submit --master $MASTER --executor-memory $EXECUTOR_MEMORY --driver-memory $DRIVER_MEMORY --jars $JAR_LOC --conf spark.driver.maxResultSize=8g --verbose Main.py --run $1 $2
+spark-submit --master $MASTER --executor-memory $EXECUTOR_MEMORY --driver-memory $DRIVER_MEMORY --jars $JAR_LOC --conf spark.driver.maxResultSize=8g --conf spark.scheduler.mode=FAIR --verbose Main.py --run $1 $2
 
-cd ../scipts
+#cd ../scipts
 #Lastly, clean up the logs and work directory
 #rm -rf /users/jkoeller/spark-2.2.0-bin-hadoop2.7/work/*
