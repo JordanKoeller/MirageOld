@@ -1,6 +1,6 @@
 
 cd ../src
-export PYSPARK_DRIVER_PYTHON=ipython
+#export PYSPARK_DRIVER_PYTHON=ipython
 
 #Pull out the configuration variables
 MASTER=$(python -c 'from app.preferences import GlobalPreferences; print(GlobalPreferences["spark_configuration"]["master"])')

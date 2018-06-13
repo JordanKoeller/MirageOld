@@ -110,7 +110,7 @@ object RDDGrid {
 			  val rddProfiled = partitioner.profileData(data)
 					  val rddTraced = rddProfiled.partitionBy(partitioner)
 					  val glommed = rddTraced.glom()
-					  val ret = glommed.map(arr => nodeStructure(arr)).persist(StorageLevel.MEMORY_AND_DISK)
+					  val ret = glommed.map(arr => nodeStructure(arr))
 					  new RDDGrid(ret)
   }
   def fromFile(file:String,numPartitions:Int,sc:SparkContext):RDDGrid = {

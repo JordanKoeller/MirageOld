@@ -11,12 +11,14 @@ import math
 from matplotlib import pyplot as plt
 
 #A few ipython things to manipulate the environment
-from IPython import get_ipython
-ipython = get_ipython()
-ipython.magic('matplotlib')
-ipython.magic('cd ../scripts')
+try:
+    from IPython import get_ipython
+    ipython = get_ipython()
+    ipython.magic('matplotlib')
+    ipython.magic('cd ../scripts')
+    #cleanup
+    del(ipython)
+    del(get_ipython)
+except ImportError:
+    print("Running without ipython")
 
-
-#cleanup
-del(ipython)
-del(get_ipython)
