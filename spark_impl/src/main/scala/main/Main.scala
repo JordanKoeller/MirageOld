@@ -3,7 +3,6 @@ package main
 import java.io._
 
 import org.apache.spark.api.java.JavaRDD
-import org.apache.spark.sql.SparkSession
 
 import lensing.RayParameters
 import lensing.RayTracer
@@ -12,15 +11,7 @@ import spatialrdd.RDDGrid
 import spatialrdd.RDDGridProperty
 //import spatialrdd.XYIntPair
 import spatialrdd.partitioners.BalancedColumnPartitioner
-import lensing.DataFrameRayTracer
 
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.types.StructField
-import org.apache.spark.sql.types.LongType
-import org.apache.spark.sql.Row
-import org.apache.spark.sql._
 
 object Main extends App {
 
