@@ -2,6 +2,7 @@ import numpy as np
 from scipy import optimize
 from scipy import interpolate
 from matplotlib import pyplot as plt
+import pandas as pd
 
 def getPeaksOf(y,num_peaks,x_threshold):
     indices = np.argpartition(y,len(y) - num_peaks)[-num_peaks:]
@@ -33,7 +34,6 @@ def get_exact_peaks(y,num_peaks,x_threshold):
     return np.array(trimmed)
 
 def get_peaks_above(y,x_threshold,y_threshold):
-    print("New impl")
     indices = np.argsort(y)[::-1]
 #    indices = np.sort(indices)
     trimmed = []
@@ -126,3 +126,52 @@ def sortByHeightAtIndex(indices,y):
                 keys[i] = keys[j]
                 keys[j] = tmp2
     return keys
+
+
+def rawDataLists_toDataFrame(retlist):
+    retmap = {}
+    for i in range(len(retlist)):
+        retmap[i] = retlist[i]
+    diffmap = {}
+    indmap = {}
+    for k,v in retmap.items():
+        tmp = []          
+        ref_data = get_peaks_above(v[0],300,8)
+        x = np.arange(0,len(v[0]))
+        for line in v:              
+            tmp.append(findCorrespondingPeaks(ref_data,x,line))
+        ref_line = tmp[0]                   
+        diffs = list(map(lambda x: x - ref_line,tmp))                                   
+        indmap[k] = tmp                                                                  
+        diffmap[k] = diffs
+        print("Finished " + str(k))
+    rets = []   
+    for k,v in indmap.items():                          
+            diffs = diffmap[k]             
+            vals = retmap[k]                       
+            indices = v               
+            radii = np.linspace(5,40,20)          
+            for i in range(len(indices)):                          
+                for j in range(len(indices[0])):                     
+                    try:                                                                    
+                        rets.append((k,radii[i],indices[i][j],vals[0][indices[0][j]],diffs[i][j]))                     
+                    except IndexError as e:
+                        print("Encountered an indexing error at data from curve no." + str(k))
+    dtype = [('line_id',int),('radius',float),('index',int),('height',float),('difference',int)]
+    nparr = np.array(rets,dtype=dtype)
+    df = pd.DataFrame(nparr,columns=['line_id','radius','index','height','difference'])
+    df['abs_dif'] = abs(df['difference'])
+    return df
+
+def getPlotOfTops(dataframe,tops,histogram=True):
+         uniques_sorted = np.sort(dataframe['height'].unique())[::-1][0:tops]
+         dfUniques = pd.DataFrame(uniques_sorted,columns=['height'])
+         dataf2 = pd.merge(dfUniques,dataframe,on='height')
+         stats = dataf2.groupby('radius').describe()
+         mean = stats['abs_dif']['mean']/100
+         stddev = stats['abs_dif']['std']/100
+         x = np.linspace(5,40,20)
+         if histogram:
+             hist = dataf2.hist('abs_dif',by='radius',bins=50,sharex=True)
+             plt.figure()
+         plt.errorbar(x,mean,yerr=stddev,fmt='o')    

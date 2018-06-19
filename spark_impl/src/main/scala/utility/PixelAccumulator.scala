@@ -16,8 +16,8 @@ class PixelAccumulator(h: Int, w: Int) extends AccumulatorV2[Long, Array[Array[I
 
   def isZero: Boolean = iszer
 
-  def copy(): SetAcc = {
-    val cp = new SetAcc(h, w)
+  def copy(): PixelAccumulator = {
+    val cp = new PixelAccumulator(h, w)
     for (i <- 0 until w) {
       for (j <- 0 until h) {
         val tmp = pixelLongConstructor(i, j, arr(i)(j))

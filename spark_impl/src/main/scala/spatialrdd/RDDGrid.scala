@@ -106,7 +106,7 @@ class RDDGrid(rdd: RDD[SpatialData]) extends RDDGridProperty {
 }
 
 object RDDGrid {
-  def apply(data:RDD[(Double,Double)],partitioner:SpatialPartitioning=new BalancedColumnPartitioner,nodeStructure: IndexedSeq[(Double, Double)] => SpatialData = MemGrid.apply):RDDGrid = {
+  def apply(data:RDD[(Double,Double)],partitioner:SpatialPartitioning=new BalancedColumnPartitioner,nodeStructure: IndexedSeq[(Double, Double)] => SpatialData = kDTree.apply):RDDGrid = {
 			  val rddProfiled = partitioner.profileData(data)
 					  val rddTraced = rddProfiled.partitionBy(partitioner)
 					  val glommed = rddTraced.glom()

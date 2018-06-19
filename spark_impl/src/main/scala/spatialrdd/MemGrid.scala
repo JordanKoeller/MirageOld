@@ -129,10 +129,6 @@ class MemGrid(grid: mutable.Map[Index, mutable.Map[Index, mutable.ArrayBuffer[Do
   }
 
 
-  override def query_points(pts: Iterator[((Int, Int), DoublePair)], r: Double): Iterator[((Int, Int), Index)] = {
-    pts.map(pt => pt._1 -> query_point_count(pt._2._1, pt._2._2, r))
-  }
-
   override def size: Int = sz
 
 }
