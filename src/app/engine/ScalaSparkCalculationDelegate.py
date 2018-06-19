@@ -111,7 +111,7 @@ class ScalaSparkCalculationDelegate(CalculationDelegate):
                 strRow = str(star[0]) + "," + str(star[1]) + "," + str(star[2])
                 starFile.write(strRow)
                 starFile.write("\n")
-            starFile.close()
+            # starFile.close()
 
             args = (starFile.name,
                     (4*(const.G/const.c/const.c).to('lyr/solMass').value*dLS/dS/dL),
