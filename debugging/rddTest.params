@@ -59,7 +59,7 @@
             },
             "radius": {
                 "unit": "r_g",
-                "value": 18.0
+                "value": 60.0
             },
             "redshift": 1.69,
             "colorKey": 3
