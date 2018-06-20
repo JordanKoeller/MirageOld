@@ -21,7 +21,6 @@ oldcurve.resolution
 p.extras['batch_lightcurve'] = new
 from app.lens_analysis.EngineDelegate import EngineDelegate
 p.canvasDim
-p.canvasDim = 30000
 p.update(canvasDim=30000)
 eng = EngineDelegate(p)
 new.bounding_box.center
