@@ -3,8 +3,8 @@
 package object utility {
     type Index = Int
     
-//    type IndexPair= (Index,Index)
     type DoublePair = (Double,Double)
+    
     
     
     class IndexPair(val v:Int=0) extends AnyVal with Serializable {
@@ -22,13 +22,13 @@ package object utility {
         "(" + this._1+","+this._2+")"
       }
     }
-//    def mkPair(x:Index, y:Index):IndexPair = {
-//    		new IndexPair((x.toInt << 16) + y.toInt)
-//    }
-    
-    def mkPair(x:Int, y:Int):IndexPair = {
-    		new IndexPair((x << 16) + y)
+    def mkPair(x:Index, y:Index):IndexPair = {
+    		new IndexPair((x.toInt << 16) + y.toInt)
     }
+    
+//    def mkPair(x:Int, y:Int):IndexPair = {
+//    		new IndexPair((x << 16) + y)
+//    }
     
     
     class PixelValue(val _hidden:Long) extends AnyVal {

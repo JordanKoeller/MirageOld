@@ -156,6 +156,7 @@ class Engine(object):
     def make_mag_map(self,center,dims,resolution,radius=None):
         center = self.get_center_coords(self.parameters)
         ret = self._calcDel.make_mag_map(center,dims,resolution)
+        println(ret)
         # return ret
         return self.normalize_magnification(ret,radius)
 

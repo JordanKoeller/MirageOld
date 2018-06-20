@@ -1,13 +1,11 @@
 package spatialrdd
 
-
-
-class kDTree(val xx: Array[Double], val yy: Array[Double], branchSize: Int, parallelDepth: Int = -1) extends SpatialData {
-
-  private val log2 = math.log(2)
+class kDTree(xx: Array[Double], yy: Array[Double], branchSize: Int, parallelDepth: Int = -1) extends SpatialData {
 
   private val xExtremes = minMax(xx)
   private val yExtremes = minMax(yy)
+  private val boxes = list_constructNodes()
+  println("Have " + boxes.length + " boxes")
 
   private def minMax(vals: Array[Double]): (Double, Double) = {
     vals.foldLeft((Double.MaxValue, Double.MinValue)) { (best, elem) =>
@@ -31,8 +29,7 @@ class kDTree(val xx: Array[Double], val yy: Array[Double], branchSize: Int, para
       for (i <- indI until indJ) {
         dx = xx(i) - x
         dy = yy(i) - y
-        val r = dx * dx + dy * dy
-        if (r <= r2) {
+        if (dx * dx + dy * dy <= r2) {
           counter += 1
         }
       }
@@ -59,11 +56,8 @@ class kDTree(val xx: Array[Double], val yy: Array[Double], branchSize: Int, para
       false
     }
   }
-  private val boxes = list_constructNodes()
-  println("Have " + boxes.length + " boxes")
 
   def apply(i: Int) = boxes(i)
-  private var numNodes = 0
 
   //  private val nodeDescs: Array[Double] = Array.fill(xx.length * 4)(0.0) //Array where groups of 4 are bottom left, top right of nodes
 
@@ -78,7 +72,7 @@ class kDTree(val xx: Array[Double], val yy: Array[Double], branchSize: Int, para
   def intersects(x: Double, y: Double, r: Double): Boolean = {
     val width = xExtremes._2 - xExtremes._1
     val height = yExtremes._2 - yExtremes._1
-    val rx = xExtremes._1 + height / 2.0
+    val rx = xExtremes._1 + width / 2.0
     val ry = yExtremes._1 + height / 2.0
     circleRectOverlap(x, y, r, rx, ry, width, height)
   }
@@ -114,7 +108,7 @@ class kDTree(val xx: Array[Double], val yy: Array[Double], branchSize: Int, para
     var level = 0
     while (!toSearch.isEmpty) {
       searching = toSearch.head
-      level = (math.log1p(searching) / log2).toInt
+      level = (math.log1p(searching) / kDTree.log2).toInt
       toSearch = toSearch.tail
       //Two cases: It overlaps the circle, or is completely enclosed by the circle
       //Case 1: completely encloses the circle
@@ -247,9 +241,10 @@ class kDTree(val xx: Array[Double], val yy: Array[Double], branchSize: Int, para
 }
 
 object kDTree {
-  
+
   val binSize = 64
   val parallelDepth = -1
+  val log2 = math.log(2)
 
   def apply(values: IndexedSeq[(Double, Double)]): kDTree = {
     val xcoords = values.map(_._1).toArray
@@ -258,22 +253,22 @@ object kDTree {
     new kDTree(xcoords, ycoords, binSize, parallelDepth)
   }
 
-  def checkKids(prnt: Int, level: Int, tree: kDTree): Boolean = {
-    val split = tree(prnt).split
-    val kid1 = tree(prnt * 2 + 1)
-    val kid2 = tree(prnt * 2 + 2)
-    var c = tree.xx
-    if (level % 2 != 0) c = tree.yy
-    for (i <- kid1.indI until kid1.indJ) if (c(i) > split) {
-      println("Error " + i)
-      return false
-    }
-    for (i <- kid2.indI until kid2.indJ) if (c(i) < split) {
-      println("Error " + i)
-      return false
-    }
-    println("Worked")
-    return true
-  }
+//  def checkKids(prnt: Int, level: Int, tree: kDTree): Boolean = {
+//    val split = tree(prnt).split
+//    val kid1 = tree(prnt * 2 + 1)
+//    val kid2 = tree(prnt * 2 + 2)
+//    var c = tree.xx
+//    if (level % 2 != 0) c = tree.yy
+//    for (i <- kid1.indI until kid1.indJ) if (c(i) > split) {
+//      println("Error " + i)
+//      return false
+//    }
+//    for (i <- kid2.indI until kid2.indJ) if (c(i) < split) {
+//      println("Error " + i)
+//      return false
+//    }
+//    println("Worked")
+//    return true
+//  }
 
 }
