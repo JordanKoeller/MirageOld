@@ -65,6 +65,16 @@ def findCorrespondingPeaks(peaks1,x,y,window=3):
         peaks2[i] = np.searchsorted(x,[maxx])
     return peaks2
 
+def findCorrespondingPeaks_slice(peaks1,y,window=50):
+    peaks2 = np.zeros_like(peaks1)
+    for i in range(len(peaks2)):
+        ind = peaks1[i]
+        slc = y[max(peaks1[i]-window,0):min(peaks1[i]+window,len(y))]
+        startPt = peaks1[i]
+        peaks2[i] = np.argmax(slc) + startPt
+    return peaks2
+
+
 def plot_maxes(xx,yy,inds):
     for ind in inds:
         x = xx[ind]
@@ -146,7 +156,8 @@ def rawDataLists_toDataFrame(retlist,x_threshold=300,y_threshold=8):
         diffmap[k] = diffs
         print("Finished " + str(k))
     rets = []   
-    for k,v in indmap.items():                          
+    exclusions = []
+    for k,v in indmap.items():                          s
             diffs = diffmap[k]             
             vals = retmap[k]                       
             indices = v               
@@ -157,13 +168,17 @@ def rawDataLists_toDataFrame(retlist,x_threshold=300,y_threshold=8):
                         rets.append((k,radii[i],indices[i][j],vals[0][indices[0][j]],diffs[i][j]))                     
                     except IndexError as e:
                         print("Encountered an indexing error at data from curve no." + str(k))
+                        print("Excluding data from " + str(k))
+                        exclusions.append(k)
     dtype = [('line_id',int),('radius',float),('index',int),('height',float),('difference',int)]
     nparr = np.array(rets,dtype=dtype)
     df = pd.DataFrame(nparr,columns=['line_id','radius','index','height','difference'])
     df['abs_dif'] = abs(df['difference'])
+    for i in exclusions:
+        df = df[df['line_id'] != i]
     return df
 
-def getPlotOfTops(dataframe,tops,histogram=True):
+def getPlotOfTops(dataframe,tops,histogram=True,num_bins=50):
          uniques_sorted = np.sort(dataframe['height'].unique())[::-1][0:tops]
          dfUniques = pd.DataFrame(uniques_sorted,columns=['height'])
          dataf2 = pd.merge(dfUniques,dataframe,on='height')
@@ -172,6 +187,6 @@ def getPlotOfTops(dataframe,tops,histogram=True):
          stddev = stats['abs_dif']['std']/100
          x = np.linspace(5,40,20)
          if histogram:
-             hist = dataf2.hist('abs_dif',by='radius',bins=50,sharex=True)
+             hist = dataf2.hist('abs_dif',by='radius',bins=num_bins,sharex=True)
              plt.figure()
          plt.errorbar(x,mean,yerr=stddev,fmt='o')    

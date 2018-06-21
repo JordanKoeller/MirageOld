@@ -12,7 +12,6 @@ from astropy import constants as const
 from astropy import units as u
 from astropy.cosmology import WMAP7 as cosmo
 import cython
-from scipy import interpolate
 
 from app.utility import Vector2D
 from app.utility import zeroVector

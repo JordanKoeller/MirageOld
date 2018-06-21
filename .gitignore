@@ -192,6 +192,6 @@ project/plugins/project/
 *.deb
 *.cache
 *.jar
-
+*.mypy_cache*
 /spark_impl/target/*
 
