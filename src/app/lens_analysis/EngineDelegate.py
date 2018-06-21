@@ -35,9 +35,12 @@ class EngineDelegate(object):
 			self.reconfigure(trial)
 	
 
-	def reconfigure(self,parameters):
+	def reconfigure(self,parameters,force_recalculate = False):
 		paramcopy = copy.deepcopy(parameters)
 		self.engine.update_parameters(parameters)
+		if force_recalculate:
+			self.engine.reconfigure()
+
 
 	def query_point(self,x,y,r):
 		return self.engine.query_line([[x,y]],r)

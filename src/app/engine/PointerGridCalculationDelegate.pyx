@@ -28,7 +28,6 @@ from astropy import units as u
 from astropy.cosmology import WMAP7 as cosmo
 import cython
 from cython.parallel import prange
-from scipy import interpolate
 
 from libc.math cimport sin, cos, atan2, sqrt
 

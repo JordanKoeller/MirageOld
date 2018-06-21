@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np #type: ignore
 import copy
 import glob
 import os
@@ -19,7 +19,7 @@ class DirectoryMap(object):
     '''
 
 
-    def __init__(self, dirname):
+    def __init__(self, dirname:str):
         '''
         Constructor
         '''

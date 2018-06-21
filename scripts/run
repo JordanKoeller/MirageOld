@@ -1,4 +1,0 @@
-#!/bin/sh
-cd src/
-python Main.py $@
-echo "\n\n\nDone"
