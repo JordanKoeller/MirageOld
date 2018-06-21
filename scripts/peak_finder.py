@@ -128,7 +128,7 @@ def sortByHeightAtIndex(indices,y):
     return keys
 
 
-def rawDataLists_toDataFrame(retlist):
+def rawDataLists_toDataFrame(retlist,x_threshold=300,y_threshold=8):
     retmap = {}
     for i in range(len(retlist)):
         retmap[i] = retlist[i]
@@ -136,7 +136,7 @@ def rawDataLists_toDataFrame(retlist):
     indmap = {}
     for k,v in retmap.items():
         tmp = []          
-        ref_data = get_peaks_above(v[0],300,8)
+        ref_data = get_peaks_above(v[0],x_threshold,y_threshold)
         x = np.arange(0,len(v[0]))
         for line in v:              
             tmp.append(findCorrespondingPeaks(ref_data,x,line))
