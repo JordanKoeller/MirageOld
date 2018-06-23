@@ -486,6 +486,39 @@ class ExperimentDataFileReader(FileReader):
     def close(self):
         pass
 
+class ModelLoader(FileReader):
+    """General-purpose file loader for reading files containing system descriptions.
+    This class can read files with .param, and .params extensions and pull out
+    just the Parameters object instance inside."""
+
+    from app.parameters import Parameters
+
+    _reader_delegates = {'.params': TableFileReader,
+                         '.param': ParametersFileReader}
+
+    def __init__(self):
+        super(ModelLoader, self).__init__()
+        self._fileDelegate = None
+
+    def _get_extension(self,filename):
+        return '.' + filename.split('.')[-1]
+
+    def open(self,filename=None):
+        self._filename = filename or self.getFile()
+        extension = self._get_extension(self._filename)
+        self._fileDelegate = self._reader_delegates[extension]()
+        self._fileDelegate.open(self._filename)
+    
+    def load(self,index = 0):
+        ret = self._fileDelegate.load()
+        if isinstance(self._fileDelegate,ParametersFileReader):
+            return ret
+        else:
+            return ret[index]
+
+    def close(self):
+        self._fileDelegate.close()
+        self._fileDelegate = None
 
 
 
@@ -518,6 +551,7 @@ class FITSFileWriter(FileWriter):
     @property
     def fileextension(self):
         return ".fits"
+
 
 class RayArchiveManager(object):
 

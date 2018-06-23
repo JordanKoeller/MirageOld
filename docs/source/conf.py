@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# lensing_simulator documentation build configuration file, created by
+# Mirage documentation build configuration file, created by
 # sphinx-quickstart on Sat Oct 21 20:21:42 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -52,7 +52,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'lensing_simulator'
+project = 'Mirage'
 copyright = '2017, David Pooley, Jordan Koeller'
 author = 'David Pooley, Jordan Koeller'
 
@@ -125,7 +125,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'lensing_simulatordoc'
+htmlhelp_basename = 'Miragedoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -152,7 +152,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'lensing_simulator.tex', 'lensing\\_simulator Documentation',
+    (master_doc, 'Mirage.tex', 'Mirage Documentation',
      'David Pooley, Jordan Koeller', 'manual'),
 ]
 
@@ -162,7 +162,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'lensing_simulator', 'lensing_simulator Documentation',
+    (master_doc, 'Mirage', 'Mirage Documentation',
      [author], 1)
 ]
 
@@ -173,8 +173,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'lensing_simulator', 'lensing_simulator Documentation',
-     author, 'lensing_simulator', 'One line description of project.',
+    (master_doc, 'Mirage', 'Mirage Documentation',
+     author, 'Mirage', 'One line description of project.',
      'Miscellaneous'),
 ]
 

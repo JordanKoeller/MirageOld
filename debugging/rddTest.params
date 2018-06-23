@@ -97,9 +97,8 @@
                         "y": 1000.0,
                         "unit": ""
                     }
-                },
-                    "query_points": null
                 }
+              }
 
             }
         }

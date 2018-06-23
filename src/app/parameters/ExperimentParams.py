@@ -6,7 +6,7 @@ Created on Jun 4, 2017
 import numpy as np
 from astropy import units as u
 from ..utility import Vector2D, Vector2DJSONDecoder, zeroVector
-
+import math
 
 class ExperimentParamsJSONEncoder(object):
     """docstring for ExperimentParamsJSONEncoder"""
@@ -164,31 +164,75 @@ class LightCurveParameters(object):
     
 class BatchLightCurveParameters(object):
     
-    def __init__(self,num_curves,resolution,bounding_box,query_points = None):
-        print(type(bounding_box))
+    def __init__(self,num_curves,resolution,bounding_box,query_points = None,seed = None):
         assert isinstance(bounding_box,MagMapParameters)
+        from app.preferences import GlobalPreferences
         self.num_curves = num_curves
         self.resolution = resolution
         self.bounding_box = bounding_box
         self._lines = query_points
+        if seed:
+            self._seed = seed
+        else:
+            self._seed = GlobalPreferences['light_curve_generator_seed']
+        
         
     @property
     def keyword(self):
         return "batch_lightcurve"
+
+    @property
+    def seed(self):
+        return self._seed
+    
     
     @property
     def jsonString(self):
         encoder = BatchLightCurveJSONEncoder()
         return encoder.encode(self)
+
+    def _slice_line(self,pts):
+        #pts is an array of [x1,y1,x2,y2]
+        #Bounding box is a MagMapParameters instance
+        #resolution is a specification of angular separation per data point
+        x1,y1,x2,y2 = pts
+        m = (y2 - y1)/(x2 - x1)
+        angle = math.atan(m)
+        resolution = self.resolution.to('rad')
+        dx = resolution.value*math.cos(angle)
+        dy = resolution.value*math.sin(angle)
+        dims = self.bounding_box.dimensions.to('rad')
+        center = self.bounding_box.center.to('rad')
+        lefX = center.x - dims.x/2
+        rigX = center.x + dims.x/2
+        topY = center.y + dims.y/2 
+        botY = center.y - dims.y/2
+        flag = True
+        x = x1
+        y = y1
+        retx = [] 
+        rety = [] 
+        while flag:
+            x -= dx
+            y -= dy
+            flag = x >= lefX and x <= rigX and y >= botY and y <= topY
+        flag = True
+        while flag:
+            x += dx
+            y += dy
+            retx.append(x)
+            rety.append(y)
+            flag = x >= lefX and x <= rigX and y >= botY and y <= topY
+        retx = retx[:-1]
+        rety = rety[:-1]
+        return [retx,rety]
     
     @property
     def lines(self):
         if self._lines:
             return self._lines
         else:
-            from app.preferences import GlobalPreferences
-            seed = GlobalPreferences['light_curve_generator_seed']
-            rng = np.random.RandomState(seed)
+            rng = np.random.RandomState(self._seed)
             scaled = rng.rand(self.num_curves,4) - 0.5
             #np.random.rand returns an array of (number,4) dimension of doubles over interval [0,1).
             #I subtract 0.5 to center on 0.0
@@ -204,8 +248,9 @@ class BatchLightCurveParameters(object):
             scaled[:,1] += center.y
             scaled[:,2] += center.x
             scaled[:,3] += center.y
-            lines = u.Quantity(scaled,'rad')
-            self._lines = lines
+            # lines = u.Quantity(scaled,'rad')
+            slices = map(lambda line: u.Quantity(np.array(self._slice_line(line)).T,'rad'),scaled)
+            self._lines = list(slices)
             return self._lines
             
     
@@ -225,10 +270,7 @@ class BatchLightCurveJSONEncoder():
         qe = QuantityJSONEncoder()
         res['resolution'] = qe.encode(obj.resolution)
         res['bounding_box'] = obj.bounding_box.jsonString
-        if obj._lines:
-            res['query_points'] = qe.encode(obj._lines)
-        else:
-            res['query_points'] = None
+        res['seed'] = obj.seed
         return res
     
 class BatchLightCurveJSONDecoder():
@@ -243,10 +285,19 @@ class BatchLightCurveJSONDecoder():
         resolution = qd.decode(js['resolution'])
         mmd = MagMapJSONDecoder()
         bounding_box = mmd.decode(js['bounding_box'])
-        pts = None
-        if js['query_points']:
-            pts = qd.decode(js['query_points'])
-        return BatchLightCurveParameters(num_curves,resolution,bounding_box,pts)
+        if 'query_points' in js:
+            pts = None
+            if js['query_points']:
+                pts = qd.decode(js['query_points'])
+            return BatchLightCurveParameters(num_curves,resolution,bounding_box,pts)
+        if 'seed' in js:
+            seed = js['seed']
+            return BatchLightCurveParameters(num_curves,resolution,bounding_box,seed=seed)
+        else:
+            from app.preferences import GlobalPreferences
+            seed = GlobalPreferences['light_curve_generator_seed']
+            return BatchLightCurveParameters(num_curves,resolution,bounding_box)
+            
          
 class RDDFileInfo(object):
     """"Object for storing info about a GridRDD saved in a Scala

@@ -13,13 +13,6 @@ from .EngineDelegate import EngineDelegate
 
 sys.path.append(os.path.abspath('..'))
 
-_with_engine = False
-
-
-def enable_engine(*args,**kwargs):
-    global _with_engine
-    _with_engine = True
-
 def __EventLoopActive():
     from PyQt5 import QtWidgets
     if QtWidgets.QApplication.instance():
@@ -47,7 +40,7 @@ def _requiresGUI(fn):
     return decorator
 
 
-def load(filename='Untitled.dat',trial_number=None,with_engine = False):
+def load(filename=None,trial_number=None):
     '''
     Given a filename, returns a :class:`la.Experiment` (if a `.dat` file is provided) or a :class:`la.DirectoryMap`
     (if a directory name is provided) instance generated from the specified file. If filename is None, and a Qt event loop 
@@ -78,6 +71,34 @@ def load(filename='Untitled.dat',trial_number=None,with_engine = False):
             return DirectoryMap(filename)
     else:
         return None
+
+def load_parameters(filename,index=0):
+    '''Convenience function for loading parameters from files. 
+
+    
+    This function accepts filenames with `.dat`, `.param`, and `.params` extensions, reads the file,
+    and returns the parameters instance specified by the file. For handling files that may contain
+    more than one :class:`app.parameters.Parameters` instance, there is an optional key-word argument to specify
+    which :class:`app.parameters.Parameters` instance to return.
+    
+    Arguments:
+
+    - `filename` (:class:`str`) : The file to parse for an inclosed :class:`app.parameters.Parameters` instance. Must have a `.dat`, `.params`, or `.param` file extension.
+    - `index` (:class:`int`) : For files that contain more than one :class:`app.parameters.Parameters` instance, index specifies which version to return. (default: `0`)
+    
+    Returns:
+
+        :class:`app.parameters.Parameters`
+    '''
+    if '.dat' in filename:
+        return load(filename,index).parameters
+    else:
+        from app.io import ModelLoader
+        loader = ModelLoader()
+        loader.open(filename)
+        ret = loader.load(index)
+        loader.close()
+        return ret
 
 def describe(filename):
     '''
@@ -130,9 +151,23 @@ def visualizeMagMap(model=None,trial_number=None, with_engine = False):
     return CommandLineController(model,view,controller)
 
 def getEngineHandler(model=None):
-    engineDel = None
-    if model:
-        engineDel = EngineDelegate(model.parameters)
+    '''Method that returns an :class:`app.lens_analysis.EngineDelegate`, which provides an interface for communicating
+    with a calculation engine. This method checks that an engine exists or can be constructed before returning. If no engine
+    exists or can be constructed, throws an `EnvironmentError`.
+    
+    arguments:
+
+    - `model` (:class:`app.lens_analysis.Trial` or :class:`app.parameters.Parameters`) : Model to be bound to the engine. The engine by default will begin calculating in the background when a model is provided. Default is `None`
+
+    Returns:
+        :class:`app.lens_analysis.EngineDelegate`
+    '''
+    if __ClusterEnabled():
+        engineDel = None
+        if model:
+            engineDel = EngineDelegate(model)
+        else:
+            engineDel = EngineDelegate()
+        return engineDel
     else:
-        engineDel = EngineDelegate()
-    return engineDel
+        raise EnvironmentError("No cluster for building an engine could be found.")

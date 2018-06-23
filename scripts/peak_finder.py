@@ -157,7 +157,7 @@ def rawDataLists_toDataFrame(retlist,x_threshold=300,y_threshold=8):
         print("Finished " + str(k))
     rets = []   
     exclusions = []
-    for k,v in indmap.items():                          s
+    for k,v in indmap.items():
             diffs = diffmap[k]             
             vals = retmap[k]                       
             indices = v               

@@ -5,7 +5,6 @@ import math
 from astropy import constants as const
 from astropy import units as u 
 from astropy.cosmology import WMAP7 as cosmo
-from scipy.stats import norm
 
 from .ExperimentParams import ExperimentParams
 import numpy as np 
@@ -217,7 +216,7 @@ class Quasar:<br>
 			return
 		starMasses = generator.generate_cluster(float(m_stars))[0]
 		if self.galaxy.starVelocityParams != None:
-			velocityMag = norm.rvs(loc = self.galaxy.starVelocityParams[0],
+			velocityMag = random_number_generator.normal(loc = self.galaxy.starVelocityParams[0],
 							scale = self.galaxy.starVelocityParams[1],
 							size = len(starMasses)) #Loc = mean, scale = sigma, size = number
 			velocityDir = random_number_generator.rand(len(velocityMag),3) - 0.5
