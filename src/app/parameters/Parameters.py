@@ -5,7 +5,6 @@ import math
 from astropy import constants as const
 from astropy import units as u 
 from astropy.cosmology import WMAP7 as cosmo
-from scipy.stats import norm
 
 from .ExperimentParams import ExperimentParams
 import numpy as np 
@@ -177,7 +176,7 @@ class Quasar:<br>
 		self.time = 0
 		self._rawMag = None
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
-		u.add_enabled_units([self.gravitationalRadius,self.einsteinRadiusUnit,self.avgMassEinsteinRadius])
+#		u.add_enabled_units([self.gravitationalRadius,self.einsteinRadiusUnit,self.avgMassEinsteinRadius])
 
 	def update(self,galaxy=None,quasar=None,dTheta=None,canvasDim=None,extras=None,dt=None):
 		if galaxy:
@@ -217,7 +216,7 @@ class Quasar:<br>
 			return
 		starMasses = generator.generate_cluster(float(m_stars))[0]
 		if self.galaxy.starVelocityParams != None:
-			velocityMag = norm.rvs(loc = self.galaxy.starVelocityParams[0],
+			velocityMag = random_number_generator.normal(loc = self.galaxy.starVelocityParams[0],
 							scale = self.galaxy.starVelocityParams[1],
 							size = len(starMasses)) #Loc = mean, scale = sigma, size = number
 			velocityDir = random_number_generator.rand(len(velocityMag),3) - 0.5

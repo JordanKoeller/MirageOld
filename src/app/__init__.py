@@ -10,3 +10,4 @@ parametersUIFile = abspath+'Resources/GUIViews/ParametersView/parametersview.ui'
 tableUIFile = abspath+'Resources/GUIViews/BatchTableView/batchtableview.ui'
 magmapUIFile = abspath+'Resources/GUIViews/MagnificationMapView/magnificationmapview.ui'
 modeldialogUIFile = abspath+'Resources/GUIViews/ConfigureModelsDialog/configuremodelsdialog.ui'
+

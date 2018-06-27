@@ -105,7 +105,7 @@ class ExperimentResultCalculator(object):
     def __BATCH_LIGHTCURVE(self,index,model,trial_number):
         print("Now tracing curves")
         special = model.parameters.extras.desiredResults[index]
-        ret = model.engine.sample_light_curves(special.lines,special.bounding_box,special.resolution)
+        ret = model.engine.sample_light_curves(special.lines)
         return np.array(ret)
 
     def __DATA_FILE(self,index,model,trial_number):

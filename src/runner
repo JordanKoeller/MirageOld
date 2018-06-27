@@ -1,1 +1,1 @@
-spark-submit --driver-memory 13g --executor-memory 13g --jars ../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar --conf spark.driver.maxResultSize=10g --master spark://atlas00:7077 --verbose Main.py --run $1 $2
+spark-submit --driver-memory 13g --executor-memory 13g --jars ../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar --conf spark.driver.maxResultSize=10g --master spark://atlas00.cs.trinity.edu:7077 --verbose Main.py --run $1 $2

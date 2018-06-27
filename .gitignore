@@ -141,7 +141,6 @@ sftp-config.json
 
 #generated documentation files
 
-*.rst
 
 # Package control specific files
 Package Control.last-run

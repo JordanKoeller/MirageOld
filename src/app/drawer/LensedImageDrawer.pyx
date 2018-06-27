@@ -3,7 +3,7 @@ import math
 from astropy import constants as const
 from astropy import units as u
 from pyqtgraph import QtCore, QtGui
-from scipy.cluster.vq import vq, kmeans, whiten
+# from scipy.cluster.vq import vq, kmeans, whiten
 
 import numpy as np
 import pyqtgraph as pg 
@@ -98,15 +98,15 @@ cdef class LensedImageDrawer(ImageDrawer):
         r /= model.parameters.dTheta.value
         drawCircle(int(model.parameters.canvasDim/2),int(model.parameters.canvasDim/2),r,canvas,3,model)
 
-    def drawCritLines(self,pixels,model,canvas):
-        pixels = whiten(pixels)
-        imgs = kmeans(pixels,4)
-        yInt = model.parameters.canvasDim/2
-        yAx = model.parameters.canvasDim/2
-        cdef np.ndarray[np.uint8_t, ndim=2] lookup = model.colorMap_arr
-        for i in imgs[0]:
-            m = -i[0]/i[1]
-            drawLine(int(model.parameters.canvasDim),m,0,canvas,3,model)
+    # def drawCritLines(self,pixels,model,canvas):
+    #     pixels = whiten(pixels)
+    #     imgs = kmeans(pixels,4)
+    #     yInt = model.parameters.canvasDim/2
+    #     yAx = model.parameters.canvasDim/2
+    #     cdef np.ndarray[np.uint8_t, ndim=2] lookup = model.colorMap_arr
+    #     for i in imgs[0]:
+    #         m = -i[0]/i[1]
+    #         drawLine(int(model.parameters.canvasDim),m,0,canvas,3,model)
 
 
 
