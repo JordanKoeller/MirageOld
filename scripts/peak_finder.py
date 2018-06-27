@@ -70,7 +70,7 @@ def findCorrespondingPeaks_slice(peaks1,y,window=50):
     for i in range(len(peaks2)):
         ind = peaks1[i]
         slc = y[max(peaks1[i]-window,0):min(peaks1[i]+window,len(y))]
-        startPt = peaks1[i]
+        startPt = peaks1[i]-window
         peaks2[i] = np.argmax(slc) + startPt
     return peaks2
 
@@ -79,7 +79,7 @@ def plot_maxes(xx,yy,inds):
     for ind in inds:
         x = xx[ind]
         y = yy[ind]
-        plt.plot(x,y,'+',markersize=20.0)
+        plt.plot(x,y,'+',markersize=20.0,color='k')
 
 def get_all(curves,num_peaks,r_ratio,engine,radius,plotting = True):
     counter = 1
@@ -138,7 +138,7 @@ def sortByHeightAtIndex(indices,y):
     return keys
 
 
-def rawDataLists_toDataFrame(retlist,x_threshold=300,y_threshold=8):
+def rawDataLists_toDataFrame(retlist,x_threshold=300,y_threshold=8,window=200):
     retmap = {}
     for i in range(len(retlist)):
         retmap[i] = retlist[i]
@@ -149,7 +149,7 @@ def rawDataLists_toDataFrame(retlist,x_threshold=300,y_threshold=8):
         ref_data = get_peaks_above(v[0],x_threshold,y_threshold)
         x = np.arange(0,len(v[0]))
         for line in v:              
-            tmp.append(findCorrespondingPeaks(ref_data,x,line))
+            tmp.append(findCorrespondingPeaks(ref_datx,line,window=window))
         ref_line = tmp[0]                   
         diffs = list(map(lambda x: x - ref_line,tmp))                                   
         indmap[k] = tmp                                                                  

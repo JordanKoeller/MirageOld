@@ -21,6 +21,17 @@ Mirage is primarily written in Python, to allow for easy manipulation of
 the program as well as data analysis through Python's interpreter. The
 calculation engine, however, gives you options to specify where the heavy lifting occurs. Mirage may be ran locally using a C/C++ implimentation that can take advantage of graphics processors for the ray-tracing, or may be ran on a computational cluster through the Apache Spark (TM) data analytics framework.
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents
+
+   installation
+   gettingstarted
+   dependencies
+   documentation
+   publications 
+   licensing
+   citing
 
 What Mirage can do
 ==================
@@ -37,24 +48,4 @@ Mirage is a program initially developed for analyzing light curves from gravitat
 * Bulk generation of magnification maps and light curves with specified variables changed for discovering correlation.
 * Tools for statistical analysis of magnification maps and light curves, as well as visualization and manipulation.
 * Open source object-oriented code, written to be easily extensible for other purposes.
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   Installation:
-   Getting started:
-   Dependencies:
-   API Documentation:
-   Licensing:
-   Citing Mirage:
-
-
-Installation
-============
-
-The easiest way to get Mirage is to pull from the `github repository <https://github.com/JordanKoeller/Mirage>`_. See the readme.md on the github page for the most up-to-date installation details.
-
-
-
 

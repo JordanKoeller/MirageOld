@@ -176,7 +176,7 @@ class Quasar:<br>
 		self.time = 0
 		self._rawMag = None
 		self.extras = None #Delegated member in charge of function-specific things, like display settings, light curve settings, etc.
-		u.add_enabled_units([self.gravitationalRadius,self.einsteinRadiusUnit,self.avgMassEinsteinRadius])
+#		u.add_enabled_units([self.gravitationalRadius,self.einsteinRadiusUnit,self.avgMassEinsteinRadius])
 
 	def update(self,galaxy=None,quasar=None,dTheta=None,canvasDim=None,extras=None,dt=None):
 		if galaxy:

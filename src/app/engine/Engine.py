@@ -90,11 +90,13 @@ class Engine(object):
         # for row in lines.value:
         #     slc= __slice_line(row,bounding_box,resolution)
         #     slices.append(np.array(slc).T)
-        lightCurves = self._calcDel.sample_light_curves(slices,self.parameters.queryQuasarRadius)
+        if isinstance(lines[0],u.Quantity):
+            for i in range(len(lines)): lines[i] = lines[i].to('rad').value
+        lightCurves = self._calcDel.sample_light_curves(lines,self.parameters.queryQuasarRadius)
         ret = []
         for curveInd in range(len(lightCurves)):
             c = self.normalize_magnification(lightCurves[curveInd])
-            qPts = slices[curveInd]
+            qPts = lines[curveInd]
             begin = qPts[0]
             end = qPts[-1]
             ret.append([c,np.array([begin,end])])
@@ -114,7 +116,7 @@ class Engine(object):
     def make_mag_map(self,center,dims,resolution,radius=None):
         center = self.get_center_coords(self.parameters)
         ret = self._calcDel.make_mag_map(center,dims,resolution)
-        println(ret)
+        print(ret)
         # return ret
         return self.normalize_magnification(ret,radius)
 
