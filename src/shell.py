@@ -8,7 +8,7 @@ from astropy import units as u
 import numpy as np
 from math import *
 import math
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 #A few ipython things to manipulate the environment
 try:
