@@ -6,7 +6,7 @@ class LightCurveBatch(object):
 	def __init__(self,lightcurve_array):
 		self._data = lightcurve_array
 
-	def plottables(self,unit='uas'):
+	def plottables(self,unit='uas'): 
 		for curve in self:
 			xAxis = curve.distance_axis.to(unit)
 			yAxis = curve.curve 
