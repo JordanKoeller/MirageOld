@@ -12,14 +12,14 @@ def angleToPixel(angles, model):
     parameters = model.parameters
     canvasDim = parameters.canvasDim
     dTheta = parameters.dTheta.to('rad').value
-
+    ret = angles.copy()
     if isinstance(angles, np.ndarray):
-        angles[:, 0] = (angles[:, 0] / dTheta) + canvasDim / 2
-        angles[:, 1] = canvasDim / 2 - (angles[:, 1] / dTheta)
-        return angles
+        ret[:, 0] = (angles[:, 0] / dTheta) + canvasDim / 2
+        ret[:, 1] = canvasDim / 2 - (angles[:, 1] / dTheta)
+        return ret
     else:
-        angles = angles.to('rad') / dTheta
-        return Vector2D(angles.x + canvasDim / 2, canvasDim / 2 - angles.y)
+        angles2 = angles.to('rad') / dTheta
+        return Vector2D(angles2.x + canvasDim / 2, canvasDim / 2 - angles2.y)
 
 
 def pixelToAngle(pixels, model):

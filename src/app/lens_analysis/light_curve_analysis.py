@@ -1,28 +1,22 @@
 import numpy as np
-from scipy.signal import savgol_filter
+from scipy.stats import sigmaclip
+from scipy.signal import savgol_filter, wiener
+from scipy.interpolate import UnivariateSpline
+from numpy import percentile
 
 
-
-def determine_baseline(y):
-	"""Function for determining the approximate baseline value of the light curve.
-	
-	This function is built on the assumption that the magnification coefficient spends most of its time around baseline.
-	By taking advantage of this property, it calculates the mode of the line, and then based on the distribution of values
-	near the baseline, deterimes an estimate of typical deviation from the baseline caused by noise.
-	
+def determine_baseline(y,sigma=3):
+	"""Function for determining the approximate baseline value of the light curve through sigma clipping.
 	Arguments:
 		y {:class:`np.ndarray`} -- The light curve to inspect. Should be a one-dimensional array.
 
 	Returns:
 		A tuple of (baseline, approximate noise) as :class:`(float,float)`
 	"""
-	hist, bins = np.hist(y,bins=200,density=True)
-	peak_ind = np.argmax(hist)
-	mode = bins[peak_ind]
-	scanner = peak_ind
-	while hist[scanner] > 0.05: scanner += 1
-	noise = bins[scanner]
-	return (mode,noise-mode)
+	clipped = sigmaclip(y,sigma,sigma)
+	mean = clipped.clipped.mean()
+	noise = (clipped.upper+clipped.lower)/2
+	return (mean,noise)
 
 
 def get_peaks_above(y,y_threshold,x_separation):
@@ -157,3 +151,85 @@ def get_all_coefficients(line,x_threshold,y_threshold,with_plotting = True):
 		except:
 			print("Failed on peak" + str(peak) + ". Excluding")
 	return tmp
+
+
+def isolate_events(line,tolerance,sigma,smoothing_window=55,tail_factor=0.1):
+	# baseline, noise = determine_baseline(line)
+	x = np.arange(len(line))
+	spline = UnivariateSpline(x,line)
+	spline.set_smoothing_factor(0)
+	spline_deriv = spline.derivative()
+	smooth_deriv_abs = wiener(abs(spline_deriv(x)),smoothing_window)
+	deriv_baseline, deriv_noise = determine_baseline(smooth_deriv_abs,sigma)
+	deriv_threshold = deriv_baseline+deriv_noise
+	# plt.plot(smooth_deriv_abs)
+	# plt.plot(smooth_deriv_abs*0+deriv_threshold)
+	# plt.show()
+	cross_point_groups = []
+	i = 0
+	while i < len(smooth_deriv_abs)-1:
+		if smooth_deriv_abs[i] < deriv_threshold and smooth_deriv_abs[i+1] >= deriv_threshold:
+			# print("Found first upper")
+			cross_up = i+1
+			i += 1
+			while i < len(smooth_deriv_abs) and smooth_deriv_abs[i] > deriv_threshold: i += 1
+			cross_down = i-1
+			cross_point_groups.append([cross_up,cross_down])
+		else:
+			i += 1
+	line_threshold = line.mean()+tolerance
+	events = []
+	cross_I = 0
+	while cross_I < len(cross_point_groups):
+		if line[cross_point_groups[cross_I][0]] < line_threshold:
+			event_start = cross_point_groups[cross_I][0]
+			event_end = None
+			#use a while True: if flag: break to emulate a do while loop
+			while True:
+				event_end = cross_point_groups[cross_I][1]
+				if line[event_end] < line_threshold: 
+					break
+				else:
+					cross_I += 1
+			if event_end - event_start > 0 and line[event_start:event_end].max() > line_threshold:
+				center = (event_start+event_end)/2
+				split = (event_end - event_start)/2
+				scaled = split*(1+tail_factor)
+				event_start = max(0,int(center - scaled))
+				event_end = min(len(line)-1,int(center+scaled))
+				events.append([event_start,event_end])
+		cross_I += 1
+	event_slices = list(map(lambda event: line[event[0]:event[1]], events))
+	return (events,event_slices)
+
+	
+def categorize_curves(curves,p_threshold,method,*args,**kwargs):
+	#cramer von-mises is the way to go. Callable with 
+	#scipy.stats.energy_distance
+    table = []
+    table.append([curves[0]])
+    for curveI in range(1,len(curves)):
+        curve = curves[curveI]
+        if len(curve) < 100:
+            continue
+        most_similar = -1
+        best_p = 1000
+        for i in range(len(table)):
+            row = table[i]
+            rep = row[0]
+            d,p_val = method(curve,rep,*args,**kwargs)
+            if p_val < p_threshold:
+                found_match = True
+                if p_val < best_p:
+                    best_p = p_val
+                    most_similar = i
+        if most_similar == -1:
+            table.append([curve])
+        else:
+            table[most_similar].append(curve)
+    return table
+
+def describe_table(table):
+    for i in range(len(table)):
+        print("Index " + str(i) + " of length " + str(len(table[i])))
+
