@@ -4,7 +4,7 @@ sc
 get_ipython().run_line_magic('ls', '')
 get_ipython().run_line_magic('cd', '../src/')
 get_ipython().run_line_magic('ls', '')
-from app.parameters.ExperimentParams import BatchLightCurveParameters
+from mirage.parameters.ExperimentParams import BatchLightCurveParameters
 get_ipython().run_line_magic('ls', '')
 get_ipython().run_line_magic('cd', '../debugging/')
 get_ipython().run_line_magic('ls', '')
@@ -19,7 +19,7 @@ qpts
 len(qpts)
 oldcurve.resolution
 p.extras['batch_lightcurve'] = new
-from app.lens_analysis.EngineDelegate import EngineDelegate
+from mirage.lens_analysis.EngineDelegate import EngineDelegate
 p.canvasDim
 p.update(canvasDim=30000)
 eng = EngineDelegate(p)

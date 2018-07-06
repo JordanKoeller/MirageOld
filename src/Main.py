@@ -11,8 +11,8 @@ import sys
 
 def run_simulation(files):
     # sys.stdout = open(os.devnull,'w')
-    from app.calculator import ExperimentTableRunner
-    from app.io import TableFileReader, ExperimentDataFileWriter
+    from mirage.calculator import ExperimentTableRunner
+    from mirage.io import TableFileReader, ExperimentDataFileWriter
     infile = files[0]
     outfile = files[1]
     queueThread = ExperimentTableRunner()
@@ -35,10 +35,10 @@ def run_simulation(files):
 
 def visualize():
     from PyQt5 import QtWidgets
-    from app.views import WindowView
-    from app.controllers import MasterController
-    from app.model import ParametersModel
-    app = QtWidgets.QApplication(sys.argv)
+    from mirage.views import WindowView
+    from mirage.controllers import MasterController
+    from mirage.model import ParametersModel
+    mirage = QtWidgets.QApplication(sys.argv)
     model = ParametersModel()
     view = WindowView()
     controller = MasterController()
@@ -46,7 +46,7 @@ def visualize():
     controller.bind_to_model(model)
     controller.bind_view_signals(view)
     view.show()
-    sys.exit(app.exec_())
+    sys.exit(mirage.exec_())
 
 
 

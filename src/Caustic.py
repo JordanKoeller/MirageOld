@@ -14,7 +14,7 @@ class Rectangle(object):
 
 
 def plotCaustic(s,xMin=-4.0,xMax=4.0):
-	"Plot a single caustix event. xMin and xMax define the domain of the plot."
+	"Plot a single caustic event. xMin and xMax define the domain of the plot."
 	d = 1.0
 	xVals = np.arange(xMin,xMax,0.01)
 	yVals = np.arange(xMin,xMax,0.01)

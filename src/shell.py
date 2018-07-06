@@ -1,6 +1,6 @@
 #Import my custom stuff
-from app import lens_analysis as la
-import app
+from mirage import lens_analysis as la
+import mirage
 
 
 #Import general things
@@ -14,7 +14,7 @@ import math
 try:
     from IPython import get_ipython
     ipython = get_ipython()
-    ipython.magic('matplotlib')
+    ipython.magic('pylab')
     ipython.magic('cd ../scripts')
     #cleanup
     del(ipython)

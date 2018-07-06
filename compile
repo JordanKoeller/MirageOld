@@ -17,13 +17,13 @@ NC='\033[0m' # No Color
 
 while getopts ":fdc" opt; do
 	  case ${opt} in
-	      d )       sphinx-apidoc -o docs/source src/app/ -f
+	      d )       sphinx-apidoc -o docs/source src/mirage/ -f
 			cd docs
 			make html
 			echo "Documentation Generated"
 			cd ..
 	            ;;
-	      f )     cd src/app
+	      f )     cd src/mirage
 		      python setup.py build_ext --inplace -f
 		      cd ../../spark_impl
 		      sbt assembly
@@ -31,7 +31,7 @@ while getopts ":fdc" opt; do
 		      cd ..
 		      echo "\n\n\n${GREEN}Build Done${NC}\n"
 	            ;;
-	      c )     cd src/app
+	      c )     cd src/mirage
 		      python setup.py build_ext --inplace
 		      cd ../../spark_impl
 		      sbt assembly
