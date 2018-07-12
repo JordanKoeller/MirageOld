@@ -50,20 +50,28 @@ class Engine(object):
         import random
         self._center = None
         self._center = self.get_center_coords()
-        if self.parameters.raw_magnification is None:
+        if len(self.parameters.stars) > 0 and self.parameters.raw_magnification is None:
             print("Trying to manually recalulate")
             x = self._center.x 
             y = self._center.y
             backup = copy.deepcopy(self.parameters)
             cp = copy.deepcopy(self.parameters)
             cp.galaxy.update(percentStars=0)
+            cp.regenerateStars()
             # self._calcDel.reconfigure(cp)  
             rawMag = self._calcDel.query_single_point(cp,x,y,cp.queryQuasarRadius)
             print("Found " + str(rawMag) + " points")
             self.parameters.setRawMag(int(rawMag))
-            self._calcDel.reconfigure(self.parameters)
-        else:
             return self._calcDel.reconfigure(self.parameters)
+        else:
+            if self.parameters.raw_magnification is None:
+                self._calcDel.reconfigure(self.parameters)
+                x = self._center.x 
+                y = self._center.y
+                r = self.parameters.queryQuasarRadius
+                rawMag = self._calcDel.query_data_length(x,y,r)
+                self.parameters.setRawMag(rawMag)
+                return self._calcDel.reconfigure(self.parameters)
 
     def query_line(self,pts,r=None):
         arr = np.array([pts.to('rad').value.tolist()])

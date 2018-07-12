@@ -11,6 +11,8 @@ from scipy.signal import wiener
 from scipy.optimize import minimize, curve_fit
 
 class LightCurveBatch(object):
+
+
     def __init__(self,lightcurve_array):
         self._data = lightcurve_array
 
@@ -45,6 +47,11 @@ class LightCurveBatch(object):
 
 
 class LightCurve(object):
+
+
+    _scaling = "mag"
+
+
     def __init__(self,data,query_points):
         self._data = data.flatten()
         start = query_points[0]
@@ -61,7 +68,10 @@ class LightCurve(object):
 
     @property
     def curve(self):
-        return self._data
+        if self._scaling == "mmag":
+            return -2.5*np.log10(self._data+0.1)
+        else:
+            return self._data
 
     @property
     def query_points(self):
@@ -84,25 +94,39 @@ class LightCurve(object):
         res = (diffx**2+diffy**2)**(0.5)
         return u.Quantity(res,'rad')
 
+    @property
+    def length(self):
+        return self.distance_axis[-1]
+    
+
     def plottable(self,unit='uas'):
         x = self.distance_axis.to(unit)
         y = self.curve
         return (x,y)
 
-    def get_event_slice_points(self,tolerance=0.0,smoothing_window=55,max_length=None):
+    def get_event_slice_points(self,tolerance=1.0,
+        smoothing_window=55,
+        max_length=u.Quantity(1000000,'uas'),
+        stitch_length=u.Quantity(1000000,'uas'),
+        min_height=1.2):
         from mirage.light_curves import isolate_events
         ret = []
         x,curve = self.plottable()
-        slice_length = -1
-        if max_length != None:
-            x = x.to(max_length.unit)
-            dx = x[1] - x[0]
-            slice_length = int((max_length/dx).value)
-        slice_list = isolate_events(curve,tolerance,smoothing_window,slice_length)
+        x = x.to(max_length.unit)
+        dx = x[1] - x[0]
+        slice_length = int((max_length/dx).value)
+        stitch_length = int((stitch_length/dx).value)
+        print("Slice length = " + str(slice_length))
+        print("Stitch length = " + str(stitch_length))
+        slice_list = isolate_events(curve,tolerance,smoothing_window,slice_length,stitch_length,min_height)
         return slice_list
 
-    def get_events(self,tolerance=0.0,smoothing_window=55,max_length=None):
-        slice_list = self.get_event_slice_points(tolerance,smoothing_window,max_length)
+    def get_events(self,tolerance=1.0,
+        smoothing_window=55,
+        max_length=u.Quantity(1000000,'uas'),
+        stitch_length=u.Quantity(1000000,'uas'),
+        min_height=1.2):
+        slice_list = self.get_event_slice_points(tolerance,smoothing_window,max_length,stitch_length,min_height)
         ret = []
         curve = self.curve
         qpts = self.query_points
@@ -187,7 +211,7 @@ class LightCurveSlice(LightCurve):
 
 class LightCurveClassificationTable(object):
 
-    def __init__(self,curves,p_value_threshold=0.2,method='craimer',*args,**kwargs):
+    def __init__(self,curves,p_value_threshold=0.2,method='craimer',maximum_length=None,minimum_height=None,*args,**kwargs):
         # LightCurveBatch.__init__(self,curves,*args,**kwargs)
         if method == 'Craimer':
             self._chooser = CraimerChooser()
@@ -203,22 +227,37 @@ class LightCurveClassificationTable(object):
             self._chooser = ProminenceChooser()
         elif method == "User":
             self._chooser = UserChooser()
+        self._maximum_length = maximum_length
+        self._minimum_height = minimum_height
         self._p_threshold = p_value_threshold
         self._table = []
         for curve in curves:
             self.insert(curve)
 
+    def _qualifies(self,lc:LightCurve) -> bool:
+        if self._maximum_length != None and lc.length < self._maximum_length:
+            return False
+        if self._minimum_height != None:
+            minimum = lc.curve.min()
+            maximum = lc.curve.max()
+            if maximum - minimum < self._minimum_height:
+                return False
+        return True
+
+
     def insert(self,lightcurve):
         assert isinstance(lightcurve,LightCurve)
-        if len(self._table) == 0:
-            self._table.append([lightcurve])
-        else:
-            unique, ind = self.get_classification(lightcurve)
-            if unique:
+        if self._qualifies(lightcurve):
+            if len(self._table) == 0:
                 self._table.append([lightcurve])
             else:
-                self._table[ind].append(lightcurve)
-
+                unique, ind = self.get_classification(lightcurve)
+                if unique:
+                    self._table.append([lightcurve])
+                else:
+                    self._table[ind].append(lightcurve)
+        else:
+            pass
 
 
     def get_classification(self,curve):
@@ -440,10 +479,18 @@ class ProminenceChooser(CountingChooser):
             i += 1
         return ret
 
+    def prominences(self,line,peaks):
+        ret = []
+        for i in range(len(peaks)):
+            r = self.calc_prominence(line,peaks[i])
+            ret.append(r)
+        return np.array(ret)
+
     def find_peak_count(self,curve:LightCurve) -> int:
         line = curve.curve
         possibles, = argrelmax(line)
-        proms = prominences(line,possibles)
+        proms = self.prominences(line,possibles)
+        # print(proms)
         c = 0
         thresh = (line.max() - line.min())/self._threshold
         for i in proms:
@@ -469,6 +516,8 @@ class UserChooser(CountingChooser):
             while True:
                 try:
                     response = input("How many peaks do you see? --> ")
+                    if response == "cancel" or response == "exit":
+                        return None
                     response = int(response)
                     break
                 except:

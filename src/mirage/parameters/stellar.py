@@ -463,7 +463,7 @@ class Galaxy(Drawable, Cosmic):
     def clearStars(self):
         self.__stars = []
         self.__avgStarMass = 0.5
-            
+        self.__pcntStar = 0
     def moveStars(self, dt):
         self.__stars[:, 0] = self.__stars[:, 0] + self.__stars[:, 3] * dt
         self.__stars[:, 1] = self.__stars[:, 1] + self.__stars[:, 4] * dt
@@ -473,7 +473,10 @@ class Galaxy(Drawable, Cosmic):
             self.__velocityDispersion = velocityDispersion or self.__velocityDispersion
             self.__shear.update(shearMag, shearAngle)
             if percentStars != None:
-                self.__pcntStar = percentStars / 100
+                if percentStars == 0:
+                    self.clearStars()
+                else:
+                    self.__pcntStar = percentStars / 100
             if stars != []:
                 self.__stars = stars
                 self.__avgStarMass = sum(stars[:, 2]) / len(stars)

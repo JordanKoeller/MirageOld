@@ -23,6 +23,7 @@ class _AbstractModel(object):
 
     def regenerate_stars(self):
         try:
+            print(self._parameters.galaxy.percentStars)
             self._parameters.regenerateStars()
             self.bind_parameters()
         except:

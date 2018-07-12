@@ -206,43 +206,47 @@ class Quasar:<br>
 			self.dt = dt
 
 	def regenerateStars(self):
-		m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
-		from mirage.calculator import getMassFunction
-		generator = getMassFunction()
-		random_number_generator = generator.random_number_generator
-		m_stars = m_stars.value
-		if m_stars < 1.0:
-			print("NOT ENOUGH MASS FOR STAR FIELD. GENERATION TERMINATED")
-			return
-		starMasses = generator.generate_cluster(float(m_stars))[0]
-		if self.galaxy.starVelocityParams != None:
-			velocityMag = random_number_generator.normal(loc = self.galaxy.starVelocityParams[0],
-							scale = self.galaxy.starVelocityParams[1],
-							size = len(starMasses)) #Loc = mean, scale = sigma, size = number
-			velocityDir = random_number_generator.rand(len(velocityMag),3) - 0.5
-			velocityDirMag = np.sqrt(velocityDir[:,0]**2 + velocityDir[:,1]**2+velocityDir[:,2]**2)
-			for i in range(0,len(starMasses)):
-				velocityDir[i,0] = velocityDir[i,0]/velocityDirMag[i]
-				velocityDir[i,1] = velocityDir[i,1]/velocityDirMag[i]
-			velocities = np.ndarray((len(velocityDir),2))
-			for i in range(0,len(starMasses)):
-				velocities[i] = [velocityDir[i,0]*velocityMag[i], velocityDir[i,1]*velocityMag[i]]
-			velocities = velocities/self.galaxy.angDiamDist.to('km').value
-			starArray = np.ndarray((len(starMasses),5))
-			for i in range(0,len(starMasses)): #PROTOCOL of X, Y, Mass, Vx, Vy
-				x = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
-				y = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
-				starArray[i] = [x,y, starMasses[i],velocities[i,0],velocities[i,1]]
-			self.__galaxy.update(stars=starArray)
-			return starArray
+		if self.__galaxy.percentStars != 0:
+			m_stars = self.__galaxy.percentStars*self.smoothMassOnScreen
+			from mirage.calculator import getMassFunction
+			generator = getMassFunction()
+			random_number_generator = generator.random_number_generator
+			m_stars = m_stars.value
+			if m_stars < 1.0:
+				print("NOT ENOUGH MASS FOR STAR FIELD. GENERATION TERMINATED")
+				return
+			starMasses = generator.generate_cluster(float(m_stars))[0]
+			if self.galaxy.starVelocityParams != None:
+				velocityMag = random_number_generator.normal(loc = self.galaxy.starVelocityParams[0],
+								scale = self.galaxy.starVelocityParams[1],
+								size = len(starMasses)) #Loc = mean, scale = sigma, size = number
+				velocityDir = random_number_generator.rand(len(velocityMag),3) - 0.5
+				velocityDirMag = np.sqrt(velocityDir[:,0]**2 + velocityDir[:,1]**2+velocityDir[:,2]**2)
+				for i in range(0,len(starMasses)):
+					velocityDir[i,0] = velocityDir[i,0]/velocityDirMag[i]
+					velocityDir[i,1] = velocityDir[i,1]/velocityDirMag[i]
+				velocities = np.ndarray((len(velocityDir),2))
+				for i in range(0,len(starMasses)):
+					velocities[i] = [velocityDir[i,0]*velocityMag[i], velocityDir[i,1]*velocityMag[i]]
+				velocities = velocities/self.galaxy.angDiamDist.to('km').value
+				starArray = np.ndarray((len(starMasses),5))
+				for i in range(0,len(starMasses)): #PROTOCOL of X, Y, Mass, Vx, Vy
+					x = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
+					y = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
+					starArray[i] = [x,y, starMasses[i],velocities[i,0],velocities[i,1]]
+				self.__galaxy.update(stars=starArray)
+				return starArray
+			else:
+				starArray = np.ndarray((len(starMasses),3))
+				for i in range(0,len(starMasses)):
+					x = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
+					y = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
+					starArray[i] = [x,y, starMasses[i]]
+				self.__galaxy.update(stars=starArray)
 		else:
-			starArray = np.ndarray((len(starMasses),3))
-			for i in range(0,len(starMasses)):
-				x = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
-				y = (random_number_generator.rand() - 0.5)* (self.canvasDim - 2)* self.dTheta.to('rad').value
-				starArray[i] = [x,y, starMasses[i]]
-			self.__galaxy.update(stars=starArray)
-
+			print("Set with no stars")
+			self.starArray = np.array([])
+			self.__galaxy.update(percentStars = 0.0)
 		
 	@property
 	def galaxy(self):

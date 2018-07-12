@@ -20,12 +20,12 @@
 	"star_icon":"circle",
 
 	"color_scheme":{
-		"minimum":"#0000ff",
+		"minimum":"#ffff00",
 		"saddle_pt":"#00ff00",
 		"galaxy":"#ff00ff",
-		"quasar":"#ffff00",
+		"quasar":"0000ff",
 		"star":"#ffffff",
-		"background":"#000000"
+		"background":"#ff0000"
 	},
 
 	"max_frame_rate" : 20,
@@ -49,6 +49,18 @@
 
 	"star_generator_seed":null,
 
-	"light_curve_generator_seed":null
+	"light_curve_generator_seed":null,
+
+	"light_curve_parameters":{
+		"maximum_timescale": {
+			"unit":"year",
+			"value":6			
+		},
+		"maximum_quasar_velocity": {
+			"unit":"km/s",
+			"value":1200
+		}
+	}
+
 
 }

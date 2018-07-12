@@ -33,4 +33,5 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
     cdef vector[pair[int,int]] query_data(self, double x, double y, double radius) nogil
     cdef build_data(self, np.ndarray[np.float64_t, ndim=2] xArray, np.ndarray[np.float64_t, ndim=2] yArray,int binsize)
   
-    
+    cdef ray_trace_helper(self,object parameters)
+

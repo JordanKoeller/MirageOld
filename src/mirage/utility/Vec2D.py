@@ -60,7 +60,7 @@ class Vector2D(object):
     
 
     def copy(self):
-        return Vector2D(self.x.value,self.y.value,self.unit)
+        return Vector2D(self.x,self.y,self.unit)
         
     @property
     def unit(self):

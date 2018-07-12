@@ -1,0 +1,68 @@
+{
+    "galaxy": {
+        "position": {
+            "x": 1.1351427529498674e-06,
+            "y": 3.8014240735798717e-06,
+            "unit": "rad"
+        },
+        "velocityDispersion": {
+            "unit": "km / s",
+            "value": 177.95
+        },
+        "redshift": 0.04,
+        "shearAngle": {
+            "unit": "rad",
+            "value": -1.171115928088195
+        },
+        "shearMag": 0.07,
+        "velocity": {
+            "x": {
+                "unit": "",
+                "value": 1.0
+            },
+            "y": {
+                "unit": "",
+                "value": 0.0
+            },
+            "z": {
+                "unit": "",
+                "value": 0.0
+            }
+        },
+        "pcntStars": 0.0,
+        "avgStarMass": 0.5
+    },
+    "quasar": {
+        "position": {
+            "x": -4.84813681109536e-08,
+            "y": 4.84813681109536e-08,
+            "unit": "rad"
+        },
+        "mass": {
+            "unit": "solMass",
+            "value": 1000000000.0
+        },
+        "velocity": {
+            "x": -3.2752554264526963e-21,
+            "y": 2.6417868352772566e-21,
+            "unit": "rad"
+        },
+        "observedPosition": {
+            "x": -4.84813681109536e-08,
+            "y": 4.84813681109536e-08,
+            "unit": "rad"
+        },
+        "radius": {
+            "unit": "rad",
+            "value": 4.848136811436379e-12
+        },
+        "redshift": 1.69,
+        "colorKey": 3
+    },
+    "canvasDim": 3000,
+    "dTheta": {
+        "unit": "rad",
+        "value": 4.848136811095361e-10
+    },
+    "extraParameters": null
+}

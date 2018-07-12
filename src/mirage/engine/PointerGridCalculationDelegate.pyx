@@ -185,34 +185,49 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef double * y = < double *> yArray.data
         with nogil:
             self.__grid = PointerGrid(x, y, h, w, nd, binsize)
-    
 
-    cdef ray_trace(self):
-        '''Ray-traces the system on the CPU. Does not require openCL
-        
-        Must call reconfigure() before this method.
-        '''
+    cpdef int query_single_point(self,object parameters, double qx, double qy, double r):
+        cdef np.ndarray[np.float64_t,ndim=2] xValues
+        cdef np.ndarray[np.float64_t,ndim=2] yValues
+        xValues, yValues = self.ray_trace_helper(parameters)
+        cdef int i,j, max_x, max_y, count
+        cdef double dx, dy, r2
+        r2 = r*r
+        max_x = xValues.shape[0]
+        max_y = xValues.shape[1]
+        count = 0
+        with nogil:
+            for i in range(0,max_x):
+                for j in range(0, max_y):
+                    dx = qx - xValues[i,j]
+                    dy = qy - yValues[i,j]
+                    if dx*dx+dy*dy < r2:
+                        count += 1
+        return count
+
+
+    cdef ray_trace_helper(self,object parameters):
         begin = time.clock()
-        cdef int height = self._parameters.canvasDim
-        cdef int width = self._parameters.canvasDim
+        cdef int height = parameters.canvasDim
+        cdef int width = parameters.canvasDim
         height = height // 2
         width = width // 2
-        cdef double dTheta = self._parameters.dTheta.value
+        cdef double dTheta = parameters.dTheta.value
         cdef np.ndarray[np.float64_t, ndim = 2] result_nparray_x = np.zeros((width * 2, height * 2), dtype=np.float64)
         cdef np.ndarray[np.float64_t, ndim = 2] result_nparray_y = np.zeros((width * 2, height * 2), dtype=np.float64)
-        cdef double dS = self._parameters.quasar.angDiamDist.to('lyr').value
-        cdef double dL = self._parameters.galaxy.angDiamDist.to('lyr').value
-        cdef double dLS = self._parameters.dLS.to('lyr').value
+        cdef double dS = parameters.quasar.angDiamDist.to('lyr').value
+        cdef double dL = parameters.galaxy.angDiamDist.to('lyr').value
+        cdef double dLS = parameters.dLS.to('lyr').value
         cdef np.ndarray[np.float64_t, ndim = 1] stars_mass, stars_x, stars_y
         cdef int numStars = 0
-        if self._parameters.galaxy.percentStars > 0.0:
-            stars_mass, stars_x, stars_y = self._parameters.galaxy.starArray
+        if parameters.galaxy.percentStars > 0.0:
+            stars_mass, stars_x, stars_y = parameters.galaxy.starArray
             numStars = len(stars_x)
-        cdef double shearMag = self._parameters.galaxy.shear.magnitude
-        cdef double shearAngle = self._parameters.galaxy.shear.angle.value
-        cdef double centerX = self._parameters.galaxy.position.to('rad').x
-        cdef double centerY = self._parameters.galaxy.position.to('rad').y
-        cdef double sis_constant = np.float64(4 * math.pi * self._parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
+        cdef double shearMag = parameters.galaxy.shear.magnitude
+        cdef double shearAngle = parameters.galaxy.shear.angle.value
+        cdef double centerX = parameters.galaxy.position.to('rad').x
+        cdef double centerY = parameters.galaxy.position.to('rad').y
+        cdef double sis_constant = np.float64(4 * math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
         cdef double point_constant = (4 * const.G / const.c / const.c).to("lyr/solMass").value * dLS / dS / dL
         cdef double pi2 = math.pi / 2
         cdef int x, y, i
@@ -245,5 +260,12 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
                 result_nparray_x[x, y] = deltaR_x - result_nparray_x[x, y]
                 result_nparray_y[x, y] = deltaR_y - result_nparray_y[x, y]
                 
-        return (result_nparray_x, result_nparray_y)
+        return (result_nparray_x, result_nparray_y)        
     
+
+    cdef ray_trace(self):
+        '''Ray-traces the system on the CPU. Does not require openCL
+        
+        Must call reconfigure() before this method.
+        '''
+        return self.ray_trace_helper(self._parameters)

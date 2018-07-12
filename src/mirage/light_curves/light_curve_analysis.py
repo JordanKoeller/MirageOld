@@ -233,3 +233,4 @@ def describe_table(table):
     for i in range(len(table)):
         print("Index " + str(i) + " of length " + str(len(table[i])))
 
+
