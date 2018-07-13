@@ -11,8 +11,6 @@ from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal
 from astropy import constants as const
 from astropy import units as u
-from astropy.coordinates.representation import CartesianRepresentation
-from astropy.coordinates.sky_coordinate import SkyCoord
 import numpy as np
 
 from mirage import parametersUIFile
