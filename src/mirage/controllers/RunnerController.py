@@ -5,7 +5,7 @@ Created on Dec 24, 2017
 '''
 from mirage.controllers.Controller import Controller
 from PyQt5.QtWidgets import QApplication
-
+from mirage.preferences import GlobalPreferences
 import numpy as np
 
 
@@ -19,6 +19,7 @@ class Runner(Controller):
         self._runningBool = False
         self._initialized = False
         self._spawnedGen = None
+        self._dt = GlobalPreferences['dt']
         
     def trigger(self, model, masterController):
         if self._runningBool:
@@ -28,6 +29,8 @@ class Runner(Controller):
                 self.initialize(model, masterController)
                 self._spawnedGen = self.generator(model, masterController)
             self._runningBool = True
+            blankframe = np.zeros((model.parameters.canvasDim,model.parameters.canvasDim),dtype=np.int32)
+            masterController.lensedImageController.setLensedImg(model,blankframe)
             while self._runningBool:
                 try:
                     frame = next(self._spawnedGen)
@@ -48,7 +51,7 @@ class Runner(Controller):
         masterController.lensedImageController.setLensedImg(model, frame)
         masterController.lightCurveController.add_point_and_plot(frame)
 #         masterController.magMapController.update(model.parameters)
-        model.parameters.incrementTime(model.parameters.dt)
+        model.parameters.incrementTime(self._dt)
         QApplication.processEvents()
         
     def initialize(self, model, masterController):
@@ -120,12 +123,15 @@ class LightCurveRunner(Runner):
         self._xStepArr = np.linspace(begin.x, end.x, resolution)
         self._yStepArr = np.linspace(begin.y, end.y, resolution)
         self._counter = 0
+        self._list = []
         
     def generator(self, model, masterController):
         while self._counter < len(self._xStepArr):
             x = self._xStepArr[self._counter]
             y = self._yStepArr[self._counter]
-            yield model.engine.get_frame(x, y)
+            ret =  model.engine.get_frame(x, y)
+            self._list.append(ret)
+            yield ret
             self._counter += 1
         raise StopIteration
     
@@ -135,7 +141,7 @@ class LightCurveRunner(Runner):
 #         masterController.lensedImageController.setLensedImg(model,frame)
         masterController.lightCurveController.add_point_and_plot(frame)
 #         masterController.magMapController.update(model.parameters)
-        model.parameters.incrementTime(model.parameters.dt)
+        # model.parameters.incrementTime(model.parameters.dt)
         QApplication.processEvents()
         
 

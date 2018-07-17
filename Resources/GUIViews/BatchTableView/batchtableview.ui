@@ -148,13 +148,6 @@
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QCheckBox" name="saveRayData">
-                <property name="text">
-                 <string>Save Ray Data</string>
-                </property>
-               </widget>
-              </item>
              </layout>
             </item>
            </layout>
@@ -239,10 +232,22 @@ newParams = copy.deepcopy(oldParams)</string>
                </widget>
               </item>
               <item row="1" column="2">
-               <widget class="QLabel" name="label_3">
-                <property name="text">
-                 <string>Samples/uas</string>
-                </property>
+               <widget class="QComboBox" name="sampleDensityUnit">
+                <item>
+                 <property name="text">
+                  <string>1/uas</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>1/r_g</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>1/theta_E</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>
@@ -282,13 +287,6 @@ newParams = copy.deepcopy(oldParams)</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="2">
-               <widget class="QLabel" name="unitLabel_6">
-                <property name="text">
-                 <string>arcsec  </string>
-                </property>
-               </widget>
-              </item>
               <item row="1" column="0">
                <widget class="QLabel" name="label_40">
                 <property name="text">
@@ -311,6 +309,30 @@ newParams = copy.deepcopy(oldParams)</string>
                 <property name="text">
                  <string>Pixels</string>
                 </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QComboBox" name="mmDimUnit">
+                <item>
+                 <property name="text">
+                  <string>arcsec</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>uas</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>r_g</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>theta_E</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>

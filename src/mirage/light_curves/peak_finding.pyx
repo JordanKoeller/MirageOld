@@ -18,11 +18,6 @@ cdef determine_baseline(np.ndarray[np.float64_t,ndim=1] y,double sigma=3.0):
 
 cpdef isolate_events(np.ndarray[np.float64_t, ndim=1] line, double tolerance=1.0, int smoothing_window=55,int max_length=-1, int stitching_max_length=10000000,double min_height = 0.1):
 #NEW IDEA: Use maximizing summed curvature as a heuristic for when an event has occurred?
-    print(tolerance)
-    print(smoothing_window)
-    print(max_length)
-    print(stitching_max_length)
-    print(min_height)
     cdef:
         np.ndarray[np.float64_t, ndim=1] x = np.arange(len(line),dtype=np.float64)
         np.ndarray[np.float64_t, ndim=1] threshold_line = gaussian_filter(line,len(line)*3/smoothing_window)
@@ -64,8 +59,6 @@ cpdef isolate_events(np.ndarray[np.float64_t, ndim=1] line, double tolerance=1.0
                 for i in range(group1.second,group2.first):
                     max_found = maxc(max_found,absc(line[i] - threshold_line[i]))
                 if max_found < tolerance:
-                    with gil:
-                        print("Should be stitching together" + str(group1.first) + " to " + str(group2.second))
                     events.push_back(pair[int,int](group1.first,group2.second))
                     cross_I += 2
                 else:
@@ -236,46 +229,3 @@ def old_trimmer(y,slice_length):
                 index = i
                 max_found = tmp
         return [index,min(index+slice_length,len(y))]
-
-
-
-
-
-
-
-    # cross_point_groups = []
-    # i = 0
-    # while i < len(smooth_deriv_abs)-1:
-    #     if smooth_deriv_abs[i] < deriv_threshold and smooth_deriv_abs[i+1] >= deriv_threshold:
-    #         # print("Found first upper")
-    #         cross_up = i+1
-    #         i += 1
-    #         while i < len(smooth_deriv_abs) and smooth_deriv_abs[i] > deriv_threshold: i += 1
-    #         cross_down = i-1
-    #         cross_point_groups.append([cross_up,cross_down])
-    #     else:
-    #         i += 1
-    # line_threshold = line.mean()+tolerance
-    # events = []
-    # cross_I = 0
-    # while cross_I < len(cross_point_groups):
-    #     if line[cross_point_groups[cross_I][0]] < line_threshold:
-    #         event_start = cross_point_groups[cross_I][0]
-    #         event_end = None
-    #         #use a while True: if flag: break to emulate a do while loop
-    #         while True:
-    #             event_end = cross_point_groups[cross_I][1]
-    #             if line[event_end] < line_threshold: 
-    #                 break
-    #             else:
-    #                 cross_I += 1
-    #         if event_end - event_start > 0 and line[event_start:event_end].max() > line_threshold:
-    #             center = (event_start+event_end)/2
-    #             split = (event_end - event_start)/2
-    #             scaled = split*(1+tail_factor)
-    #             event_start = max(0,int(center - scaled))
-    #             event_end = min(len(line)-1,int(center+scaled))
-    #             events.append([event_start,event_end])
-    #     cross_I += 1
-    # event_slices = list(map(lambda event: line[event[0]:event[1]], events))
-    # return (events,event_slices)

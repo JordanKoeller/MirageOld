@@ -74,7 +74,6 @@ class CustomImageItem(ImageItem):
         
 
 from .ImageView import ImageView
-from .ParametersView import ParametersView
 from .PlotView import PlotView
 from .TableView import TableView
 from .WindowView import WindowView, AnalysisPerspectiveManager, TablePerspectiveManager, ExplorePerspectiveManager

@@ -23,7 +23,7 @@ def _scaleFactor(qR,gR):
 
 def generateSpecialUnits(qMass,qR,gR):
 	linearRg = (qMass.to('kg')*const.G/const.c/const.c).to('m')
-	angleRg = linearRg/cosmo.angular_diameter_distance(qR)
+	angleRg = linearRg/cosmo.angular_diameter_distance(qR).to('m')
 	rgUnit = u.def_unit('r_g',angleRg.value*u.rad)
 	thetaE = 4*const.G*u.Quantity(0.5,'solMass').to('kg')*_scaleFactor(qR,gR)/const.c/const.c
 	thetaEUnit = u.def_unit('theta_E',math.sqrt(thetaE.value)*u.rad)

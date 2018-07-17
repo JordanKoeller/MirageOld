@@ -9,7 +9,6 @@ from .DirectoryMap import DirectoryMap
 from .Experiment import Experiment
 from .Trial import Trial
 from .EngineDelegate import EngineDelegate
-# from .TrialWithEngine import TrialWithEngine
 
 sys.path.append(os.path.abspath('..'))
 
@@ -145,8 +144,8 @@ def visualizeMagMap(model=None,trial_number=None, with_engine = False):
 #     view.signals['to_analysis_perspective'].emit()
     controller.enableAnalysis(model)
     view.setPerspective(AnalysisPerspectiveManager)
-    view.signals['plot_pane_signal'].emit(True)
-    view.signals['mm_pane_signal'].emit(True)
+    # view.signals['plot_pane_signal'].emit(True)
+    # view.signals['mm_pane_signal'].emit(True)
     view.show()
     return CommandLineController(model,view,controller)
 

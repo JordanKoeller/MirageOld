@@ -25,7 +25,7 @@ class MasterController(Controller):
     _updateModel = pyqtSignal(object)
     _startCalculation = pyqtSignal(object, object)
     _warningLabel = pyqtSignal(str)
-
+    _msg = pyqtSignal(str)
     def __init__(self):
         '''
         Constructor
@@ -33,6 +33,7 @@ class MasterController(Controller):
         Controller.__init__(self)
         self.lightCurveController = LightCurveController()
         self.lensedImageController = LensedImageController()
+        self.lensedImageController.signals['request_zoom_on'].connect(lambda x,y: self._zoom_on(x,y))
         self.tableController = TableController()
         self.parametersController = ParametersController()
         self.magMapController = MagMapController()
@@ -43,12 +44,17 @@ class MasterController(Controller):
                         warning=self._warningLabel)
         self.addSignals(view_update_signal=self._update_signal,
                         destroy_view=self._destroy_signal)
+        self.addSignals(message=self._msg)
+
+    def _zoom_on(self,tl,br):
+        newP = self.model.zoom_to(tl,br)
+        self.parametersController.bind_fields(newP)
+
         
     def clear_perspective(self):
         self.lightCurveController.signals['destroy_view'].emit()
         self.lensedImageController.signals['destroy_view'].emit()
         self.tableController.signals['destroy_view'].emit()
-        self.parametersController.signals['destroy_view'].emit()
         self.magMapController.signals['destroy_view'].emit()
     
     def bind_to_model(self, model):
@@ -60,6 +66,7 @@ class MasterController(Controller):
         from ..views import WindowView
         assert isinstance(viewSignals, WindowView)
         signals = viewSignals.signals
+        self.parametersController.set_view(viewSignals)
         signals['exit_signal'].connect(self.exit)
         signals['play_signal'].connect(self.playPauseSlot)
         signals['reset_signal'].connect(self.resetSlot)
@@ -80,8 +87,10 @@ class MasterController(Controller):
         signals['scale_mag_map'].connect(self.magMapController.setScaling)
         self.signals['add_view_signal'].connect(viewSignals.addView)
         self.signals['warning'].connect(self.raise_warning)
+        self.signals['message'].connect(viewSignals.message_slot)
         
     def playPauseSlot(self):
+        self.signals['message'].emit("Calculating")
         if self.updateModel():
             self.runner.trigger(self.model, self)
 #             self.signals['trigger_calculation'].emit(self.model,self)
@@ -92,6 +101,7 @@ class MasterController(Controller):
     def updateModel(self):
         parameters = self.parametersController.getParameters()
         if parameters is None:
+            print("Returned None, because is set to readonly")
             return True
         if parameters:
             if parameters != self.model.parameters:
@@ -105,11 +115,11 @@ class MasterController(Controller):
             print("WHAT HAPPENED IN UPDATE MODEL???")
         
     def resetSlot(self):
+        self.signals['message'].emit("Reseting")
         parameters = self.parametersController.getParameters()
         if parameters:
             self.model.set_parameters(parameters)
             self.model.bind_parameters()
-            self.runner.reset()
         
     def enableAnalysis(self,trial=None):
         from mirage.model import TrialModel
@@ -124,10 +134,13 @@ class MasterController(Controller):
         model = TrialModel(trial)
         self.runner = LightCurveRunner()
         self.bind_to_model(model)
+        self.parametersController.bind_fields(model.parameters)
+        self.parametersController.set_read_only(True)
     
     def disableAnalysis(self):
         self.runner = AnimationRunner()
         from mirage.model import ParametersModel
+        self.parametersController.set_read_only(False)
         if self.model:
             self.model.disable()
             model = ParametersModel(self.model.parameters)
@@ -163,15 +176,7 @@ class MasterController(Controller):
     
     
     def toggleParamPane(self, state,read_only):
-        from ..views import ParametersView
-        if state is True:
-            view = ParametersView()
-            self.parametersController.bind_view_signals(view)
-            self.signals['add_view_signal'].emit(view)
-            self.parametersController.update(self.model.parameters)
-            self.read_only_entry(read_only)
-        else:
-            self.parametersController.signals['destroy_view'].emit()
+        self.parametersController.toggle(state,read_only)
     
     def toggleImagePane(self, state):
         from ..views import ImageView

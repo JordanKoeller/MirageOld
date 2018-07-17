@@ -12,6 +12,4 @@ def maximum_curve_length(distance):
     qv = qd.decode(GlobalPreferences['light_curve_parameters']['maximum_quasar_velocity'])
     dtheta = qv.to('m/s')*timescale.to('s')/distance.to('m')
     ret = u.Quantity(dtheta.value,'rad')
-    print(ret.to("uas"))
-    print(ret)
     return ret

@@ -247,6 +247,11 @@ class Quasar:<br>
 			print("Set with no stars")
 			self.starArray = np.array([])
 			self.__galaxy.update(percentStars = 0.0)
+
+	def clear_stars(self):
+		self.__galaxy.update(percentStars = 0)
+		self.regenerateStars()
+		return self
 		
 	@property
 	def galaxy(self):
@@ -476,6 +481,10 @@ class Quasar:<br>
 	def jsonString(self):
 		encoder = ParametersJSONEncoder()
 		return encoder.encode(self)
+
+	def copy(self):
+		from copy import deepcopy
+		return deepcopy(self)
 
 	def __eq__(self,other):
 		if not self.isSimilar(other):

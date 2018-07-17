@@ -30,6 +30,11 @@
 
 	"max_frame_rate" : 20,
 
+	"dt" : {
+		"value" : 1,
+		"unit" : "s"
+	},
+
 	"default_perspective":[
 		"parameter",
 		"visualization"
@@ -43,7 +48,7 @@
 
 	"draw_quasar":true,
 
-	"draw_galaxy":true,
+	"draw_galaxy":false,
 
 	"draw_stars":true,
 

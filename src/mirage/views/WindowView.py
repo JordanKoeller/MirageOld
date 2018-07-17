@@ -29,7 +29,8 @@ class WindowView(QMainWindow, SignalRepo):
     _table_pane = pyqtSignal(bool)
     _destroy_all = pyqtSignal()
     _scale_magMap = pyqtSignal(str)
-
+    _msg = pyqtSignal(str)
+    _cmsg = pyqtSignal()
     def __init__(self, *args, **kwargs):
         '''
         Constructor
@@ -39,7 +40,7 @@ class WindowView(QMainWindow, SignalRepo):
         uic.loadUi(mainUIFile, self)
         self.perspectiveManager = PerspectiveManager(self)
         self.dockArea = DockArea()
-        self.gridLayout_10.addWidget(self.dockArea)
+        self.splitter.addWidget(self.dockArea)
         self.actionPlotPane.toggled.connect(lambda: self.getPerspective().showPlot())
         self.actionMagMapPane.toggled.connect(lambda: self.getPerspective().showMagMap())
         self.actionParametersPane.toggled.connect(lambda: self.getPerspective().showParameters())
@@ -63,9 +64,14 @@ class WindowView(QMainWindow, SignalRepo):
                         to_explore_perspective = self.actionExplorePerspective.triggered,
                         to_table_perspective = self.actionTablePerspective.triggered,
                         destroy_all = self._destroy_all,
-                        scale_mag_map = self._scale_magMap)
+                        scale_mag_map = self._scale_magMap,
+                        message=self._msg,
+                        clear_message = self._cmsg)
         self.perspectiveManager.showPerspective(True)
         self.bind_menubar_signals()
+
+    def message_slot(self,msg):
+        self.statusBar.showMessage(msg)
         
     def setPerspective(self,Perspective):
         self.signals['destroy_all'].emit()
@@ -79,6 +85,8 @@ class WindowView(QMainWindow, SignalRepo):
         self.actionExplorePerspective.triggered.connect(lambda: self.setPerspective(ExplorePerspectiveManager))
         self.actionTablePerspective.triggered.connect(lambda: self.setPerspective(TablePerspectiveManager))
         self.actionAnalysisPerspective.triggered.connect(lambda: self.setPerspective(AnalysisPerspectiveManager))
+        self.signals['message'].connect(self.message_slot)
+        self.signals['clear_message'].connect(self.statusBar.clearMessage)
         
     def removeView(self,ViewType):
         dock = None
@@ -166,7 +174,7 @@ class ExplorePerspectiveManager(PerspectiveManager):
     
     def __init__(self, mainview, auto_configure=False):
         PerspectiveManager.__init__(self, mainview, auto_configure)
-    
+        mainview.signals['message'].emit("Switched to explore mode.")
     
     def showPerspective(self, state=True):
         PerspectiveManager.showPerspective(self, state)
@@ -180,10 +188,12 @@ class ExplorePerspectiveManager(PerspectiveManager):
         self.v.playPauseAction.setEnabled(True)
         self.v.resetAction.setEnabled(True)
         self.v.actionExplorePerspective.setChecked(True)
+        self.showImage(True)
 
 class AnalysisPerspectiveManager(PerspectiveManager):
     def __init__(self, mainview, auto_configure=False):
         PerspectiveManager.__init__(self, mainview, auto_configure)
+        mainview.signals['message'].emit("Switched to analysis mode.")
 
     
     def showPerspective(self, state=True):
@@ -197,6 +207,8 @@ class AnalysisPerspectiveManager(PerspectiveManager):
         self.v.resetAction.setEnabled(True)
         self.v.actionAnalysisPerspective.setChecked(True)
         self.v.actionParametersPane.setEnabled(True)
+        self.showPlot(True)
+        self.showMagMap(True)
         
     def showParameters(self, state=True):
         self.signals['param_pane_signal'].emit(state,True)
@@ -213,6 +225,7 @@ class AnalysisPerspectiveManager(PerspectiveManager):
 class TablePerspectiveManager(PerspectiveManager):
     def __init__(self, mainview, auto_configure=False):
         PerspectiveManager.__init__(self, mainview, auto_configure)
+        mainview.signals['message'].emit("Switched to table mode.")
 
     
     def showPerspective(self, state=True):

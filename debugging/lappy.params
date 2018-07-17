@@ -50,7 +50,7 @@
             "velocity": {
                 "x": -3.2717786634279656e-21,
                 "y": 2.626172648024304e-21,
-                "unit": "rad"
+                "unit": "rad/s"
             },
             "observedPosition": {
                 "x": 0.0,
@@ -64,7 +64,7 @@
             "redshift": 1.69,
             "colorKey": 3
         },
-        "canvasDim": 1000,
+        "canvasDim": 2000,
         "dTheta": {
             "unit": "theta_E",
             "value": 200.0
@@ -72,8 +72,8 @@
         "extraParameters": {
             "name": "laptop_test_Data",
             "description": "imageC 2237 run at 10% of mass in stars. Set up to be the same dimensions of those specified in Pooley et al. 10,000^2 canvas, drawing to a 2000x2000 magnification map.",
-            "numTrials": 1,
-            "trialVariance": "newParams = copy.deepcopy(oldParams)\nnewParams.galaxy.update(percentStars=10.0)",
+            "numTrials": 5,
+            "trialVariance": "newParams = copy.deepcopy(oldParams)\nradii = u.Quantity(np.linspace(40,100,5),oldParams.gravitationalRadius)\nnewParams.galaxy.update(percentStars=10.0)\nnewParams.quasar.update(radius=radii[trialNumber])",
             "resultList": {
                 "magmap": {
                     "center": {

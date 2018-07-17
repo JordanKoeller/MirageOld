@@ -115,6 +115,9 @@ class Vector2D(object):
         "Returns the dot product of two vectors."
         if isinstance(that,float) or isinstance(that, int):
             return Vector2D(self.x*that,self.y*that,self.unit)
+        elif isinstance(that,u.Quantity):
+            vals = self._vals*that
+            return Vector2D(vals[0].value,vals[1].value,vals.unit)
         else:
             vals = self._vals * that._vals
             return Vector2D(vals[0].value,vals[1].value,vals.unit)

@@ -1,11 +1,10 @@
-from mirage import lens_analysis as la
-from matplotlib import pyplot as plt
+# from mirage import lens_analysis as la
 from scipy.stats import sigmaclip
 from scipy.signal import argrelmax
 from mirage.light_curves import *
-from astropy import units as u
-home_file = '/home/raqmu/Documents/Research/PeakComparison/10percent/large_sim/lightCurvesPlusMagmaps_20radiiForPeaks.dat'
-get_ipython().run_line_magic('pylab', '')
+# from astropy import units as u
+# get_ipython().run_line_magic('pylab', '')
+home_file = '/home/raqmu/Documents/Research/Vienna/RunsForPresentation/lightCurvesPlusMagmaps_20radiiForPeaks.dat'
 all_ref_batch = LightCurveBatch([])
 expts = la.load(home_file)
 trial = expts[0]
@@ -64,6 +63,7 @@ for i in range(len(reference_events)):
     top_peaks = get_exact_peaks(refe.curve,refe.num_peaks,50)
     refe.p1 = min(top_peaks)
     refe.p2 = max(top_peaks)
+    refe.p3 = argmax(refe.curve)
     for j in range(20):
         other_obj = ts[j][curve_id][slice_obj]
         other_obj.curve_id = curve_id
@@ -73,9 +73,12 @@ for i in range(len(reference_events)):
         top_peaks = get_exact_peaks(other_obj.curve,other_obj.ref_num_peaks,50)
         other_obj.p1 = min(top_peaks)
         other_obj.p2 = max(top_peaks)
+        other_obj.p3 = argmax(other_obj.curve)
         other_obj.d1 = abs(refe.p1 - other_obj.p1)
         other_obj.d2 = abs(refe.p2 - other_obj.p2)
+        other_obj.d3 = abs(refe.p3 - other_obj.p3)
         other_obj.rad = radii[j]
+        other_obj.ref_peak = refe.p3
         tmp[j] = other_obj
     lcb = LightCurveBatch(tmp)
     lcb.curve_id = curve_id
@@ -85,16 +88,10 @@ tmp_for_df = []
 c = 0
 for vent in list_of_events:
     for e in vent:
-        tup = [c,e.event_id,e.curve_id,e.ref_num_peaks,e.num_peaks,e.p1,e.p2,e.d1,e.d2,e.rad,len(e.curve),e.curve,e]
+        tup = [c,e.event_id,e.curve_id,e.ref_num_peaks,e.num_peaks,e.ref_peak,e.p3,e.d3,e.rad,len(e.curve),e.curve,e]
         tmp_for_df.append(tup)
         c += 1
 import pandas as pd
-headers = ["id","event-id","curve-id","ref_num_peaks","num_peaks","p1","p2","d1","d2","rad","len","plot","obj"]
-df = pd.DataFrame(tmp_for_df,columns=headers)
-d1 = df.copy()
-d2 = df.copy()
-d2['d1'] = d2['d2']
-d2['event-id'] = - d2['event-id']
-d2['p1'] = d1['p2']
-master_df = d1.append(d2)
+headers = ["id","event-id","curve-id","ref_num_peaks","num_peaks","ref_peak","p","d","rad","len","plot","obj"]
+master_df = pd.DataFrame(tmp_for_df,columns=headers)
 df2 = master_df[master_df['ref_num_peaks'] == 2]

@@ -234,6 +234,7 @@ class ParametersFileManager(FileWriter):
         if len(data.galaxy.stars) > 0:
             stars = data.galaxy.stars
             np.save(self._file,stars)
+        return True
 
     def close(self):
         self._file.close()
@@ -260,8 +261,8 @@ class ParametersFileReader(FileReader):
             self._file = file_object
         stars = None
         retPt = self._file.tell()
-        bits = self._file.read()
-        params,index = self.loadBytes(bits)
+        print(retPt)
+        params,index = self.loadBytes()
         try:
             self._file.seek(index)
             stars = np.load(self._file)
@@ -281,8 +282,12 @@ class ParametersFileReader(FileReader):
         # finally:
         #     return model
 
-    def loadBytes(self,bites):
+    def loadBytes(self):
         from mirage.parameters.Parameters import ParametersJSONDecoder
+        ret_pt = self._file.tell()
+        end = self.find_end()
+        self._file.seek(ret_pt)
+        bites = self._file.read(end - ret_pt)
         decoder = json.JSONDecoder()
         string = str(bites,'utf-8',errors='ignore')
         jsonstr,index = decoder.raw_decode(string)
@@ -290,6 +295,20 @@ class ParametersFileReader(FileReader):
         model = jsonDecoder.decode(jsonstr)
         return (model,index)
 
+    def find_end(self):
+        end_char = b'\x93'
+        flag = True
+        buf_sz = int(1e6)
+        last_pt = self._file.tell()
+        while flag:
+            tmp = self._file.read(buf_sz)
+            if end_char in tmp:
+                flag = False
+                ind = tmp.index(end_char)
+                last_pt = last_pt + ind
+            else:
+                last_pt = self._file.tell()
+        return last_pt
 
     def close(self):
         self._file.close()
@@ -476,6 +495,9 @@ class FileProxy(object):
     def close(self,*args,**kwargs):
         return self._file.close(*args,**kwargs)
 
+
+
+
 class ExperimentDataFileReader(FileReader):
 
 
@@ -488,14 +510,12 @@ class ExperimentDataFileReader(FileReader):
     def load(self):
         file = open(self._filename,'rb')
         preader = ParametersFileReader()
-        # preader.open(file)
         params = preader.load(file_object=file)
-        print("GOT PARAMS")
         offset = file.tell()
-        proxy = FileProxy(file)
-        proxy.start_point = offset
+        print(offset)
         dataFile = tempfile.TemporaryFile()
-        dataFile.write(file.read())
+        for chunk in iter(lambda: file.read(int(1e6)), b''):
+            dataFile.write(chunk)
         dataFile.seek(0)
         return (params,dataFile)
 

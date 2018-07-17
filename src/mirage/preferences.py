@@ -45,6 +45,8 @@ class _PreferencesParser(object):
 class _GlobalPreferences(_PreferencesParser):
     """docstring for _GlobalPreferences"""
     def __init__(self,path):
+        from mirage.utility import QuantityJSONDecoder
+        qd = QuantityJSONDecoder()
         _PreferencesParser.__init__(self,path)
         defaults = _PreferencesParser(os.environ['projectDir']+'.default_preferences.json')
         #Load in defaults
@@ -58,6 +60,7 @@ class _GlobalPreferences(_PreferencesParser):
         if self['use_openCL']:
             if self['cl_device'] != 'discover':
                 os.environ['PYOPENCL_CTX'] = str(self['cl_device'])
+        self._prefMap['dt'] = qd.decode(self['dt'])
         lookup = {
             'minimum':1,
             'saddle_pt':5,

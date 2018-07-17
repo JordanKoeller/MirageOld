@@ -135,7 +135,7 @@ class QuasarJSONDecoder(object):
         redshift = js['redshift']
         tmpCosmic = Cosmic()
         tmpCosmic.updateCosmic(redshift=redshift)
-        velocity = (velocity * tmpCosmic.angDiamDist.to('m').value).setUnit('km/s')
+        # velocity = (velocity * tmpCosmic.angDiamDist.to('m').value).setUnit('km/s')
         radius = qd.decode(js['radius'])
         return Quasar(redshift=redshift,
                       radius=radius,
@@ -227,7 +227,7 @@ class Movable(Drawable):
         
     @property
     def velocity(self):
-        return self.__velocity.to('rad')
+        return self.__velocity.to('rad/s')
 
     def updateMovable(self, position, velocity):
         if velocity != None:
@@ -244,11 +244,11 @@ class Movable(Drawable):
     def observedPosition(self):
         return self.__observedPosition.to('rad')
 
-    def setTime(self, t):
-        self.__observedPosition = self._Drawable__position + (self.velocity * t)
+    # def setTime(self, t):
+    #     self.__observedPosition = self._Drawable__position + (self.velocity * t)
 
     def incrementTime(self, dt):
-        self.__observedPosition = self.__observedPosition + self.velocity * dt
+        self.__observedPosition = self.observedPosition + (self.velocity * dt).to('rad')
 
     def setPos(self, x, y=None):
         if y == None:
@@ -309,11 +309,10 @@ class Quasar(Movable, Cosmic):
     __radius = 0
 
     def __init__(self, redshift=2, radius=u.Quantity(1e6, 'uas'), position=Vector2D(0, 0, 'rad'),
-                 mass=u.Quantity(1e9, 'solMass'), velocity=Vector2D(0, 0, 'km/s')):
+                 mass=u.Quantity(1e9, 'solMass'), velocity=Vector2D(0, 0, 'rad/s')):
         self.__radius = radius
         self.updateCosmic(redshift=redshift)
-        normVel = velocity.to('km/s') / self.angDiamDist.to('km').value
-        self.updateMovable(position=position, velocity=normVel.setUnit('rad'))
+        self.updateMovable(position=position, velocity=velocity)
         self.updateDrawable(position=position, colorKey=3)
         self.__mass = mass
 
@@ -574,10 +573,10 @@ microGalaxy = Galaxy(redshift=0.0073,
 defaultQuasar = Quasar(redshift=0.073,
     position=Vector2D(-0.0003, 0, "rad"),
     radius=u.Quantity(5, "arcsecond"),
-    velocity=Vector2D(0, 0, "km/s"))
+    velocity=Vector2D(0, 0, "rad/s"))
 
 microQuasar = Quasar(redshift=0.073,
     position=Vector2D(0, 0, "rad"),
     radius=u.Quantity(1.7037e-6, "rad"),
-    velocity=Vector2D(1.59016e-8, 0, "km/s"))
+    velocity=Vector2D(1.59016e-8, 0, "rad/s"))
 

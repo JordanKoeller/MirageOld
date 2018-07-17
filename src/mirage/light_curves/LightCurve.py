@@ -116,8 +116,8 @@ class LightCurve(object):
         dx = x[1] - x[0]
         slice_length = int((max_length/dx).value)
         stitch_length = int((stitch_length/dx).value)
-        print("Slice length = " + str(slice_length))
-        print("Stitch length = " + str(stitch_length))
+        # print("Slice length = " + str(slice_length))
+        # print("Stitch length = " + str(stitch_length))
         slice_list = isolate_events(curve,tolerance,smoothing_window,slice_length,stitch_length,min_height)
         return slice_list
 
@@ -533,3 +533,35 @@ def _lorentzian(x,x0,gam,i,*args):
 def _gaussian(x,x0,gam,i,*args):
     dx = x - x0
     return i*np.exp(-dx*dx/2/gam/gam)
+
+class CausticTypeChooser(object):
+    def __init__(self,width=4):
+        self.window_width = width
+
+    def characterize(self,a:LightCurve) -> int:
+        try:
+            y = a.curve
+            peak = np.argmax(y)
+            rise_seg = self.get_rise_to(y,peak)
+            # plt.figure()
+            # plt.plot(rise_seg)
+            # wait = input("Done?")
+            # plt.close()
+            interp = np.linspace(rise_seg[0],rise_seg[-1],len(rise_seg))
+            delta = (rise_seg - interp).sum()
+            return delta/abs(delta)
+        except:
+            return 2
+
+    def get_rise_to(self,curve:np.ndarray,peak:int):
+        left_of = curve[:peak+1]
+        right_of = curve[peak:]
+        curve_segment = curve
+        if left_of[0] < right_of[-1]:
+            curve_segment =  left_of[max(0,peak-self.window_width):]
+        else:
+            curve_segment =  right_of[:min(peak+self.window_width,len(right_of))][::-1]
+        return curve_segment
+
+
+

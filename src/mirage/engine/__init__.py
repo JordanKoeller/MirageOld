@@ -10,6 +10,7 @@ Engine_ScalaSpark = lambda: Engine(ScalaSparkCalculationDelegate())
 
 Engine_MagMap = lambda arg1, arg2, arg3: Engine(MagMapCalculationDelegate(arg1,arg2,arg3))
 
+
 Engine_CPU = Engine_PointerGrid
 Engine_Spark = Engine_ScalaSpark
 

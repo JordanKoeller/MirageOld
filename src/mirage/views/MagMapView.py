@@ -52,12 +52,12 @@ class MagMapViewWidget(GraphicsLayoutWidget):
         self.gradientWidget.restoreState(self._getCenteredGradient(baseMag))
                 
     def _getCenteredGradient(self,center):
-        default = {'ticks':[(0.0, (204, 51, 0,255)), (center, (255, 255, 255, 255)), (1, (0, 0, 153,255))],'mode':'rgb'}
+        default = {'ticks':[(0.0, (0, 0, 153,255)), (center, (255, 255, 255, 255)), ((1-center)/5 + center, (204, 51, 0,255))],'mode':'rgb'}
         return default
                 
     def setROI(self,begin,end):
         self._viewBox.removeItem(self._roi)
-        self._roi = LineSegmentROI((begin,end),pen={'color':'#00FF00'})
+        self._roi = LineSegmentROI((begin,end),pen={'color':'#00FF00'}, movable=False)
         self._roi.setZValue(10)
         self._viewBox.addItem(self._roi)
         self.roiStartPos = begin

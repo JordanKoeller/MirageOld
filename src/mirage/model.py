@@ -1,18 +1,23 @@
 
 from mirage.engine import Engine, Engine_PointerGrid, Engine_ScalaSpark, Engine_MagMap
 from mirage.parameters import Parameters, DefaultParameters
-
+from mirage.utility import Vector2D
 
 class _AbstractModel(object):
     
-    _parameters = None
-    _engine = None
+    # _parameters = None
+    # _engine = None
     
     def __init__(self,parameters,engine):
-        assert isinstance(parameters,Parameters)
+        if parameters:
+            assert isinstance(parameters,Parameters)
+            self._parameters = parameters
+            print("Set parameters")
+        else:
+            self._parameters = None
         assert isinstance(engine, Engine) or isinstance(engine, Engine_ScalaSpark)
-        self._parameters = parameters
         self._engine = engine
+
 
     def set_parameters(self, parameters):
         assert isinstance(parameters, Parameters)
@@ -29,6 +34,11 @@ class _AbstractModel(object):
         except:
             print("Failed to regenerate stars")
 
+    def get_raw_magnification(self):
+        if self._parameters.raw_magnification:
+            return self._parameters.raw_magnification
+        else:
+            return self.engine.calculate_raw_magnification()
 
     @property
     def parameters(self):
@@ -68,6 +78,27 @@ class ParametersModel(_AbstractModel):
         assert isinstance(instance,_AbstractModel)
         p = instance.parameters
         return cls(p)
+
+    def zoom_to(self,center,dims):
+        #We assume the square selected is a perfect square.
+        old_canvDim = self.parameters.canvasDim
+        old_dTheta = self.parameters.dTheta
+        canvDimRatio = dims.x/old_canvDim
+        new_dTheta = old_dTheta*canvDimRatio*old_canvDim
+        old_center = self.parameters.galaxy.center
+        center_p = center - Vector2D(old_canvDim/2,old_canvDim/2)
+        center_angle = center_p*old_dTheta.to('rad').value
+        center_angle = center_angle.setUnit('rad')
+        new_center = old_center.to('rad') - center_angle.to('rad')
+
+        # center = self.parameters.pixelToAngle(center)
+        newP = self.parameters.copy()
+        newP.galaxy.update(center=new_center)
+        print("Center of galaxy at " + str(new_center.to('arcsec')))
+        newP.update(dTheta = new_dTheta)
+        return newP
+
+
         
         
 class TrialModel(_AbstractModel):

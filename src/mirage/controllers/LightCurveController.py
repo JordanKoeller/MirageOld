@@ -35,6 +35,8 @@ class LightCurveController(Controller):
         
     def plot_xy(self,x,y):
         self.signals['view_update_signal'].emit({'xAxis':x,'yAxis':y})
+        self.x = x
+        self.y = y
         
     def add_point_and_plot(self,pixels):
         newY = None

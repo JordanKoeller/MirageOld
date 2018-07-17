@@ -51,20 +51,13 @@ class Engine(object):
         self._center = None
         self._center = self.get_center_coords()
         if len(self.parameters.stars) > 0 and self.parameters.raw_magnification is None:
-            print("Trying to manually recalulate")
-            x = self._center.x 
-            y = self._center.y
-            backup = copy.deepcopy(self.parameters)
-            cp = copy.deepcopy(self.parameters)
-            cp.galaxy.update(percentStars=0)
-            cp.regenerateStars()
-            # self._calcDel.reconfigure(cp)  
-            rawMag = self._calcDel.query_single_point(cp,x,y,cp.queryQuasarRadius)
+            rawMag = self.calculate_raw_magnification()
             print("Found " + str(rawMag) + " points")
             self.parameters.setRawMag(int(rawMag))
             return self._calcDel.reconfigure(self.parameters)
         else:
             if self.parameters.raw_magnification is None:
+                print("CRAP had to do it again")
                 self._calcDel.reconfigure(self.parameters)
                 x = self._center.x 
                 y = self._center.y
@@ -72,6 +65,25 @@ class Engine(object):
                 rawMag = self._calcDel.query_data_length(x,y,r)
                 self.parameters.setRawMag(rawMag)
                 return self._calcDel.reconfigure(self.parameters)
+            else:
+                return self._calcDel.reconfigure(self.parameters)
+
+
+    def calculate_raw_magnification(self):
+        self._center = None
+        self._center = self.get_center_coords()
+        print("calculating raw mag")
+        x = self._center.x
+        y = self._center.y
+        backup = copy.deepcopy(self.parameters)
+        cp = copy.deepcopy(self.parameters)
+        cp.clear_stars()
+        # self._calcDel.reconfigure(cp)  
+        rawMag = self._calcDel.query_single_point(cp,x,y,cp.queryQuasarRadius)
+        print("Raw Mag of " + str(rawMag))
+        print("Queried rad of " + str(cp.queryQuasarRadius))
+        return rawMag
+
 
     def query_line(self,pts,r=None):
         arr = np.array([pts.to('rad').value.tolist()])
