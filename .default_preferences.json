@@ -40,7 +40,7 @@
 		"visualization"
 	],
 
-	"mass_function":"Kroupa_2001",
+	"mass_function":"Pooley_2011",
 
 	"animate_motion":false,
 
