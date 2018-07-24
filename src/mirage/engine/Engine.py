@@ -185,12 +185,16 @@ class Engine(object):
                         resx += deltaR_x * sis_constant / r 
                         resy += deltaR_y * sis_constant / r 
                     else:
+                        print("ellipticity")
+                        print(q)
+                        print(tq)
                         eex = (deltaR_x*sin(tq)+deltaR_y*cos(tq))
                         eey = (deltaR_y*sin(tq)-deltaR_x*cos(tq))
-                        ex =  sis_constant/q1*atan(q1*eex/sqrt(q*q*eex*eex+eey*eey))
-                        ey = sis_constant/q1*atanh(q1*eey/sqrt(q*q*eex*eex+eey*eey))
+                        ex = q*sis_constant/q1*atan(q1*eex/sqrt(q*q*eex*eex+eey*eey))
+                        ey = q*sis_constant/q1*atanh(q1*eey/sqrt(q*q*eex*eex+eey*eey))
                         resx += ex*sin(tq) - ey*cos(tq)
                         resy += ex*cos(tq) + ey*sin(tq)
+
                 
                 # Shear
                 phi = 2 * (pi2 - shearAngle) - math.atan2(deltaR_y, deltaR_x)
@@ -202,6 +206,8 @@ class Engine(object):
                 resx = 0.0
                 resy = 0.0
             self._center =  Vector2D(resx, resy, 'rad')
+            # self._center = -Vector2D(2.88819e-06,9.31579e-07,'rad')
+            print(self._center)
         return self._center
 
     def save_rays(self,fname):

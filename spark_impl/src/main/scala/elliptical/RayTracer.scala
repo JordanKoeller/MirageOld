@@ -3,7 +3,7 @@ package elliptical
 import org.apache.spark.rdd.RDD
 import org.apache.spark.broadcast.Broadcast
 
-class RayTracer() {
+class RayTracer() extends Serializable {
   
   def atanh(x:Double):Double = {
     0.5*math.log((1.0+x)/(1.0-x))
