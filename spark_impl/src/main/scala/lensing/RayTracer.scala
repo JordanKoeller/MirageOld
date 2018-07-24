@@ -12,12 +12,12 @@ class RayTracer() {
     //    val ret = pixels.glom().map { pixelIter =>
     pixels.mapPartitions(pixelIter => {
       pixelIter.map { long =>
-        val x = long.toInt % p.value.width
-        val y = long.toInt / p.value.width
+        val x = long % p.value.width.toLong
+        val y = long / p.value.width.toLong
         var retX = 0.0
         var retY = 0.0
-        val incidentAngleX = (x - p.value.width / 2.0) * p.value.dTheta
-        val incidentAngleY = (p.value.height / 2.0 - y) * p.value.dTheta
+        val incidentAngleX = (x.toDouble - p.value.width / 2.0) * p.value.dTheta
+        val incidentAngleY = (p.value.height / 2.0 - y.toDouble) * p.value.dTheta
 
         // Point sources
         for (star <- p.value.stars) {

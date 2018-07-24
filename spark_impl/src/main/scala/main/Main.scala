@@ -43,7 +43,7 @@ object Main extends App {
     }
     //Construction of RDD, mapping of RDD to ray-traced source plane locations
     val rayTracer = new RayTracer()
-    val pixels = sc.range(0, (width * height).toLong, 1, partitionCount)
+    val pixels = sc.range(0, width.toLong * height.toLong, 1, partitionCount)
     val parameters = RayParameters(
       stars,
       pointConstant,

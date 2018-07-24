@@ -42,20 +42,13 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QScrollArea" name="tableFrame">
-         <property name="widgetResizable">
-          <bool>true</bool>
+        <widget class="QFrame" name="tableFrame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
          </property>
-         <widget class="QWidget" name="scrollAreaWidgetContents">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>826</width>
-            <height>288</height>
-           </rect>
-          </property>
-         </widget>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
         </widget>
        </item>
        <item>
@@ -373,6 +366,9 @@ newParams = copy.deepcopy(oldParams)</string>
          </item>
          <item>
           <widget class="QPushButton" name="queueEditCancelButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>Cancel Editing</string>
            </property>

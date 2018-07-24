@@ -40,10 +40,10 @@ class GalaxyJSONEncoder(object):
             # res['starMasses'] = m.tolist()
             # res['starXPos'] = x.tolist()
             # res['starYPos'] = y.tolist()
-            x = quantDecoder.encode(o.velocity.x)
-            y = quantDecoder.encode(o.velocity.y)
-            z = quantDecoder.encode(o.velocity.z)
-            res['velocity'] = {'x':x, 'y':y, 'z':z}
+            # x = quantDecoder.encode(o.velocity.x)
+            # y = quantDecoder.encode(o.velocity.y)
+            # z = quantDecoder.encode(o.velocity.z)
+            res['velocity'] = o.velocity.jsonString
             res['pcntStars'] = o.percentStars
             # res['skyCoords'] = o.skyCoords #WILL NEED HELP HERE
             res['avgStarMass'] = o.averageStarMass
@@ -69,10 +69,14 @@ class GalaxyJSONDecoder(object):
         # starm = js['starMasses']
         # starx = js['starXPos']
         # stary = js['starYPos']
-        vx = qd.decode(js['velocity']['x'])
-        vy = qd.decode(js['velocity']['y'])
-        vz = qd.decode(js['velocity']['z'])
-        velocity = CR(vx, vy, vz)
+        velocity = None
+        if 'z' in js['velocity']:
+            vx = qd.decode(js['velocity']['x'])
+            vy = qd.decode(js['velocity']['y'])
+            vz = qd.decode(js['velocity']['z'])
+            velocity = CR(vx, vy, vz)
+        else:
+            velocity = vd.decode(js['velocity'])
         pcntStars = js['pcntStars'] / 100
         # skyCoords = #NEED HELP HERE
         # if len(starm) > 0:
@@ -416,7 +420,7 @@ class Galaxy(Drawable, Cosmic):
 
     def __init__(self, redshift=0.5, velocityDispersion=u.Quantity(1500, 'km/s'), shearMag=0.306,
                  shearAngle=u.Quantity(30, 'degree'), percentStars=0.0,
-                 center=zeroVector.setUnit('rad'), velocity=u.Quantity(0, 'km/s'),
+                 center=zeroVector.setUnit('rad'), velocity=Vector2D(0,0, 'rad/s'),
                  starVelocityParams=None, skyCoords=None, stars=[]):
         Drawable.__init__(self)
         Cosmic.__init__(self)

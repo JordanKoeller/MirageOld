@@ -306,6 +306,8 @@ class ParametersFileReader(FileReader):
                 flag = False
                 ind = tmp.index(end_char)
                 last_pt = last_pt + ind
+            elif len(tmp) == 0:
+                return last_pt
             else:
                 last_pt = self._file.tell()
         return last_pt

@@ -16,18 +16,9 @@
         },
         "shearMag": 0.07,
         "velocity": {
-            "x": {
-                "unit": "",
-                "value": 1.0
-            },
-            "y": {
-                "unit": "",
-                "value": 0.0
-            },
-            "z": {
-                "unit": "",
-                "value": 0.0
-            }
+                "unit" : "rad",
+                "x": 0.0,
+		"y": 0.0
         },
         "pcntStars": 0.0,
         "avgStarMass": 0.5

@@ -3,7 +3,7 @@ Created on Dec 25, 2017
 
 @author: jkoeller
 '''
-from PyQt5 import QtCore, uic
+from PyQt5 import QtCore, uic, QtWidgets
 from PyQt5.QtWidgets import QPushButton
 from pyqtgraph.widgets.GraphicsLayoutWidget import GraphicsLayoutWidget
 from pyqtgraph.widgets.TableWidget import TableWidget
@@ -71,13 +71,15 @@ class ExperimentQueueTable(TableWidget):
     def __initClearTable(self):
         self.setData([["","","","",""]])
         headers = ['Name','Description','Number of Trials','Parameters','Remove']
-        self.setColumnWidth(0,100)
-        self.setColumnWidth(1,400)
-        self.setColumnWidth(2,130)
-        self.setColumnWidth(3,100)
-        self.setColumnWidth(4,100)
+        self.setColumnWidth(0,210)
+        self.setColumnWidth(1,210)
+        self.setColumnWidth(2,210)
+        self.setColumnWidth(3,210)
+        self.setColumnWidth(4,210)
         self.horizontalHeader().setStretchLastSection(True)
         self.setHorizontalHeaderLabels(headers)
+        # for i in range(5):
+        #     self.horizontalHeader().setSectionResizeMode(i,QtWidgets.QHeaderView.Stretch)
         self.__experiments = []
                   
     def __mkRow(self,params):
@@ -106,7 +108,7 @@ class TableViewWidget(GraphicsLayoutWidget):
         self._initTable()
 
     def _initTable(self):
-        self.table = ExperimentQueueTable(self.scrollAreaWidgetContents,editable = False)
+        self.table = ExperimentQueueTable(self.tableFrame,editable = False)
     
     def addExperiment(self,*args,**kwargs):
         self.table.addExperiment(*args,**kwargs)
@@ -123,9 +125,11 @@ class TableViewWidget(GraphicsLayoutWidget):
         return self.table.experiments
     
     def _buildObjectHelper(self):
-        try:
+        # try:
+        if True:
             ret = {}
-            inputUnit = self.unitLabel_6.text()
+            inputUnit = self.mmDimUnit.currentText()
+            ret['input_unit'] = inputUnit
             ret['name'] = self.experimentNameEntry.text()
             ret['desc'] = self.experimentDescEntry.toPlainText()
             ret['numTrials'] = self.trialSpinBox.value()
@@ -140,26 +144,20 @@ class TableViewWidget(GraphicsLayoutWidget):
                 ret['datasets']['batch_lightcurves']['resolution'] = res
                 ret['datasets']['batch_lightcurves']['num_curves'] = num_curves
                 ret['datasets']['batch_lightcurves']['magmap'] = {}
-                ret['datasets']['batch_lightcurves']['magmapdims'] = self.vectorFromQString(self.magMapDimEntry.text(),unit=inputUnit)
+                ret['datasets']['batch_lightcurves']['magmapdims'] = self.vectorFromQString(self.magMapDimEntry.text())
                 ret['datasets']['batch_lightcurves']['magmapres'] = self.vectorFromQString(self.magMapResolutionEntry.text(),None)
-                
-#                 ret['datasets']['lightcurve'] = {}
-#                 ret['datasets']['lightcurve']['resolution'] = self.dataPointSpinBox.value()
-#                 ret['datasets']['lightcurve']['pstart'] =self.vectorFromQString(self.quasarPathStart.text(),unit=inputUnit)
-#                 ret['datasets']['lightcurve']['pend'] = self.vectorFromQString(self.quasarPathEnd.text(),unit=inputUnit)
             if self.enableMagMap.isChecked():
                 ret['datasets']['magmap'] = {}
-                ret['datasets']['magmap']['magmapdims'] = self.vectorFromQString(self.magMapDimEntry.text(),unit=inputUnit)
+                ret['datasets']['magmap']['magmapdims'] = self.vectorFromQString(self.magMapDimEntry.text())
                 ret['datasets']['magmap']['magmapres'] = self.vectorFromQString(self.magMapResolutionEntry.text(),None)
-            if self.saveRayData.isChecked():
-                ret['datasets']['datafile'] = True
             if self.queueSaveStarfield.isChecked():
                 ret['datasets']['starfield'] = True
             else:
                 ret['datasets']['starfield'] = False
             return ret
-        except:
-            return "PARSE_ERROR"
+        # except:
+        #     print("Crapped out")
+        #     return "PARSE_ERROR"
         
     def _bindFieldsHelper(self,obj):
         from mirage.parameters.ExperimentParams import LightCurveParameters, \

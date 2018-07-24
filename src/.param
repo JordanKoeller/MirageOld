@@ -1,44 +1,32 @@
 {
     "galaxy": {
         "position": {
-            "x": 0.0,
-            "y": 0.0,
+            "x": 2.2832089510745533e-06,
+            "y": -3.0760181067906075e-06,
             "unit": "rad"
         },
         "velocityDispersion": {
             "unit": "km / s",
-            "value": 1500.0
+            "value": 177.9
         },
-        "redshift": 0.5,
+        "redshift": 0.0394,
         "shearAngle": {
             "unit": "rad",
-            "value": 0.5235987755982988
+            "value": 1.1740829878165855
         },
-        "shearMag": 0.306,
-        "starMasses": [],
-        "starXPos": [],
-        "starYPos": [],
+        "shearMag": 0.08,
         "velocity": {
-            "x": {
-                "unit": "",
-                "value": 1000000000.0
-            },
-            "y": {
-                "unit": "",
-                "value": 0.0
-            },
-            "z": {
-                "unit": "",
-                "value": 0.0
-            }
+            "x": 0.0,
+            "y": 0.0,
+            "unit": "rad / s"
         },
         "pcntStars": 0.0,
         "avgStarMass": 0.5
     },
     "quasar": {
         "position": {
-            "x": 0.0,
-            "y": 0.0,
+            "x": 2.1525727441263397e-07,
+            "y": -5.090543651650128e-08,
             "unit": "rad"
         },
         "mass": {
@@ -46,26 +34,26 @@
             "value": 1000000000.0
         },
         "velocity": {
-            "x": -3.5103937772894857e-15,
-            "y": 1.5765211209083518e-14,
-            "unit": "rad"
-        },
-        "observedPosition": {
             "x": 0.0,
             "y": 0.0,
+            "unit": "rad / s"
+        },
+        "observedPosition": {
+            "x": 2.1525727441263397e-07,
+            "y": -5.090543651650128e-08,
             "unit": "rad"
         },
         "radius": {
             "unit": "rad",
-            "value": 4.848136811095361e-06
+            "value": 4.842756069075255e-13
         },
-        "redshift": 2.0,
+        "redshift": 1.695,
         "colorKey": 3
     },
-    "canvasDim": 2000,
+    "canvasDim": 1000,
     "dTheta": {
         "unit": "rad",
-        "value": 0.0009696273622190719
+        "value": 7.249861370730685e-11
     },
     "extraParameters": null
 }

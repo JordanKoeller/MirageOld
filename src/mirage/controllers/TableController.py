@@ -14,6 +14,8 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QFileDialog
 
+from astropy import units as u
+
 
 
 class TableController(Controller):
@@ -64,9 +66,10 @@ class TableController(Controller):
         self.signals['request_table'].connect(view.sendTable)
         
     def bind_parameters_controller(self,pc):
-        s = pc.signals
-        s['set_input_units'].connect(self.set_input_units)
         self.pc = pc
+        # s = pc.signals
+        # s['set_input_units'].connect(self.set_input_units)
+        # self.pc = pc
         
     def receiveTable(self,table):
         self._table = table
@@ -76,6 +79,7 @@ class TableController(Controller):
         self.signals['set_input_units'].emit(units)
         
     def editParams(self,params,row):
+        print("Calling edit")
         self.pc.update(params)
         self.update(params)
         self.editing = row
@@ -83,6 +87,7 @@ class TableController(Controller):
         self.signals['set_enabled_edit'].emit(True)
                 
     def addToQueue(self,extras):
+        print("Adding")
         parameters = self.pc.getParameters()
         if extras != "PARSE_ERROR" and parameters:
             exp = self.buildObject(extras,parameters)
@@ -97,37 +102,42 @@ class TableController(Controller):
 #             extraObjects.append(LightCurveParameters(extras['datasets']['lightcurve']['resolution'],
 #                                                               extras['datasets']['lightcurve']['pstart'],
 #                                                               extras['datasets']['lightcurve']['pend']))
-        if extras['datasets']['starfield']:
-            extraObjects.append(StarFieldData())
-        if 'datafile' in extras['datasets']:
-            directory = QFileDialog.getExistingDirectory() or '/tmp'
-            fname = directory +'/' + extras['name'] +'.raydata'
-            extraObjects.append(RDDFileInfo(fname,0))
-        if 'magmap' in extras['datasets']:
-            extraObjects.append(MagMapParameters(extras['datasets']['magmap']['magmapdims'],
-                                                      extras['datasets']['magmap']['magmapres']))
-        if 'batch_lightcurves' in extras['datasets'] and 'magmap' in extras['datasets']:
-            mm = MagMapParameters(extras['datasets']['batch_lightcurves']['magmapdims'],
-                                                      extras['datasets']['batch_lightcurves']['magmapres'])
-            extraObjects.append(BatchLightCurveParameters(extras['datasets']['batch_lightcurves']['num_curves'],
-                                                          extras['datasets']['batch_lightcurves']['resolution'],
-                                                          mm))
-            
-        exptParams = ExperimentParams(extras['name'],
-                                      extras['desc'],
-                                      extras['numTrials'],
-                                      extras['varianceStr'],
-                                      extraObjects)
-        parameters.extras = exptParams
-        try:
-            varyTrial(parameters,0)
-            return parameters
-        except ParametersError as e:
-            raise ParametersError(e.value)   
-        except:
-            raise SyntaxError("Syntax error found in trial variance code") 
+        inputUnits = extras['input_unit']
+        with u.add_enabled_units(self.pc.getParameters().specialUnits):
+            if extras['datasets']['starfield']:
+                extraObjects.append(StarFieldData())
+            if 'datafile' in extras['datasets']:
+                directory = QFileDialog.getExistingDirectory() or '/tmp'
+                fname = directory +'/' + extras['name'] +'.raydata'
+                extraObjects.append(RDDFileInfo(fname,0))
+            if 'magmap' in extras['datasets']:
+                extraObjects.append(MagMapParameters(extras['datasets']['magmap']['magmapdims'].setUnit(inputUnits),
+                                                          extras['datasets']['magmap']['magmapres']))
+            if 'batch_lightcurves' in extras['datasets'] and 'magmap' in extras['datasets']:
+                mm = MagMapParameters(extras['datasets']['batch_lightcurves']['magmapdims'].setUnit(inputUnits),
+                                                          extras['datasets']['batch_lightcurves']['magmapres'])
+                extraObjects.append(BatchLightCurveParameters(extras['datasets']['batch_lightcurves']['num_curves'],
+                                                              extras['datasets']['batch_lightcurves']['resolution'],
+                                                              mm))
+                
+            exptParams = ExperimentParams(extras['name'],
+                                          extras['desc'],
+                                          extras['numTrials'],
+                                          extras['varianceStr'],
+                                          extraObjects)
+            parameters.extras = exptParams
+            try:
+                varyTrial(parameters,0)
+                return parameters
+            except ParametersError as e:
+                print("Found ParametersError")
+                raise ParametersError(e.value)   
+            except:
+                print("Found syntax error")
+                raise SyntaxError("Syntax error found in trial variance code") 
                 
     def save(self):
+        print("Saving")
         from mirage.io import TableFileWriter
         data = self.getExperiments()
         if data:

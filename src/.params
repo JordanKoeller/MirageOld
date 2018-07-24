@@ -2,44 +2,32 @@
     {
         "galaxy": {
             "position": {
-                "x": 0.0,
-                "y": 0.0,
+                "x": 2.2832089510745533e-06,
+                "y": -3.0760181067906075e-06,
                 "unit": "rad"
             },
             "velocityDispersion": {
                 "unit": "km / s",
-                "value": 1500.0
+                "value": 177.9
             },
-            "redshift": 0.5,
+            "redshift": 0.0394,
             "shearAngle": {
                 "unit": "rad",
-                "value": 0.5235987755982988
+                "value": 1.1740829878165855
             },
-            "shearMag": 0.306,
-            "starMasses": [],
-            "starXPos": [],
-            "starYPos": [],
+            "shearMag": 0.08,
             "velocity": {
-                "x": {
-                    "unit": "",
-                    "value": 1000000000.0
-                },
-                "y": {
-                    "unit": "",
-                    "value": 0.0
-                },
-                "z": {
-                    "unit": "",
-                    "value": 0.0
-                }
+                "x": 0.0,
+                "y": 0.0,
+                "unit": "rad / s"
             },
-            "pcntStars": 0.0,
+            "pcntStars": 1.0,
             "avgStarMass": 0.5
         },
         "quasar": {
             "position": {
-                "x": 0.0,
-                "y": 0.0,
+                "x": 2.1525727441263397e-07,
+                "y": -5.090543651650128e-08,
                 "unit": "rad"
             },
             "mass": {
@@ -47,33 +35,34 @@
                 "value": 1000000000.0
             },
             "velocity": {
-                "x": -3.5103937772894857e-15,
-                "y": 1.5765211209083518e-14,
-                "unit": "rad"
-            },
-            "observedPosition": {
                 "x": 0.0,
                 "y": 0.0,
+                "unit": "rad / s"
+            },
+            "observedPosition": {
+                "x": 2.1525727441263397e-07,
+                "y": -5.090543651650128e-08,
                 "unit": "rad"
             },
             "radius": {
                 "unit": "rad",
-                "value": 4.848136811095361e-06
+                "value": 5.38687906745596e-13
             },
-            "redshift": 2.0,
+            "redshift": 1.695,
             "colorKey": 3
         },
-        "canvasDim": 2000,
+        "canvasDim": 40000,
         "dTheta": {
             "unit": "rad",
-            "value": 0.0009696273622190719
+            "value": 9.608220779573839e-09
         },
         "extraParameters": {
-            "name": "Untitled",
-            "description": "Description",
-            "numTrials": 1,
-            "trialVariance": "# numpy as np, astropy.units as u, trialNumber are in scope\n###fill in trial variance code here###\nnewParams = copy.deepcopy(oldParams)",
+            "name": "Blackburn_C_withlightcurves",
+            "description": "Lastly, the same model, but now varying quasar radius, not the percentage, to get Light curves. We assume 100% of the mass is in stars.",
+            "numTrials": 20,
+            "trialVariance": "# numpy as np, astropy.units as u, trialNumber are in scope\n###fill in trial variance code here###\nradii = u.Quantity(np.linspace(5,40,20),oldParams.gravitationalRadius)\nnewParams = copy.deepcopy(oldParams)\nnewParams.quasar.update(radius=radii[trialNumber])\n",
             "resultList": {
+                "starfield": [],
                 "magmap": {
                     "center": {
                         "x": 0.0,
@@ -81,17 +70,41 @@
                         "unit": "rad"
                     },
                     "dimensions": {
-                        "x": 50.0,
-                        "y": 50.0,
-                        "unit": "arcsec"
+                        "x": 40.0,
+                        "y": 40.0,
+                        "unit": "theta_E"
                     },
                     "resolution": {
-                        "x": 1024.0,
-                        "y": 1024.0,
+                        "x": 2000.0,
+                        "y": 2000.0,
                         "unit": ""
                     }
                 },
-                "starfield": []
+                "batch_lightcurve": {
+                    "num_curves": 500,
+                    "resolution": {
+                        "unit": "uas",
+                        "value": 0.01
+                    },
+                    "bounding_box": {
+                        "center": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "unit": "rad"
+                        },
+                        "dimensions": {
+                            "x": 40.0,
+                            "y": 40.0,
+                            "unit": "theta_E"
+                        },
+                        "resolution": {
+                            "x": 2000.0,
+                            "y": 2000.0,
+                            "unit": ""
+                        }
+                    },
+                    "seed": 4950
+                }
             }
         }
     }

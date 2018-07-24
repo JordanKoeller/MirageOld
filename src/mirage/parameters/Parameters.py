@@ -274,7 +274,9 @@ class Quasar:<br>
 
 	@property
 	def einsteinRadius(self):
-		return 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.dLS/self.quasar.angDiamDist /((const.c**2).to('km2/s2'))
+		ret = 4 * math.pi * self.__galaxy.velocityDispersion * self.__galaxy.velocityDispersion * self.dLS/self.quasar.angDiamDist /((const.c**2).to('km2/s2'))
+		ret = ret.value
+		return u.Quantity(ret,'rad')
 	@property
 	def einsteinRadiusUnit(self):
 		return u.def_unit('einstein_rad',self.einsteinRadius.value*u.rad)
@@ -375,7 +377,7 @@ class Quasar:<br>
 
 		assert isinstance(position, Vector2D)
 		position = (position - self.galaxy.position).to('rad').magnitude()
-		er = self.einsteinRadius.value
+		er = self.einsteinRadius.to('rad').value
 		return (1/2)*er/position
 
 	def shear(self,position):
@@ -394,7 +396,7 @@ class Quasar:<br>
 
 		assert isinstance(position,Vector2D)
 		v = (position - self.galaxy.position).to('rad')
-		b = self.einsteinRadius.value
+		b = self.einsteinRadius.to("rad").value
 		gam = self.galaxy.shearMag
 		p = self.galaxy.shearAngle.to('rad').value
 		s1 = (1/2)*(b*(v.y*v.y-v.x*v.x)/((v.x*v.x+v.y*v.y)**(1.5)) + 2*gam*math.cos(2*p))

@@ -77,7 +77,7 @@ class MasterController(Controller):
         signals['record_signal'].connect(self.recordSlot)
         signals['plot_pane_signal'].connect(self.togglePlotPane)
         signals['mm_pane_signal'].connect(self.toggleMagMapPane)
-        signals['param_pane_signal'].connect(self.toggleParamPane)
+        # signals['param_pane_signal'].connect(self.toggleParamPane)
         signals['image_pane_signal'].connect(self.toggleImagePane)
         signals['toggle_table_signal'].connect(self.toggleTablePane)
         signals['to_analysis_perspective'].connect(self.enableAnalysis)

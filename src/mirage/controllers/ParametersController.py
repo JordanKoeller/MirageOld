@@ -129,6 +129,7 @@ class ParametersController(Controller):
                     #     params.quasar.update(radius=u.Quantity(angle.value * qRadius.value, 'rad'))
                     return params
             except:
+                print("Failed building in ParametersController")
                 return False
 
     def save(self):
