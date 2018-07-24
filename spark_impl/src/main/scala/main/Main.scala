@@ -4,8 +4,8 @@ import java.io._
 
 import org.apache.spark.api.java.JavaRDD
 
-import lensing.RayParameters
-import lensing.RayTracer
+import elliptical.RayParameters
+import elliptical.RayTracer
 import spatialrdd.GridGenerator
 import spatialrdd.RDDGrid
 import spatialrdd.RDDGridProperty

@@ -8,7 +8,7 @@ import math
 from astropy import units as u
 from astropy.coordinates import SphericalRepresentation as SR
 from astropy.coordinates import CartesianRepresentation as CR
-from astropy.cosmology import WMAP7 as cosmo
+from astropy.cosmology import WMAP5 as cosmo
 import numpy as np
 
 from ..calculator import Conversions

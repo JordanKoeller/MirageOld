@@ -25,11 +25,11 @@ import math
 
 from astropy import constants as const
 from astropy import units as u
-from astropy.cosmology import WMAP7 as cosmo
+from astropy.cosmology import WMAP5 as cosmo
 import cython
 from cython.parallel import prange
 
-from libc.math cimport sin, cos, atan2, sqrt
+from libc.math cimport sin, cos, atan2, sqrt, atan, atanh, sqrt
 
 cdef class PointerGridCalculationDelegate(CalculationDelegate):
 
@@ -232,6 +232,8 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef double pi2 = math.pi / 2
         cdef int x, y, i
         cdef double incident_angle_x, incident_angle_y, r, deltaR_x, deltaR_y, phi
+        cdef double q = parameters.ellipticity, tq = parameters.ellipAng, q1 = sqrt(1-parameters.ellipticity**2), ex, ey
+        cdef double eex, eey
         for x in prange(0, width * 2, 1, nogil=True, schedule='static', num_threads=self.core_count):
             for y in range(0, height * 2):
                 incident_angle_x = (x - width) * dTheta
@@ -250,11 +252,21 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
                 deltaR_y = incident_angle_y - centerY
                 r = sqrt(deltaR_x * deltaR_x + deltaR_y * deltaR_y)
                 if r != 0.0:
-                    result_nparray_x[x, y] += deltaR_x * sis_constant / r 
-                    result_nparray_y[x, y] += deltaR_y * sis_constant / r
+                    if q == 1.0:
+                        result_nparray_x[x, y] += deltaR_x * sis_constant / r 
+                        result_nparray_y[x, y] += deltaR_y * sis_constant / r
+                    else:
+                        eex = (deltaR_x*sin(tq)+deltaR_y*cos(tq))
+                        eey = (deltaR_y*sin(tq)-deltaR_x*cos(tq))
+                        ex = q*sis_constant/q1*atan(q1*eex/sqrt(q*q*eex*eex+eey*eey))
+                        ey = q*sis_constant/q1*atanh(q1*eey/sqrt(q*q*eex*eex+eey*eey))
+                        result_nparray_x[x,y] += ex*sin(tq) - ey*cos(tq)
+                        result_nparray_y[x,y] += ex*cos(tq) + ey*sin(tq)
 
                 # Shear
                 phi = 2 * (pi2 - shearAngle) - CMATH.atan2(deltaR_y, deltaR_x)
+                # ex = shearMag * r * CMATH.cos(phi)
+                # ex = shearMag * r * CMATH.sin(phi)
                 result_nparray_x[x, y] += shearMag * r * CMATH.cos(phi)
                 result_nparray_y[x, y] += shearMag * r * CMATH.sin(phi)
                 result_nparray_x[x, y] = deltaR_x - result_nparray_x[x, y]

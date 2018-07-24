@@ -9,9 +9,7 @@ import numpy as np
 
 from ..utility.NullSignal import NullSignal
 from ..utility.ParametersError import ParametersError
-# from ..Models import Model
 
-# from Controllers.QueueController import exptModelVariance
 def exptModelVariance(params,trialNo):
     return params
 

@@ -4,7 +4,7 @@ import math
 
 from astropy import constants as const
 from astropy import units as u 
-from astropy.cosmology import WMAP7 as cosmo
+from astropy.cosmology import WMAP5 as cosmo
 
 from .ExperimentParams import ExperimentParams
 import numpy as np 
@@ -58,6 +58,9 @@ class ParametersJSONDecoder(object):
 			dTheta = qDecode.decode(js['dTheta'])
 			# print(str(dTheta)+str("DTHETA HERE"))
 			parameters = Parameters(galaxy,quasar,dTheta,canvasDim)
+			# if 'ellipticity' in js:
+			# 	parameters.ellipticity = js['ellipticity']
+			# 	parameters.ellipAng = js['ellipAng']
 			if 'rawMagnification' in js:
 				parameters.setRawMag(js['rawMagnification'])
 			if js['extraParameters']:
@@ -172,6 +175,8 @@ class Quasar:<br>
 		self.__dTheta = u.Quantity(dTheta/canvasDim,'rad')
 		self.__canvasDim = canvasDim
 		self.numStars = numStars
+		self.ellipticity = 0.6974
+		self.ellipAng = 1.129
 		self.dt = 2.6e7
 		self.time = 0
 		self._rawMag = None
@@ -376,9 +381,19 @@ class Quasar:<br>
 		"""
 
 		assert isinstance(position, Vector2D)
-		position = (position - self.galaxy.position).to('rad').magnitude()
-		er = self.einsteinRadius.to('rad').value
-		return (1/2)*er/position
+		from math import sin, cos
+		q = self.ellipticity
+		tq = self.ellipAng
+		xx = position.to('arcsec').x
+		yy = position.to('arcsec').y
+		x = xx*sin(tq)+yy*cos(tq)
+		y = yy*sin(tq)-xx*cos(tq)
+		b = self.einsteinRadius.to('arcsec').value
+		return b/(2.0*(x*x+y*y/q/q)**(0.5))
+
+		# position = (position - self.galaxy.position).to('rad').magnitude()
+		# er = self.einsteinRadius.to('rad').value
+		# return (1/2)*er/position
 
 	def shear(self,position):
 		'''Given a position, calculates the shear of the lens at that position.
@@ -393,6 +408,8 @@ class Quasar:<br>
 		Arguments:
 			position {`Vector2D:mirage.utility.Vector2D`} -- Position at which to calculate shear. Must be in angular units.
 		'''
+
+		print("Will need to update to account for ellipticity")
 
 		assert isinstance(position,Vector2D)
 		v = (position - self.galaxy.position).to('rad')

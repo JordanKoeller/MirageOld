@@ -13,6 +13,8 @@ from mirage.utility import Vector2D
 from .CalculationDelegate import CalculationDelegate
 import copy
 
+from math import sin, cos, sqrt, atanh, atan
+
 class Engine(object):
     '''
     classdocs
@@ -167,6 +169,9 @@ class Engine(object):
             # Calculation is Below
             incident_angle_x = 0.0
             incident_angle_y = 0.0
+            q = parameters.ellipticity
+            tq = parameters.ellipAng
+            q1 = sqrt(1-q*q)
             try:
                 # SIS
                 deltaR_x = incident_angle_x - centerX
@@ -176,8 +181,16 @@ class Engine(object):
                     resx += deltaR_x 
                     resy += deltaR_y
                 else:
-                    resx += deltaR_x * sis_constant / r 
-                    resy += deltaR_y * sis_constant / r 
+                    if parameters.ellipticity == 1.0:
+                        resx += deltaR_x * sis_constant / r 
+                        resy += deltaR_y * sis_constant / r 
+                    else:
+                        eex = (deltaR_x*sin(tq)+deltaR_y*cos(tq))
+                        eey = (deltaR_y*sin(tq)-deltaR_x*cos(tq))
+                        ex =  sis_constant/q1*atan(q1*eex/sqrt(q*q*eex*eex+eey*eey))
+                        ey = sis_constant/q1*atanh(q1*eey/sqrt(q*q*eex*eex+eey*eey))
+                        resx += ex*sin(tq) - ey*cos(tq)
+                        resy += ex*cos(tq) + ey*sin(tq)
                 
                 # Shear
                 phi = 2 * (pi2 - shearAngle) - math.atan2(deltaR_y, deltaR_x)

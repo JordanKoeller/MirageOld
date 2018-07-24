@@ -30,7 +30,6 @@ class ExperimentTableRunner(object):
         self.signals['progressLabel'].emit("Calculation starting ...")
         for params in self.experimentQueue:
             ctr += 1
-            # self.signals['progressLabel'].emit("Experiment "+str(ctr-1)+" of "+len(self.experimentQueue) " finished.")
             numTrials = params.extras.numTrials 
             self.filemanager.newExperiment(numTrials,len(params.extras.desiredResults)) #NEED TO IMPLIMENT
             exptRunner = ExperimentResultCalculator(params,self.signals)

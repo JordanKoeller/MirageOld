@@ -2,7 +2,7 @@ import math
 
 from astropy import constants as const
 from astropy import units as u
-from astropy.cosmology import WMAP7 as cosmo
+from astropy.cosmology import WMAP5 as cosmo
 
 
 # def generateSpecialUnits(qMass,qR,gR):
