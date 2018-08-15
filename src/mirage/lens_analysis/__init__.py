@@ -71,7 +71,7 @@ def load(filename=None,trial_number=None):
     else:
         return None
 
-def load_parameters(filename,index=0):
+def load_simulation(filename,index=0):
     '''Convenience function for loading parameters from files. 
 
     

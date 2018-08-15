@@ -193,7 +193,7 @@ class IMF(object):
             isMultiple = np.zeros(len(masses), dtype=bool)
             systemMasses = masses
 
-        return (masses, isMultiple, compMasses, systemMasses)
+        return masses
         
     def calc_multi(self, newMasses, compMasses, newSystemMasses, newIsMultiple, CSF, MF):
         """
@@ -272,7 +272,7 @@ class IMF_broken_powerlaw(IMF):
         self._mass_limits = np.atleast_1d(mass_limits)
         self._m_limits_low = mass_limits[0:-1]
         self._m_limits_high = mass_limits[1:]
-        self._powers = powers
+        self._powers = np.ascontiguousarray(powers)
         self._multi_props = multiplicity
 
         if multiplicity == None:
@@ -295,6 +295,11 @@ class IMF_broken_powerlaw(IMF):
         self.nterms = nterms
         self.coeffs = coeffs
         self.k = 1
+
+
+    def set_seed(self,seed):
+        self._seed = seed
+        _random_number_generator.seed(self._seed)
 
     def xi(self, m):
         """
@@ -599,8 +604,8 @@ class Weidner_Kroupa_2004(IMF_broken_powerlaw):
         IMF_broken_powerlaw.__init__(self, massLimits, powers,
                                      multiplicity=multiplicity)
 
-class Evolved_IMF(object):
-    def __init__(self,distro = Kroupa_2001(),conversions={0.8:0.6,8:1.4,30:10}):
+class Evolved_IMF(IMF_broken_powerlaw):
+    def __init__(self,distro = Kroupa_2001(),conversions={0.8:0.6,8:1.4,30:10},massLimits=None,powers=None,multiplicity=None):
         """
         Generates masses based on the provided IMF, then provides conversions to simulate an aging galaxy like large-mass stars replaced with masses of back holes, neutron stars, etc.
         
@@ -608,12 +613,18 @@ class Evolved_IMF(object):
         
 	- distro (Kroupa_2001): IMF Mass Distribution to start with. Can swap in an instance of another IMF to start with a different model.
         - Conversions: dict, where the key is the lower limit of the star mass, value is what those masses get converted to."""
-        self.IMF = distro
+        if massLimits != None:
+            IMF_broken_powerlaw.__init__(self,massLimits,powers,multiplicity = multiplicity)
+        else:
+            IMF_broken_powerlaw.__init__(self,distro._mass_limits, distro._powers,distro._multi_props)
         self.__conversions = []
         for k,v in conversions.items():
             if isinstance(k,str):
                 k = float(k)
-            self.__conversions.append((k,v))
+            self.__conversions.append([k,v])
+        self.__conversions = np.array(self.__conversions)
+
+    
 
     @property
     def random_number_generator(self):
@@ -647,7 +658,7 @@ class Evolved_IMF(object):
         massCounter = 0.0
         tolerance = 3.0
         while (totalMass - massCounter > tolerance):
-            rawMasses = self.IMF.generate_cluster(totalMass-massCounter)[0]
+            rawMasses = IMF_broken_powerlaw.generate_cluster(totalMass-massCounter)[0]
             for mass in rawMasses:
                 if mass < self.__conversions[0][0]:
                     retArr.append(mass)
@@ -659,25 +670,28 @@ class Evolved_IMF(object):
                     retArr.append(self.__conversions[max(index-1,0)][1])
                     massCounter += self.__conversions[max(index-1,0)][1]
         ret = np.ascontiguousarray(retArr)
-        return (ret,'formatting')
+        return ret
 
-class Seeding_Decorator(object):
-    """
-    Decorator of an IMF object, that accepts a seed argument.
-    Every time `generate_cluster` is called, it resets the seed of the random
-    number generator to ensure the same random distribution is generated until
-    the next seed is set.  """
-    def __init__(self, obj,seed):
-        self._obj = obj
-        self._seed = seed
+# class Seeding_Decorator(object):
+#     """
+#     Decorator of an IMF object, that accepts a seed argument.
+#     Every time `generate_cluster` is called, it resets the seed of the random
+#     number generator to ensure the same random distribution is generated until
+#     the next seed is set.  """
+#     def __init__(self, obj,seed):
+#         self._obj = obj
+#         self._seed = seed
 
-    def generate_cluster(self,*args,**kwargs):
-        _random_number_generator.seed(self._seed)
-        return self._obj.generate_cluster(*args,**kwargs)
+#     def generate_cluster(self,*args,**kwargs):
+#         _random_number_generator.seed(self._seed)
+#         return self._obj.generate_cluster(*args,**kwargs)
 
-    @property
-    def random_number_generator(self):
-        return _random_number_generator
+#     def set_seed(self,seed:int):
+#         self._seed = seed
+
+#     @property
+#     def random_number_generator(self):
+#         return _random_number_generator
     
         
 

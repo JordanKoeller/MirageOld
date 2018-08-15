@@ -34,7 +34,7 @@ class ParametersController(Controller):
 
     def set_view(self,view):
         self._view = view
-        self._view.regenerateStars.pressed.connect(self._request_new_stars)
+        self._view.regenerate_stars.pressed.connect(self._request_new_stars)
         self._qplabel = QLabel()
         self._view.statusBar.addWidget(self._qplabel)
         # self._qplabel = self._view.statusBar.children()[1]
@@ -168,7 +168,7 @@ class ParametersController(Controller):
         self._view.scaleInput.setReadOnly(state)
         self._view.dimensionInput.setReadOnly(state)
         self._view.quasarBHMassEntry.setReadOnly(state)
-        self._view.regenerateStars.setDisabled(state)
+        self._view.regenerate_stars.setDisabled(state)
         self._isReadOnly = state
 
     def bind_fields(self,parameters):

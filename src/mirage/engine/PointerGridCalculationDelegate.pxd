@@ -15,6 +15,7 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
     cdef int core_count
     cdef public double time
     cdef bool __preCalculating
+    cdef double _angle
 
 #     cdef void reconfigure(self,object parameters)
 #     

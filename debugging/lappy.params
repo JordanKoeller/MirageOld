@@ -55,15 +55,15 @@
             "redshift": 1.69,
             "colorKey": 3
         },
-        "canvasDim": 1000,
+        "canvasDim": 2000,
         "dTheta": {
             "unit": "theta_E",
-            "value": 200.0
+            "value": 40.0
         },
         "extraParameters": {
             "name": "ImageC_Lensmodels",
             "description": "imageC 2237 run at 10% of mass in stars. Set up to be the same dimensions of those specified in Pooley et al. 10,000^2 canvas, drawing to a 2000x2000 magnification map.",
-            "numTrials": 3,
+            "numTrials": 1,
             "trialVariance": "newParams = copy.deepcopy(oldParams)\npcnts = np.array([1.47,2.15,3.16,4.64,6.81,10,14.68,21.5,31.62,46.4,68.13,100])\nnewParams.galaxy.update(percentStars=pcnts[trialNumber])",
             "resultList": {
                 "magmap": {

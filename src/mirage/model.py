@@ -1,58 +1,57 @@
 
 from mirage.engine import Engine, Engine_PointerGrid, Engine_ScalaSpark, Engine_MagMap
-from mirage.parameters import Parameters, DefaultParameters
 from mirage.utility import Vector2D
+from mirage.parameters import DefaultParameters
 
-class _AbstractModel(object):
+class AbstractModel(object):
     
-    # _parameters = None
-    # _engine = None
     
-    def __init__(self,parameters,engine):
-        if parameters:
-            assert isinstance(parameters,Parameters)
-            self._parameters = parameters
-            print("Set parameters")
-        else:
-            self._parameters = None
-        assert isinstance(engine, Engine) or isinstance(engine, Engine_ScalaSpark)
+    def __init__(self,simulation,engine):
+        self._simulation = simulation
         self._engine = engine
 
 
-    def set_parameters(self, parameters):
-        assert isinstance(parameters, Parameters)
-        self._parameters = parameters
+    def set_simulation(self,simulation):
+        self._simulation = simulation
 
-    def bind_parameters(self):
-        self._engine.update_parameters(self._parameters)
+    def bind_simulation(self):
+        self._engine.update_parameters(self.parameters)
 
     def regenerate_stars(self):
         try:
-            print(self._parameters.galaxy.percentStars)
-            self._parameters.regenerateStars()
+            self.parameters.regenerate_stars()
             self.bind_parameters()
         except:
             print("Failed to regenerate stars")
 
     def get_raw_magnification(self):
-        if self._parameters.raw_magnification:
-            return self._parameters.raw_magnification
+        if self.parameters.raw_magnification:
+            return self.parameters.raw_magnification
         else:
             return self.engine.calculate_raw_magnification()
 
     @property
+    def simulation(self):
+        return self._simulation
+    
+
+    @property
     def parameters(self):
-        return self._parameters
+        return self.simulation.parameters
 
     @property
     def engine(self):
         return self._engine
 
+    @property
+    def experiments(self):
+        return self.simulation.experiments
+
     def disable(self):
         pass
 
 
-class ParametersModel(_AbstractModel):
+class ParametersModel(AbstractModel):
     '''
     Standard Model for calculating lensed systems from a system description.
 
@@ -68,14 +67,14 @@ class ParametersModel(_AbstractModel):
         '''
         Constructor
         '''
-        _AbstractModel.__init__(self, parameters, engine)
+        AbstractModel.__init__(self, parameters, engine)
 
     @classmethod
     def fromSubClass(cls,instance):
         '''
         Convert a :class:`AbstractModel` subtype instance to a :class:`ParametersModel` object instance. 
         '''
-        assert isinstance(instance,_AbstractModel)
+        assert isinstance(instance,AbstractModel)
         p = instance.parameters
         return cls(p)
 
@@ -101,7 +100,7 @@ class ParametersModel(_AbstractModel):
 
         
         
-class TrialModel(_AbstractModel):
+class TrialModel(AbstractModel):
     '''
     Model for calculating lensed systems from a :class:`mirage.lens_analysis.Trial` instance, or a filename and trial number. To pull data from a file, call the :class:`TrialModel.fromFile` method.
     
@@ -120,7 +119,7 @@ class TrialModel(_AbstractModel):
         mmp = self._trial.parameters.extras['magmap']
         params = self._trial.parameters
         engine = Engine_MagMap(params,mmp,magmap)
-        _AbstractModel.__init__(self, parameters, engine)
+        AbstractModel.__init__(self, parameters, engine)
         
     @classmethod
     def fromFile(cls,filename,trialnumber):
@@ -150,17 +149,17 @@ class TrialModel(_AbstractModel):
 
         
         
-class ClusterModel(_AbstractModel):
+class ClusterModel(AbstractModel):
 
-    def __init__(self, parameters):
+    def __init__(self, simulation):
         engine = Engine_ScalaSpark()
-        _AbstractModel.__init__(self, parameters, engine)
+        AbstractModel.__init__(self, simulation, engine)
         
-class CPUModel(_AbstractModel):
+class CPUModel(AbstractModel):
     
-    def __init__(self,parameters):
+    def __init__(self,simulation):
         engine = Engine_PointerGrid()
-        _AbstractModel.__init__(self, parameters, engine)
+        AbstractModel.__init__(self, simulation, engine)
        
 def __initialize():
     from mirage.preferences import GlobalPreferences

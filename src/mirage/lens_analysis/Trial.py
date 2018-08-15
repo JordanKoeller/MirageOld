@@ -6,15 +6,13 @@ import sys
 
 from .AbstractFileWrapper import AbstractFileWrapper
 
-from ..parameters.ExperimentParams import LightCurveParameters, \
-    MagMapParameters, StarFieldData, BatchLightCurveParameters, \
-    RDDFileInfo
+from ..parameters.ExperimentParams import MagMapParameters, BatchLightCurveParameters
 from ..calculator.ExperimentResultCalculator import varyTrial
 
 def _requiresDtype(dtype):
     def decorator(fn):
         def decorated(self,*args,**kwargs):
-            for k,v in self._exptTypes.items():
+            for k,v in self.experiments.items():
                 if isinstance(k, dtype):
                     index = v
                     return fn(self,index,*args,**kwargs)
@@ -31,27 +29,9 @@ class Trial(AbstractFileWrapper):
 
     Can be constructed directly, but recommended to construct by indexing a :class:`la.Experiment` instance.
     '''
-    def __init__(self,filepath,trialno,fileobject=None,params=None,lookuptable=[]):
-        AbstractFileWrapper.__init__(self, filepath, fileobject, params, lookuptable)    
+    def __init__(self,filepath,trialno,fileobject=None,simulation=None,lookuptable=[]):
+        AbstractFileWrapper.__init__(self, filepath, fileobject, simulation, lookuptable)    
         self.__trialNo = trialno
-
-    
-    @property
-    @_requiresDtype(LightCurveParameters)
-    def lightCurve(self,ind,xUnit = 'arcsec'): #Automatically passed in parameter 'ind' supplies information of what column that data type is located in
-        '''
-        Requires the trial have light curve data.
-
-        Returns a tuple containing the X and Y axes of a light curve run. X axis represents distance traveled by quasar, Y axis represents magnfication coefficient.
-
-        Parameters: `xUnit` (:class:`str`) Unit to measure the x axis in. 
-        '''
-        lc = self._getDataSet(ind)
-        x = np.arange(0,len(lc))
-        distCovered = self.parameters.extras.desiredResults[ind].pathEnd - self.parameters.extras.desiredResults[ind].pathStart
-        dist = distCovered.to(xUnit).magnitude()/len(lc)
-        x = x * dist
-        return (x,lc)
     
     
     @_requiresDtype(MagMapParameters)
@@ -73,35 +53,14 @@ class Trial(AbstractFileWrapper):
         fm.close()
         print("Magnification Map saved")
 
-    @_requiresDtype(StarFieldData)
-    def getStars(self,ind):
-            return self._getDataSet(ind)
-
-
-    @_requiresDtype(StarFieldData)
-    def regenerateParameters(self,ind):
-        '''
-        Constructs and returns a :class:`mirage.Parameters` instance, exactly as it was when the :class:`Trial` was calculated.
-        '''
-        params = copy.deepcopy(self.parameters)
-        stars = self.getStars()
-        params.setStars(stars)
-        return params    
+    def getStars(self):
+            return self.parameters.stars 
 
     @property
     def parameters(self):
-        params = copy.deepcopy(self._params)
-        params =  varyTrial(params,self.trialNumber)
-        try:
-            stars = self.getStars()
-            params.setStars(stars)
-        except:
-            pass
-        try:
-            fname = self.rddFileInfo
-            params.getExtras('datafile').set_filename(fname)
-        finally:
-            return params
+        sim = copy.deepcopy(self.simulation)
+        params =  varyTrial(sim,self.trialNumber).parameters
+        return params
 
 
 
@@ -119,7 +78,6 @@ class Trial(AbstractFileWrapper):
         ret = np.histogram(mm,numBuckets+1)
         return (ret[0],ret[1][1:])
         
-    @_requiresDtype(StarFieldData)
     @_requiresDtype(MagMapParameters)
     def traceQuasar(self,magIndex,starsIndex):
         '''
@@ -136,12 +94,6 @@ class Trial(AbstractFileWrapper):
         Returns this trial's index within the experiment calculated.
         '''
         return self.__trialNo
-
-    @property
-    @_requiresDtype(RDDFileInfo)
-    def rddFileInfo(self,index):
-        filename = self._getDataSet(index)[0]
-        return filename
 
     
     @property

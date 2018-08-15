@@ -9,24 +9,24 @@ import numpy as np
 
 from ..utility.NullSignal import NullSignal
 from ..utility.ParametersError import ParametersError
+from ..model import AbstractModel
+from ..parameters import Simulation
+def exptModelVariance(simulation:AbstractModel,trialNo) -> AbstractModel:
+    return simulation
 
-def exptModelVariance(params,trialNo):
-    return params
-
-def varyTrial(params,trialNo):
+def varyTrial(simulation:AbstractModel,trialNo:int) -> AbstractModel:
     from astropy import units as u
     import copy
-    varianceStr = params.extras.trialVarianceFunction
-    oldParams = params
+    varianceStr = simulation.experiments.trial_variance_function
     nspace = {}
     try:
-        exec(varianceStr,{'oldParams':oldParams,'trialNumber':trialNo,'u':u,'np':np,'copy':copy},nspace)
+        exec(varianceStr,{'old_simulation':simulation,'trial_number':trialNo,'u':u,'np':np,'copy':copy},nspace)
     except ParametersError as e:
         raise e
     except:
         print("What happened")
         raise SyntaxError
-    return nspace['newParams']
+    return nspace['new_simulation']
 
 class ExperimentResultCalculator(object):
     '''
@@ -36,7 +36,7 @@ class ExperimentResultCalculator(object):
     '''
 
 
-    def __init__(self, parameters,signals = NullSignal):
+    def __init__(self, simulation:Simulation) -> None:
         '''
         Constructor. Parses parameters to determine what calculations need to be performed.
 
@@ -47,76 +47,37 @@ class ExperimentResultCalculator(object):
         signals: (defualt NullSignal) dict. Signals to be emitted upon completions of various calculations. If none are provided, NullSignal is used, sending all text to standard
         output.
         '''
-        from mirage.parameters.ExperimentParams import MagMapParameters, LightCurveParameters,StarFieldData, BatchLightCurveParameters, RDDFileInfo
-        expTypes = parameters.extras.desiredResults
-        self.signals = signals
-        #Parse expTypes to functions to run.
+        from mirage.parameters.ExperimentParams import MagMapParameters, BatchLightCurveParameters
         self.experimentRunners = []
-        for exp in expTypes:
-            if isinstance(exp, LightCurveParameters):
-                self.experimentRunners.append(self.__LIGHT_CURVE)
+        for exp in simulation.experiments.values():
             if isinstance(exp,MagMapParameters):
                 self.experimentRunners.append(self.__MAGMAP)
-            if isinstance(exp,StarFieldData):
-                self.experimentRunners.append(self.__STARFIELD)
             if isinstance(exp,BatchLightCurveParameters):
                 self.experimentRunners.append(self.__BATCH_LIGHTCURVE)
-            if isinstance(exp,RDDFileInfo):
-                self.experimentRunners.append(self.__DATA_FILE)
         
         
-    def runExperiment(self,model,trial_number):
+    def run_experiment(self,model:AbstractModel) -> list:
         '''
         Function to call to calculate results. Returns a list of the resultant data.
         '''
         ret = []
         for exp in range(0,len(self.experimentRunners)):
-            ret.append(self.experimentRunners[exp](exp,model,trial_number))
+            ret.append(self.experimentRunners[exp](model))
         return ret
 
-
-    
-    def __LIGHT_CURVE(self,index,model,trial_number):
-        '''
-        Internal Function. Instructs the engine to make a light curve and returns the data.
-        '''
-        special = model.parameters.extras.desiredResults[index]
-        start,finish = (special.pathStart,special.pathEnd)
-        res = special.resolution
-        return model.engine.make_light_curve(start,finish,res)
-        
-    def __MAGMAP(self,index,model,trial_number):
+    def __MAGMAP(self,model:AbstractModel) -> np.ndarray:
         '''
         Internal Function. Instructs the engine to make a magnification map and returns the data.
 
         '''
         print("Now making magmap")
-        special = model.parameters.extras.desiredResults[index]
+        special = model.experiments['magmap']
         ret = model.engine.make_mag_map(special.center,special.dimensions,special.resolution) #Assumes args are (topleft,height,width,resolution)
-        # rawMag = Model['exptModel'].engine.rawMagnification(special.center.to('rad').x,special.center.to('rad').y)
         return ret
-        ################################## WILL NEED TO CHANGE TO BE ON SOURCEPLANE?????? ############################################################
 
-    def __STARFIELD(self,index,model,trial_number):
-        return model.parameters.galaxy.stars 
     
-    def __BATCH_LIGHTCURVE(self,index,model,trial_number):
+    def __BATCH_LIGHTCURVE(self,model:AbstractModel) -> np.ndarray:
         print("Now tracing curves")
-        special = model.parameters.extras.desiredResults[index]
+        special = model.experiments['batch_lightcurve']
         ret = model.engine.sample_light_curves(special.lines)
         return np.array(ret)
-
-    def __DATA_FILE(self,index,model,trial_number):
-        from mirage.io import RayArchiveManager
-        import os
-        special = model.parameters.extras.desiredResults[index]
-        num_parts = model.engine.core_count
-        filename = special.filename
-        saver = RayArchiveManager()
-        savedir = saver.get_directory_name(filename,trial_number)
-        model.engine.save_rays(savedir)
-        saver.write(savedir,num_parts)
-        print("Saving data to the directory " + savedir)
-        ret = np.array([savedir])
-        return ret
-            

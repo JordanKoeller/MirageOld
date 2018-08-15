@@ -12,18 +12,17 @@ import sys
 def run_simulation(files):
     # sys.stdout = open(os.devnull,'w')
     from mirage.calculator import ExperimentTableRunner
-    from mirage.io import TableFileReader, ExperimentDataFileWriter
+    from mirage.io import TableFileReader, ExperimentDataFileWriter, SimulationReader
     infile = files[0]
     outfile = files[1]
     queueThread = ExperimentTableRunner()
-    fileLoader = TableFileReader()
+    fileLoader = SimulationReader()
     fileLoader.open(infile)
     table = fileLoader.load()
     fileLoader.close()
     fileWriter = ExperimentDataFileWriter()
     fileWriter.open(outfile)
-    queueThread.bindExperiments(table,fileWriter)
-    queueThread.run()
+    queueThread.run(table,fileWriter)
     endTime = DT.now()
     dSec = (endTime - starttime).seconds
     hrs = dSec // 3600

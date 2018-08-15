@@ -65,7 +65,9 @@
 			"unit":"km/s",
 			"value":1200
 		}
-	}
+	},
+
+	"starfield_scalefactor":3
 
 
 }

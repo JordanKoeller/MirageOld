@@ -4,9 +4,7 @@ Created on Dec 22, 2017
 @author: jkoeller
 '''
 from mirage.calculator.ExperimentResultCalculator import varyTrial
-from mirage.parameters.ExperimentParams import LightCurveParameters, \
-    MagMapParameters, StarFieldData, ExperimentParams, BatchLightCurveParameters, \
-    RDDFileInfo
+from mirage.parameters.ExperimentParams import BatchLightCurveParameters, MagMapParameters
 from mirage.utility.ParametersError import ParametersError
 
 from . import Controller

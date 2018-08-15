@@ -28,8 +28,6 @@ class Engine(object):
         self.bind_calculation_delegate(calculation_delegate)
         self._parameters = None
         self._preCalculating = False
-        self._center = None
-
     @property
     def core_count(self):
         return self._calcDel.core_count
@@ -49,42 +47,7 @@ class Engine(object):
 #         self._calcDel.bind_manager(self)
     
     def reconfigure(self):
-        import random
-        self._center = None
-        self._center = self.get_center_coords()
-        if len(self.parameters.stars) > 0 and self.parameters.raw_magnification is None:
-            rawMag = self.calculate_raw_magnification()
-            print("Found " + str(rawMag) + " points")
-            self.parameters.setRawMag(int(rawMag))
-            return self._calcDel.reconfigure(self.parameters)
-        else:
-            if self.parameters.raw_magnification is None:
-                print("CRAP had to do it again")
-                self._calcDel.reconfigure(self.parameters)
-                x = self._center.x 
-                y = self._center.y
-                r = self.parameters.queryQuasarRadius
-                rawMag = self._calcDel.query_data_length(x,y,r)
-                self.parameters.setRawMag(rawMag)
-                return self._calcDel.reconfigure(self.parameters)
-            else:
-                return self._calcDel.reconfigure(self.parameters)
-
-
-    def calculate_raw_magnification(self):
-        self._center = None
-        self._center = self.get_center_coords()
-        print("calculating raw mag")
-        x = self._center.x
-        y = self._center.y
-        backup = copy.deepcopy(self.parameters)
-        cp = copy.deepcopy(self.parameters)
-        cp.clear_stars()
-        # self._calcDel.reconfigure(cp)  
-        rawMag = self._calcDel.query_single_point(cp,x,y,cp.queryQuasarRadius)
-        print("Raw Mag of " + str(rawMag))
-        print("Queried rad of " + str(cp.queryQuasarRadius))
-        return rawMag
+        return self._calcDel.reconfigure(self.parameters)
 
 
     def query_line(self,pts,r=None):
@@ -114,7 +77,7 @@ class Engine(object):
         #     slices.append(np.array(slc).T)
         if isinstance(lines[0],u.Quantity):
             for i in range(len(lines)): lines[i] = lines[i].to('rad').value
-        lightCurves = self._calcDel.sample_light_curves(lines,self.parameters.queryQuasarRadius)
+        lightCurves = self._calcDel.sample_light_curves(lines,self.parameters.quasar.radius)
         ret = []
         for curveInd in range(len(lightCurves)):
             c = self.normalize_magnification(lightCurves[curveInd])
@@ -136,7 +99,7 @@ class Engine(object):
         
     
     def make_mag_map(self,center,dims,resolution,radius=None):
-        center = self.get_center_coords(self.parameters)
+        # center = self.get_center_coords(self.parameters)
         ret = self._calcDel.make_mag_map(center,dims,resolution)
         print(ret)
         # return ret
@@ -149,66 +112,66 @@ class Engine(object):
     def ray_trace(self):
         return self._calcDel.ray_trace(self.parameters)
     
-    def get_center_coords(self, params=None):
-        '''Calculates and returns the location of a ray sent out from the center of the screen after 
-        projecting onto the Source Plane.'''
-        # Pulling parameters out of parameters class
-        if not self._center:
-            parameters = params or self.parameters
-            dS = parameters.quasar.angDiamDist.value
-            dLS = parameters.dLS.value
-            shearMag = parameters.galaxy.shear.magnitude
-            shearAngle = parameters.galaxy.shear.angle.value
-            centerX = parameters.galaxy.position.to('rad').x
-            centerY = parameters.galaxy.position.to('rad').y
-            sis_constant = np.float64(4 *  math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
-            pi2 = math.pi / 2
-            # Calculation variables
-            resx = 0
-            resy = 0
-            # Calculation is Below
-            incident_angle_x = 0.0
-            incident_angle_y = 0.0
-            q = parameters.ellipticity
-            tq = parameters.ellipAng
-            q1 = sqrt(1-q*q)
-            try:
-                # SIS
-                deltaR_x = incident_angle_x - centerX
-                deltaR_y = incident_angle_y - centerY
-                r = math.sqrt(deltaR_x * deltaR_x + deltaR_y * deltaR_y)
-                if r == 0.0:
-                    resx += deltaR_x 
-                    resy += deltaR_y
-                else:
-                    if parameters.ellipticity == 1.0:
-                        resx += deltaR_x * sis_constant / r 
-                        resy += deltaR_y * sis_constant / r 
-                    else:
-                        print("ellipticity")
-                        print(q)
-                        print(tq)
-                        eex = (deltaR_x*sin(tq)+deltaR_y*cos(tq))
-                        eey = (deltaR_y*sin(tq)-deltaR_x*cos(tq))
-                        ex = q*sis_constant/q1*atan(q1*eex/sqrt(q*q*eex*eex+eey*eey))
-                        ey = q*sis_constant/q1*atanh(q1*eey/sqrt(q*q*eex*eex+eey*eey))
-                        resx += ex*sin(tq) - ey*cos(tq)
-                        resy += ex*cos(tq) + ey*sin(tq)
+    # def get_center_coords(self, params=None):
+    #     '''Calculates and returns the location of a ray sent out from the center of the screen after 
+    #     projecting onto the Source Plane.'''
+    #     # Pulling parameters out of parameters class
+    #     if not self._center:
+    #         parameters = params or self.parameters
+    #         dS = parameters.quasar.angDiamDist.value
+    #         dLS = parameters.dLS.value
+    #         shearMag = parameters.galaxy.shear.magnitude
+    #         shearAngle = parameters.galaxy.shear.angle.value
+    #         centerX = parameters.galaxy.position.to('rad').x
+    #         centerY = parameters.galaxy.position.to('rad').y
+    #         sis_constant = np.float64(4 *  math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
+    #         pi2 = math.pi / 2
+    #         # Calculation variables
+    #         resx = 0
+    #         resy = 0
+    #         # Calculation is Below
+    #         incident_angle_x = 0.0
+    #         incident_angle_y = 0.0
+    #         q = parameters.ellipticity
+    #         tq = parameters.ellipAng
+    #         q1 = sqrt(1-q*q)
+    #         try:
+    #             # SIS
+    #             deltaR_x = incident_angle_x - centerX
+    #             deltaR_y = incident_angle_y - centerY
+    #             r = math.sqrt(deltaR_x * deltaR_x + deltaR_y * deltaR_y)
+    #             if r == 0.0:
+    #                 resx += deltaR_x 
+    #                 resy += deltaR_y
+    #             else:
+    #                 if parameters.ellipticity == 1.0:
+    #                     resx += deltaR_x * sis_constant / r 
+    #                     resy += deltaR_y * sis_constant / r 
+    #                 else:
+    #                     print("ellipticity")
+    #                     print(q)
+    #                     print(tq)
+    #                     eex = (deltaR_x*sin(tq)+deltaR_y*cos(tq))
+    #                     eey = (deltaR_y*sin(tq)-deltaR_x*cos(tq))
+    #                     ex = q*sis_constant/q1*atan(q1*eex/sqrt(q*q*eex*eex+eey*eey))
+    #                     ey = q*sis_constant/q1*atanh(q1*eey/sqrt(q*q*eex*eex+eey*eey))
+    #                     resx += ex*sin(tq) - ey*cos(tq)
+    #                     resy += ex*cos(tq) + ey*sin(tq)
 
                 
-                # Shear
-                phi = 2 * (pi2 - shearAngle) - math.atan2(deltaR_y, deltaR_x)
-                resx += shearMag * r * math.cos(phi)
-                resy += shearMag * r * math.sin(phi)
-                resx = deltaR_x - resx
-                resy = deltaR_y - resy
-            except ZeroDivisionError:
-                resx = 0.0
-                resy = 0.0
-            self._center =  Vector2D(resx, resy, 'rad')
-            # self._center = -Vector2D(2.88819e-06,9.31579e-07,'rad')
-            print(self._center)
-        return self._center
+    #             # Shear
+    #             phi = 2 * (pi2 - shearAngle) - math.atan2(deltaR_y, deltaR_x)
+    #             resx += shearMag * r * math.cos(phi)
+    #             resy += shearMag * r * math.sin(phi)
+    #             resx = deltaR_x - resx
+    #             resy = deltaR_y - resy
+    #         except ZeroDivisionError:
+    #             resx = 0.0
+    #             resy = 0.0
+    #         self._center =  Vector2D(resx, resy, 'rad')
+    #         # self._center = -Vector2D(2.88819e-06,9.31579e-07,'rad')
+    #         print(self._center)
+    #     return self._center
 
     def save_rays(self,fname):
         self._calcDel.save_rays(fname)
@@ -225,24 +188,34 @@ class Engine(object):
         """Provides an interface for updating the parameters describing the lensed system to be modeled.
 
         If the new system warrants a recalculation of spatial data, will call the function 'reconfigure' automatically"""
-
+        parameters.regenerate_stars()
         if self._parameters is None:
             self._parameters = parameters
-            if self._parameters.galaxy.percentStars > 0 and self._parameters.galaxy.stars == []:
-                self._parameters.regenerateStars()
             self.reconfigure()
-        elif not self._parameters.isSimilar(parameters):
-            self._parameters.update(canvasDim=parameters.canvasDim)
-            if self._parameters.isSimilar(parameters):
-                self._parameters = parameters
-                if self._parameters.galaxy.percentStars > 0 and self._parameters.galaxy.stars == []:
-                    self._parameters.regenerateStars()
-            else:
-                self._parameters = parameters
+        elif self._parameters.is_similar(parameters):
+            self._parameters = parameters
+        elif not self._parameters.is_similar(parameters):
+            self._parameters = parameters
             self.reconfigure()
         else:
-            parameters.setStars(self._parameters.stars)
-            self._parameters = parameters
+            raise ValueError("Couldn't decide if needs to re ray-trace.")
+        # if self._parameters is None:
+        #     self._parameters = parameters
+        #     if self._parameters.galaxy.percent_stars > 0 and self._parameters.galaxy.stars == []:
+        #         self._parameters.regenerate_stars()
+        #     self.reconfigure()
+        # elif not self._parameters.isSimilar(parameters):
+        #     self._parameters.update(canvasDim=parameters.canvasDim)
+        #     if self._parameters.isSimilar(parameters):
+        #         self._parameters = parameters
+        #         if self._parameters.galaxy.percent_stars > 0 and self._parameters.galaxy.stars == []:
+        #             self._parameters.regenerate_stars()
+        #     else:
+        #         self._parameters = parameters
+        #     self.reconfigure()
+        # else:
+        #     parameters.setStars(self._parameters.stars)
+        #     self._parameters = parameters
             
     def normalize_magnification(self,values,radius = None):
         assert isinstance(values, np.ndarray) or isinstance(values,float) or isinstance(values,int), "values must be a numeric type or numpy array."

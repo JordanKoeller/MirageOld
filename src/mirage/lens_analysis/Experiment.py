@@ -15,18 +15,18 @@ class Experiment(AbstractFileWrapper):
     '''
 
 
-    def __init__(self, filepath, fileobject=None,params=None,lookuptable=[]):
+    def __init__(self, filepath, fileobject=None,simulation=None,lookuptable=[]):
         '''
         Constructor
         '''
-        AbstractFileWrapper.__init__(self,filepath,fileobject,params,lookuptable)
+        AbstractFileWrapper.__init__(self,filepath,fileobject,simulation,lookuptable)
         self.__index = 0
         
 
     
     def __next__(self):
         if self.__index < len(self._lookupTable):
-            ret =  Trial(self._filepath,self.__index,self._fileobject,self._params,self._lookupTable)
+            ret =  Trial(self._filepath,self.__index,self._fileobject,self._simulation,self._lookupTable)
             self.__index += 1
             return ret 
         else:
@@ -36,7 +36,7 @@ class Experiment(AbstractFileWrapper):
     def __getitem__(self,ind):
         if isinstance(ind,int):
             if ind < len(self._lookupTable):
-                return Trial(self._filepath,ind,self._fileobject,self._params,self._lookupTable)
+                return Trial(self._filepath,ind,self._fileobject,self.simulation,self._lookupTable)
             else:
                 raise IndexError("Index out of range.")
         else:
@@ -72,4 +72,4 @@ class Experiment(AbstractFileWrapper):
         
     
     def __iter__(self):
-        return Experiment(self._filepath,self._fileobject,self._params,self._lookupTable)
+        return Experiment(self._filepath,self._fileobject,self.simulation,self._lookupTable)

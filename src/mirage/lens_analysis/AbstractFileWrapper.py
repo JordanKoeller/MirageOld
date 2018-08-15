@@ -19,26 +19,26 @@ class AbstractFileWrapper(object):
     '''
 
 
-    def __init__(self, filepath, fileobject=None, params=None, lookuptable=[]):
+    def __init__(self, filepath, fileobject=None, simulation=None, lookuptable=[]):
         '''
         '''
         self._filepath = filepath
-        if not fileobject or not params:
+        if not fileobject or not simulation:
             from mirage.io import ExperimentDataFileReader
             reader = ExperimentDataFileReader()
             reader.open(self._filepath)
-            self._params, self._fileobject = reader.load()
+            self._simulation, self._fileobject = reader.load()
             reader.close()
         else:
             self._fileobject = fileobject
-            self._params = params
+            self._simulation = simulation
         if lookuptable == []:
             self._lookupTable = np.load(self._fileobject)
         else:
             self._lookupTable = lookuptable
-        self._exptTypes = {}
-        for i in range(0,len(self._params.extras.desiredResults)):
-            self._exptTypes[self._params.extras.desiredResults[i]] = i
+        # self._exptTypes = {}
+        # for i in range(0,len(self.experiments)):
+        #     self._exptTypes[self._params.extras.desiredResults[i]] = i
 
 
     def _getDataSet(self,trialNo,tableNo):
@@ -80,7 +80,7 @@ class AbstractFileWrapper(object):
         
         Returns: :class:'bool'
         '''
-        return restype in self._exptTypes
+        return restype in self.experiments
 
     @property
     def file(self):
@@ -108,8 +108,15 @@ class AbstractFileWrapper(object):
         '''
         Returns an instance of the parameters specified by the file.
         '''
-        return self._params
-        
+        return self._simulation.parameters
+
+    @property
+    def simulation(self):
+        return self._simulation
+    
+    @property
+    def experiments(self):
+        return self._simulation.experiments
         
     def __str__(self):
         return str(self._params)

@@ -207,7 +207,7 @@
 #         self.scaleInput.setReadOnly(state)
 #         self.dimensionInput.setReadOnly(state)
 #         self.quasarBHMassEntry.setReadOnly(state)
-#         self.regenerateStars.setDisabled(state)
+#         self.regenerate_stars.setDisabled(state)
 #         self.qVelRandomizer.setDisabled(state)
     
 
@@ -226,7 +226,7 @@
 #         self.widget = _ParametersViewWidget()
 #         self.addWidget(self.widget)
 #         self.addSignals(send_parameters=self._sendParameters,
-#                         regenerate_stars=self.widget.regenerateStars.clicked,
+#                         regenerate_stars=self.widget.regenerate_stars.clicked,
 #                         set_input_units=self.widget.scaleUnitOption.currentTextChanged)
 
 #     def update_slot(self, parameters):

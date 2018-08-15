@@ -1,0 +1,76 @@
+{
+    "parameters": {
+        "quasar": {
+            "z": 0.073,
+            "mass": {
+                "unit": "solMass",
+                "value": 1000000000.0
+            },
+            "radius": {
+                "unit": "arcsec",
+                "value": 5.0
+            }
+        },
+        "galaxy": {
+            "z": 0.0073,
+            "velocity_dispersion": {
+                "unit": "km / s",
+                "value": 1500.0
+            },
+            "shear": {
+                "r": 0.32,
+                "theta": 30.0,
+                "theta_unit": "degree",
+                "unit": ""
+            },
+            "ellipticity": {
+                "r": 0.0,
+                "theta": 0.0,
+                "theta_unit": "degree",
+                "unit": ""
+            }
+        },
+        "ray_field": {
+            "center": {
+                "x": 0.0,
+                "y": 0.0,
+                "unit": "arcsec"
+            },
+            "dims": {
+                "x": 40.0,
+                "y": 40.0,
+                "unit": "arcsec"
+            },
+            "resolution": {
+                "x": 2000.0,
+                "y": 2000.0,
+                "unit": ""
+            }
+        }
+    },
+    "experiments": {
+        "name": "Test",
+        "description": "This is a test.",
+        "num_trials": 1,
+        "trial_variance": "newParams = oldParams",
+        "result_list": {
+            "magmap": {
+                "center": {
+                    "x": 0.3,
+                    "y": 0.1,
+                    "unit": "arcsec"
+                },
+                "dims": {
+                    "x": 20.0,
+                    "y": 20.0,
+                    "unit": "arcsec"
+                },
+                "resolution": {
+                    "x": 2000.0,
+                    "y": 2000.0,
+                    "unit": ""
+                }
+            }
+        }
+    }
+}

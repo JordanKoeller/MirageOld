@@ -1,0 +1,4 @@
+cd mirage
+python setup.py build_ext --inplace
+cd ..
+python Main.py --run ../debugging/lappy.params ../debugging

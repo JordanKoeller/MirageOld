@@ -1,21 +1,26 @@
-
-export PYTHONSTARTUP='shell.py'
-RET_DIR=$(pwd)
-cd $LA_HOME
-if ["$1" != ""]; then
-	export PYSPARK_DRIVER_PYTHON=ipython
+#!/bin/sh
+a=0
+export PYTHONSTARTUP=$LA_HOME'/shell.py'
+while getopts ":lc" opt; do
+	case ${opts} in 
+		c ) 
+			export PYSPARK_DRIVER_PYTHON=ipython
 
 	#Pull out the configuration variables
-	MASTER=$(python -c 'from mirage.preferences import GlobalPreferences; print(GlobalPreferences["spark_configuration"]["master"])')
-	DRIVER_MEMORY=$(python -c 'from mirage.preferences import GlobalPreferences; print(GlobalPreferences["spark_configuration"]["driver-memory"])')
-	EXECUTOR_MEMORY=$(python -c 'from mirage.preferences import GlobalPreferences; print(GlobalPreferences["spark_configuration"]["executor-memory"])')
-	EXTRA_ARGS=$(python -c 'from mirage.preferences import GlobalPreferences; print(GlobalPreferences["spark_configuration"]["command-line-args"])')
-	JAR_LOC='../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar'
+			MASTER=$(python -c 'from mirage.preferences import GlobalPreferences; print(GlobalPreferences["spark_configuration"]["master"])')
+			DRIVER_MEMORY=$(python -c 'from mirage.preferences import GlobalPreferences; print(GlobalPreferences["spark_configuration"]["driver-memory"])')
+			EXECUTOR_MEMORY=$(python -c 'from mirage.preferences import GlobalPreferences; print(GlobalPreferences["spark_configuration"]["executor-memory"])')
+			EXTRA_ARGS=$(python -c 'from mirage.preferences import GlobalPreferences; print(GlobalPreferences["spark_configuration"]["command-line-args"])')
+			JAR_LOC='../spark_impl/target/scala-2.11/lensing_simulator_spark_kernel-assembly-0.1.0-SNAPSHOT.jar'
 
 
-	#The command itself
-	pyspark --master $MASTER --executor-memory $EXECUTOR_MEMORY --driver-memory $DRIVER_MEMORY --jars $JAR_LOC
-else
+			#The command itself
+			pyspark --master $MASTER --executor-memory $EXECUTOR_MEMORY --driver-memory $DRIVER_MEMORY --jars $JAR_LOC
+			let FLAG++
+			;;
+	esac
+done
+if [ $a -eq "0" ];
+then
 	ipython
 fi
-cd $RET_DIR

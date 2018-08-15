@@ -12,9 +12,17 @@ import shutil
 import os 
 
 from mirage.preferences import GlobalPreferences
-from mirage.utility import asynchronous
 
 from abc import ABC, abstractmethod
+
+
+
+def _formatJson(data):
+    ret = json.dumps(data,indent=4)
+    return ret
+
+
+
 
 class FileWriter(ABC):
     '''
@@ -153,56 +161,6 @@ Provides an interface for loading data from files.
     def _fileextension(self):
         return ''
 
-def _formatJson(data):
-    ret = json.dumps(data,indent=4)
-    return ret
-
-class RecordingFileManager(FileWriter):
-    
-    
-    def __init__(self,buffer_frames=False):
-        FileWriter.__init__(self)
-        self._bufferFrames = buffer_frames
-        
-    def _asNPArray(self,im):
-        im = im.toImage()
-        im = im.convertToFormat(4)
-        width = im.width()
-        height = im.height()
-        ptr = im.bits()
-        ptr.setsize(im.byteCount())
-        arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
-        arr2 = arr.copy()
-        arr[:,0] = arr2[:,2]
-        arr[:,2] = arr2[:,0]
-        return arr
-        
-    def open(self, filename=None, *args, **kwargs):
-        FileWriter.open(self, filename=filename, *args, **kwargs)
-        import imageio
-        self._writer = imageio.get_writer(self._filename,fps=GlobalPreferences['max_frame_rate'])
-        self._frames = []
-    
-    def write(self, frame):
-        if self._bufferFrames:
-            self._frames.append(frame)
-        else:
-            frame = self._asNPArray(frame)
-            self._writer.append_data(frame)
-            
-    @property
-    def _fileextension(self):
-        return '.mp4'
-            
-    @asynchronous
-    def close(self):
-        if self._bufferFrames:
-            for frame in self._frames:
-                img = self._asNPArray(frame)
-                self._writer.appendData(img)
-            self._frames = []
-        self._writer.close()
-
 
 class ParametersFileManager(FileWriter):
     '''
@@ -229,11 +187,8 @@ class ParametersFileManager(FileWriter):
                 return False
         
     def write(self, data):
-        jsonString = _formatJson(data.jsonString)
+        jsonString = _formatJson(data.json)
         self._file.write(bytes(jsonString,'utf-8'))
-        if len(data.galaxy.stars) > 0:
-            stars = data.galaxy.stars
-            np.save(self._file,stars)
         return True
 
     def close(self):
@@ -254,49 +209,23 @@ class ParametersFileReader(FileReader):
         return ret
 
     def load(self,file_object=None):
+        from mirage.parameters import Parameters
         if not file_object:
             self._filename = self._filename or self.open()
             self._file = open(self._filename,'rb')
         else:
             self._file = file_object
-        stars = None
-        retPt = self._file.tell()
-        print(retPt)
-        params,index = self.loadBytes()
-        try:
-            self._file.seek(index)
-            stars = np.load(self._file)
-            if stars.shape[1] == 3:
-                print("Found stars")
-                params.setStars(stars)
-        finally:
-            return params
-        # decoder = ParametersJSONDecoder()
-        # model = json.load(self._file)
-        # model = decoder.decode(model)
-        # try:
-        #     stars = np.load(self._file)
-        #     if stars:
-        #         print("Found stars")
-        #         model.setStars(stars)
-        # finally:
-        #     return model
-
-    def loadBytes(self):
-        from mirage.parameters.Parameters import ParametersJSONDecoder
         ret_pt = self._file.tell()
-        end = self.find_end()
+        ending = self.find_end()
         self._file.seek(ret_pt)
-        bites = self._file.read(end - ret_pt)
+        bites = self._file.read(ending - ret_pt)
         decoder = json.JSONDecoder()
-        string = str(bites,'utf-8',errors='ignore')
-        jsonstr,index = decoder.raw_decode(string)
-        jsonDecoder = ParametersJSONDecoder()
-        model = jsonDecoder.decode(jsonstr)
-        return (model,index)
+        string = str(bites,'utf-8',errors="ignore")
+        js,ind = decoder.raw_decode(string)
+        model = Parameters.from_json(js)
+        return model
 
-    def find_end(self):
-        end_char = b'\x93'
+    def find_end(self,end_char=b'\x93'):
         flag = True
         buf_sz = int(1e6)
         last_pt = self._file.tell()
@@ -319,6 +248,51 @@ class ParametersFileReader(FileReader):
     def _fileextension(self):
         return '.param'
 
+
+class SimulationWriter(FileWriter):
+
+    def __init__(self) -> None:
+        FileWriter.__init__(self)
+    def open(self,filename:str="",file_object=None) -> None:
+        if not file_object:
+            self._file = None
+            return FileWriter.open(self,filename)
+        else:
+            self._file = file_object
+            return True
+
+    def write(self,data):
+        if not self._file:
+            self._file = open(self._filename,'wb+')
+        js = data.json
+        string = _formatJson(js)
+        self._file.write(bytes(string,'utf-8'))
+
+    def close(self):
+        self._file.close()
+
+    @property 
+    def _fileextension(self):
+        return '.sim'
+
+class SimulationReader(FileReader):
+
+    def __init__(self) -> None:
+        FileReader.__init__(self)
+
+    def open(self,filename:str):
+        FileReader.open(self,filename)
+
+    def load(self):
+        from mirage.parameters import Simulation
+        self._file = open(self._filename,'rb')
+        js = self._file.read()
+        js = json.loads(js)
+        return Simulation.from_json(js)
+
+    def close(self):
+        self._file.close()
+
 class TableFileWriter(FileWriter):
     
     def __init__(self):
@@ -332,7 +306,7 @@ class TableFileWriter(FileWriter):
             self._file = open(self._filename,'wb+')
             dataStrings = []
             for i in data:
-                dataStrings.append(i.jsonString)
+                dataStrings.append(i.json)
             js = _formatJson(dataStrings)
             self._file.write(bytes(js,'utf-8'))
         
@@ -353,14 +327,13 @@ class TableFileReader(FileReader):
 
     def load(self):
         if self._filename:
-            from mirage.parameters.Parameters import ParametersJSONDecoder
-            decoder = ParametersJSONDecoder()
+            from mirage.parameters import Simulation
             self._file = open(self._filename,'rb')
             data = self._file.read()
             paramList = json.loads(data)
             ret = []
             for p in paramList:
-                ret.append(decoder.decode(p))
+                ret.append(Simulation.from_json(p))
             return ret
         
     def close(self):
@@ -378,11 +351,9 @@ class ModelFileReader(FileReader):
 
     def load(self,filename=None,*args,**kwargs):
         if self._filename:
-            from mirage.parameters.Parameters import ParametersJSONDecoder
             self._file = open(self._filename)
             model = json.load(self._file)
-            decoder = ParametersJSONDecoder()
-            model = decoder.decode(model)
+            model = Parameters.from_json(model)
             if model:
                 return model
             else:
@@ -404,7 +375,7 @@ class ExperimentDataFileWriter(FileWriter):
         self._directory = filename or self.getDirectory()
         self.trialCount = 0
         self.experimentCount = 0 #Specifies which row in the table to be written next
-        self._parametersWriter = ParametersFileManager()
+        self._simWriter = SimulationWriter()
         self._locationArray = None
 
     def getDirectory(self):
@@ -412,7 +383,7 @@ class ExperimentDataFileWriter(FileWriter):
         directory = QtWidgets.QFileDialog.getExistingDirectory()
         return directory
 
-    def newExperiment(self,num_trials,num_results):
+    def new_experiment(self,num_trials,num_results):
         self.tempfile = tempfile.TemporaryFile()
         self._locationArray = self.getDataSizeArray(num_trials,num_results)
         self.trialCount = 0
@@ -421,11 +392,11 @@ class ExperimentDataFileWriter(FileWriter):
             self._zeroMark = tempfile2.tell()
 
 
-    def closeExperiment(self,parameters):
+    def close_experiment(self,simulation):
         self.tempfile.flush()
-        with open(self._directory + "/" + parameters.extras.name + '.dat','wb+') as file:
-            self._parametersWriter.open(file_object=file)
-            self._parametersWriter.write(parameters)
+        with open(self._directory + "/" + simulation.experiments.name + '.dat','wb+') as file:
+            self._simWriter.open(file_object=file)
+            self._simWriter.write(simulation)
             np.save(file,self._locationArray)
             #Now need to copy over tempfile contents
             self.tempfile.seek(0)
@@ -475,30 +446,6 @@ class ExperimentDataFileWriter(FileWriter):
 
     def __del__(self):
         pass
-
-class FileProxy(object):
-
-    def __init__(self,file):
-        self._file = file
-        self.start_point = 0
-
-    def read(self,*args,**kwargs):
-        return self._file.read(*args,**kwargs)
-
-    def write(self,*args,**kwargs):
-        return self._file.write(*args,**kwargs)
-
-    def tell(self,*args,**kwargs):
-        return self._file.tell(*args,**kwargs) - self.start_point
-
-    def seek(self,amt,start):
-        return self._file.seek(self.start_point+amt,start)
-            
-    def close(self,*args,**kwargs):
-        return self._file.close(*args,**kwargs)
-
-
-
 
 class ExperimentDataFileReader(FileReader):
 
@@ -591,68 +538,3 @@ class FITSFileWriter(FileWriter):
         return ".fits"
 
 
-class RayArchiveManager(object):
-
-
-    def __init__(self):
-        self._extension = '.raydata'
-
-    def _dressName(self,fname):
-        if self._extension in fname:
-            return fname
-        else:
-            return fname + self._extension
-
-    def write(self,directory,num_partitions):
-        #write a parameters file.
-        #And now write the partition count in a file
-        with open(directory+"/num_parts", 'w+') as partFile:
-            partFile.write(str(num_partitions))
-        zipping = False
-        if zipping:
-            tmp = tempfile.mkstemp()[1]
-            zipper = zipfile.ZipFile(tmp,'a',zipfile.ZIP_DEFLATED)
-            self._zipdir(directory,zipper)
-            shutil.rmtree(directory)
-            shutil.move(tmp,directory)
-        #NOTE: I think I can delete the hidden .crc files.
-
-    def open(self,filename):
-        from mirage.parameters.ExperimentParams import RDDFileInfo
-        #Constructs and returns a RDDFileInfo instance.
-        #TODO
-        #Note: I don't need to clean up the directory. Just untarring it is enough.
-        zipping = False
-        if zipping:
-            shutil.move(filename,filename+".zip")
-            zipper = zipfile.ZipFile(filename+".zip",'a',zipfile.ZIP_DEFLATED)
-            zipper.extractall(filename)
-            shutil.rm(filename+'.zip')
-        directory = filename
-        # ploader = ParametersFileReader()
-        # ploader.open(directory+'/params.param')
-        # params = ploader.load()
-        # ploader.close()
-        num_parts = 0
-        with open(directory+'/num_parts') as partFile:
-            num_parts = int(partFile.read())
-        return RDDFileInfo(directory,num_parts)
-
-    def get_directory_name(self,filename,trial_number):
-        fname = filename
-        directory = fname
-        tstring = None
-        if trial_number < 10:
-            tstring = "trial0"+str(trial_number)
-        else:
-            tstring = "trial"+str(trial_number)
-        savedir = directory + "/"+tstring + ".raydata"
-        print("Saving data to the directory " + savedir)
-        return savedir
-
-
-    def _zipdir(self,path, ziph):
-        # ziph is zipfile handle
-        with os.scandir(path) as e:
-            for dirobj in e:
-                ziph.write(dirobj.path,dirobj.name)

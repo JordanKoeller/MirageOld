@@ -5,83 +5,50 @@ Created on Jun 4, 2017
 '''
 import numpy as np
 from astropy import units as u
-from ..utility import Vector2D, Vector2DJSONDecoder, zeroVector
 import math
 
-class ExperimentParamsJSONEncoder(object):
-    """docstring for ExperimentParamsJSONEncoder"""
-    def __init__(self):
-        super(ExperimentParamsJSONEncoder, self).__init__()
-        
-    def encode(self,o):
-        if isinstance(o,ExperimentParams):
-            res = {}
-            res['name'] = o.name
-            res['description'] = o.description
-            res['numTrials'] = o.numTrials
-            res['trialVariance'] = str(o.trialVarianceFunction)
-            results = {}
-            for i in o.desiredResults:
-                results[i.keyword] = i.jsonString
-            res['resultList'] = results
-            return res
-        else:
-            raise TypeError("Attribute o must be of type ExperimentParams")
+from ..utility import Vector2D, zeroVector, JSONable, QuantityJSONEncoder, \
+    QuantityJSONDecoder, Region, PixelRegion
+from .Parameters import Parameters
 
-class ExperimentParamsJSONDecoder(object):
-    def __init__(self):
-        pass
 
-    def decode(self,o):
-        name = o['name']
-        desc = o['description']
-        nt = o['numTrials']
-        tv = o['trialVariance']
-        resultParams = []
-        for kind,data in o['resultList'].items():
-            if kind == 'magmap':
-                decoder = MagMapJSONDecoder()
-                resultParams.append(decoder.decode(data))
-            elif kind == 'lightcurve':
-                decoder = LightCurveJSONDecoder()
-                resultParams.append(decoder.decode(data))
-            elif kind == 'starfield':
-                resultParams.append(StarFieldData())
-            elif kind == "batch_lightcurve":
-                decoder = BatchLightCurveJSONDecoder()
-                resultParams.append(decoder.decode(data))
-            elif kind == 'datafile':
-                decoder = RDDFileInfoJSONDecoder()
-                resultParams.append(decoder.decode(data))
-        return ExperimentParams(name,desc,nt,tv,resultParams)
 
-class ExperimentParams(dict):
+class ExperimentParams(dict,JSONable):
     '''
     classdocs
     '''
 
 
-    def __init__(self,name = None, description = None, numTrials = 1, trialVariance = 1,resultParams = []):
+    def __init__(self,name:str = "",
+        description:str = "",
+        num_trials:int = 1,
+        trial_variance:str = "",
+        result_params:list = []) -> None:
         '''
         Constructor
         '''
-        self.name = name
-        self.description = description
-        self.numTrials = numTrials
-        self.trialVarianceFunction = trialVariance
-        self.desiredResults = resultParams
-        for i in self.desiredResults:
+        dict.__init__(self)
+        JSONable.__init__(self)
+        self._name = name
+        self._description = description
+        self._num_trials = num_trials
+        self._trial_variance_function = trial_variance
+        for i in result_params:
             self[i.keyword] = i
-        
-        
-    def generatePath(self,params):
-        pass #Need to impliment
+
+    @property
+    def name(self) ->str:
+        return self._name
     
-    def getParams(self,name):
-        for i in self.desiredResults:
-            if name == i.keyword:
-                return i
-        return None
+    @property
+    def description(self) ->str:
+        return self._description
+    @property
+    def num_trials(self)->int:
+        return self._num_trials
+    @property
+    def trial_variance_function(self)->str:
+        return self._trial_variance_function
     
     def append(self,data):
         self[data.keyword] = data
@@ -92,104 +59,113 @@ class ExperimentParams(dict):
     def desc(self):
         return self.description
 
+    @classmethod
+    def from_json(cls,js):
+        name = js['name']
+        desc = js['description']
+        nt = js['num_trials']
+        tv = js['trial_variance']
+        resultParams = []
+        for kind,data in js['result_list'].items():
+            if kind == 'magmap':
+                ps = MagMapParameters.from_json(data)
+                resultParams.append(ps)
+            elif kind == "batch_lightcurve":
+                ps = BatchLightCurveParameters.from_json(data)
+                resultParams.append(ps)
+        return cls(name,desc,nt,tv,resultParams)
+
     @property
-    def jsonString(self):
-        encoder = ExperimentParamsJSONEncoder()
-        return encoder.encode(self)
+    def json(self) -> dict:
+        res = {}
+        res['name'] = self.name
+        res['description'] = self.description
+        res['num_trials'] = self.num_trials
+        res['trial_variance'] = str(self.trial_variance_function)
+        results = {}
+        for keyword,params in self.items():
+            results[keyword] = params.json
+        res['result_list'] = results
+        return res
         
-    def __str__(self):
-        string =  "Name = "+self.name+"\nDescription = "+self.desc+"\nNumber of Trials = "+str(self.numTrials)+"\n"
-        for i in self.desiredResults:
+    def __repr__(self):
+        string =  "Name = "+self.name+"\nDescription = "+self.desc+"\nNumber of Trials = "+str(self.num_trials)+"\n"
+        for i in self:
             string += str(i)
         return string
     
+class Simulation(JSONable):
 
-class LightCurveJSONEncoder(object):
-    """docstring for LightCurveJSONEncoder"""
-    def __init__(self):
-        super(LightCurveJSONEncoder, self).__init__()
-    
-    def encode(self,o):
-        if isinstance(o, LightCurveParameters):
-            res = {}
-            res['pathStart'] = o.pathStart.jsonString
-            res['pathEnd'] = o.pathEnd.jsonString
-            res['resolution'] = o.resolution
-            return res
-        else:
-            raise TypeError("Argument o must be of type LightCurveParameters")
-        
-class LightCurveJSONDecoder(object):
-    
-    def __init__(self):
-        pass
-    
-    def decode(self,data):
-        vd = Vector2DJSONDecoder()
-        start = vd.decode(data['pathStart'])
-        end = vd.decode(data['pathEnd'])
-        res = data['resolution']
-        return LightCurveParameters(start,end,res)
+    def __init__(self,parameters:Parameters, experiments:ExperimentParams) -> None:
+        self.parameters = parameters
+        self.experiments = experiments
 
-class LightCurveParameters(object):
-    
-    def __init__(self, startPos, endPos, numDataPoints):
-        self.pathStart = startPos
-        self.pathEnd = endPos
-        self.resolution = numDataPoints
-        
+    @classmethod
+    def from_json(cls,js):
+        from mirage.utility import QuantityJSONDecoder
+        qd = QuantityJSONDecoder()
+        qz = js['parameters']['quasar']['z']
+        gz = js['parameters']['galaxy']['z']
+        q_mass = qd.decode(js['parameters']['quasar']['mass'])
+        pt_mass = 0.5 * u.solMass
+        specials = Parameters.static_special_units(pt_mass,q_mass,gz,qz)
+        with u.add_enabled_units(specials):
+            p = Parameters.from_json(js['parameters'])
+            ex = ExperimentParams.from_json(js['experiments'])
+            return cls(p,ex)
+
     @property
-    def keyword(self):
-        return "lightcurve"
-        
-    @property
-    def jsonString(self):
-        encoder = LightCurveJSONEncoder()
-        return encoder.encode(self)
-    
-    def update(self,start=None,end=None,resolution=None):
-        if start:
-            assert isinstance(start,Vector2D), "Start must be a Vector2D instance."
-            self.pathStart = start
-        if end:
-            assert isinstance(end,Vector2D), "End must be a Vector2D instance."
-            self.pathEnd = end
-        if resolution:
-            assert isinstance(resolution,int) and resolution > 1, "resolution must be an int, greater than 1"
-            self.resolution = resolution
+    def json(self) -> dict:
+        ret = {}
+        ret['parameters'] = self.parameters.json
+        ret['experiments'] = self.experiments.json
+        return ret
 
-
-    def __str__(self):
-        return "LIGHTCURVE:\n\n Start = "+str(self.pathStart.to('arcsec'))+"\nEnd = "+str(self.pathEnd.to('arcsec'))+"\nResolution = "+str(self.resolution)+" pixels"
+class BatchLightCurveParameters(JSONable):
     
-class BatchLightCurveParameters(object):
-    
-    def __init__(self,num_curves,resolution,bounding_box,query_points = None,seed = None):
-        assert isinstance(bounding_box,MagMapParameters)
-        from mirage.preferences import GlobalPreferences
+    def __init__(self,
+        num_curves:int,
+        resolution:u.Quantity,
+        region:Region,
+        query_points:np.ndarray = None,
+        seed:int = None) -> None:
         self.num_curves = num_curves
         self.resolution = resolution
-        self.bounding_box = bounding_box
+        self.bounding_box = region
         self._lines = query_points
         if seed:
             self._seed = seed
         else:
+            from mirage.preferences import GlobalPreferences
             self._seed = GlobalPreferences['light_curve_generator_seed']
         
         
     @property
-    def keyword(self):
+    def keyword(self) -> str:
         return "batch_lightcurve"
 
     @property
-    def seed(self):
+    def seed(self) -> int:
         return self._seed
     
+    @classmethod
+    def from_json(cls,js):
+        qd = QuantityJSONDecoder()
+        nc = js['num_curves']
+        bb = Region.from_json(js['bounding_box'])
+        resolution = qd.decode(js['resolution'])
+        seed = js['seed']
+        return cls(nc,resolution,bb,seed=seed)
     
     @property
-    def jsonString(self):
-        encoder = BatchLightCurveJSONEncoder()
-        return encoder.encode(self)
+    def json(self) -> dict:
+        qe = QuantityJSONEncoder()
+        ret = {}
+        ret['num_curves'] = self.num_curves
+        ret['bounding_box'] = self.bounding_box.json
+        ret['seed'] = self.seed
+        ret['resolution'] = qe.encode(self.resolution)
+        return ret
 
     def _slice_line(self,pts):
         #pts is an array of [x1,y1,x2,y2]
@@ -257,164 +233,15 @@ class BatchLightCurveParameters(object):
     def __str__(self):
         return "LIGHTCURVE BATCH:\n\n Count = "+str(self.num_curves)+"\n Resolution"+str(self.resolution)
 
-class BatchLightCurveJSONEncoder():
-    
-    def __init__(self):
-        pass
-    
-    def encode(self,obj):
-        assert isinstance(obj,BatchLightCurveParameters)
-        from mirage.utility import QuantityJSONEncoder
-        res = {}
-        res['num_curves'] = obj.num_curves
-        qe = QuantityJSONEncoder()
-        res['resolution'] = qe.encode(obj.resolution)
-        res['bounding_box'] = obj.bounding_box.jsonString
-        res['seed'] = obj.seed
-        return res
-    
-class BatchLightCurveJSONDecoder():
-     
-    def __init__(self):
-        pass 
-     
-    def decode(self,js):
-        from mirage.utility import QuantityJSONDecoder
-        qd = QuantityJSONDecoder()
-        num_curves  = js['num_curves']
-        resolution = qd.decode(js['resolution'])
-        mmd = MagMapJSONDecoder()
-        bounding_box = mmd.decode(js['bounding_box'])
-        if 'query_points' in js:
-            pts = None
-            if js['query_points']:
-                pts = qd.decode(js['query_points'])
-            return BatchLightCurveParameters(num_curves,resolution,bounding_box,pts)
-        if 'seed' in js:
-            seed = js['seed']
-            return BatchLightCurveParameters(num_curves,resolution,bounding_box,seed=seed)
-        else:
-            from mirage.preferences import GlobalPreferences
-            seed = GlobalPreferences['light_curve_generator_seed']
-            return BatchLightCurveParameters(num_curves,resolution,bounding_box)
-            
-         
-class RDDFileInfo(object):
-    """"Object for storing info about a GridRDD saved in a Scala
-    object file, for use by a cluster."""
-    def __init__(self, fname,num_partitions):
-        super(RDDFileInfo, self).__init__()
-        self.filename = fname
-        self.num_partitions = num_partitions
 
-    def set_numParts(self,nparts):
-        self.num_partitions = nparts
+class MagMapParameters(PixelRegion):
 
-    def set_filename(self,name):
-        self.filename = name
-        
-    @property 
-    def keyword(self):
-        return "datafile"
+    def __init__(self,*args,**kwargs):
+        PixelRegion.__init__(self,*args,**kwargs)
 
-    @property 
-    def jsonString(self):
-        return {"filename":self.filename,"num_partitions":self.num_partitions}
-
-class RDDFileInfoJSONDecoder(object):
-    def __init__(self):
-        pass
-
-    def decode(self,js):
-        fname = js['filename']
-        num_partitions = js['num_partitions']
-        return RDDFileInfo(fname,num_partitions)
-
-
-class MagMapJSONEncoder(object):
-    """docstring for MagMapJSONEncoder"""
-    def __init__(self):
-        super(MagMapJSONEncoder, self).__init__()
-    def encode(self,o):
-        if isinstance(o, MagMapParameters):
-            res = {}
-            res['center'] = o.center.jsonString
-            res['dimensions'] = o.dimensions.jsonString
-            res['resolution'] = o.resolution.jsonString
-            return res
-        else:
-            raise TypeError("Argument o must be of type MagMapParameters.")
-        
-class MagMapJSONDecoder(object):
-    
-    def __init__(self):
-        pass
-    
-    def decode(self,data):
-        vd = Vector2DJSONDecoder()
-        center = vd.decode(data['center'])
-        dims = vd.decode(data['dimensions'])
-        res = vd.decode(data['resolution'])
-        ret = MagMapParameters(dims,res)
-        ret.center = center
-        return ret
-
-class MagMapParameters(object):
-    
-    def __init__(self, dimensions, resolution):
-        self.center = zeroVector
-        self.dimensions = dimensions
-        self.resolution = resolution
-        
-    def pixelToAngle(self,pixel):
-        dTheta = self.dimensions.to('rad')/self.resolution
-        if isinstance(pixel,np.ndarray):
-            pixel[:,0] = (pixel[:,0] - self.resolution.x/2)*dTheta.x + self.center.to('rad').x 
-            pixel[:,1] = ( self.resolution.y/2 - pixel[:,1])*dTheta.y + self.center.to('rad').y
-            return pixel
-        else:
-            pixel = Vector2D(pixel.x - self.resolution.x/2,self.resolution.y/2 - pixel.y)
-            delta = pixel*dTheta
-            return delta + self.center.to('rad')
-    
-    def angleToPixel(self,angle):
-        dTheta = self.dimensions.to('rad')/self.resolution
-        if isinstance(angle, np.ndarray):
-            angle[:,0] = (angle[:,0] - self.center.to('rad').x)/dTheta.x + self.resolution.x/2
-            angle[:,1] = self.resolution.y/2 - (angle[:,1] - self.center.to('rad').y)/dTheta.y
-            return np.array(angle,dtype=np.int)
-        else:
-            delta = angle - self.center.to('rad')
-            pixel = (delta/dTheta).unitless()
-            return Vector2D(int(pixel.x + self.resolution.x/2),int(self.resolution.y/2 - pixel.y))
-        
-      
     @property
-    def keyword(self):
+    def keyword(self) -> str:
         return "magmap"
-        
-    @property
-    def jsonString(self):
-        encoder = MagMapJSONEncoder()
-        return encoder.encode(self)
-
-        
-        
+    
     def __str__(self):
         return "MAGNIFICATION MAP:\n\nCenter = " + str(self.center.to('arcsec')) + "\n Dimensions = " + str(self.dimensions.to('arcsec')) + "\n Resolution = "+str(self.resolution.x)+"x"+str(self.resolution.y)
-    
-class StarFieldData(object):
-    """docstring for StarFieldData"""
-    def __init__(self):
-        super(StarFieldData, self).__init__()
-        
-    @property
-    def keyword(self):
-        return "starfield"
-
-    @property
-    def jsonString(self):
-        return []
-        
-    def __str__(self):
-        return ""

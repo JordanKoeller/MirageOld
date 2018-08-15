@@ -1,0 +1,90 @@
+{
+    "parameters": {
+        "quasar": {
+            "z": 1.63,
+            "mass": {
+                "unit": "solMass",
+                "value": 1000000000.0
+            },
+            "radius": {
+                "unit": "r_g",
+                "value": 40.0
+            }
+        },
+        "galaxy": {
+            "z": 0.04,
+            "velocity_dispersion": {
+                "unit": "km / s",
+                "value": 177.95
+            },
+            "shear": {
+                "r": 0.07,
+                "theta": 67.1,
+                "theta_unit": "degree",
+                "unit": ""
+            },
+            "ellipticity": {
+                "r": 0.0,
+                "theta": 0.0,
+                "theta_unit": "degree",
+                "unit": ""
+            },
+            "star_generator": {
+                "seed": 2399,
+                "mass_limits": [
+                    0.08,
+                    0.5,
+                    1.5
+                ],
+                "powers": [
+                    -1.3,
+                    -2.7
+                ],
+                "percent_stars": 10.0
+            }
+        },
+        "ray_field": {
+            "center": {
+                "x": 4.015852400364761e-06,
+                "y": 1.877538e-06,
+                "unit": "rad"
+            },
+            "dims": {
+                "x": 50.0,
+                "y": 50.0,
+                "unit": "theta_E"
+            },
+            "resolution": {
+                "x": 2000.0,
+                "y": 2000.0,
+                "unit": ""
+            }
+        },
+        "star_field_factor": 1.5
+    },
+    "experiments": {
+        "name": "Test",
+        "description": "This is a test.",
+        "num_trials": 1,
+        "trial_variance": "new_simulation = old_simulation",
+        "result_list": {
+            "magmap": {
+                "center": {
+                    "x": -1.434697569306732e-07,
+                    "y": -4.128818752433141e-08,
+                    "unit": "rad"
+                },
+                "dims": {
+                    "x": 40.0,
+                    "y": 40.0,
+                    "unit": "theta_E"
+                },
+                "resolution": {
+                    "x": 400.0,
+                    "y": 400.0,
+                    "unit": ""
+                }
+            }
+        }
+    }
+}

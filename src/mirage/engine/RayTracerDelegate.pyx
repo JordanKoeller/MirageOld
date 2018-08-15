@@ -73,3 +73,6 @@ def ray_trace(inputCoords, parameters):
               parameters.galaxy.position.to('rad').y
               )
     return inputCoords
+
+
+cdef _ray_trace(self,)

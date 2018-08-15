@@ -22,6 +22,7 @@ if __name__ =="__main__":
 	datavisdrawer = Extension("drawer/DataVisualizerDrawer", sources = ["drawer/DataVisualizerDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 	shapedrawer = Extension("drawer/ShapeDrawer", sources = ["drawer/ShapeDrawer.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 	peak_slicing = Extension("light_curves/peak_finding", sources = ["light_curves/peak_finding.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
+	raw_magCalc = Extension("calculator/RawMagCalculator", sources = ["calculator/RawMagCalculator.pyx"], language = "c++",    extra_compile_args=["-std=c++11"], extra_link_args=["-std=c++11"], libraries = ["m"])
 
 	setup(
 		ext_modules = cythonize([
@@ -31,9 +32,9 @@ if __name__ =="__main__":
 								ptrCalcDel,
 								drawer_supers,
 								datavisdrawer,
-								rayTracerDel,
 								lensedimgdrawer,
 								shapedrawer,
-                                                                peak_slicing]),
+                                                                peak_slicing,
+                                                                raw_magCalc]),
 		include_dirs = [numpy.get_include(),"utility","drawer", "engine", "light_curves"],
 	)

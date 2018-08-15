@@ -59,12 +59,10 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef double stepY = (mmax.y - mmin.y) / resolution
         cdef np.ndarray[np.float64_t, ndim = 1] yAxis = np.ones(resolution)
         cdef int i = 0
-        cdef double radius = self._parameters.queryQuasarRadius
+        cdef double radius = self._parameters.quasar.radius.to('rad').value
         cdef double x = mmin.x
         cdef double y = mmin.y
         cdef bool hasVel = False  # Will change later
-        cdef double trueLuminosity = self.trueLuminosity
-        cdef int aptLuminosity = 0
         with nogil:
             for i in range(0, resolution):
                 x += stepX
@@ -84,15 +82,21 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef double x = 0
         cdef double y = 0
         start = center - dims / 2
-        cdef double x0 = start.to('rad').x
-        cdef double y0 = start.to('rad').y + dims.to('rad').y
-        cdef double radius = self._parameters.queryQuasarRadius
+        cdef double x0 = center.to('rad').x
+        cdef double y0 = center.to('rad').y
+        cdef double radius = self._parameters.quasar.radius.to('rad').value
         cdef double roverX, roverY
-        for i in prange(0, resx, nogil=True, schedule='guided', num_threads=self.core_count):
-            for j in range(0, resy):
-                roverX = x0 + i * stepX
-                roverY = y0 - stepY * j
-                retArr[i, j] = (< double > self.__grid.find_within_count(roverX, roverY, radius))
+        cdef double eex, eey
+        cdef double angle = 11*math.pi/6
+        cdef double cosShear = cos(angle)
+        cdef double sinShear = sin(angle)
+        for i in prange(-resx/2, resx/2, nogil=True, schedule='guided', num_threads=self.core_count):
+            for j in range(-resy/2, resy/2):
+                eex = i * stepX
+                eey = j * stepY
+                roverX = x0 + (eex*cosShear - eey*sinShear)
+                roverY = y0 - (eex*sinShear + eey*cosShear)
+                retArr[i+resx/2, j+resy/2] = (< double > self.__grid.find_within_count(roverX, roverY, radius))
         return retArr
     
     cpdef object sample_light_curves(self, object pts, double radius): #OPtimizations are definitely possible by cythonizing more, especially the last for loop.
@@ -148,9 +152,9 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef double qx = 0
         cdef double qy = 0
         cdef double qr = 0
-        qx = x or self._parameters.queryQuasarX
-        qy = y or self._parameters.queryQuasarY
-        qr = r or self._parameters.queryQuasarRadius
+        qx = x
+        qy = y
+        qr = r or self._parameters.quasar.radius.to('rad').value
         cdef vector[pair[int, int]] ret = self.query_data(qx, qy, qr)
         cdef int retf = ret.size()
         cdef int i = 0
@@ -163,9 +167,9 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         return fret
     
     cpdef unsigned int query_data_length(self, object x, object y, object radius):
-        cdef double xx = x or self._parameters.queryQuasarX
-        cdef double yy = y or self._parameters.queryQuasarY
-        cdef double r = radius or self._parameters.queryQuasarRadius
+        cdef double xx = x
+        cdef double yy = y
+        cdef double r = radius or self._parameters.quasar.radius.to('rad').value
         with nogil:
             return self.__grid.find_within_count(xx, yy, r)
 
@@ -208,11 +212,13 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
 
     cdef ray_trace_helper(self,object parameters):
         begin = time.clock()
-        cdef int height = parameters.canvasDim
-        cdef int width = parameters.canvasDim
+        rayfield = parameters.rayfield
+        cdef int height = rayfield.resolution.x
+        cdef int width = rayfield.resolution.y
         height = height // 2
         width = width // 2
-        cdef double dTheta = parameters.dTheta.value
+        cdef double dTheta_x = rayfield.dTheta.to('rad').x
+        cdef double dTheta_y = rayfield.dTheta.to('rad').y
         cdef np.ndarray[np.float64_t, ndim = 2] result_nparray_x = np.zeros((width * 2, height * 2), dtype=np.float64)
         cdef np.ndarray[np.float64_t, ndim = 2] result_nparray_y = np.zeros((width * 2, height * 2), dtype=np.float64)
         cdef double dS = parameters.quasar.angDiamDist.to('lyr').value
@@ -220,24 +226,40 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
         cdef double dLS = parameters.dLS.to('lyr').value
         cdef np.ndarray[np.float64_t, ndim = 1] stars_mass, stars_x, stars_y
         cdef int numStars = 0
-        if parameters.galaxy.percentStars > 0.0:
-            stars_mass, stars_x, stars_y = parameters.galaxy.starArray
+        if parameters.galaxy.percent_stars > 0.0:
+            stars = parameters.galaxy.stars
+            stars_mass = stars[:,0]
+            stars_x = stars[:,1]
+            stars_y = stars[:,2]
             numStars = len(stars_x)
         cdef double shearMag = parameters.galaxy.shear.magnitude
         cdef double shearAngle = parameters.galaxy.shear.angle.value
-        cdef double centerX = parameters.galaxy.position.to('rad').x
-        cdef double centerY = parameters.galaxy.position.to('rad').y
-        cdef double sis_constant = np.float64(4 * math.pi * parameters.galaxy.velocityDispersion ** 2 * (const.c ** -2).to('s2/km2').value * dLS / dS)
+        cdef double sis_constant = parameters.einstein_radius.to('rad').value
         cdef double point_constant = (4 * const.G / const.c / const.c).to("lyr/solMass").value * dLS / dS / dL
         cdef double pi2 = math.pi / 2
         cdef int x, y, i
         cdef double incident_angle_x, incident_angle_y, r, deltaR_x, deltaR_y, phi
-        cdef double q = parameters.ellipticity, tq = parameters.ellipAng, q1 = sqrt(1-parameters.ellipticity**2), ex, ey
+        cdef double q = parameters.galaxy.ellipticity.magnitude
+        cdef double tq = parameters.galaxy.ellipticity.angle.to('rad').value
+        cdef double q1 = sqrt(1-q**2), ex, ey
         cdef double eex, eey
+        cdef double angle = 0.0#-11*math.pi/6
+        # sv = parameters.shear_vector(Vector2D(0,0,'rad'))
+        # con = parameters.convergence(Vector2D(0,0,'rad'))
+        # print("Shear : " + str(sv))
+        # print("ShearAngle : " + str(sv.angle))
+        # sm = sv.magnitude()
+        # self._angle = math.atan(1/(1-con-sm))
+        # print("Calc angle" + str(self._angle))
+        # sv = self._parameters.shear_vector(Vector2D(0,0,'rad')).angle
+        cdef double cosShear = cos(-angle)
+        cdef double sinShear = sin(-angle)
         for x in prange(0, width * 2, 1, nogil=True, schedule='static', num_threads=self.core_count):
             for y in range(0, height * 2):
-                incident_angle_x = (x - width) * dTheta
-                incident_angle_y = (height - y) * dTheta
+                eex = (x-width)*dTheta_x
+                eey = (height - y)*dTheta_y
+                incident_angle_x = eex*cosShear - eey*sinShear
+                incident_angle_y = eex*sinShear + eey * cosShear
 
                 for i in range(numStars):
                     deltaR_x = incident_angle_x - stars_x[i]
@@ -248,8 +270,8 @@ cdef class PointerGridCalculationDelegate(CalculationDelegate):
                         result_nparray_y[x, y] += deltaR_y * stars_mass[i] * point_constant / r;                
 #                 
                 # SIS
-                deltaR_x = incident_angle_x - centerX
-                deltaR_y = incident_angle_y - centerY
+                deltaR_x = incident_angle_x
+                deltaR_y = incident_angle_y
                 r = sqrt(deltaR_x * deltaR_x + deltaR_y * deltaR_y)
                 if r != 0.0:
                     if q == 1.0:
